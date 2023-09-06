@@ -233,6 +233,74 @@ export const Pokedex: {[speciesid: string]: ModdedSpeciesData} = {
 		megaCreator: "DrPumpkinz",
 	},
 
+	// slate 8
+
+	skarmory: {
+		inherit: true,
+		mega: "skarmorymega",
+		megaName: "Skarmory-Mega",
+		megaAbility: {0: "Poison Point"},
+		megaStats: {hp: 65, atk: 95, def: 158, spa: 40, spd: 105, spe: 102},
+		megaStone: "Skarmorite",
+		megaCreator: "EeveeGirl1380",
+	},
+
+	druddigon: {
+		inherit: true,
+		mega: "druddigonmega",
+		megaName: "Druddigon-Mega",
+		megaAbility: {0: "Petrification"},
+		megaStats: {hp: 77, atk: 165, def: 120, spa: 60, spd: 115, spe: 48},
+		megaStone: "Druddigonite",
+		megaCreator: "Sticky Fingaaa and Paulluxx",
+		movepoolAdditions: ["morningsun", "rockblast", "spikes"],
+	},
+
+	chesnaught: {
+		inherit: true,
+		mega: "chesnaughtmega",
+		megaName: "Chesnaught-Mega",
+		megaAbility: {0: "Flash Fire"},
+		megaStats: {hp: 88, atk: 137, def: 142, spa: 74, spd: 95, spe: 94},
+		megaStone: "Chesnite",
+		megaCreator: "BlueRay",
+		movepoolAdditions: ["bodypress", "icehammer"],
+	},
+
+	// slate 9
+
+	skuntank: {
+		inherit: true,
+		mega: "skuntankmega",
+		megaName: "Skuntank-Mega",
+		megaAbility: {0: "Repulsive"},
+		megaStats: {hp: 103, atk: 113, def: 107, spa: 86, spd: 86, spe: 84},
+		megaStone: "Skuntankite",
+		megaCreator: "Hematite",
+	},
+
+	emolga: {
+		inherit: true,
+		mega: "emolgamega",
+		megaName: "Emolga-Mega",
+		megaAbility: {0: "Technician"},
+		megaStats: {hp: 55, atk: 120, def: 60, spa: 95, spd: 60, spe: 138},
+		megaStone: "Emolganite",
+		megaCreator: "BlueRay",
+		movepoolAdditions: ["lowkick"],
+	},
+
+	avalugg: {
+		inherit: true,
+		mega: "avaluggmega",
+		megaName: "Avalugg-Mega",
+		megaAbility: {0: "Parental Bond"},
+		megaStats: {hp: 95, atk: 137, def: 234, spa: 54, spd: 61, spe: 33},
+		megaStone: "Avaluggite",
+		megaCreator: "okispokis",
+		movepoolAdditions: ["iciclecrash"],
+	},
+
 	// crossover Megas
 
 	lanturn: {
