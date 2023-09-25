@@ -145,8 +145,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 			) {
 				let summons = [];
 				for (const id in hyperspaceLookup) summons.push(id);
-				const randomPick = this.sample(summons);
-				const summon = hyperspaceLookup[randomPick];
+				const summon = this.sample(summons);
 				const userBackup = {
 					name: attacker.name,
 					fullname: attacker.fullname,
@@ -184,16 +183,14 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				// just want to make sure because this is *super* invisible
 
 				attacker.addVolatile('hyperspacemayhem', attacker); // appropriately modify certain moves, like Teleport and Shadow Force
-				console.log(summon);
-				console.log(this.dex.species.get(summon));
 				attacker.formeChange(this.dex.species.get(summon), move); // make sure this is silent?
 				this.add('-message', `It's ${attacker.name}!`);
-				if (summon.move === "Geomancy" || summon.move === "Shadow Force") {
-					this.add('-prepare', attacker, summon.move);
+				if (hyperspaceLookup[randomPick].move === "Geomancy" || hyperspaceLookup[randomPick].move === "Shadow Force") {
+					this.add('-prepare', attacker, hyperspaceLookup[randomPick]);
 					attacker.addVolatile('twoturnmove', defender);
 				}
-				this.useMove(summon.move, attacker); // use the move
-				if (summon.move === "Teleport") this.add('-message', `Oops! Looks like ${attacker.name} doesn't know how to battle!`);
+				this.useMove(hyperspaceLookup[randomPick].move, attacker); // use the move
+				if (hyperspaceLookup[randomPick].move === "Teleport") this.add('-message', `Oops! Looks like ${attacker.name} doesn't know how to battle!`);
 				if (attacker.volatiles['mustrecharge']) delete attacker.volatiles['mustrecharge']; // for Dialga
 
 				// to do: make a special exception for Zacian and Rayquaza's stat modifiers
