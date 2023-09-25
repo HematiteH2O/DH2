@@ -177,16 +177,19 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 
 				source.formeChange(this.dex.species.get(summon), effect); // make sure this is silent?
 				this.add('-message', `It's ${source.name}!`);
+				source.addVolatile('hyperspacemayhem', source); // appropriately modify certain moves, like Teleport and Shadow Force
+				if (summon.move === "Geomancy" || summon.move === "Shadow Force") {
+					this.add('-prepare', source, summon.move);
+					source.addVolatile('twoturnmove', target);
+				}
 				this.useMove(summon.move, source); // use the move
+				if (source.volatiles['mustrecharge']) delete source.volatiles['mustrecharge']; // for Dialga
+				if (summon.move === "Teleport") this.add('-message', `Oops! Looks like ${source.name} doesn't know how to battle!`);
 
-				// to do:
-				// Shadow Force and Geomancy need to execute fully
-				// Shadow Force has a 1.2x boost from Griseous Orb
-				// Dragon Ascent and Roar of Time skip their drawbacks
-				// Teleport is a joke outcome that does absolutely nothing, needs dedicated text
-				// make a special exception for Zacian's Intrepid Sword boost (it shouldn't look like it's applying to Hoopa's stats)
+				// to do: make a special exception for Zacian and Rayquaza's stat modifiers
+				// (they *should* work correctly, but the way they display will be misleading)
 
-				// then change back
+				// then change everything back to Hoopa
 				source.name = userBackup.name;
 				source.fullname = userBackup.fullname;
 				source.gender = userBackup.gender;
@@ -196,21 +199,31 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				source.set.shiny = userBackup.shiny;
 				// silently restore boosts
 				source.setBoost(boostBackup);
-				// then change form back
+				// change form back
 				source.formeChange(userBackup.species, effect);
 				// to do: make sure this is silent
-				// to do: make sure the user's current Ability always reverts to Hyperspace Mayhem *without* activating its base Ability first, in case it was copied
+				// to do: make it so the user's current Ability always reverts to Hyperspace Mayhem, and does this *without* activating its base Ability first, in case it was copied
 
 				// again:
 				console.log(source.set.evs);
 				console.log(source.set.ivs);
 				console.log(source.nature);
-				// just want to make sure because this is *super* invisible
+				// just for testing
 
 				this.add('-message', `${this.dex.species.get(summon).baseSpecies ? this.dex.species.get(summon).baseSpecies : this.dex.species.get(summon).name} went back home!`);
 				this.add('-message', `Bye, bye, ${this.dex.species.get(summon).baseSpecies ? this.dex.species.get(summon).baseSpecies : this.dex.species.get(summon).name}!`);
-				return null; // Hyperspace Hole doesn't actually get used
+				return null; // Hyperspace Hole itself doesn't actually get used
 			}
+		},
+		condition: {
+			onModifyMove(move, pokemon) {
+				if (move.selfSwitch) delete move.selfSwitch; // for Cosmog
+			},
+			onBasePower(basePower, user, target, move) {
+				if (user.baseSpecies.num === 487 && (move.type === 'Ghost' || move.type === 'Dragon')) { // for Giratina
+					return this.chainModify([4915, 4096]);
+				}
+			},
 		},
 		rating: 3.5,
 		num: -1007,
