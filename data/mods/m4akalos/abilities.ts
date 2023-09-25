@@ -176,7 +176,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				source.nature = this.sample(natures).name;
 				source.set.shiny = '';
 				if (this.randomChance(1, 4)) source.set.shiny = 'shiny'; // change to 4096... but, like, after confirming this actually works!
-				source.clearBoosts();
+				if (hyperspaceLookup[summon].move !== "Geomancy") source.clearBoosts();
 				// silently clear boosts
 				this.add('-message', `It's ${source.name}!`);
 
@@ -211,7 +211,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				source.set.ivs = userBackup.ivs;
 				source.set.shiny = userBackup.shiny;
 				// silently restore boosts
-				source.setBoost(boostBackup);
+				if (hyperspaceLookup[summon].move !== "Geomancy") source.setBoost(boostBackup);
 				console.log(source.boosts);
 				// change form back
 				source.formeChange(userBackup.species, move);
