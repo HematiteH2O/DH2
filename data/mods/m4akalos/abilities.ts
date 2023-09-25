@@ -152,6 +152,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				const userBackup = {
 					name: source.name,
 					fullname: source.fullname,
+					status: source.status,
 					gender: source.gender,
 					species: source.species,
 					nature: this.dex.natures.get(source.set.nature).name,
@@ -209,6 +210,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				// then change everything back to Hoopa
 				source.name = userBackup.name;
 				source.fullname = userBackup.fullname;
+				source.status = userBackup.status;
 				source.gender = userBackup.gender;
 				source.nature = userBackup.nature;
 				source.set.evs = userBackup.evs;
