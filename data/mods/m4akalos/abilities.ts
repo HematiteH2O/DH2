@@ -104,6 +104,8 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				move.accuracy = true;
 				if (target.hasType('Rock') || !target.addType('Rock')) {
 					this.add('-immune', target, '[from] ability: Petrification');
+				} else {
+					this.add('-start', target, 'typeadd', 'Rock', '[from] ability: Petrification');
 				}
 				return null;
 			}
@@ -125,7 +127,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				}
 			}
 			if (statsLowered && target.hp) {
-				this.boost({def: -1}, target, source, null, true);
+				this.boost({def: -1}, target, source, null, false, true);
 			}
 		},
 		name: "Repulsive",
