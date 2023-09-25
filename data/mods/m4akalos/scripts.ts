@@ -80,7 +80,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			// The species the opponent sees
 			const apparentSpecies =
 				this.illusion ? this.illusion.species.name : species.baseSpecies;
-			if (isPermanent || source.id === 'hyperspacemayhem') {
+			if (isPermanent || source.id === 'hyperspacehole') {
 				if (isPermanent) this.baseSpecies = rawSpecies;
 				this.details = species.name + (this.level === 100 ? '' : ', L' + this.level) +
 					(this.gender === '' ? '' : ', ' + this.gender) + (this.set.shiny ? ', shiny' : '');
@@ -113,7 +113,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			} else {
 				if (source.effectType === 'Ability') {
 					this.battle.add('-formechange', this, species.name, message, `[from] ability: ${source.name}`);
-				} else if (source.id === 'hyperspacemayhem') {
+				} else if (source.id === 'hyperspacehole') {
 					this.battle.add('-formechange', this, this.illusion ? this.illusion.species.name : species.name, '[silent]');
 				} else {
 					this.battle.add('-formechange', this, this.illusion ? this.illusion.species.name : species.name, message);
@@ -126,7 +126,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				this.setAbility(species.abilities['0'], null, true);
 				this.baseAbility = this.ability;
 			}
-			if (source.id === 'hyperspacemayhem') {
+			if (source.id === 'hyperspacehole') {
 				if (this.volatiles['hyperspacemayhem']) {
 					this.setAbility(species.abilities['0'], null, true);
 					this.battle.singleEvent('Start', this.getAbility(), this.abilityState, pokemon);
