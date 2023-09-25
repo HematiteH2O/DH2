@@ -145,9 +145,9 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 					fullname = source.fullname,
 					gender = source.gender,
 					species = source.species,
+					nature = source.nature,
 					evs = source.set.evs,
 					ivs = source.set.ivs,
-					nature = source.set.nature,
 					shiny = source.set.shiny,
 				};
 				const boostBackup: SparseBoostsTable = {};
@@ -165,8 +165,8 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				source.set.ivs = {hp: rand(32), atk: rand(32), def: rand(32), spa: rand(32), spd: rand(32), spe: rand(32)};
 				// to do: set three of those to 31 at random
 				source.nature = this.sample(this.battle.dex.natures);
-				source.shiny = '';
-				if (rand(4) = 1) source.shiny = 'shiny'; // change to 4096... but, like, after confirming this actually works!
+				source.set.shiny = '';
+				if (rand(4) = 1) source.set.shiny = 'shiny'; // change to 4096... but, like, after confirming this actually works!
 				source.clearBoosts();
 				// silently clear boosts
 
