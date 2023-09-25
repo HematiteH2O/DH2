@@ -166,7 +166,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				// to do: set three of those to 31 at random
 				source.nature = this.sample(this.battle.dex.natures);
 				source.set.shiny = '';
-				if (rand(4) = 1) source.set.shiny = 'shiny'; // change to 4096... but, like, after confirming this actually works!
+				if (rand(4) === 1) source.set.shiny = 'shiny'; // change to 4096... but, like, after confirming this actually works!
 				source.clearBoosts();
 				// silently clear boosts
 
