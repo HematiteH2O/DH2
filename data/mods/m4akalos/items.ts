@@ -365,6 +365,62 @@ export const Items: {[itemid: string]: ModdedItemData} = {
 		gen: 8,
 		desc: "If held by an Avalugg, this item allows it to Mega Evolve in battle.",
 	},
+	laprasite: {
+		name: "Laprasite",
+		spritenum: 578,
+		megaStone: "Lapras-Mega",
+		megaEvolves: "Lapras",
+		itemUser: ["Lapras"],
+		onTakeItem(item, source) {
+			if (item.megaEvolves === source.baseSpecies.baseSpecies) return false;
+			return true;
+		},
+		num: -1027,
+		gen: 8,
+		desc: "If held by a Lapras, this item allows it to Mega Evolve in battle.",
+	},
+	pyroarite: {
+		name: "Pyroarite",
+		spritenum: 578,
+		megaStone: "Pyroar-Mega",
+		megaEvolves: "Pyroar",
+		itemUser: ["Pyroar"],
+		onTakeItem(item, source) {
+			if (item.megaEvolves === source.baseSpecies.baseSpecies) return false;
+			return true;
+		},
+		num: -1028,
+		gen: 8,
+		desc: "If held by a Pyroar, this item allows it to Mega Evolve in battle.",
+	},
+	carbinite: {
+		name: "Carbinite",
+		spritenum: 578,
+		megaStone: "Carbink-Mega",
+		megaEvolves: "Carbink",
+		itemUser: ["Carbink"],
+		onTakeItem(item, source) {
+			if (item.megaEvolves === source.baseSpecies.baseSpecies) return false;
+			return true;
+		},
+		num: -1029,
+		gen: 8,
+		desc: "If held by a Carbink, this item allows it to Mega Evolve in battle.",
+	},
+	hoopanite: {
+		name: "Hoopanite",
+		spritenum: 578,
+		megaStone: "Hoopa-Mega",
+		megaEvolves: "Hoopa",
+		itemUser: ["Hoopa"],
+		onTakeItem(item, source) {
+			if (item.megaEvolves === source.baseSpecies.baseSpecies) return false;
+			return true;
+		},
+		num: -1030,
+		gen: 8,
+		desc: "If held by a Hoopa-Confined, this item allows it to Mega Evolve in battle.",
+	},
 
 	// crossover Megas
 
