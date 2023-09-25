@@ -185,7 +185,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				console.log(source.nature);
 				// just want to make sure because this is *super* invisible
 
-				source.addVolatile('hyperspacemayhem', source); // appropriately modify certain moves, like Teleport and Shadow Force
+				source.addVolatile('hyperspacemayhem'); // appropriately modify certain moves, like Teleport and Shadow Force
 				source.formeChange(this.dex.species.get(summon), move); // make sure this is silent?
 				if (hyperspaceLookup[summon].move === "Geomancy" || hyperspaceLookup[summon].move === "Shadow Force") {
 					this.add('-prepare', source, hyperspaceLookup[summon].move);
