@@ -138,6 +138,9 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 	hyperspacemayhem: {
 		shortDesc: "Hyperspace Hole summons a random restricted Legendary Pokémon to attack instead.",
 		name: "Hyperspace Mayhem",
+		onModifyMove(move) {
+			if (move && move.id === 'hyperspacehole') move.target = 'self'; // cosmetic
+		},
 		onSourceTryHitPriority: 1,
 		onSourceTryHit(target, source, move) {
 			if (
@@ -162,7 +165,6 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				}
 				this.add('-ability', source, 'Hyperspace Mayhem');
 				this.add('-message', `By using Hyperspace Hole, ${source.name} summons a Legendary Pokémon!`);
-				this.add('-anim', source, "Hyperspace Hole", source);
 
 				source.name = this.dex.species.get(summon).baseSpecies ? this.dex.species.get(summon).baseSpecies : this.dex.species.get(summon).name;
 				source.fullname = source.side.id + ': ' + source.name;
