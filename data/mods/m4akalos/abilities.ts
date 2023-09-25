@@ -195,7 +195,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				if (hyperspaceLookup[summon].move === "Teleport") this.add('-message', `Oops! Looks like ${source.name} doesn't know how to battle!`);
 				if (source.volatiles['mustrecharge']) {
 					delete source.volatiles['mustrecharge']; // for Dialga
-					this.add('-end', pokemon, 'mustrecharge', '[silent]');
+					this.add('-end', source, 'mustrecharge', '[silent]');
 				}
 				if (source.volatiles['hyperspacemayhem']) delete source.volatiles['hyperspacemayhem']; // for everything
 
