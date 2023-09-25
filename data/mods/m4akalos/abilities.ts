@@ -151,9 +151,8 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 					shiny = source.set.shiny,
 				},
 				const boostBackup: SparseBoostsTable = {};
-				for (const stat of defSpd) {
-					targetBoosts[stat] = target.boosts[stat];
-					sourceBoosts[stat] = source.boosts[stat];
+				for (stat in source.boosts) {
+					boostBackup[stat] = source.boosts[stat];
 				}
 
 				source.name = this.dex.species.get(summon).baseSpecies ? this.dex.species.get(summon).baseSpecies : this.dex.species.get(summon).name;
