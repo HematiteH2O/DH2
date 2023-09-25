@@ -116,7 +116,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 	repulsive: {
 		shortDesc: "When lowering a target's stats, also lowers target's Defense by 1 stage.",
 		onAnyAfterEachBoost(boost, target, source, effect) {
-			if (!source || source !== this.effectData.target || effect.name === 'Repulsive') return;
+			if (!source || source !== this.effectState.target || effect.name === 'Repulsive') return;
 			let statsLowered = false;
 			let i: BoostID;
 			for (i in boost) {
