@@ -130,7 +130,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (this.volatiles['hyperspacemayhem']) {
 					this.setAbility(species.abilities['0'], null, true);
 				} else {
-					this.setAbility('hyperspacemayhem');
+					this.setAbility('hyperspacemayhem'), null, true;
 				}
 				if (this.species.forme.startsWith('Mega') || this.species.forme.startsWith('Ultra')) this.battle.add('-start', this, 'typechange', this.getTypes(true).join('/'), '[silent]');
 			}
