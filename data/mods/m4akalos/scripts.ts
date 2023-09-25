@@ -133,8 +133,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (this.terastallized) details += `, tera:${this.terastallized}`;
 				this.battle.add('detailschange', this, details);
 
-				if (this.volatiles['hyperspacemayhem']) this.setAbility(species.abilities['0'], null, true);
-				else this.setAbility('hyperspacemayhem');
+				if (this.volatiles['hyperspacemayhem']) {
+					this.setAbility(species.abilities['0'], null, true);
+					this.battle.singleEvent('Start', this.getAbility(), this.abilityState, pokemon);
+				} else {
+					this.setAbility('hyperspacemayhem');
+				}
 				if (this.species.forme.startsWith('Mega') || this.species.forme.startsWith('Ultra')) this.battle.add('-start', this, 'typechange', this.getTypes(true).join('/'), '[silent]');
 			}
 			if (this.terastallized) {
