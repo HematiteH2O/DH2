@@ -149,7 +149,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 					ivs = source.set.ivs,
 					nature = source.set.nature,
 					shiny = source.set.shiny,
-				},
+				};
 				const boostBackup: SparseBoostsTable = {};
 				for (stat in source.boosts) {
 					boostBackup[stat] = source.boosts[stat];
