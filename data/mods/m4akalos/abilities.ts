@@ -106,6 +106,13 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 		rating: 3,
 		num: -1006,
 	},
+	hyperspacemayhem: {
+		shortDesc: "Hyperspace Hole summons a random restricted Legendary Pokémon to attack instead.",
+		name: "Hyperspace Mayhem",
+		// just a dummy Ability entry right now - the effect may be hard-coded into Hyperspace Hole
+		rating: 3.5,
+		num: -1007,
+	},
 
 	// crossover Megas
 
