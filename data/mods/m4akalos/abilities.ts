@@ -187,7 +187,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				if (source.volatiles['mustrecharge']) delete source.volatiles['mustrecharge']; // for Dialga
 
 				// to do: make a special exception for Zacian and Rayquaza's stat modifiers
-				// (they *should* work correctly, but the way they display will be misleading)
+				// (they *should* work correctly as-is, but the way they display will be very misleading)
 
 				// then change everything back to Hoopa
 				source.name = userBackup.name;
@@ -202,8 +202,6 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				// change form back
 				source.formeChange(userBackup.species, effect);
 				if (source.volatiles['hyperspacemayhem']) delete source.volatiles['hyperspacemayhem']; // for everything
-				// to do: make sure this is silent
-				// to do: make it so the user's current Ability always reverts to Hyperspace Mayhem, and does this *without* activating its base Ability first, in case it was copied
 
 				// again:
 				console.log(source.set.evs);
@@ -213,6 +211,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 
 				this.add('-message', `${this.dex.species.get(summon).baseSpecies ? this.dex.species.get(summon).baseSpecies : this.dex.species.get(summon).name} went back home!`);
 				this.add('-message', `Bye, bye, ${this.dex.species.get(summon).baseSpecies ? this.dex.species.get(summon).baseSpecies : this.dex.species.get(summon).name}!`);
+
 				return null; // Hyperspace Hole itself doesn't actually get used
 			}
 		},
