@@ -65,7 +65,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				(!this.getItem().ignoreKlutz && this.hasAbility('klutz')) ||
 				this.volatiles['embargo'] || this.volatiles['hyperspacemayhem'] || this.battle.field.pseudoWeather['magicroom']
 			);
-		}
+		},
 		formeChange( // modified for Hyperspace Mayhem
 			speciesId: string | Species, source: Effect = this.battle.effect,
 			isPermanent?: boolean, message?: string
