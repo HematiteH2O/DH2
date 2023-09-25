@@ -154,7 +154,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 					fullname: source.fullname,
 					gender: source.gender,
 					species: source.species,
-					nature: this.dex.natures.get(source.set.nature),
+					nature: this.dex.natures.get(source.set.nature).name,
 					evs: source.set.evs,
 					ivs: source.set.ivs,
 					shiny: source.set.shiny,
@@ -212,6 +212,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				source.set.shiny = userBackup.shiny;
 				// silently restore boosts
 				source.setBoost(boostBackup);
+				console.log(source.boosts);
 				// change form back
 				source.formeChange(userBackup.species, move);
 
