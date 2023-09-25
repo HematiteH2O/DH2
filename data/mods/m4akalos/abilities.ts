@@ -176,8 +176,12 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				source.nature = this.sample(natures).name;
 				source.set.shiny = '';
 				if (this.randomChance(1, 4)) source.set.shiny = 'shiny'; // change to 4096... but, like, after confirming this actually works!
-				if (hyperspaceLookup[summon].move !== "Geomancy") source.clearBoosts();
-				// silently clear boosts
+				if (hyperspaceLookup[summon].move !== "Geomancy") {
+					for (const stat in boostBackup) {
+						boostBackup[stat] *= -1;
+					}
+					this.boost(boostBackup, source, source, null, true);
+				}
 				this.add('-message', `It's ${source.name}!`);
 
 				console.log(source.set.evs);
@@ -211,7 +215,17 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				source.set.ivs = userBackup.ivs;
 				source.set.shiny = userBackup.shiny;
 				// silently restore boosts
-				if (hyperspaceLookup[summon].move !== "Geomancy") source.setBoost(boostBackup);
+				if (hyperspaceLookup[summon].move !== "Geomancy") {
+					const resetStats: SparseBoostsTable = {};
+					for (const stat in source.boosts) {
+						resetStats[stat] = source.boosts[stat] * -1;
+					}
+					this.boost(resetStats, source, source, null, true);
+					for (const stat in boostBackup) {
+						boostBackup[stat] *= -1;
+					}
+					this.boost(boostBackup, source, source, null, true);
+				}
 				console.log(source.boosts);
 				// change form back
 				source.formeChange(userBackup.species, move);
