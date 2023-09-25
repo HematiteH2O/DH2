@@ -160,7 +160,6 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 					ivs: source.set.ivs,
 					shiny: source.set.shiny,
 				};
-				let newSummon = this.deepClone(source);
 				const boostBackup: SparseBoostsTable = {};
 				for (const stat in source.boosts) {
 					boostBackup[stat] = source.boosts[stat];
@@ -168,48 +167,48 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				this.add('-ability', source, 'Hyperspace Mayhem');
 				this.add('-message', `By using Hyperspace Hole, ${source.name} summons a Legendary Pokémon!`);
 
-				newSummon.name = this.dex.species.get(summon).baseSpecies ? this.dex.species.get(summon).baseSpecies : this.dex.species.get(summon).name;
-				newSummon.fullname = source.side.id + ': ' + source.name;
-				newSummon.status = '';
-				newSummon.gender = ''; // not dealing with this because (thank goodness!) none of these have genders anyway
-				newSummon.set.evs = {hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0};
-				newSummon.set.ivs = {hp: this.random(32), atk: this.random(32), def: this.random(32), spa: this.random(32), spd: this.random(32), spe: this.random(32)};
+				source.name = this.dex.species.get(summon).baseSpecies ? this.dex.species.get(summon).baseSpecies : this.dex.species.get(summon).name;
+				source.fullname = source.side.id + ': ' + source.name;
+				source.gender = ''; // not dealing with this because (thank goodness!) none of these have genders anyway
+				source.set.evs = {hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0};
+				source.set.ivs = {hp: this.random(32), atk: this.random(32), def: this.random(32), spa: this.random(32), spd: this.random(32), spe: this.random(32)};
 				// to do: set three of those to 31 at random
 				const natures = this.dex.natures.all();
-				newSummon.nature = this.sample(natures).name;
-				newSummon.set.shiny = '';
-				if (this.randomChance(1, 4)) newSummon.set.shiny = true; // change to 4096... but, like, after confirming this actually works!
-				newSummon.clearBoosts();
-				newSummon.addVolatile('hyperspacemayhem', source, null); // appropriately modify certain moves
-				this.add('-message', `It's ${newSummon.name}!`);
-				this.battle.actions.switchIn(newSummon, 4);
+				source.nature = this.sample(natures).name;
+				source.set.shiny = '';
+				if (this.randomChance(1, 4)) source.set.shiny = true; // change to 4096... but, like, after confirming this actually works!
+				for (const stat in boostBackup) {
+					boostBackup[stat] *= -1;
+				}
+				this.boost(boostBackup, source, source, null, true);
+				this.add('-message', `It's ${source.name}!`);
 
-				console.log(newSummon.set.evs);
-				console.log(newSummon.set.ivs);
-				console.log(newSummon.nature);
 				console.log(source.set.evs);
 				console.log(source.set.ivs);
 				console.log(source.nature);
 				// just want to make sure because this is *super* invisible
 
+				source.addVolatile('hyperspacemayhem', source, null); // appropriately modify certain moves, like Teleport and Shadow Force
+				source.formeChange(this.dex.species.get(summon), move); // make sure this is silent?
 				if (hyperspaceLookup[summon].move === "Geomancy" || hyperspaceLookup[summon].move === "Shadow Force") {
-					this.add('-prepare', newSummon, hyperspaceLookup[summon].move);
-					newSummon.addVolatile(this.dex.moves.get(hyperspaceLookup[summon].move).id, target);
+					this.add('-prepare', source, hyperspaceLookup[summon].move);
+					source.addVolatile(this.dex.moves.get(hyperspaceLookup[summon].move).id, target);
 				}
-				this.actions.useMove(hyperspaceLookup[summon].move, newSummon);
-				if (hyperspaceLookup[summon].move === "Teleport") this.add('-message', `Oops! Looks like ${newSummon.name} doesn't know how to battle!`);
-				if (newSummon.volatiles['mustrecharge']) {
-					this.hint("But ${newSummon.name} is leaving, so ${source.name} will still be able to attack next turn!");
+				this.actions.useMove(hyperspaceLookup[summon].move, source);
+				if (hyperspaceLookup[summon].move === "Teleport") this.add('-message', `Oops! Looks like ${source.name} doesn't know how to battle!`);
+				if (source.volatiles['mustrecharge']) {
+					delete source.volatiles['mustrecharge']; // for Dialga
+					this.add('-end', source, 'mustrecharge');
 				}
+				if (source.volatiles['hyperspacemayhem']) delete source.volatiles['hyperspacemayhem']; // for everything
 
 				// to do: make a special exception for Zacian and Rayquaza's stat modifiers
 				// (they *should* work correctly as-is, but the way they display will be very misleading)
 
-				/*
 				// then change everything back to Hoopa
 				source.name = userBackup.name;
 				source.fullname = userBackup.fullname;
-	 			source.status = userBackup.status,
+				source.status = userBackup.status;
 				source.gender = userBackup.gender;
 				source.nature = userBackup.nature;
 				source.set.evs = userBackup.evs;
@@ -229,12 +228,15 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				this.boost(boostBackup, source, source, null, true);
 				// change form back
 				source.formeChange(userBackup.species, move);
-	 			*/
 
-				this.add('-anim', newSummon, "Teleport", newSummon);
-				this.add('-message', `${newSummon.name} went back home!`);
-				this.add('-message', `Bye, bye, ${newSummon.name}!`);
-				delete newSummon;
+				// again:
+				console.log(source.set.evs);
+				console.log(source.set.ivs);
+				console.log(source.nature);
+				// just for testing
+
+				this.add('-message', `${this.dex.species.get(summon).baseSpecies ? this.dex.species.get(summon).baseSpecies : this.dex.species.get(summon).name} went back home!`);
+				this.add('-message', `Bye, bye, ${this.dex.species.get(summon).baseSpecies ? this.dex.species.get(summon).baseSpecies : this.dex.species.get(summon).name}!`);
 
 				return null; // Hyperspace Hole itself doesn't actually get used
 			}
