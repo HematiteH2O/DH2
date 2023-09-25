@@ -157,7 +157,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 					shiny: source.set.shiny,
 				};
 				const boostBackup: SparseBoostsTable = {};
-				for (stat in source.boosts) {
+				for (const stat in source.boosts) {
 					boostBackup[stat] = source.boosts[stat];
 				}
 				this.add('-ability', source, 'Hyperspace Mayhem');
