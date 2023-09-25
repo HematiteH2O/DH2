@@ -80,8 +80,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			// The species the opponent sees
 			const apparentSpecies =
 				this.illusion ? this.illusion.species.name : species.baseSpecies;
-			if (isPermanent) {
-				this.baseSpecies = rawSpecies;
+			if (isPermanent || source.id === 'hyperspacemayhem') {
+				if (isPermanent) this.baseSpecies = rawSpecies;
 				this.details = species.name + (this.level === 100 ? '' : ', L' + this.level) +
 					(this.gender === '' ? '' : ', ' + this.gender) + (this.set.shiny ? ', shiny' : '');
 				let details = (this.illusion || this).details;
@@ -127,12 +127,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				this.baseAbility = this.ability;
 			}
 			if (source.id === 'hyperspacemayhem') {
-				this.details = species.name + (this.level === 100 ? '' : ', L' + this.level) +
-					(this.gender === '' ? '' : ', ' + this.gender) + (this.set.shiny ? ', shiny' : '');
-				let details = (this.illusion || this).details;
-				if (this.terastallized) details += `, tera:${this.terastallized}`;
-				this.battle.add('detailschange', this, details);
-
 				if (this.volatiles['hyperspacemayhem']) {
 					this.setAbility(species.abilities['0'], null, true);
 					this.battle.singleEvent('Start', this.getAbility(), this.abilityState, pokemon);
