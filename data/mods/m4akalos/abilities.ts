@@ -163,7 +163,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				}
 				this.add('-ability', attacker, 'Hyperspace Mayhem');
 				this.add('-message', `By using Hyperspace Hole, ${attacker.name} summons a Legendary Pokémon!`);
-				this.add('-anim', attacker, "Hyperspace Fury", attacker);
+				this.add('-anim', attacker, "Hyperspace Hole", attacker);
 
 				attacker.name = this.dex.species.get(summon).baseSpecies ? this.dex.species.get(summon).baseSpecies : this.dex.species.get(summon).name;
 				attacker.fullname = attacker.side.id + ': ' + attacker.name;
