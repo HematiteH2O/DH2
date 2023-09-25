@@ -177,12 +177,10 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				source.nature = this.sample(natures).name;
 				source.set.shiny = '';
 				if (this.randomChance(1, 4)) source.set.shiny = true; // change to 4096... but, like, after confirming this actually works!
-				if (hyperspaceLookup[summon].move !== "Geomancy") {
-					for (const stat in boostBackup) {
-						boostBackup[stat] *= -1;
-					}
-					this.boost(boostBackup, source, source, null, true);
+				for (const stat in boostBackup) {
+					boostBackup[stat] *= -1;
 				}
+				this.boost(boostBackup, source, source, null, true);
 				this.add('-message', `It's ${source.name}!`);
 
 				console.log(source.set.evs);
@@ -190,13 +188,13 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				console.log(source.nature);
 				// just want to make sure because this is *super* invisible
 
-				source.addVolatile('hyperspacemayhem'); // appropriately modify certain moves, like Teleport and Shadow Force
+				source.addVolatile('hyperspacemayhem', source, null); // appropriately modify certain moves, like Teleport and Shadow Force
 				source.formeChange(this.dex.species.get(summon), move); // make sure this is silent?
 				if (hyperspaceLookup[summon].move === "Geomancy" || hyperspaceLookup[summon].move === "Shadow Force") {
 					this.add('-prepare', source, hyperspaceLookup[summon].move);
 					source.addVolatile(this.dex.moves.get(hyperspaceLookup[summon].move).id, target);
 				}
-				this.actions.useMove(hyperspaceLookup[summon].move, source, null); // use the move
+				this.actions.useMove(hyperspaceLookup[summon].move, source);
 				if (hyperspaceLookup[summon].move === "Teleport") this.add('-message', `Oops! Looks like ${source.name} doesn't know how to battle!`);
 				if (source.volatiles['mustrecharge']) {
 					delete source.volatiles['mustrecharge']; // for Dialga
@@ -223,12 +221,11 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 						resetStats[stat] = source.boosts[stat] * -1;
 					}
 					this.boost(resetStats, source, source, null, true);
-					for (const stat in boostBackup) {
-						boostBackup[stat] *= -1;
-					}
-					this.boost(boostBackup, source, source, null, true);
 				}
-				console.log(source.boosts);
+				for (const stat in boostBackup) {
+					boostBackup[stat] *= -1;
+				}
+				this.boost(boostBackup, source, source, null, true);
 				// change form back
 				source.formeChange(userBackup.species, move);
 
