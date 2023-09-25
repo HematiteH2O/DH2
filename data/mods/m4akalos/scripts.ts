@@ -49,6 +49,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		if (item.name === "Wormadamite" && (pokemon.baseSpecies.name === "Wormadam" || pokemon.baseSpecies.name === "Wormadam-Trash")) {
 			return null;
 		}
+		if (item.name === "Hoopanite" && (pokemon.baseSpecies.name === "Hoopa-Unbound")) return null;
 		if (item.megaEvolves !== pokemon.baseSpecies.name || item.megaStone === pokemon.species.name) {
 			return null;
 		}
