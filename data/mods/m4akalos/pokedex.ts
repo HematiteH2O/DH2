@@ -301,6 +301,50 @@ export const Pokedex: {[speciesid: string]: ModdedSpeciesData} = {
 		movepoolAdditions: ["iciclecrash"],
 	},
 
+	// slate 10
+
+	lapras: {
+		inherit: true,
+		mega: "laprasmega",
+		megaName: "Lapras-Mega",
+		megaAbility: {0: "Misty Surge"},
+		megaStats: {hp: 130, atk: 95, def: 90, spa: 135, spd: 125, spe: 60},
+		megaStone: "Laprasite",
+		megaCreator: "ItzaDelta and Vipotis",
+		movepoolAdditions: ["wish"],
+	},
+
+	pyroar: {
+		inherit: true,
+		mega: "pyroarmega",
+		megaName: "Pyroar-Mega",
+		megaAbility: {0: "Grassy Surge"},
+		megaStats: {hp: 86, atk: 68, def: 92, spa: 149, spd: 86, spe: 126},
+		megaStone: "Pyroarite",
+		megaCreator: "The Damned",
+		movepoolAdditions: ["energyball", "grassyterrain", "morningsun", "scorchingsands"],
+	},
+
+	carbink: {
+		inherit: true,
+		mega: "carbinkmega",
+		megaName: "Carbink-Mega",
+		megaAbility: {0: "Mirror Armor"},
+		megaStats: {hp: 50, atk: 60, def: 155, spa: 120, spd: 155, spe: 60},
+		megaStone: "Carbinite",
+		megaCreator: "okispokis",
+	},
+
+	hoopa: {
+		inherit: true,
+		mega: "hoopamega",
+		megaName: "Hoopa-Mega",
+		megaAbility: {0: "Hyperspace Mayhem"},
+		megaStats: {hp: 80, atk: 150, def: 70, spa: 160, spd: 160, spe: 80},
+		megaStone: "Hoopanite",
+		megaCreator: "DrPumpkinz",
+	},
+
 	// crossover Megas
 
 	lanturn: {
