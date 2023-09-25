@@ -169,7 +169,6 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				if (rand(4) = 1) source.shiny = 'shiny'; // change to 4096... but, like, after confirming this actually works!
 				source.clearBoosts();
 				// silently clear boosts
-				this.add('-message', `It's ${source.name}!`);
 
 				console.log(source.set.evs);
 				console.log(source.set.ivs);
@@ -177,6 +176,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				// just want to make sure because this is *super* invisible
 
 				source.formeChange(this.dex.species.get(summon), effect); // make sure this is silent?
+				this.add('-message', `It's ${source.name}!`);
 				this.useMove(summon.move, source); // use the move
 
 				// to do:
@@ -187,9 +187,6 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				// make a special exception for Zacian's Intrepid Sword boost (it shouldn't look like it's applying to Hoopa's stats)
 
 				// then change back
-				this.add('-message', `${source.name} went back home!`);
-				this.add('-message', `Bye, bye, ${source.name}!`);
-
 				source.name = userBackup.name;
 				source.fullname = userBackup.fullname;
 				source.gender = userBackup.gender;
@@ -210,6 +207,8 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				console.log(source.nature);
 				// just want to make sure because this is *super* invisible
 
+				this.add('-message', `${this.dex.species.get(summon).baseSpecies ? this.dex.species.get(summon).baseSpecies : this.dex.species.get(summon).name} went back home!`);
+				this.add('-message', `Bye, bye, ${this.dex.species.get(summon).baseSpecies ? this.dex.species.get(summon).baseSpecies : this.dex.species.get(summon).name}!`);
 				return null; // Hyperspace Hole doesn't actually get used
 			}
 		},
