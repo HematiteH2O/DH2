@@ -185,8 +185,8 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				console.log(source.nature);
 				// just want to make sure because this is *super* invisible
 
-				source.formeChange(this.dex.species.get(summon), move); // make sure this is silent?
 				source.addVolatile('hyperspacemayhem', source); // appropriately modify certain moves, like Teleport and Shadow Force
+				source.formeChange(this.dex.species.get(summon), move); // make sure this is silent?
 				if (hyperspaceLookup[summon].move === "Geomancy" || hyperspaceLookup[summon].move === "Shadow Force") {
 					this.add('-prepare', source, hyperspaceLookup[summon].move);
 					source.addVolatile(this.dex.moves.get(hyperspaceLookup[summon].move).id, target);
@@ -197,6 +197,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 					delete source.volatiles['mustrecharge']; // for Dialga
 					this.add('-end', pokemon, 'mustrecharge', '[silent]');
 				}
+				if (source.volatiles['hyperspacemayhem']) delete source.volatiles['hyperspacemayhem']; // for everything
 
 				// to do: make a special exception for Zacian and Rayquaza's stat modifiers
 				// (they *should* work correctly as-is, but the way they display will be very misleading)
@@ -213,7 +214,6 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				source.setBoost(boostBackup);
 				// change form back
 				source.formeChange(userBackup.species, move);
-				if (source.volatiles['hyperspacemayhem']) delete source.volatiles['hyperspacemayhem']; // for everything
 
 				// again:
 				console.log(source.set.evs);
