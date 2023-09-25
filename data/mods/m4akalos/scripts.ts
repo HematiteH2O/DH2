@@ -127,8 +127,15 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				this.baseAbility = this.ability;
 			}
 			if (source.id === 'hyperspacemayhem') {
+				this.details = species.name + (this.level === 100 ? '' : ', L' + this.level) +
+					(this.gender === '' ? '' : ', ' + this.gender) + (this.set.shiny ? ', shiny' : '');
+				let details = (this.illusion || this).details;
+				if (this.terastallized) details += `, tera:${this.terastallized}`;
+				this.battle.add('detailschange', this, details);
+
 				if (this.volatiles['hyperspacemayhem']) this.setAbility('Hyperspace Mayhem');
 				else this.setAbility(species.abilities['0'], null, true);
+				if (this.species.forme.startsWith('Mega') || this.species.forme.startsWith('Ultra')) this.battle.add('-start', this, 'typechange', this.getTypes(true).join('/'), '[silent]');
 			}
 			if (this.terastallized) {
 				this.knownType = true;
