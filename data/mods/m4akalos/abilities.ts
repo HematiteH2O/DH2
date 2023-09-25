@@ -175,7 +175,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				const natures = this.dex.natures.all();
 				source.nature = this.sample(natures).name;
 				source.set.shiny = '';
-				if (this.randomChance(1, 4)) source.set.shiny = 'shiny'; // change to 4096... but, like, after confirming this actually works!
+				if (this.randomChance(1, 4)) source.set.shiny = true; // change to 4096... but, like, after confirming this actually works!
 				if (hyperspaceLookup[summon].move !== "Geomancy") {
 					for (const stat in boostBackup) {
 						boostBackup[stat] *= -1;
