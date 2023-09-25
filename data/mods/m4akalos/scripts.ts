@@ -129,7 +129,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			if (source.id === 'hyperspacehole') {
 				if (this.volatiles['hyperspacemayhem']) {
 					this.setAbility(species.abilities['0'], null, true);
-					this.battle.singleEvent('Start', this.getAbility(), this.abilityState, pokemon);
 				} else {
 					this.setAbility('hyperspacemayhem');
 				}
