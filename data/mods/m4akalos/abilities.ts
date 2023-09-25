@@ -127,7 +127,8 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				}
 			}
 			if (statsLowered && target.hp) {
-				this.boost({def: -1}, target, source, null, false, true);
+				this.add('-ability', source, 'Repulsive');
+				this.boost({def: -1}, target, source, null, true);
 			}
 		},
 		name: "Repulsive",
@@ -141,7 +142,10 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 			if (
 				effect && effect.id === 'hyperspacehole' && source.hasAbility('hyperspacemayhem')
 			) {
-				const summon = this.sample(hyperspaceLookup);
+				let summons = [];
+				for (id in hyperspaceLookup) summons.push(id);
+				const randomPick = this.sample(summons);
+				const summon = hyperspaceLookup[randomPick];
 				const userBackup = {
 					name: source.name,
 					fullname: source.fullname,
