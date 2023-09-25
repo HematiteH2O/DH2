@@ -143,7 +143,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				effect && effect.id === 'hyperspacehole' && source.hasAbility('hyperspacemayhem')
 			) {
 				let summons = [];
-				for (id in hyperspaceLookup) summons.push(id);
+				for (const id in hyperspaceLookup) summons.push(id);
 				const randomPick = this.sample(summons);
 				const summon = hyperspaceLookup[randomPick];
 				const userBackup = {
