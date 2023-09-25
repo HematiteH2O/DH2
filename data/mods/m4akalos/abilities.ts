@@ -1,3 +1,29 @@
+const hyperspaceLookup = {
+	mewtwo: { move: "Psystrike" },
+	lugia: { move: "Aeroblast" },
+	hooh: { move: "Sacred Fire" },
+	groudon: { move: "Precipice Blades" },
+	kyogre: { move: "Origin Pulse" },
+	rayquaza: { move: "Dragon Ascent" },
+	dialga: { move: "Roar of Time" },
+	palkia: { move: "Spacial Rend" },
+	giratinaorigin: { move: "Shadow Force" },
+	reshiram: { move: "Blue Flare" },
+	zekrom: { move: "Bolt Strike" },
+	kyurem: { move: "Glaciate" },
+	xerneas: { move: "Geomancy" },
+	yveltal: { move: "Oblivion Wing" },
+	zygardecomplete: { move: "Core Enforcer" },
+	cosmog: { move: "Teleport" },
+	solgaleo: { move: "Sunsteel Strike" },
+	lunala: { move: "Moongeist Beam" },
+	necrozmaultra: { move: "Light That Burns the Sky" },
+	zaciancrowned: { move: "Behemoth Blade" },
+	zamazentacrowned: { move: "Behemoth Bash" },
+	eternatus: { move: "Eternabeam" },
+	calyrexice: { move: "Glacial Lance" },
+	calyrexshadow: { move: "Astral Barrage" },
+};
 export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 	managate: {
 		desc: "When using a Psychic-type move, this Pokémon moves last among Pokémon using the same or greater priority moves, then switches out to a chosen ally.",
@@ -109,7 +135,78 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 	hyperspacemayhem: {
 		shortDesc: "Hyperspace Hole summons a random restricted Legendary Pokémon to attack instead.",
 		name: "Hyperspace Mayhem",
-		// just a dummy Ability entry right now - the effect may be hard-coded into Hyperspace Hole
+		onSourceTryPrimaryHit(target, source, effect) {
+			if (
+				effect && effect.id === 'hyperspacehole' && source.hasAbility('hyperspacemayhem')
+			) {
+				const summon = this.sample(hyperspaceLookup);
+				const userBackup = {
+					name = source.name,
+					fullname = source.fullname,
+					gender = source.gender,
+					species = source.species,
+					evs = source.set.evs,
+					ivs = source.set.ivs,
+					nature = source.set.nature,
+					shiny = source.set.shiny,
+				},
+				const boostBackup: SparseBoostsTable = {};
+				for (const stat of defSpd) {
+					targetBoosts[stat] = target.boosts[stat];
+					sourceBoosts[stat] = source.boosts[stat];
+				}
+
+				source.name = this.dex.species.get(summon).baseSpecies ? this.dex.species.get(summon).baseSpecies : this.dex.species.get(summon).name;
+				source.fullname = source.side.id + ': ' + source.name;
+				source.gender = ''; // not dealing with this because (thank goodness!) none of these have genders anyway
+				source.set.evs = {hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0};
+				source.set.ivs = {hp: rand(32), atk: rand(32), def: rand(32), spa: rand(32), spd: rand(32), spe: rand(32)};
+				// to do: set three of those to 31 at random
+				source.nature = this.sample(this.battle.dex.natures);
+				source.shiny = '';
+				if (rand(4) = 1) source.shiny = 'shiny'; // change to 4096... but, like, after confirming this actually works!
+				source.clearBoosts();
+				// silently clear boosts
+
+				console.log(source.set.evs);
+				console.log(source.set.ivs);
+				console.log(source.nature);
+				// just want to make sure because this is *super* invisible
+
+				source.formeChange(this.dex.species.get(summon), effect); // make sure this is silent?
+				this.useMove(summon.move, source); // use the move
+
+				// to do:
+				// Shadow Force and Geomancy need to execute fully
+				// Shadow Force has a 1.2x boost from Griseous Orb
+				// Dragon Ascent and Roar of Time skip their drawbacks
+				// Teleport is a joke outcome that does absolutely nothing, needs dedicated text
+				// make a special exception for Zacian's Intrepid Sword boost (it shouldn't look like it's applying to Hoopa's stats)
+
+				// then change back
+				source.name = userBackup.name;
+				source.fullname = userBackup.fullname;
+				source.gender = userBackup.gender;
+				source.set.evs = userBackup.evs;
+				source.set.ivs = userBackup.ivs;
+				source.set.nature = userBackup.nature;
+				source.set.shiny = userBackup.shiny;
+				// silently restore boosts
+				source.setBoost(boostBackup);
+				// then change form back
+				source.formeChange(userBackup.species, effect);
+				// to do: make sure this is silent
+				// to do: make sure the user's current Ability always reverts to Hyperspace Mayhem *without* activating its base Ability first, in case it was copied
+
+				// again:
+				console.log(source.set.evs);
+				console.log(source.set.ivs);
+				console.log(source.nature);
+				// just want to make sure because this is *super* invisible
+
+				return null; // Hyperspace Hole doesn't actually get used
+			}
+		},
 		rating: 3.5,
 		num: -1007,
 	},
