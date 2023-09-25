@@ -196,7 +196,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 					this.add('-prepare', source, hyperspaceLookup[summon].move);
 					source.addVolatile(this.dex.moves.get(hyperspaceLookup[summon].move).id, target);
 				}
-				this.actions.useMove(hyperspaceLookup[summon].move, source, '[silent]'); // use the move
+				this.actions.useMove(hyperspaceLookup[summon].move, source, null); // use the move
 				if (hyperspaceLookup[summon].move === "Teleport") this.add('-message', `Oops! Looks like ${source.name} doesn't know how to battle!`);
 				if (source.volatiles['mustrecharge']) {
 					delete source.volatiles['mustrecharge']; // for Dialga
