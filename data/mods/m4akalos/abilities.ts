@@ -154,7 +154,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				for (stat in source.boosts) {
 					boostBackup[stat] = source.boosts[stat];
 				}
-				this.add('-ability', pokemon, 'Hyperspace Mayhem');
+				this.add('-ability', source, 'Hyperspace Mayhem');
 				this.add('-message', `By using Hyperspace Hole, ${source.name} summons a Legendary Pokémon!`);
 				this.add('-anim', source, "Hyperspace Fury", source);
 
