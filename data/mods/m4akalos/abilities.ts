@@ -168,11 +168,11 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				source.fullname = source.side.id + ': ' + source.name;
 				source.gender = ''; // not dealing with this because (thank goodness!) none of these have genders anyway
 				source.set.evs = {hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0};
-				source.set.ivs = {hp: rand(32), atk: rand(32), def: rand(32), spa: rand(32), spd: rand(32), spe: rand(32)};
+				source.set.ivs = {hp: this.random(32), atk: this.random(32), def: this.random(32), spa: this.random(32), spd: this.random(32), spe: this.random(32)};
 				// to do: set three of those to 31 at random
 				source.nature = this.sample(this.battle.dex.natures);
 				source.set.shiny = '';
-				if (rand(4) === 1) source.set.shiny = 'shiny'; // change to 4096... but, like, after confirming this actually works!
+				if (this.randomChance(1, 4)) source.set.shiny = 'shiny'; // change to 4096... but, like, after confirming this actually works!
 				source.clearBoosts();
 				// silently clear boosts
 
