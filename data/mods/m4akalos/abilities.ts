@@ -138,81 +138,82 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 	hyperspacemayhem: {
 		shortDesc: "Hyperspace Hole summons a random restricted Legendary Pokémon to attack instead.",
 		name: "Hyperspace Mayhem",
-		onSourceTryPrimaryHit(target, source, effect) {
+		onModifyMovePriority: 1,
+		onModifyMove(move, attacker, defender) {
 			if (
-				effect && effect.id === 'hyperspacehole' && source.hasAbility('hyperspacemayhem')
+				move && move.id === 'hyperspacehole' && attacker.hasAbility('hyperspacemayhem')
 			) {
 				let summons = [];
 				for (const id in hyperspaceLookup) summons.push(id);
 				const randomPick = this.sample(summons);
 				const summon = hyperspaceLookup[randomPick];
 				const userBackup = {
-					name: source.name,
-					fullname: source.fullname,
-					gender: source.gender,
-					species: source.species,
-					nature: source.nature,
-					evs: source.set.evs,
-					ivs: source.set.ivs,
-					shiny: source.set.shiny,
+					name: attacker.name,
+					fullname: attacker.fullname,
+					gender: attacker.gender,
+					species: attacker.species,
+					nature: attacker.nature,
+					evs: attacker.set.evs,
+					ivs: attacker.set.ivs,
+					shiny: attacker.set.shiny,
 				};
 				const boostBackup: SparseBoostsTable = {};
-				for (const stat in source.boosts) {
-					boostBackup[stat] = source.boosts[stat];
+				for (const stat in attacker.boosts) {
+					boostBackup[stat] = attacker.boosts[stat];
 				}
-				this.add('-ability', source, 'Hyperspace Mayhem');
-				this.add('-message', `By using Hyperspace Hole, ${source.name} summons a Legendary Pokémon!`);
-				this.add('-anim', source, "Hyperspace Fury", source);
+				this.add('-ability', attacker, 'Hyperspace Mayhem');
+				this.add('-message', `By using Hyperspace Hole, ${attacker.name} summons a Legendary Pokémon!`);
+				this.add('-anim', attacker, "Hyperspace Fury", attacker);
 
-				source.name = this.dex.species.get(summon).baseSpecies ? this.dex.species.get(summon).baseSpecies : this.dex.species.get(summon).name;
-				source.fullname = source.side.id + ': ' + source.name;
-				source.gender = ''; // not dealing with this because (thank goodness!) none of these have genders anyway
-				source.set.evs = {hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0};
-				source.set.ivs = {hp: this.random(32), atk: this.random(32), def: this.random(32), spa: this.random(32), spd: this.random(32), spe: this.random(32)};
+				attacker.name = this.dex.species.get(summon).baseSpecies ? this.dex.species.get(summon).baseSpecies : this.dex.species.get(summon).name;
+				attacker.fullname = attacker.side.id + ': ' + attacker.name;
+				attacker.gender = ''; // not dealing with this because (thank goodness!) none of these have genders anyway
+				attacker.set.evs = {hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0};
+				attacker.set.ivs = {hp: this.random(32), atk: this.random(32), def: this.random(32), spa: this.random(32), spd: this.random(32), spe: this.random(32)};
 				// to do: set three of those to 31 at random
-				source.nature = this.sample(this.battle.dex.natures);
-				source.set.shiny = '';
-				if (this.randomChance(1, 4)) source.set.shiny = 'shiny'; // change to 4096... but, like, after confirming this actually works!
-				source.clearBoosts();
+				attacker.nature = this.sample(this.battle.dex.natures);
+				attacker.set.shiny = '';
+				if (this.randomChance(1, 4)) attacker.set.shiny = 'shiny'; // change to 4096... but, like, after confirming this actually works!
+				attacker.clearBoosts();
 				// silently clear boosts
 
-				console.log(source.set.evs);
-				console.log(source.set.ivs);
-				console.log(source.nature);
+				console.log(attacker.set.evs);
+				console.log(attacker.set.ivs);
+				console.log(attacker.nature);
 				// just want to make sure because this is *super* invisible
 
-				source.addVolatile('hyperspacemayhem', source); // appropriately modify certain moves, like Teleport and Shadow Force
-				source.formeChange(this.dex.species.get(summon), effect); // make sure this is silent?
-				this.add('-message', `It's ${source.name}!`);
+				attacker.addVolatile('hyperspacemayhem', attacker); // appropriately modify certain moves, like Teleport and Shadow Force
+				attacker.formeChange(this.dex.species.get(summon), move); // make sure this is silent?
+				this.add('-message', `It's ${attacker.name}!`);
 				if (summon.move === "Geomancy" || summon.move === "Shadow Force") {
-					this.add('-prepare', source, summon.move);
-					source.addVolatile('twoturnmove', target);
+					this.add('-prepare', attacker, summon.move);
+					attacker.addVolatile('twoturnmove', defender);
 				}
-				this.useMove(summon.move, source); // use the move
-				if (summon.move === "Teleport") this.add('-message', `Oops! Looks like ${source.name} doesn't know how to battle!`);
-				if (source.volatiles['mustrecharge']) delete source.volatiles['mustrecharge']; // for Dialga
+				this.useMove(summon.move, attacker); // use the move
+				if (summon.move === "Teleport") this.add('-message', `Oops! Looks like ${attacker.name} doesn't know how to battle!`);
+				if (attacker.volatiles['mustrecharge']) delete attacker.volatiles['mustrecharge']; // for Dialga
 
 				// to do: make a special exception for Zacian and Rayquaza's stat modifiers
 				// (they *should* work correctly as-is, but the way they display will be very misleading)
 
 				// then change everything back to Hoopa
-				source.name = userBackup.name;
-				source.fullname = userBackup.fullname;
-				source.gender = userBackup.gender;
-				source.set.evs = userBackup.evs;
-				source.set.ivs = userBackup.ivs;
-				source.set.nature = userBackup.nature;
-				source.set.shiny = userBackup.shiny;
+				attacker.name = userBackup.name;
+				attacker.fullname = userBackup.fullname;
+				attacker.gender = userBackup.gender;
+				attacker.set.evs = userBackup.evs;
+				attacker.set.ivs = userBackup.ivs;
+				attacker.set.nature = userBackup.nature;
+				attacker.set.shiny = userBackup.shiny;
 				// silently restore boosts
-				source.setBoost(boostBackup);
+				attacker.setBoost(boostBackup);
 				// change form back
-				source.formeChange(userBackup.species, effect);
-				if (source.volatiles['hyperspacemayhem']) delete source.volatiles['hyperspacemayhem']; // for everything
+				attacker.formeChange(userBackup.species, move);
+				if (attacker.volatiles['hyperspacemayhem']) delete attacker.volatiles['hyperspacemayhem']; // for everything
 
 				// again:
-				console.log(source.set.evs);
-				console.log(source.set.ivs);
-				console.log(source.nature);
+				console.log(attacker.set.evs);
+				console.log(attacker.set.ivs);
+				console.log(attacker.nature);
 				// just for testing
 
 				this.add('-message', `${this.dex.species.get(summon).baseSpecies ? this.dex.species.get(summon).baseSpecies : this.dex.species.get(summon).name} went back home!`);
