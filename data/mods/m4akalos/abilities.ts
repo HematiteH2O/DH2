@@ -141,14 +141,14 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 			) {
 				const summon = this.sample(hyperspaceLookup);
 				const userBackup = {
-					name = source.name,
-					fullname = source.fullname,
-					gender = source.gender,
-					species = source.species,
-					nature = source.nature,
-					evs = source.set.evs,
-					ivs = source.set.ivs,
-					shiny = source.set.shiny,
+					name: source.name,
+					fullname: source.fullname,
+					gender: source.gender,
+					species: source.species,
+					nature: source.nature,
+					evs: source.set.evs,
+					ivs: source.set.ivs,
+					shiny: source.set.shiny,
 				};
 				const boostBackup: SparseBoostsTable = {};
 				for (stat in source.boosts) {
