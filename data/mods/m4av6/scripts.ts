@@ -190,6 +190,9 @@ export const Scripts: ModdedBattleScriptsData = {
 		if (item.name === "Rapidashinite" && pokemon.baseSpecies.name === "Rapidash-Galar") {
 			return null;
 		}
+		if (item.name === "Wormadamite" && (pokemon.baseSpecies.name === "Wormadam" || pokemon.baseSpecies.name === "Wormadam-Trash")) {
+			return null;
+		}
 		if (pokemon.baseSpecies.name === "Pichu") {
 			return null;
 		}
