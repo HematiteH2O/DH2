@@ -151,7 +151,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 					fullname: source.fullname,
 					gender: source.gender,
 					species: source.species,
-					nature: source.nature,
+					nature: this.dex.natures.get(source.set.nature),
 					evs: source.set.evs,
 					ivs: source.set.ivs,
 					shiny: source.set.shiny,
@@ -187,11 +187,14 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				source.formeChange(this.dex.species.get(summon), move); // make sure this is silent?
 				if (hyperspaceLookup[summon].move === "Geomancy" || hyperspaceLookup[summon].move === "Shadow Force") {
 					this.add('-prepare', source, hyperspaceLookup[summon].move);
-					source.addVolatile('twoturnmove', target);
+					source.addVolatile(this.dex.moves.get(hyperspaceLookup[summon].move).id, target);
 				}
 				this.actions.useMove(hyperspaceLookup[summon].move, source); // use the move
 				if (hyperspaceLookup[summon].move === "Teleport") this.add('-message', `Oops! Looks like ${source.name} doesn't know how to battle!`);
-				if (source.volatiles['mustrecharge']) delete source.volatiles['mustrecharge']; // for Dialga
+				if (source.volatiles['mustrecharge']) {
+					delete source.volatiles['mustrecharge']; // for Dialga
+					this.add('-end', pokemon, 'mustrecharge', '[silent]');
+				}
 
 				// to do: make a special exception for Zacian and Rayquaza's stat modifiers
 				// (they *should* work correctly as-is, but the way they display will be very misleading)
