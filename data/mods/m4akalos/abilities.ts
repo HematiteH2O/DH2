@@ -154,6 +154,9 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				for (stat in source.boosts) {
 					boostBackup[stat] = source.boosts[stat];
 				}
+				this.add('-ability', pokemon, 'Hyperspace Mayhem');
+				this.add('-message', `By using Hyperspace Hole, ${source.name} summons a Legendary Pokémon!`);
+				this.add('-anim', source, "Hyperspace Fury", source);
 
 				source.name = this.dex.species.get(summon).baseSpecies ? this.dex.species.get(summon).baseSpecies : this.dex.species.get(summon).name;
 				source.fullname = source.side.id + ': ' + source.name;
@@ -166,6 +169,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				if (rand(4) = 1) source.shiny = 'shiny'; // change to 4096... but, like, after confirming this actually works!
 				source.clearBoosts();
 				// silently clear boosts
+				this.add('-message', `It's ${source.name}!`);
 
 				console.log(source.set.evs);
 				console.log(source.set.ivs);
@@ -183,6 +187,9 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				// make a special exception for Zacian's Intrepid Sword boost (it shouldn't look like it's applying to Hoopa's stats)
 
 				// then change back
+				this.add('-message', `${source.name} went back home!`);
+				this.add('-message', `Bye, bye, ${source.name}!`);
+
 				source.name = userBackup.name;
 				source.fullname = userBackup.fullname;
 				source.gender = userBackup.gender;
