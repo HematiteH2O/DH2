@@ -184,6 +184,8 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				// just want to make sure because this is *super* invisible
 
 				attacker.addVolatile('hyperspacemayhem', attacker); // appropriately modify certain moves, like Teleport and Shadow Force
+				console.log(summon);
+				console.log(this.dex.species.get(summon));
 				attacker.formeChange(this.dex.species.get(summon), move); // make sure this is silent?
 				this.add('-message', `It's ${attacker.name}!`);
 				if (summon.move === "Geomancy" || summon.move === "Shadow Force") {
