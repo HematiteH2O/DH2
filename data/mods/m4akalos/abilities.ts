@@ -171,7 +171,8 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				attacker.set.evs = {hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0};
 				attacker.set.ivs = {hp: this.random(32), atk: this.random(32), def: this.random(32), spa: this.random(32), spd: this.random(32), spe: this.random(32)};
 				// to do: set three of those to 31 at random
-				attacker.nature = this.sample(this.battle.dex.natures);
+				const natures = this.dex.natures.all();
+				attacker.nature = this.sample(natures).name;
 				attacker.set.shiny = '';
 				if (this.randomChance(1, 4)) attacker.set.shiny = 'shiny'; // change to 4096... but, like, after confirming this actually works!
 				attacker.clearBoosts();
