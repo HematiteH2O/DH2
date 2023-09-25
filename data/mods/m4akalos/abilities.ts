@@ -175,16 +175,16 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				console.log(source.nature);
 				// just want to make sure because this is *super* invisible
 
+				source.addVolatile('hyperspacemayhem', source); // appropriately modify certain moves, like Teleport and Shadow Force
 				source.formeChange(this.dex.species.get(summon), effect); // make sure this is silent?
 				this.add('-message', `It's ${source.name}!`);
-				source.addVolatile('hyperspacemayhem', source); // appropriately modify certain moves, like Teleport and Shadow Force
 				if (summon.move === "Geomancy" || summon.move === "Shadow Force") {
 					this.add('-prepare', source, summon.move);
 					source.addVolatile('twoturnmove', target);
 				}
 				this.useMove(summon.move, source); // use the move
-				if (source.volatiles['mustrecharge']) delete source.volatiles['mustrecharge']; // for Dialga
 				if (summon.move === "Teleport") this.add('-message', `Oops! Looks like ${source.name} doesn't know how to battle!`);
+				if (source.volatiles['mustrecharge']) delete source.volatiles['mustrecharge']; // for Dialga
 
 				// to do: make a special exception for Zacian and Rayquaza's stat modifiers
 				// (they *should* work correctly, but the way they display will be misleading)
@@ -201,6 +201,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				source.setBoost(boostBackup);
 				// change form back
 				source.formeChange(userBackup.species, effect);
+				if (source.volatiles['hyperspacemayhem']) delete source.volatiles['hyperspacemayhem']; // for everything
 				// to do: make sure this is silent
 				// to do: make it so the user's current Ability always reverts to Hyperspace Mayhem, and does this *without* activating its base Ability first, in case it was copied
 
