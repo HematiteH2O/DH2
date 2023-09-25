@@ -189,7 +189,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 					this.add('-prepare', attacker, hyperspaceLookup[summon].move);
 					attacker.addVolatile('twoturnmove', defender);
 				}
-				this.useMove(hyperspaceLookup[summon].move, attacker); // use the move
+				this.actions.useMove(hyperspaceLookup[summon].move, attacker); // use the move
 				if (hyperspaceLookup[summon].move === "Teleport") this.add('-message', `Oops! Looks like ${attacker.name} doesn't know how to battle!`);
 				if (attacker.volatiles['mustrecharge']) delete attacker.volatiles['mustrecharge']; // for Dialga
 
