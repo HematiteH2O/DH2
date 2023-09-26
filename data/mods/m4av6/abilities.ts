@@ -833,7 +833,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 						}
 					} else {
 						this.add('-message', `${(target.illusion ? target.illusion.name : target.name)} suddenly exploded!`);
-						this.useMove('explosion', target, "[from] ability: Alchemist", "[of] " + source);
+						this.actions.useMove('explosion', target, "[from] ability: Alchemist", "[of] " + source);
 					}
 				} else {
 					this.add('-ability', source, 'Alchemist');
@@ -1631,7 +1631,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				/*
 				this.add('-anim', source, "Earthquake", target);
 				*/
-				this.useMove('earthquake', this.effectState.target); // going to rework this a bit
+				this.actions.useMove('earthquake', this.effectState.target); // going to rework this a bit
 			}
 		},
 		name: "Seismic Scream",
@@ -1973,7 +1973,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				delete data.moveData.flags['protect'];
 
 				if (move.category === 'Status') {
-					this.useMove(move, target, data.target);
+					this.actions.useMove(move, target, data.target);
 				} else {
 					const hitMove = new this.dex.Move(data.moveData) as ActiveMove;
 					if (data.source.isActive) {
