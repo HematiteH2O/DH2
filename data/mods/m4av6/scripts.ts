@@ -225,7 +225,7 @@ export const Scripts: ModdedBattleScriptsData = {
 
 		this.battle.runEvent('AfterMega', pokemon);
 		return true;
-	}
+	},
 
 	 getDamage(
 		source: Pokemon, target: Pokemon, move: string | number | ActiveMove,
@@ -499,7 +499,7 @@ pokemon: {
 			this.battle.singleEvent('Start', item, this.itemState, this, source, effect);
 		}
 		return true;
-	}
+	},
 	setAbility(ability: string | Ability, source?: Pokemon | null, isFromFormeChange = false, isTransform = false) {
 		if (!this.hp) return false;
 		if (typeof ability === 'string') ability = this.battle.dex.abilities.get(ability);
@@ -525,7 +525,7 @@ pokemon: {
 		}
 		this.abilityOrder = this.battle.abilityOrder++;
 		return oldAbility;
-	}
+	},
 	runEffectiveness(move: ActiveMove) {
 		let totalTypeMod = 0;
 		for (const type of this.getTypes()) {
@@ -538,7 +538,7 @@ pokemon: {
 			}
 		}
 		return totalTypeMod;
-	}
+	},
 	isGrounded(negateImmunity = false) {
 		if ('gravity' in this.battle.field.pseudoWeather) return true;
 		if ('ingrain' in this.volatiles && this.battle.gen >= 4) return true;
@@ -557,7 +557,7 @@ pokemon: {
 			}
 		}
 		return item !== 'airballoon';
-	}
+	},
 	getMoveTargets(move: ActiveMove, target: Pokemon): {targets: Pokemon[], pressureTargets: Pokemon[]} {
 		let targets: Pokemon[] = [];
 
@@ -628,7 +628,7 @@ pokemon: {
 		}
 
 		return {targets, pressureTargets};
-	}
+	},
 	cureStatus(pokemon: Pokemon, silent = false) {
 		if (!this.hp || !this.status) return false;
 		this.battle.add('-curestatus', this, this.status, silent ? '[silent]' : '[msg]');
@@ -641,7 +641,7 @@ pokemon: {
 			this.removeVolatile('staccato');
 		}
 		return true;
-	}
+	},
 	ignoringItem() { // modded for Hyperspace Mayhem: even if the holder has an item, the summoned Pokémon doesn't!
 		return !!(
 			this.itemState.knockedOff || // Gen 3-4
