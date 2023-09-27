@@ -102,12 +102,15 @@ export const Scripts: ModdedBattleScriptsData = {
 			}
 		}
 		// up to three Megas of the Day
-		const megaOne = this.sample(megaList);
-		const megaTwo = this.sample(megaList);
-		const megaThree = this.sample(megaList);
-		this.modData('FormatsData', megaOne).tier = "Mega of the Day!";
-		this.modData('FormatsData', megaTwo).tier = "Mega of the Day!";
-		this.modData('FormatsData', megaThree).tier = "Mega of the Day!";
+		const random1 = Math.floor(Math.random() * megaList.length);
+		const random2 = Math.floor(Math.random() * (megaList.length - 1));
+		const random3 = Math.floor(Math.random() * (megaList.length - 2));
+		if (random2 >= random1) random2 += 1;
+		if (random3 >= random1) random3 += 1;
+		if (random3 >= random2) random3 += 1;
+		this.modData('FormatsData', megaList[random1]).tier = "Mega of the Day!";
+		this.modData('FormatsData', megaList[random2]).tier = "Mega of the Day!";
+		this.modData('FormatsData', megaList[random3]).tier = "Mega of the Day!";
 		console.log('Megas of the Day: ' + megaOne + ', ' + megaTwo + ', ' + megaThree);
 	},
 
