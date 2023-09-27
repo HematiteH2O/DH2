@@ -108,7 +108,7 @@ export const Scripts: ModdedBattleScriptsData = {
 		this.modData('FormatsData', megaOne).tier = "Mega of the Day!";
 		this.modData('FormatsData', megaTwo).tier = "Mega of the Day!";
 		this.modData('FormatsData', megaThree).tier = "Mega of the Day!";
-		console.log(Megas of the Day: ' + megaOne + ', ' + megaTwo + ', ' + megaThree);
+		console.log('Megas of the Day: ' + megaOne + ', ' + megaTwo + ', ' + megaThree);
 	},
 
 	actions: {
