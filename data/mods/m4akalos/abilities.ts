@@ -207,10 +207,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				source.nature = this.sample(natures).name;
 				source.set.shiny = '';
 				source.shiny = '';
-				if (this.randomChance(1, 4)) {
-					source.set.shiny = true; // change to 4096... but, like, after confirming this actually works!
-					source.shiny = true; // change to 4096... but, like, after confirming this actually works!
-				}
+				if (this.randomChance(1, 4)) source.set.shiny = true; // change to 4096... but, like, after confirming this actually works!
 				this.add('-message', `It's ${source.name}!`);
 
 				source.volatiles['hyperspacemayhem'].userBackup = userBackup;
@@ -242,7 +239,6 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				source.set.evs = userBackup.evs;
 				source.set.ivs = userBackup.ivs;
 				source.set.shiny = userBackup.shiny;
-				source.shiny = userBackup.shiny;
 				// silently restore boosts
 				if (hyperspaceLookup[summon].move !== "Geomancy") {
 					const resetStats: SparseBoostsTable = {};
