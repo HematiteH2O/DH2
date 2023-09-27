@@ -3148,7 +3148,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				source.nature = userBackup.nature;
 				source.set.evs = userBackup.evs;
 				source.set.ivs = userBackup.ivs;
-				source.set.shiny = userBackup.shiny;
+				source.set.shiny = userBackup.set.shiny;
 				// silently restore boosts
 				if (hyperspaceLookup[summon].move !== "Geomancy") {
 					const resetStats: SparseBoostsTable = {};
