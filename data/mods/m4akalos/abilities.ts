@@ -206,7 +206,6 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				const natures = this.dex.natures.all();
 				source.nature = this.sample(natures).name;
 				source.set.shiny = '';
-				source.shiny = '';
 				if (this.randomChance(1, 4)) source.set.shiny = true; // change to 4096... but, like, after confirming this actually works!
 				this.add('-message', `It's ${source.name}!`);
 
