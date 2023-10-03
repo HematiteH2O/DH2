@@ -727,7 +727,7 @@ field: { // modified for Arena Rock and Down-to-Earth
 		if (this.battle.getAllActive().some(x => x.hasAbility('downtoearth'))) return true; // modded: skip the TerrainChange
 		this.battle.eachEvent('TerrainChange', sourceEffect);
 		return true;
-	}
+	},
 
 	clearTerrain() {
 		if (!this.terrain) return false;
