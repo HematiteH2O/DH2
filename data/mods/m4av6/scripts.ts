@@ -748,11 +748,6 @@ field: { // modified for Arena Rock and Down-to-Earth
 		}
 		return terrain.map(toID).includes(ourTerrain);
 	},
-
-	getTerrain() {
-		if (this.battle.getAllActive().some(x => x.hasAbility('downtoearth'))) return ''; // modded
-		return this.battle.dex.conditions.getByID(this.terrain);
-	},
 },
 
 };
