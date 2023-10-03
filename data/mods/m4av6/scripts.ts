@@ -685,4 +685,74 @@ pokemon: {
 	}
 },
 
+field: { // modified for Arena Rock and Down-to-Earth
+	setTerrain(status: string | Effect, source: Pokemon | 'debug' | null = null, sourceEffect: Effect | null = null) {
+		status = this.battle.dex.conditions.get(status);
+		if (source) { // modded: this whole section added for Arena Rock
+			const result = this.battle.runEvent('SetTerrain', source, source, status);
+			if (!result) {
+				if (result === false) {
+					if ((sourceEffect as Move)?.terrain) {
+						this.battle.add('-fail', source, sourceEffect, '[from] ' + this.terrain);
+					} else if (sourceEffect && sourceEffect.effectType === 'Ability') {
+						this.battle.add('-ability', source, sourceEffect, '[from] ' + this.terrain, '[fail]');
+					}
+				}
+				return null;
+			}
+		} // end of modded section
+		if (!sourceEffect && this.battle.effect) sourceEffect = this.battle.effect;
+		if (!source && this.battle.event && this.battle.event.target) source = this.battle.event.target;
+		if (source === 'debug') source = this.battle.sides[0].active[0];
+		if (!source) throw new Error(`setting terrain without a source`);
+
+		if (this.terrain === status.id) return false;
+		const prevTerrain = this.terrain;
+		const prevTerrainState = this.terrainState;
+		this.terrain = status.id;
+		this.terrainState = {
+			id: status.id,
+			source,
+			sourceSlot: source.getSlot(),
+			duration: status.duration,
+		};
+		if (status.durationCallback) {
+			this.terrainState.duration = status.durationCallback.call(this.battle, source, source, sourceEffect);
+		}
+		if (!this.battle.singleEvent('FieldStart', status, this.terrainState, this, source, sourceEffect)) {
+			this.terrain = prevTerrain;
+			this.terrainState = prevTerrainState;
+			return false;
+		}
+		if (this.battle.getAllActive().some(x => x.hasAbility('downtoearth'))) return true; // modded: skip the TerrainChange
+		this.battle.eachEvent('TerrainChange', sourceEffect);
+		return true;
+	}
+
+	clearTerrain() {
+		if (!this.terrain) return false;
+		if (this.field.isTerrain('grassyterrain') && this.battle.getAllActive().some(x => x.hasAbility('arenarock'))) return; // modded for Arena Rock
+		const prevTerrain = this.getTerrain();
+		this.battle.singleEvent('FieldEnd', prevTerrain, this.terrainState, this);
+		this.terrain = '';
+		this.terrainState = {id: ''};
+		this.battle.eachEvent('TerrainChange');
+		return true;
+	},
+
+	isTerrain(terrain: string | string[], target?: Pokemon | Side | Battle) {
+		if (this.battle.getAllActive().some(x => x.hasAbility('downtoearth'))) return false; // modded
+		const ourTerrain = this.effectiveTerrain(target);
+		if (!Array.isArray(terrain)) {
+			return ourTerrain === toID(terrain);
+		}
+		return terrain.map(toID).includes(ourTerrain);
+	},
+
+	getTerrain() {
+		if (this.battle.getAllActive().some(x => x.hasAbility('downtoearth'))) return ''; // modded
+		return this.battle.dex.conditions.getByID(this.terrain);
+	},
+},
+
 };
