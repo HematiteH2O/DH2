@@ -152,8 +152,10 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 					return;
 				}
 			}
+			const restore = pokemon.isActive;
 			pokemon.isActive = false;
 			this.field.clearTerrain();
+			pokemon.isActive = restore;
 		},
 		name: "Arena Rock",
 		rating: 4.5,
