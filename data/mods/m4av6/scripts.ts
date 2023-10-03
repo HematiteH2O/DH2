@@ -741,6 +741,7 @@ field: { // modified for Arena Rock and Down-to-Earth
 	},
 
 	isTerrain(terrain: string | string[], target?: Pokemon | Side | Battle) {
+		const toID = Data.toID; // modded ?
 		if (this.battle.getAllActive().some(x => x.hasAbility('downtoearth'))) return false; // modded
 		const ourTerrain = this.effectiveTerrain(target);
 		if (!Array.isArray(terrain)) {
