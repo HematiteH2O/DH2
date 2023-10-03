@@ -435,6 +435,9 @@ pokemon: {
 		if (typeof item === 'string') item = this.battle.dex.items.get(item);
 
 		const effectid = this.battle.effect ? this.battle.effect.id : '';
+		const RESTORATIVE_BERRIES = new Set([
+			'leppaberry', 'aguavberry', 'enigmaberry', 'figyberry', 'iapapaberry', 'magoberry', 'sitrusberry', 'wikiberry', 'oranberry',
+		] as ID[]); // manually pasted in const RESTORATIVE_BERRIES because its absence caused a bug
 		if (RESTORATIVE_BERRIES.has('leppaberry' as ID)) {
 			const inflicted = ['trick', 'switcheroo'].includes(effectid);
 			const external = inflicted && source && !source.isAlly(this);
