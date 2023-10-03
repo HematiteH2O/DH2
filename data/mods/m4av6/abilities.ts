@@ -73,9 +73,10 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 		},
 		onEnd(source) {
 			if (!this.field.isTerrain('')) this.add('-message', `${source.name} is no longer suppressing the effects of the terrain!`);
-			source.abilityState.ending = true; // does this matter?
-			if (this.getAllActive().some(x => (x.hasAbility('downtoearth') && x !== source))) return;
-			this.eachEvent('TerrainChange', this.effect);
+			const restore = source.isActive;
+			source.isActive = false;
+			if (!this.getAllActive().some(x => (x.hasAbility('downtoearth') && x !== source))) this.eachEvent('TerrainChange', this.effect);
+			source.isActive = restore;
 		},
 		name: "Down-to-Earth",
 		rating: 2,
