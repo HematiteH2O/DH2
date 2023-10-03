@@ -731,7 +731,7 @@ field: { // modified for Arena Rock and Down-to-Earth
 
 	clearTerrain() {
 		if (!this.terrain) return false;
-		if (this.field.isTerrain('grassyterrain') && this.battle.getAllActive().some(x => x.hasAbility('arenarock'))) return; // modded for Arena Rock
+		if (this.field.isTerrain('grassyterrain') && this.battle.getAllActive().some(x => x.hasAbility('arenarock'))) return false; // modded for Arena Rock
 		const prevTerrain = this.getTerrain();
 		this.battle.singleEvent('FieldEnd', prevTerrain, this.terrainState, this);
 		this.terrain = '';
