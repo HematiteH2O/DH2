@@ -5,17 +5,20 @@ const tourbanned = [
 	"bisharpmega", "clefablemega", "dodriomega", "empoleonmega", "goodramega", "gourgeistmega", "hydreigonmega", "meowsticfmega", "slowkinggalarmega", "starmiemega", "tapulele", "tornadustherian", "toxtricitylowkeymega", "trevenantmega", "walreinmega"
 ]; // not for looong
 const viabilityList = [
-	"corviknightmega", "dhelmisemega", "mudsdalemega",
-	"blissey", "clefable", "corviknight", "ferrothorn", "gliscor", "heatran", "landorustherian", "rillaboom", "slowbro", "tapufini", "toxapex",
-	"dragalgemega", "latiasmega", "lopunnymega", "mawilemega", "medichammega", "raichumega", "reuniclusmega", "scizormega", "talonflamemega", "vikavoltmega",
-	"garchomp", "greninjaash", "hippowdon", "kartana", "nidoqueen", "slowkinggalar", "tangrowth", "tapukoko", "volcarona", "weavile", "zapdos",
-	"bastiodonmega", "charizardmegax", "drapionmega", "exploudmega", "falinksmegalegion", "garchompmega", "garbodormega", "lycanrocmega", "nidoqueenmega", "noivernmega", "parasectmega", "sableyemega", "spiritombmega", "swampertmega", "wishiwashimega",
-	"aegislash", "amoonguss", "buzzwole", "blacephalon", "chansey", "deoxysspeed", "greninja", "hydreigon", "keldeo", "kommoo", "magnezone", "melmetal", "terrakion", "thundurus",
-	"aurorusmega", "bibarelmega", "delphoxmega", "inteleonmega", "luxraymega", "typhlosionmega", "zoroarkmega",
-	"arctozolt", "barraskewda", "bisharp", "dragonite", "gengar", "gastrodon", "grimmsnarl", "hatterene", "hawlucha", "jirachi", "latias", "latios", "moltres", "ninetalesalola", "pelipper", "reuniclus", "rotomheat", "rotomwash", "scizor", "serperior", "shuckle", "skarmory", "slowking", "tapubulu", "tyranitar", "urshifurapidstrike", "zapdosgalar", "victini", "volcanion",
-	"delibirdmega",
-	"alakazam", "alomomola", "araquanid", "azumarill", "blaziken", "celesteela", "conkeldurr", "crawdaunt", "deoxysdefense", "diancie", "ditto", "dracozolt", "dragalge", "empoleon", "excadrill", "gyarados", "hoopaunbound", "infernape", "mamoswine", "manaphy", "mantine", "mew", "mukalola", "porygonz", "regieleki", "salamence", "swampert", "thundurustherian", "zeraora",
-	"rhyperiormega", "mienshaomega", "chesnaughtmega", "druddigonmega",
+	"aegislash", "alomomola", "amoonguss", "arctozolt", "azumarill", "barraskewda", "bisharp", "blacephalon", "blaziken", "blissey", "buzzwole",
+	"clefable", "corviknight", "deoxysdefense", "deoxysspeed", "dragonite", "excadrill", "ferrothorn", "garchomp", "gastrodon", "gengar", "gliscor",
+	"greninjaash", "greninja", "grimmsnarl", "hawlucha", "heatran", "hippowdon", "hoopaunbound", "hydreigon", "kartana", "keldeo", "kommoo",
+	"landorustherian", "latias", "magnezone", "melmetal", "mew", "moltres", "nidoqueen", "pelipper", "regieleki", "rillaboom", "rotomwash", "scizor",
+	"serperior", "skarmory", "slowbro", "slowking", "slowkinggalar", "tangrowth", "tapubulu", "tapufini", "tapukoko", "thundurus", "torkoal",
+	"toxapex", "tyranitar", "urshifurapidstrike", "victini", "volcanion", "volcarona", "weavile", "zapdos", "zapdosgalar", "zeraora",
+];
+const megaViabilityList = [
+	"araquanidmega", "bastiodonmega", "bibarelmega", "chandeluremega", "conkeldurrmega", "corviknightmega", "dhelmisemega", "dragalgemega",
+	"eelektrossmega", "falinksmega", "flygonmega", "froslassmega", "garbodormega", "hawluchamega", "honchkrowmega", "infernapemega", "inteleonmega",
+	"krookodilemega", "lanturnmega", "latiasmega", "lopunnymega", "lurantismega", "luxraymega", "lycanrocmega", "magmortarmega", "medichammega",
+	"meowsticmega", "mimikyumega", "mimikyumegabusted", "nidoqueenmega", "noivernmega", "orbeetlemega", "raichumega", "regicemega", "reuniclusmega",
+	"scizormega", "sirfetchdmega", "slowkingmega", "staraptormega", "starmiemega", "stoutlandmega", "swampertmega", "talonflamemega",
+	"typhlosionmega", "tyranitarmega", "tyrantrummega", "vanilluxemega", "wailordmega",
 ];
 const notier = ["wishiwashimega1", "wishiwashimega2", "wishiwashimega3", "wishiwashimega4", "wishiwashimegaschool", "falinksmegacombat"]; // should not appear in the teambuilder
 /*
@@ -37,7 +40,7 @@ export const Scripts: ModdedBattleScriptsData = {
 	gen: 8,
 	teambuilderConfig: {
 		excludeStandardTiers: true,
-		customTiers: ['Tourbanned', 'Mega of the Day!', 'Popular', 'Other Megas', 'Heat!', 'NFE'],
+		customTiers: ['Tourbanned', 'Mega of the Day!', 'Popular', 'Popular Megas', 'Other Megas', 'Heat!', 'NFE'],
 	},
 	init() {
 		if (this.dataCache.Pokedex.raichumega) return; // don't bother generating the dex if it's already stored!
@@ -81,7 +84,7 @@ export const Scripts: ModdedBattleScriptsData = {
 				else if (notier.includes(pokemon.mega)) this.modData('FormatsData', pokemon.mega).tier = null; // special exception for Wishiwashi, Falinks, et cetera
 				else {
 					megaList.push(pokemon.mega);
-					if (viabilityList.includes(pokemon.mega)) this.modData('FormatsData', pokemon.mega).tier = "Popular";
+					if (viabilityList.includes(pokemon.mega)) this.modData('FormatsData', pokemon.mega).tier = "Popular Megas";
 					else this.modData('FormatsData', pokemon.mega).tier = "Other Megas";
 				}
 			}
@@ -94,6 +97,7 @@ export const Scripts: ModdedBattleScriptsData = {
 				else if (uber.includes(id)) this.modData('FormatsData', id).tier = "Uber";
 				else if (tourbanned.includes(id)) this.modData('FormatsData', id).tier = "Tourbanned";
 				else if (viabilityList.includes(id)) this.modData('FormatsData', id).tier = "Popular";
+				else if (megaViabilityList.includes(id)) this.modData('FormatsData', id).tier = "Popular Megas";
 				else if (notier.includes(id)) this.modData('FormatsData', id).tier = null; // special exception for Wishiwashi, Falinks, et cetera
 				else if (this.dataCache.Pokedex[id] && this.dataCache.Pokedex[id].name.endsWith('-Mega')) this.modData('FormatsData', id).tier = "Other Megas";
 				else if (!this.modData('FormatsData', id).isNonstandard && this.dataCache.Pokedex[id] && !this.dataCache.Pokedex[id].evos && !id.startsWith('pikachu') && !id.startsWith('meltan')) this.modData('FormatsData', id).tier = "Heat!"; // default (FE)
