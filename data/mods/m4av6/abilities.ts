@@ -73,10 +73,9 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 		},
 		onEnd(source) {
 			if (!this.field.isTerrain('')) this.add('-message', `${source.name} is no longer suppressing the effects of the terrain!`);
-			const restore = source.isActive;
-			source.isActive = false;
+			source.m.forceCustomBlock = true;
 			if (!this.getAllActive().some(x => (x.hasAbility('downtoearth') && x !== source))) this.eachEvent('TerrainChange', this.effect);
-			source.isActive = restore;
+			source.m.forceCustomBlock = null;
 		},
 		name: "Down-to-Earth",
 		rating: 2,
@@ -153,10 +152,9 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 					return;
 				}
 			}
-			const restore = pokemon.isActive;
-			pokemon.isActive = false;
+			pokemon.m.forceCustomBlock = true;
 			this.field.clearTerrain();
-			pokemon.isActive = restore;
+			pokemon.m.forceCustomBlock = null;
 		},
 		name: "Arena Rock",
 		rating: 4.5,
