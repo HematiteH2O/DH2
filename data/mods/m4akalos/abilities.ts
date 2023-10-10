@@ -394,7 +394,8 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 	},
 	// Diamond Dust modded into other Abilities
 	forecast: {
-		onUpdate(pokemon) {
+		inherit: true,
+		onWeatherChange(pokemon) {
 			if (pokemon.baseSpecies.baseSpecies !== 'Castform' || pokemon.transformed) return;
 			let forme = null;
 			switch (pokemon.effectiveWeather()) {
@@ -408,6 +409,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				break;
 			case 'hail':
 			case 'diamonddust':
+			case 'snow':
 				if (pokemon.species.id !== 'castformsnowy') forme = 'Castform-Snowy';
 				break;
 			default:
@@ -418,111 +420,57 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				pokemon.formeChange(forme, this.effect, false, '[msg]');
 			}
 		},
-		name: "Forecast",
-		rating: 2,
-		num: 59,
 	},
 	icebody: {
-		desc: "If Hail or Diamond Dust is active, this Pokémon restores 1/16 of its maximum HP, rounded down, at the end of each turn. This Pokémon takes no damage from Hail.",
-		shortDesc: "If Hail or Diamond Dust is active, heals 1/16 of its max HP each turn; immunity to Hail.",
+		shortDesc: "If Hail, Snow or Diamond Dust is active, heals 1/16 of its max HP each turn; immunity to Hail.",
+		inherit: true,
 		onWeather(target, source, effect) {
-			if (effect.id === 'hail' || effect.id === 'diamonddust') {
+			if (effect.id === 'hail' || effect.id === 'diamonddust' || effect.id === 'snow') {
 				this.heal(target.baseMaxhp / 16);
 			}
 		},
-		onImmunity(type, pokemon) {
-			if (type === 'hail') return false;
-		},
-		name: "Ice Body",
-		rating: 1,
-		num: 115,
 	},
 	iceface: {
-		desc: "If this Pokémon is an Eiscue, the first physical hit it takes in battle deals 0 neutral damage. Its ice face is then broken and it changes forme to Noice Face. Eiscue regains its Ice Face forme when Hail or Diamond Dust begins or when Eiscue switches in while Hail or Diamond Dust is active. Confusion damage also breaks the ice face.",
-		shortDesc: "If Eiscue, the first physical hit it takes deals 0 damage. Effect restored in Hail, Diamond Dust.",
+		inherit: true,
+		shortDesc: "If Eiscue, the first physical hit it takes deals 0 damage. Effect restored in Hail, Snow, Diamond Dust.",
 		onStart(pokemon) {
-			if (
-				(this.field.isWeather('hail') || this.field.isWeather('diamonddust')) &&
-				pokemon.species.id === 'eiscuenoice' && !pokemon.transformed
-			) {
+			if (this.field.isWeather(['hail', 'diamonddust', 'snow']) &&
+				pokemon.species.id === 'eiscuenoice' && !pokemon.transformed) {
 				this.add('-activate', pokemon, 'ability: Ice Face');
 				this.effectState.busted = false;
 				pokemon.formeChange('Eiscue', this.effect, true);
 			}
 		},
-		onDamagePriority: 1,
-		onDamage(damage, target, source, effect) {
-			if (
-				effect && effect.effectType === 'Move' && effect.category === 'Physical' &&
-				target.species.id === 'eiscue' && !target.transformed
-			) {
-				this.add('-activate', target, 'ability: Ice Face');
-				this.effectState.busted = true;
-				return 0;
-			}
-		},
-		onCriticalHit(target, type, move) {
-			if (!target) return;
-			if (move.category !== 'Physical' || target.species.id !== 'eiscue' || target.transformed) return;
-			if (target.volatiles['substitute'] && !(move.flags['authentic'] || move.infiltrates)) return;
-			if (!target.runImmunity(move.type)) return;
-			return false;
-		},
-		onEffectiveness(typeMod, target, type, move) {
-			if (!target) return;
-			if (move.category !== 'Physical' || target.species.id !== 'eiscue' || target.transformed) return;
-			if (target.volatiles['substitute'] && !(move.flags['authentic'] || move.infiltrates)) return;
-			if (!target.runImmunity(move.type)) return;
-			return 0;
-		},
-		onUpdate(pokemon) {
-			if (pokemon.species.id === 'eiscue' && this.effectState.busted) {
-				pokemon.formeChange('Eiscue-Noice', this.effect, true);
-			}
-		},
-		onAnyWeatherStart() {
-			const pokemon = this.effectState.target;
-			if (
-				(this.field.isWeather('hail') || this.field.isWeather('diamonddust')) &&
-				pokemon.species.id === 'eiscuenoice' && !pokemon.transformed
-			) {
+		onWeatherChange(pokemon, source, sourceEffect) {
+			// snow/hail resuming because Cloud Nine/Air Lock ended does not trigger Ice Face
+			if ((sourceEffect as Ability)?.suppressWeather) return;
+			if (!pokemon.hp) return;
+			if (this.field.isWeather(['hail', 'diamonddust', 'snow']) &&
+				pokemon.species.id === 'eiscuenoice' && !pokemon.transformed) {
 				this.add('-activate', pokemon, 'ability: Ice Face');
 				this.effectState.busted = false;
 				pokemon.formeChange('Eiscue', this.effect, true);
 			}
 		},
-		isPermanent: true,
-		name: "Ice Face",
-		rating: 3,
-		num: 248,
 	},
 	slushrush: {
-		shortDesc: "If Hail or Diamond Dust is active, this Pokémon's Speed is doubled.",
+		inherit: true,
+		shortDesc: "If Hail, Snow or Diamond Dust is active, this Pokémon's Speed is doubled.",
 		onModifySpe(spe, pokemon) {
-			if (this.field.isWeather('hail') || this.field.isWeather('diamonddust')) {
+			if (this.field.isWeather(['hail', 'diamonddust', 'snow'])) {
 				return this.chainModify(2);
 			}
 		},
-		name: "Slush Rush",
-		rating: 3,
-		num: 202,
 	},
 	snowcloak: {
-		desc: "If Hail or Diamond Dust is active, this Pokémon's evasiveness is multiplied by 1.25. This Pokémon takes no damage from Hail.",
-		shortDesc: "If Hail or Diamond Dust is active, evasiveness is 1.25x; immunity to Hail.",
-		onImmunity(type, pokemon) {
-			if (type === 'hail') return false;
-		},
-		onModifyAccuracyPriority: 8,
+		inherit: true,
+		shortDesc: "If Hail, Snow or Diamond Dust is active, evasiveness is 1.25x; immunity to Hail.",
 		onModifyAccuracy(accuracy) {
 			if (typeof accuracy !== 'number') return;
-			if (this.field.isWeather('hail') || this.field.isWeather('diamonddust')) {
+			if (this.field.isWeather(['hail', 'diamonddust', 'snow'])) {
 				this.debug('Snow Cloak - decreasing accuracy');
-				return accuracy * 0.8;
+				return this.chainModify([3277, 4096]);
 			}
 		},
-		name: "Snow Cloak",
-		rating: 1.5,
-		num: 81,
 	},
 };
