@@ -93,7 +93,7 @@ export const Scripts: ModdedBattleScriptsData = {
 			}
 
 			// tiering
-			if (this.modData('FormatsData', id) && this.dataCache.Pokedex[id].creator) this.data.FormatsData[id] = { }; // for non-dynamic Pokémon like Sawsbuck
+			if (!this.modData('FormatsData', id) && this.dataCache.Pokedex[id].creator) this.data.FormatsData[id] = { }; // for non-dynamic Pokémon like Sawsbuck
 			if (this.modData('FormatsData', id)) {
 				if (this.modData('FormatsData', id).isNonstandard === 'Past') this.modData('FormatsData', id).isNonstandard = null;
 				// singles tiers
