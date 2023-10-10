@@ -349,7 +349,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 			duration: 5,
 			durationCallback(target, source, effect) {
 				if (source?.hasAbility('persistent')) {
-					this.add('-activate', source, 'ability: Persistent', effect);
+					this.add('-activate', source, 'ability: Persistent', '[move] Heal Block');
 					return 7;
 				}
 				for (const pokemon of this.getAllActive()) {
@@ -359,12 +359,13 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 				}
 				return 5;
 			},
-			onStart(pokemon, target, effect) {
+			onStart(pokemon, source) {
 				if (effect?.effectType === 'Ability') {
-					this.add('-start', target, 'Heal Block', '[silent]');
+					this.add('-start', pokemon, 'Heal Block', '[silent]');
 				} else {
-					this.add('-start', target, 'move: Heal Block');
+					this.add('-start', pokemon, 'move: Heal Block');
 				}
+				source.moveThisTurnResult = true;
 			},
 			onDisableMove(pokemon) {
 				for (const moveSlot of pokemon.moveSlots) {
@@ -380,13 +381,25 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 					return false;
 				}
 			},
-			onResidualOrder: 17,
+			onModifyMove(move, pokemon, target) {
+				if (move.flags['heal'] && !move.isZ && !move.isMax) {
+					this.add('cant', pokemon, 'move: Heal Block', move);
+					return false;
+				}
+			},
+			onResidualOrder: 20,
 			onEnd(pokemon) {
 				this.add('-end', pokemon, 'move: Heal Block');
 			},
 			onTryHeal(damage, target, source, effect) {
 				if ((effect?.id === 'zpower') || this.effectState.isZ) return damage;
 				return false;
+			},
+			onRestart(target, source) {
+				this.add('-fail', target, 'move: Heal Block'); // Succeeds to supress downstream messages
+				if (!source.moveThisTurnResult) {
+					source.moveThisTurnResult = false;
+				}
 			},
 		},
 	},
@@ -867,7 +880,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 	curse: {
 		inherit: true,
 		condition: {
-			onStart(pokemon, source, effect) {
+			onStart(pokemon, source) {
 				if (effect?.effectType === 'Ability') {
 					this.add('-message', `${pokemon.name} was cursed!`);
 					this.add('-start', pokemon, 'Curse', '[silent]');
@@ -875,7 +888,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 					this.add('-start', pokemon, 'Curse', '[of] ' + source);
 				}
 			},
-			onResidualOrder: 10,
+			onResidualOrder: 12,
 			onResidual(pokemon) {
 				this.damage(pokemon.baseMaxhp / 4);
 			},
