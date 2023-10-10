@@ -2,13 +2,15 @@ import {toID} from '..../sim/dex';
 
 // tiering information
 const ag = ["gengarmega", "rayquazamega", "zacian", "zaciancrowned", "calyrexshadow"];
-const uber = ["butterfreemega", "cinderacemega", "rillaboommega", "dragapultmega", "alakazammega", "blastoisemega", "blazikenmega", "cinderace", "darkrai", "darmanitangalar", "deoxysattack", "deoxys", "dialga", "dracovish", "dragapult", "lucariomega", "eternatus", "giratina", "giratinaorigin", "groudon", "groudonprimal", "hooh", "kangaskhanmega", "kyogre", "kyogreprimal", "kyurem", "kyuremblack", "kyuremwhite", "landorus", "lucariomega", "lugia", "lunala", "magearna", "magearnaoriginal", "marshadow", "metagrossmega", "mewtwo", "mewtwomegax", "mewtwomegay", "naganadel", "necrozmadawnwings", "necrozmaduskmane", "necrozmaultra", "palkia", "pheromosa", "rayquaza", "reshiram", "salamencemega", "shayminsky", "solgaleo", "spectrier", "urshifu", "xerneas", "yveltal", "zamazenta", "zamazentacrowned", "zekrom", "zygarde", "zygardecomplete", "calyrexice", "arceus", "arceusfire", "arceuswater", "arceuselectric", "arceusgrass", "arceusice", "arceusfighting", "arceuspoison", "arceusground", "arceusflying", "arceuspsychic", "arceusbug", "arceusrock", "arceusghost", "arceusdragon", "arceusdark", "arceussteel", "arceusfairy", "genesect", "genesectburn", "genesectchill", "genesectdouse", "genesectshock"];
-const tourbanned = [
-	"bisharpmega", "clefablemega", "dodriomega", "empoleonmega", "goodramega", "gourgeistmega", "hydreigonmega", "meowsticfmega", "slowkinggalarmega", "starmiemega", "tapulele", "tornadustherian", "toxtricitylowkeymega", "trevenantmega", "walreinmega"
-]; // not for looong
+const uber = [
+	// M4A first
+	"butterfreemega", "cinderacemega", "dragapultmega", "clefablemega", "dodriomega", "empoleonmega", "hydreigonmega", "slowkinggalarmega",
+	// Natdex second
+	"alakazammega", "blastoisemega", "blazikenmega", "cinderace", "darkrai", "darmanitangalar", "deoxysattack", "deoxysspeed", "deoxys", "dialga", "dracovish", "dragapult", "lucariomega", "eternatus", "giratina", "giratinaorigin", "groudon", "groudonprimal", "hooh", "kangaskhanmega", "kyogre", "kyogreprimal", "kyurem", "kyuremblack", "kyuremwhite", "landorus", "lucariomega", "lugia", "lunala", "magearna", "magearnaoriginal", "marshadow", "metagrossmega", "mewtwo", "mewtwomegax", "mewtwomegay", "naganadel", "necrozmadawnwings", "necrozmaduskmane", "necrozmaultra", "palkia", "pheromosa", "rayquaza", "reshiram", "salamencemega", "shayminsky", "solgaleo", "spectrier", "tornadustherian", "urshifu", "xerneas", "yveltal", "zamazenta", "zamazentacrowned", "zekrom", "zygarde", "zygardecomplete", "calyrexice", "arceus", "arceusfire", "arceuswater", "arceuselectric", "arceusgrass", "arceusice", "arceusfighting", "arceuspoison", "arceusground", "arceusflying", "arceuspsychic", "arceusbug", "arceusrock", "arceusghost", "arceusdragon", "arceusdark", "arceussteel", "arceusfairy", "genesect", "genesectburn", "genesectchill", "genesectdouse", "genesectshock",
+];
 const viabilityList = [
 	"aegislash", "alomomola", "amoonguss", "arctozolt", "azumarill", "barraskewda", "bisharp", "blacephalon", "blaziken", "blissey", "buzzwole",
-	"clefable", "corviknight", "deoxysdefense", "deoxysspeed", "dragonite", "excadrill", "ferrothorn", "garchomp", "gastrodon", "gengar", "gliscor",
+	"clefable", "corviknight", "deoxysdefense", "dragonite", "excadrill", "ferrothorn", "garchomp", "gastrodon", "gengar", "gliscor",
 	"greninjaash", "greninja", "grimmsnarl", "hawlucha", "heatran", "hippowdon", "hoopaunbound", "hydreigon", "kartana", "keldeo", "kommoo",
 	"landorustherian", "latias", "magnezone", "melmetal", "mew", "moltres", "nidoqueen", "pelipper", "regieleki", "rillaboom", "rotomwash", "scizor",
 	"serperior", "skarmory", "slowbro", "slowking", "slowkinggalar", "tangrowth", "tapubulu", "tapufini", "tapukoko", "thundurus", "torkoal",
@@ -42,7 +44,7 @@ export const Scripts: ModdedBattleScriptsData = {
 	gen: 8,
 	teambuilderConfig: {
 		excludeStandardTiers: true,
-		customTiers: ['Tourbanned', 'Mega of the Day!', 'Popular', 'Popular Megas', 'Other Megas', 'Heat!', 'NFE'],
+		customTiers: ['Mega of the Day!', 'Popular', 'Popular Megas', 'Other Megas', 'Heat!', 'NFE'],
 	},
 	init() {
 		if (this.dataCache.Pokedex.raichumega) return; // don't bother generating the dex if it's already stored!
@@ -82,7 +84,6 @@ export const Scripts: ModdedBattleScriptsData = {
 				if (!this.modData('FormatsData', pokemon.mega)) this.data.FormatsData[pokemon.mega] = { };
 
 				if (uber.includes(pokemon.mega)) this.modData('FormatsData', pokemon.mega).tier = "Uber";
-				else if (tourbanned.includes(pokemon.mega)) this.modData('FormatsData', pokemon.mega).tier = "Tourbanned";
 				else if (notier.includes(pokemon.mega)) this.modData('FormatsData', pokemon.mega).tier = null; // special exception for Wishiwashi, Falinks, et cetera
 				else {
 					megaList.push(pokemon.mega);
@@ -92,12 +93,12 @@ export const Scripts: ModdedBattleScriptsData = {
 			}
 
 			// tiering
+			if (this.modData('FormatsData', id) && !this.dataCache.Pokedex[id].creator) this.modData('FormatsData', id) = {}; // for non-dynamic Pokémon like Sawsbuck
 			if (this.modData('FormatsData', id)) {
 				if (this.modData('FormatsData', id).isNonstandard === 'Past') this.modData('FormatsData', id).isNonstandard = null;
 				// singles tiers
 				if (ag.includes(id)) this.modData('FormatsData', id).tier = "AG";
 				else if (uber.includes(id)) this.modData('FormatsData', id).tier = "Uber";
-				else if (tourbanned.includes(id)) this.modData('FormatsData', id).tier = "Tourbanned";
 				else if (viabilityList.includes(id)) this.modData('FormatsData', id).tier = "Popular";
 				else if (megaViabilityList.includes(id)) this.modData('FormatsData', id).tier = "Popular Megas";
 				else if (notier.includes(id)) this.modData('FormatsData', id).tier = null; // special exception for Wishiwashi, Falinks, et cetera
