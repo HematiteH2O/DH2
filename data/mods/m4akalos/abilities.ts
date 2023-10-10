@@ -168,9 +168,9 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				//Shininess check moved here, to as early as we can after doing the backup.
 				let isShiny = userBackup.shiny;
 				//console.log("Are shiny already? " + isShiny);
-				if (this.randomChance(1, 4)) {
+				if (this.randomChance(1, 4096) || this.randomChance(1, 4096) || this.randomChance(1, 4096)) { // Shiny Charm P:
 					//console.log("Rolled a Shiny");
-					isShiny = true; // change to 4096... but, like, after confirming this actually works!
+					isShiny = true;
 					source.set.shiny = true;
 					source.shiny = true;
 				} else {
