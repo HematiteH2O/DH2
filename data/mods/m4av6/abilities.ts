@@ -1725,7 +1725,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 		inherit: true,
 		shortDesc: "Changes Aegislash/Falinks-Mega to Blade Forme/Combat before attack, Shield Forme/Legion before King's Shield.",
 		onModifyMove(move, attacker, defender) {
-			if ((attacker.species.baseSpecies !== 'Aegislash' && !attacker.species.name.startsWith('Falinks-Mega') || attacker.transformed) return;
+			if ((attacker.species.baseSpecies !== 'Aegislash' && !attacker.species.name.startsWith('Falinks-Mega')) || attacker.transformed) return;
 			if (move.category === 'Status' && move.id !== 'kingsshield') return;
 			if (attacker.species.baseSpecies === 'Aegislash') {
 				const targetForme = (move.id === 'kingsshield' ? 'Aegislash' : 'Aegislash-Blade');
