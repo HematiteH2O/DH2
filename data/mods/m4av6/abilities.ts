@@ -2875,15 +2875,40 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 					nature: this.dex.natures.get(source.set.nature).name,
 					evs: source.set.evs,
 					ivs: source.set.ivs,
-					shiny: source.set.shiny,
+					shiny: source.set.shiny, //update with "were we shiny last turn"
 					volatiles: source.volatiles,
+					level: source.level,
 				};
+				
+				this.add('-ability', source, 'Hyperspace Mayhem');
+				
+				//Shininess check moved here, to as early as we can after doing the backup.
+				let isShiny = userBackup.shiny;
+				//console.log("Are shiny already? " + isShiny);
+				if (this.randomChance(1, 4096) || this.randomChance(1, 4096) || this.randomChance(1, 4096)) { // Shiny Charm P:
+					//console.log("Rolled a Shiny");
+					isShiny = true;
+					source.set.shiny = true;
+					source.shiny = true;
+				} else {
+					//console.log("Rolled a non-Shiny");
+					isShiny = false;
+					source.set.shiny = false;
+					source.shiny = false;
+				}
+				let wasShiny = userBackup.shiny ? true : false;
+				if (wasShiny != isShiny) {
+					//console.log("Switching shininess");
+					let details = source.species + (userBackup.level === 100 ? '' : ', L' + userBackup.level) +
+						(userBackup.gender === '' ? '' : ', ' + userBackup.gender) + (isShiny ? ', shiny' : '');
+					this.add('replace', source, details); //???
+				}
+
 				const boostBackup: SparseBoostsTable = {};
 				for (const stat in source.boosts) {
 					boostBackup[stat] = source.boosts[stat];
 				}
 				
-				this.add('-ability', source, 'Hyperspace Mayhem');
 				source.volatiles = {}; // clear volatiles silently
 				source.addVolatile('hyperspacemayhem', source, null); // appropriately modify certain moves, like Teleport and Shadow Force
 				this.add('-message', `By using Hyperspace Hole, ${source.name} summons a Legendary Pokémon!`);
@@ -2922,8 +2947,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 
 				const natures = this.dex.natures.all();
 				source.nature = this.sample(natures).name;
-				source.set.shiny = '';
-				if (this.randomChance(1, 4)) source.set.shiny = true; // change to 4096... but, like, after confirming this actually works!
+        
 				this.add('-message', `It's ${source.name}!`);
 
 				source.volatiles['hyperspacemayhem'].userBackup = userBackup;
@@ -2954,7 +2978,12 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				source.nature = userBackup.nature;
 				source.set.evs = userBackup.evs;
 				source.set.ivs = userBackup.ivs;
-				source.set.shiny = userBackup.set.shiny;
+				//Okay so what this relies on is just. not updating this. this doesnt update visually on its own,
+				//so I'm using it to store whether we WERE shiny last turn. 
+				//Practically, it would never be shiny twice in a row, but Iiiiiii this is fine.
+				//source.set.shiny = userBackup.shiny;
+				source.shiny = userBackup.shiny;
+
 				// silently restore boosts
 				if (hyperspaceLookup[summon].move !== "Geomancy") {
 					const resetStats: SparseBoostsTable = {};
