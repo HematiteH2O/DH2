@@ -727,14 +727,14 @@ field: { // modified for Arena Rock and Down-to-Earth
 			this.terrainState = prevTerrainState;
 			return false;
 		}
-		if (this.battle.getAllActive().some(x => x.hasAbility('downtoearth'))) return true; // modded: skip the TerrainChange
+		if (this.battle.getAllActive().some(x => x.hasAbility('downtoearth') && !x.m.forceCustomBlock)) return true; // modded: skip the TerrainChange
 		this.battle.eachEvent('TerrainChange', sourceEffect);
 		return true;
 	},
 
 	clearTerrain() {
 		if (!this.terrain) return false;
-		if (this.isTerrain('grassyterrain') && this.battle.getAllActive().some(x => x.hasAbility('arenarock'))) return false; // modded for Arena Rock
+		if (this.isTerrain('grassyterrain') && this.battle.getAllActive().some(x => x.hasAbility('arenarock') && !x.m.forceCustomBlock)) return false; // modded for Arena Rock
 		const prevTerrain = this.getTerrain();
 		this.battle.singleEvent('FieldEnd', prevTerrain, this.terrainState, this);
 		this.terrain = '';
@@ -744,7 +744,7 @@ field: { // modified for Arena Rock and Down-to-Earth
 	},
 
 	isTerrain(terrain: string | string[], target?: Pokemon | Side | Battle) {
-		if (this.battle.getAllActive().some(x => x.hasAbility('downtoearth'))) return false; // modded
+		if (this.battle.getAllActive().some(x => x.hasAbility('downtoearth') && !x.m.forceCustomBlock)) return false; // modded
 		const ourTerrain = this.effectiveTerrain(target);
 		if (!Array.isArray(terrain)) {
 			return ourTerrain === toID(terrain);
