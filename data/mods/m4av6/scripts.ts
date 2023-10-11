@@ -688,25 +688,23 @@ pokemon: {
 field: { // modified for Arena Rock and Down-to-Earth
 	setTerrain(status: string | Effect, source: Pokemon | 'debug' | null = null, sourceEffect: Effect | null = null) {
 		status = this.battle.dex.conditions.get(status);
-		if (source) { // modded: this whole section added for Arena Rock
-			const result = this.battle.runEvent('SetTerrain', source, source, status);
-			if (!result) {
-				if (result === false) {
-					if ((sourceEffect as Move)?.terrain) {
-						this.battle.add('-fail', source, sourceEffect, '[from] ' + this.terrain);
-					} else if (sourceEffect && sourceEffect.effectType === 'Ability') {
-						this.battle.add('-ability', source, sourceEffect, '[from] ' + this.terrain, '[fail]');
-					}
-				}
-				return null;
-			}
-		} // end of modded section
 		if (!sourceEffect && this.battle.effect) sourceEffect = this.battle.effect;
 		if (!source && this.battle.event && this.battle.event.target) source = this.battle.event.target;
 		if (source === 'debug') source = this.battle.sides[0].active[0];
 		if (!source) throw new Error(`setting terrain without a source`);
 
 		if (this.terrain === status.id) return false;
+		if (source) { // modded: this whole section added for Arena Rock
+			const result = this.battle.runEvent('SetTerrain', source, source, status);
+			if (this.terrain === 'grassyterrain' && this.battle.getAllActive().some(x => x.hasAbility('arenarock') && !x.m.forceCustomBlock)) {
+				if ((sourceEffect as Move)?.terrain) {
+					this.battle.add('-fail', source, sourceEffect, '[from] ' + this.terrain);
+				} else if (sourceEffect && sourceEffect.effectType === 'Ability') {
+					this.battle.add('-ability', source, sourceEffect, '[from] ' + this.terrain, '[fail]');
+				}
+				return null;
+			}
+		} // end of modded section
 		const prevTerrain = this.terrain;
 		const prevTerrainState = this.terrainState;
 		this.terrain = status.id;
