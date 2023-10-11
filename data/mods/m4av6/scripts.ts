@@ -24,7 +24,6 @@ const megaViabilityList = [
 	"scizormega", "sirfetchdmega", "slowkingmega", "staraptormega", "starmiemega", "stoutlandmega", "swampertmega", "talonflamemega",
 	"typhlosionmega", "tyranitarmega", "tyrantrummega", "vanilluxemega", "wailordmega",
 ];
-const notier = ["wishiwashimega1", "wishiwashimega2", "wishiwashimega3", "wishiwashimega4", "wishiwashimegaschool", "falinksmegacombat"]; // should not appear in the teambuilder
 /*
 // doubles tiers (currently unused because the teambuilder doesn't support them well)
 const vgcbanned = ["mew", "celebi", "jirachi", "deoxys", "deoxysattack", "deoxysdefense", "deoxysspeed", "phione", "manaphy", "darkrai", "shaymin", "shayminsky", "victini", "keldeo", "keldeoresolute", "meloetta", "greninjaash", "diancie", "dianciemega", "hoopa", "hoopaunbound", "volcanion", "magearna", "magearnaoriginal", "marshadow", "zeraora", "zarude", "arceus", "arceusfire", "arceuswater", "arceuselectric", "arceusgrass", "arceusice", "arceusfighting", "arceuspoison", "arceusground", "arceusflying", "arceuspsychic", "arceusbug", "arceusrock", "arceusghost", "arceusdragon", "arceusdark", "arceussteel", "arceusfairy", "genesect", "genesectburn", "genesectchill", "genesectdouse", "genesectshock"];
@@ -84,7 +83,6 @@ export const Scripts: ModdedBattleScriptsData = {
 				if (!this.modData('FormatsData', pokemon.mega)) this.data.FormatsData[pokemon.mega] = { };
 
 				if (uber.includes(pokemon.mega)) this.modData('FormatsData', pokemon.mega).tier = "Uber";
-				else if (notier.includes(pokemon.mega)) this.modData('FormatsData', pokemon.mega).tier = null; // special exception for Wishiwashi, Falinks, et cetera
 				else {
 					megaList.push(pokemon.mega);
 					if (megaViabilityList.includes(pokemon.mega)) this.modData('FormatsData', pokemon.mega).tier = "Popular Megas";
@@ -93,7 +91,6 @@ export const Scripts: ModdedBattleScriptsData = {
 			}
 
 			// tiering
-			if (!this.modData('FormatsData', id) && this.dataCache.Pokedex[id].creator) this.data.FormatsData[id] = { }; // for non-dynamic Pokémon like Sawsbuck
 			if (this.modData('FormatsData', id)) {
 				if (this.modData('FormatsData', id).isNonstandard === 'Past') this.modData('FormatsData', id).isNonstandard = null;
 				// singles tiers
@@ -101,8 +98,7 @@ export const Scripts: ModdedBattleScriptsData = {
 				else if (uber.includes(id)) this.modData('FormatsData', id).tier = "Uber";
 				else if (viabilityList.includes(id)) this.modData('FormatsData', id).tier = "Popular";
 				else if (megaViabilityList.includes(id)) this.modData('FormatsData', id).tier = "Popular Megas";
-				else if (notier.includes(id)) this.modData('FormatsData', id).tier = null; // special exception for Wishiwashi, Falinks, et cetera
-				else if (this.dataCache.Pokedex[id] && this.dataCache.Pokedex[id].name.endsWith('-Mega')) this.modData('FormatsData', id).tier = "Other Megas";
+				else if (this.dataCache.Pokedex[id] && this.dataCache.Pokedex[id].name.includes('-Mega')) this.modData('FormatsData', id).tier = "Other Megas";
 				else if (!this.modData('FormatsData', id).isNonstandard && this.dataCache.Pokedex[id] && !this.dataCache.Pokedex[id].evos && !id.startsWith('pikachu') && !id.startsWith('meltan')) this.modData('FormatsData', id).tier = "Heat!"; // default (FE)
 				else if (!this.modData('FormatsData', id).isNonstandard) this.modData('FormatsData', id).tier = "NFE"; // default (NFE)
 				if (id === 'crucibellemega') this.modData('FormatsData', id).tier = "CAP"; // hard-coding for things that don't exist
@@ -144,9 +140,6 @@ export const Scripts: ModdedBattleScriptsData = {
 				if (pokemon.species.name === "Registeel") return "Registeel-Mega";
 		}
 		if (item.name === "Meowsticite" && pokemon.species.name === "Meowstic-F") return "Meowstic-F-Mega";
-		if (item.name === "Sawsbuckite" && pokemon.species.id === "sawsbucksummer") return "Sawsbuck-Summer-Mega";
-		if (item.name === "Sawsbuckite" && pokemon.species.id === "sawsbuckautumn") return "Sawsbuck-Autumn-Mega";
-		if (item.name === "Sawsbuckite" && pokemon.species.id === "sawsbuckwinter") return "Sawsbuck-Winter-Mega";
 		if (item.name === "Toxtricitite" && pokemon.species.name === "Toxtricity-Low-Key") return "Toxtricity-Low-Key-Mega";
 		if (item.name === "Ninetalesite") {
 			if (pokemon.species.name === "Ninetales-Alola") return "Ninetales-Alola-Mega";
@@ -169,6 +162,24 @@ export const Scripts: ModdedBattleScriptsData = {
 		if (!speciesid) return false;
 
 		if (pokemon.illusion) this.battle.singleEvent('End', this.battle.dex.abilities.get('Illusion'), pokemon.abilityState, pokemon);
+		if (speciesid === 'sawsbuckmega') {
+			speciesid = this.dex.deepClone(this.dex.species.get(speciesid));
+			if (pokemon.species.id === "sawsbucksummer") {
+				speciesid.types = ["Fire", "Grass"];
+				speciesid.baseStats = {hp: 80, atk: 100, def: 70, spa: 135, spd: 70, spe: 120};
+				speciesid.abilities: {0: "Summer Days"};
+			}
+			if (pokemon.species.id === "sawsbuckautumn") {
+				speciesid.types = ["Ghost", "Grass"];
+				speciesid.baseStats = {hp: 80, atk: 110, def: 115, spa: 60, spd: 115, spe: 95};
+				speciesid.abilities: {0: "Autumn Leaves"};
+			}
+			if (pokemon.species.id === "sawsbuckwinter") {
+				speciesid.types = ["Ice", "Grass"];
+				speciesid.baseStats = {hp: 80, atk: 130, def: 105, spa: 60, spd: 85, spe: 115};
+				speciesid.abilities: {0: "Winter's Tale"};
+			}
+		}
 		pokemon.formeChange(speciesid, pokemon.getItem(), true);
 
 		// Limit one mega evolution
