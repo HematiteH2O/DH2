@@ -61,6 +61,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 			if (!this.field.isTerrain('')) {
 				this.add('-ability', source, 'Down-to-Earth');
 				this.add('-message', `${source.name} suppresses the effects of the terrain!`);
+				this.eachEvent('TerrainChange', this.effect);
 			}
 		},
 		onAnyTerrainStart(target, source, terrain) {
@@ -127,13 +128,13 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 			if (this.field.setTerrain('grassyterrain')) {
 				this.add('-message', `${source.name} covered the arena with unrelenting plant growth!`);
 				this.hint("Arena Rock doesn't wear off until the user leaves the field!");
-				this.field.terrainData.duration = 0;
-			} else if (this.field.isTerrain('grassyterrain') && this.field.terrainData.duration !== 0) {
+				this.field.terrainState.duration = 0;
+			} else if (this.field.isTerrain('grassyterrain') && this.field.terrainState.duration !== 0) {
 				this.add('-ability', source, 'Arena Rock');
 				this.add('-message', `${source.name} covered the arena with unrelenting plant growth!`);
 				this.hint("Arena Rock doesn't wear off until the user leaves the field!");
-				this.field.terrainData.source = source;
-				this.field.terrainData.duration = 0;
+				this.field.terrainState.source = source;
+				this.field.terrainState.duration = 0;
 			}
 		},
 		onAnySetTerrain(target, source, terrain) {
@@ -141,11 +142,11 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 			return false;
 		},
 		onEnd(pokemon) {
-			if (this.field.terrainData.source !== pokemon || !this.field.isTerrain('grassyterrain')) return;
+			if (this.field.terrainState.source !== pokemon || !this.field.isTerrain('grassyterrain')) return;
 			for (const target of this.getAllActive()) {
 				if (target === pokemon) continue;
 				if (target.hasAbility('arenarock')) {
-					this.field.terrainData.source = target;
+					this.field.terrainState.source = target;
 					return;
 				}
 			}
