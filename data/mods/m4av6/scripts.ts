@@ -87,7 +87,7 @@ export const Scripts: ModdedBattleScriptsData = {
 				else if (notier.includes(pokemon.mega)) this.modData('FormatsData', pokemon.mega).tier = null; // special exception for Wishiwashi, Falinks, et cetera
 				else {
 					megaList.push(pokemon.mega);
-					if (viabilityList.includes(pokemon.mega)) this.modData('FormatsData', pokemon.mega).tier = "Popular Megas";
+					if (megaViabilityList.includes(pokemon.mega)) this.modData('FormatsData', pokemon.mega).tier = "Popular Megas";
 					else this.modData('FormatsData', pokemon.mega).tier = "Other Megas";
 				}
 			}
