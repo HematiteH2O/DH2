@@ -112,7 +112,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 			}
 			const oldTypes = pokemon.getTypes();
 			if (oldTypes.join() === types.join() || !pokemon.setType(types)) return;
-			if (this.field.terrain || pokemon.transformed) {
+			if ((this.field.terrain || pokemon.transformed) && !(this.getAllActive().some(x => x.hasAbility('downtoearth') && !x.m.forceCustomBlock))) {
 				this.add('-start', pokemon, 'typechange', types.join('/'), '[from] ability: Mimicry');
 				if (!this.field.terrain) this.hint("Transform Mimicry changes you to your original un-transformed types.");
 			} else {
