@@ -87,7 +87,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 		},
 		onTerrainChange(pokemon) {
 			let types;
-			if (this.field.isTerrain('')) {
+			if (this.getAllActive().some(x => x.hasAbility('downtoearth') && !x.m.forceCustomBlock)) {
 				types = pokemon.baseSpecies.types;
 			} else {
 				switch (this.field.terrain) {
@@ -136,10 +136,6 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				this.field.terrainState.source = source;
 				this.field.terrainState.duration = 0;
 			}
-		},
-		onAnySetTerrain(target, source, terrain) {
-			if (source.hasAbility('arenarock') && terrain.id === 'grassyterrain') return;
-			return false;
 		},
 		onEnd(pokemon) {
 			if (this.field.terrainState.source !== pokemon || !this.field.isTerrain('grassyterrain')) return;
