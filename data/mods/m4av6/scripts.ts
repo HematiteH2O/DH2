@@ -702,7 +702,7 @@ field: { // modified for Arena Rock and Down-to-Earth
 				} else if (sourceEffect && sourceEffect.effectType === 'Ability') {
 					this.battle.add('-ability', source, sourceEffect, '[from] ' + this.terrain, '[fail]');
 				}
-				this.add('-message', `Nothing can break through this unrelenting plant growth!`);
+				this.battle.add('-message', `Nothing can break through this unrelenting plant growth!`);
 				return null;
 			}
 		} // end of modded section
