@@ -1,4 +1,4 @@
-import {toID} from '..../sim/dex';
+import {toID} from '../../../sim/dex-data';
 
 // tiering information
 const ag = ["gengarmega", "rayquazamega", "zacian", "zaciancrowned", "calyrexshadow"];
