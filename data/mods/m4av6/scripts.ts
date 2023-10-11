@@ -24,7 +24,6 @@ const megaViabilityList = [
 	"scizormega", "sirfetchdmega", "slowkingmega", "staraptormega", "starmiemega", "stoutlandmega", "swampertmega", "talonflamemega",
 	"typhlosionmega", "tyranitarmega", "tyrantrummega", "vanilluxemega", "wailordmega",
 ];
-const notier = ["wishiwashimega1", "wishiwashimega2", "wishiwashimega3", "wishiwashimega4", "wishiwashimegaschool", "falinksmegacombat"]; // should not appear in the teambuilder
 /*
 // doubles tiers (currently unused because the teambuilder doesn't support them well)
 const vgcbanned = ["mew", "celebi", "jirachi", "deoxys", "deoxysattack", "deoxysdefense", "deoxysspeed", "phione", "manaphy", "darkrai", "shaymin", "shayminsky", "victini", "keldeo", "keldeoresolute", "meloetta", "greninjaash", "diancie", "dianciemega", "hoopa", "hoopaunbound", "volcanion", "magearna", "magearnaoriginal", "marshadow", "zeraora", "zarude", "arceus", "arceusfire", "arceuswater", "arceuselectric", "arceusgrass", "arceusice", "arceusfighting", "arceuspoison", "arceusground", "arceusflying", "arceuspsychic", "arceusbug", "arceusrock", "arceusghost", "arceusdragon", "arceusdark", "arceussteel", "arceusfairy", "genesect", "genesectburn", "genesectchill", "genesectdouse", "genesectshock"];
@@ -84,7 +83,6 @@ export const Scripts: ModdedBattleScriptsData = {
 				if (!this.modData('FormatsData', pokemon.mega)) this.data.FormatsData[pokemon.mega] = { };
 
 				if (uber.includes(pokemon.mega)) this.modData('FormatsData', pokemon.mega).tier = "Uber";
-				else if (notier.includes(pokemon.mega)) this.modData('FormatsData', pokemon.mega).tier = null; // special exception for Wishiwashi, Falinks, et cetera
 				else {
 					megaList.push(pokemon.mega);
 					if (megaViabilityList.includes(pokemon.mega)) this.modData('FormatsData', pokemon.mega).tier = "Popular Megas";
@@ -101,8 +99,7 @@ export const Scripts: ModdedBattleScriptsData = {
 				else if (uber.includes(id)) this.modData('FormatsData', id).tier = "Uber";
 				else if (viabilityList.includes(id)) this.modData('FormatsData', id).tier = "Popular";
 				else if (megaViabilityList.includes(id)) this.modData('FormatsData', id).tier = "Popular Megas";
-				else if (notier.includes(id)) this.modData('FormatsData', id).tier = null; // special exception for Wishiwashi, Falinks, et cetera
-				else if (this.dataCache.Pokedex[id] && this.dataCache.Pokedex[id].name.endsWith('-Mega')) this.modData('FormatsData', id).tier = "Other Megas";
+				else if (this.dataCache.Pokedex[id] && this.dataCache.Pokedex[id].name.includes('-Mega')) this.modData('FormatsData', id).tier = "Other Megas";
 				else if (!this.modData('FormatsData', id).isNonstandard && this.dataCache.Pokedex[id] && !this.dataCache.Pokedex[id].evos && !id.startsWith('pikachu') && !id.startsWith('meltan')) this.modData('FormatsData', id).tier = "Heat!"; // default (FE)
 				else if (!this.modData('FormatsData', id).isNonstandard) this.modData('FormatsData', id).tier = "NFE"; // default (NFE)
 				if (id === 'crucibellemega') this.modData('FormatsData', id).tier = "CAP"; // hard-coding for things that don't exist
