@@ -123,6 +123,9 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 				if (source === this.effectState.target) {
 					this.attrLastMove('[still]');
 					this.add('-anim', source, "Mist");
+				} else {
+					this.attrLastMove('[still]');
+					this.add('-anim', source, "Crush Claw", target);
 				}
 			},
 		},
