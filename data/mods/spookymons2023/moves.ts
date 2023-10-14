@@ -82,6 +82,8 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 					name: 'Baneful Transformation',
 					forme: '',
 					types: ["???"],
+					baseStats: {hp: 60, atk: 60, def: 85, spa: 85, spd: 75, spe: 111},
+					weightkg: 13,
 				};
 				newPoke.species = newPoke.baseSpecies;
 				newPoke.clearVolatile();
