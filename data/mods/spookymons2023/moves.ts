@@ -30,7 +30,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 					return false;
 				}
 				werewolf.addVolatile('banefultransformation');
-				this.battle.runEvent('BeforeSwitchIn', werewolf);
+				this.runEvent('BeforeSwitchIn', werewolf);
 				this.actions.switchIn(werewolf, source.position, this.effect, false);
 				return null;
 			}
@@ -90,8 +90,8 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 				newPoke.species = newPoke.baseSpecies;
 				newPoke.clearVolatile();
 				pokemon.illusion = newPoke;
-				pokemon.illusion.name = '???';
-				pokemon.illusion.set.name = '???';
+				pokemon.illusion.name = "???";
+				pokemon.illusion.set.name = "???";
 			},
 			onSwap(pokemon) {
 				if (pokemon.illusion) pokemon.illusion.name = 'The Baneful Transformation'; // should still appear as ??? on the health bar, I hope!
