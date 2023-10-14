@@ -29,6 +29,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 					this.hint(`Your team's Baneful Transformation is ${werewolf.name}, who is already active!`, true, source.side);
 					return false;
 				}
+				this.add('-anim', source, "Haze", source);
 				werewolf.addVolatile('banefultransformation');
 				this.runEvent('BeforeSwitchIn', werewolf);
 				this.actions.switchIn(werewolf, source.position, this.effect, false);
@@ -44,8 +45,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 		selfSwitch: true,
 		onPrepareHit(target, source, move) {
 			this.attrLastMove('[still]');
-			this.add('-anim', source, "Black Hole Eclipse", source); // yeah I don't even know--
-			this.add('-anim', source, "Moonlight", source);
+			this.add('-anim', source, "Haze", source);
 		},
 		condition: {
 			// mechanical distinctions of the monster (not at all sure if any or all of these will be kept)
@@ -122,10 +122,10 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 			onPrepareHit(target, source, move) {
 				if (source === this.effectState.target) {
 					this.attrLastMove('[still]');
-					this.add('-anim', source, "Mist");
+					this.add('-anim', source, "Mist", source);
 				} else {
 					this.attrLastMove('[still]');
-					this.add('-anim', source, "Crush Claw", target);
+					this.add('-anim', target, "Crush Claw", source);
 				}
 			},
 		},
