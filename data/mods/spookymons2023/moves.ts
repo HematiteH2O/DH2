@@ -29,7 +29,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 					this.hint(`Your team's Baneful Transformation is ${werewolf.name}, who is already active!`, true, source.side);
 					return false;
 				}
-				return !!this.switchIn(werewolf, source.position, 'banefultransformation', true);
+				return !!this.actions.switchIn(werewolf, source.position, 'banefultransformation', true);
 			}
 			if (this.canSwitch(source.side)) {
 				this.hint(`Select a Pokémon to become your team's Baneful Transformation!`, true, source.side);
@@ -76,6 +76,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 					newPoke[key] = value;
 				}
 				newPoke.name = '???';
+				newPoke.set.name = '???';
 				newPoke.gender = '';
 				newPoke.baseSpecies = {
 					id: 'banefultransformation',
