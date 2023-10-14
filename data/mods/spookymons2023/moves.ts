@@ -37,6 +37,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 			if (this.canSwitch(source.side)) {
 				this.hint(`Select a Pokémon to become your team's Baneful Transformation!`, true, source.side);
 				this.hint(`From now on, when you use Baneful Transformation, you'll only be able to switch to the Pokémon you choose now.`, true, source.side);
+				this.hint(`During this battle, ${source.illusion ? source.illusion.name : source.name} will always summon the same Baneful Transformation. You should try to deduce its identity over the course of the battle!`, true, source.side.foe);
 			}
 			return !!this.canSwitch(source.side);
 		},
@@ -54,11 +55,11 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 			},
 			onSourceModifyDamage(damage, source, target, move) {
 				if (!(target.getMoveHitData(move).typeMod > 0)) { // reduce damage taken
-					return this.chainModify([2, 3]); // this might be too extreme, but we can come back to it
+					return this.chainModify([3, 4]);
 				}
 			},
 			onTryHeal(damage, target, source, effect) { // reduce healing
-				return this.chainModify([2, 3]); // this is meant to even out with the reducted damage taken
+				return this.chainModify([3, 4]); // this is meant to even out with the reduced damage taken
 			},
 			onModifySpe(spe, pokemon) { // reduce Speed
 				return this.chainModify(0.5);
@@ -94,14 +95,11 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 				pokemon.illusion.set.name = "???";
 			},
 			onSwap(pokemon) {
-				if (pokemon.illusion) pokemon.illusion.name = 'The Baneful Transformation'; // should still appear as ??? on the health bar, I hope!
 				this.add('-message', `Grrrrrr...`);
 				// this.add(`raw|<img src="IMAGE URL HERE" height="14" width="32">`); // would be fun to add a visual here :D (but I haven't made one yet P:)
 				if (!pokemon.m.werewolfHints && pokemon.m.wolfsbane && pokemon.m.wolfsbane.name) {
 					this.hint(`This must be one of ${pokemon.m.wolfsbane.name}'s allies, but which one?`);
-					this.hint(`The Baneful Transformation's identity is a secret. It's impossible to tell what moves it uses—or even how much HP it has left!`);
 					this.hint(`The Baneful Transformation will take less damage from moves, unless they're super effective. However, its Speed and HP recovery are also reduced.`);
-					this.hint(`During this battle, ${pokemon.m.wolfsbane.name} will always summon the same Baneful Transformation. You should try to deduce its identity over the course of the battle!`);
 					pokemon.m.werewolfHints = true;
 				}
 				this.add('-ability', pokemon, 'Neurotoxin');
@@ -124,7 +122,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 			onPrepareHit(target, source, move) {
 				if (source === this.effectState.target) {
 					this.attrLastMove('[still]');
-					this.add('-anim', source, "Mist", source);
+					this.add('-anim', source, "Mist");
 				}
 			},
 		},
