@@ -100,6 +100,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		if (pos >= side.active.length) {
 			throw new Error(`Invalid switch position ${pos} / ${side.active.length}`);
 		}
+		if (banefulTransformation) { // this section modded for Baneful Transformation
+			if (!pokemon.m.wolfsbane) pokemon.m.wolfsbane = oldActive;
+			pokemon.addVolatile('banefultransformation');
+			this.battle.runEvent('BeforeSwitchIn', pokemon); // do this before it becomes active
+		}
 		const oldActive = side.active[pos];
 		const unfaintedActive = oldActive?.hp ? oldActive : null;
 		if (unfaintedActive) {
@@ -143,11 +148,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			}
 			if (switchCopyFlag) {
 				pokemon.copyVolatileFrom(oldActive, switchCopyFlag);
-			}
-			if (banefulTransformation) { // this section modded for Baneful Transformation
-				if (!pokemon.m.wolfsbane) pokemon.m.wolfsbane = oldActive;
-				pokemon.addVolatile('banefultransformation');
-				this.battle.runEvent('BeforeSwitchIn', pokemon); // do this before it becomes active
 			}
 			if (newMove) pokemon.lastMove = newMove;
 			oldActive.clearVolatile();
