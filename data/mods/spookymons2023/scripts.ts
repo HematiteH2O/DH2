@@ -147,6 +147,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			if (banefulTransformation) { // this section modded for Baneful Transformation
 				if (!pokemon.m.wolfsbane) pokemon.m.wolfsbane = oldActive;
 				pokemon.addVolatile('banefultransformation');
+				this.battle.runEvent('BeforeSwitchIn', pokemon); // do this before it becomes active
 			}
 			if (newMove) pokemon.lastMove = newMove;
 			oldActive.clearVolatile();
