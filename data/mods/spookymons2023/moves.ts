@@ -29,7 +29,10 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 					this.hint(`Your team's Baneful Transformation is ${werewolf.name}, who is already active!`, true, source.side);
 					return false;
 				}
-				return !!this.actions.switchIn(werewolf, source.position, 'banefultransformation', true);
+				werewolf.addVolatile('banefultransformation');
+				this.battle.runEvent('BeforeSwitchIn', werewolf);
+				this.actions.switchIn(werewolf, source.position, this.effect, false);
+				return null;
 			}
 			if (this.canSwitch(source.side)) {
 				this.hint(`Select a Pokémon to become your team's Baneful Transformation!`, true, source.side);
@@ -75,8 +78,6 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 					// @ts-ignore
 					newPoke[key] = value;
 				}
-				newPoke.name = '???';
-				newPoke.set.name = '???';
 				newPoke.gender = '';
 				newPoke.baseSpecies = {
 					id: 'banefultransformation',
@@ -89,6 +90,8 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 				newPoke.species = newPoke.baseSpecies;
 				newPoke.clearVolatile();
 				pokemon.illusion = newPoke;
+				pokemon.illusion.name = '???';
+				newPoke.illusion.set.name = '???';
 			},
 			onSwap(pokemon) {
 				if (pokemon.illusion) pokemon.illusion.name = 'The Baneful Transformation'; // should still appear as ??? on the health bar, I hope!
