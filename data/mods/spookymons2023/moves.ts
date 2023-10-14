@@ -91,7 +91,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 				newPoke.clearVolatile();
 				pokemon.illusion = newPoke;
 				pokemon.illusion.name = '???';
-				newPoke.illusion.set.name = '???';
+				pokemon.illusion.set.name = '???';
 			},
 			onSwap(pokemon) {
 				if (pokemon.illusion) pokemon.illusion.name = 'The Baneful Transformation'; // should still appear as ??? on the health bar, I hope!
