@@ -100,13 +100,13 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		if (pos >= side.active.length) {
 			throw new Error(`Invalid switch position ${pos} / ${side.active.length}`);
 		}
+		const oldActive = side.active[pos];
+		const unfaintedActive = oldActive?.hp ? oldActive : null;
 		if (banefulTransformation) { // this section modded for Baneful Transformation
 			if (!pokemon.m.wolfsbane) pokemon.m.wolfsbane = oldActive;
 			pokemon.addVolatile('banefultransformation');
 			this.battle.runEvent('BeforeSwitchIn', pokemon); // do this before it becomes active
 		}
-		const oldActive = side.active[pos];
-		const unfaintedActive = oldActive?.hp ? oldActive : null;
 		if (unfaintedActive) {
 			oldActive.beingCalledBack = true;
 			let switchCopyFlag: 'copyvolatile' | 'shedtail' | boolean = false;
