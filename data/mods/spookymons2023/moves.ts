@@ -15,7 +15,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 			let werewolf = null;
 			for (let i = source.side.pokemon.length - 1; i >= 0; i--) {
 				const possibleTarget = source.side.pokemon[i];
-				if (possibleTarget.wolfsbane && possibleTarget !== source) {
+				if (possibleTarget.m.wolfsbane && possibleTarget !== source) {
 					werewolf = possibleTarget;
 					break;
 				}
@@ -65,10 +65,10 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 			onBeforeSwitchIn(pokemon) {
 				const newPoke = new Pokemon(pokemon.set, pokemon.side);
 				const doNotCarryOver = [
+					'baseSpecies', 'species', 'gender', 'name',
 					'fullname', 'side', 'fainted', 'status', 'hp', 'illusion',
 					'transformed', 'position', 'isActive', 'faintQueued',
 					'subFainted', 'getHealth', 'getDetails', 'moveSlots', 'ability',
-					'species', 'gender', 'name',
 				];
 				for (const [key, value] of Object.entries(pokemon)) {
 					if (doNotCarryOver.includes(key)) continue;
@@ -77,16 +77,17 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 				}
 				newPoke.name = '???';
 				newPoke.gender = '';
-				newPoke.species = {
+				newPoke.baseSpecies = {
 					id: 'banefultransformation',
 					name: 'Baneful Transformation',
 					forme: '',
 					types: ["???"],
 				};
+				newPoke.species = newPoke.baseSpecies;
 				newPoke.clearVolatile();
 				pokemon.illusion = newPoke;
 			},
-			onStart(pokemon) {
+			onSwap(pokemon) {
 				if (pokemon.illusion) pokemon.illusion.name = 'The Baneful Transformation'; // should still appear as ??? on the health bar, I hope!
 				this.add('-message', `Grrrrrr...`);
 				// this.add(`raw|<img src="IMAGE URL HERE" height="14" width="32">`); // would be fun to add a visual here :D (but I haven't made one yet P:)
