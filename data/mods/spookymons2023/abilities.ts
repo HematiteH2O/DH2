@@ -7,16 +7,9 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 			this.field.addPseudoWeather('neurotoxin');
 			// not meant to be obvious that this is a pseudoWeather; it's just for coding convenience
 		},
-		condition: {
-			duration: 0, // lasts forever, isn't announced
-			onAnyModifyMove(move, source, target) {
-				if (source.status === 'psn' || source.status === 'tox') move.neurotoxin = true;
-			},
-			onAnyEffectiveness(typeMod, target, type, move) {
-				if (target.hasAbility('neurotoxin') || target.volatiles['banefultransformation']) {
-					if (move.neurotoxin && typeMod > 0) return 0; // I hope this works
-				}
-			},
+		onEffectiveness(typeMod, target, type, move) {
+			if (!target || move.category === 'Status' || !target.runImmunity(move.type)) return;
+			if (this.activePokemon.status === 'psn' || this.activePokemon.status === 'tox') return 0;
 		},
 		name: "Neurotoxin",
 		rating: 4,
