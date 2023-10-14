@@ -70,7 +70,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 					'subFainted', 'getHealth', 'getDetails', 'moveSlots', 'ability',
 					'species', 'gender', 'name',
 				];
-				for (const [key, value] of Object.entries(target)) {
+				for (const [key, value] of Object.entries(pokemon)) {
 					if (doNotCarryOver.includes(key)) continue;
 					// @ts-ignore
 					newPoke[key] = value;
