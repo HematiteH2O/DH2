@@ -45,6 +45,10 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 		},
 		condition: {
 			// mechanical distinctions of the monster (not at all sure if any or all of these will be kept)
+			onEffectiveness(typeMod, target, type, move) { // Neurotoxin
+				if (!target || move.category === 'Status' || !target.runImmunity(move.type)) return;
+				if (this.activePokemon.status === 'psn' || this.activePokemon.status === 'tox') return 0;
+			},
 			onSourceModifyDamage(damage, source, target, move) {
 				if (!(target.getMoveHitData(move).typeMod > 0)) { // reduce damage taken
 					return this.chainModify([2, 3]); // this might be too extreme, but we can come back to it
