@@ -1,4 +1,4 @@
-// import {deepClone} from '../../../sim/dex'; // I *might* not need this, since I'm using this.dex.deepClone
+import {Pokemon} from "../../../sim/pokemon";
 
 export const Moves: {[moveid: string]: ModdedMoveData} = {
 	banefultransformation: {
