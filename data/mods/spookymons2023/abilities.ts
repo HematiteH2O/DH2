@@ -33,9 +33,9 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				const newPos = target.side.pokemon.length - 1;
 				const doNotCarryOver = [
 					'm',
-					'fullname', 'side', 'fainted', 'status', 'hp', 'illusion',
+					'fullname', 'side', 'fainted', 'hp', 'illusion',
 					'transformed', 'position', 'isActive', 'faintQueued',
-					'subFainted', 'getHealth', 'getDetails', 'moveSlots', 'ability',
+					'subFainted', 'getHealth', 'getDetails', 'ability',
 				];
 				for (const [key, value] of Object.entries(target)) {
 					if (doNotCarryOver.includes(key)) continue;
@@ -48,6 +48,11 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				2 * newPoke.species.baseStats['hp'] + newPoke.set.ivs['hp'] + Math.floor(newPoke.set.evs['hp'] / 4) + 100
 			) * newPoke.level / 100 + 10);
 				newPoke.maxhp = newPoke.baseMaxhp;
+
+				if (newPoke.name === 'Pollux') {
+					newPoke.name = 'Castor'; // just for fun
+					newPoke.set.name = 'Castor'; // just for fun
+				}
 
 				// for Gemini Laser:
 				newPoke.m.complement = target;
