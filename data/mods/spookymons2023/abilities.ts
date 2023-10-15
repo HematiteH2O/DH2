@@ -16,8 +16,43 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 		num: -2001,
 	},
 	divide: {
-		shortDesc: "Doesn't do anything yet.",
-		// doesn't do anything yet P:
+		shortDesc: "The first time the Pokémon's HP falls below half, it self-replicates...",
+		onEmergencyExit(target) {
+			if (this.effectState.busted) return; // only once per battle aksdjfh
+			if (pokemon.baseSpecies.name === 'Starmie-Fallen' && !pokemon.transformed) {
+				this.effectState.busted = true; // making sure right away--
+				this.add('-activate', target, 'ability: Divide');
+				this.add('-message', `${(target.illusion ? target.illusion.name : target.name)} cast off the injured part of its body...`);
+				this.add('-anim', target, "Double Team", target);
+				target.side.pokemonLeft++;
+				target.side.pokemon.length++;
+
+				const newPoke = new Pokemon(target.set, target.side);
+				const newPos = target.side.pokemon.length - 1;
+				const doNotCarryOver = [
+					'species', 'baseSpecies',
+					'fullname', 'side', 'fainted', 'status', 'hp', 'illusion',
+					'transformed', 'position', 'isActive', 'faintQueued',
+					'subFainted', 'getHealth', 'getDetails', 'moveSlots', 'ability',
+				];
+				for (const [key, value] of Object.entries(target)) {
+					if (doNotCarryOver.includes(key)) continue;
+					// @ts-ignore
+					newPoke[key] = value;
+				}
+				newPoke.species = 'starmierisen';
+				newPoke.baseSpecies = 'starmierisen';
+				newPoke.maxhp = newPoke.baseMaxhp; // for dynamax
+				newPoke.hp = newPoke.baseMaxhp;
+				if (newPoke.name === 'Pollux') newPoke.name = 'Castor'; // just for fun
+
+				newPoke.clearVolatile();
+				newPoke.position = newPos;
+				target.side.pokemon[newPos] = newPoke;
+				this.add('poke', source.side.pokemon[newPos].side.id, source.side.pokemon[newPos].details, '');
+				this.add('-message', `${newPoke.name} was added to ${newPoke.side.name}'s team!`);
+			}
+		},
 		name: "Divide",
 		rating: 4,
 		num: -2002,
