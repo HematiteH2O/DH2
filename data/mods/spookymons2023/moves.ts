@@ -166,15 +166,15 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 			}
 		},
 		onTry(source) {
-			if (source.species.name !== 'Starmie-Fallen' && source.species.name !== 'Starmie-Risen') {
+			if (source.species.name !== 'Starmie-Gemini' && source.species.name !== 'Starmie-Gemini-Risen') {
 				this.attrLastMove('[still]');
 				this.add('-fail', source, 'move: Gemini Laser');
-				this.hint("Only a Starmie-Fallen or Starmie-Risen can use this move.");
+				this.hint("Only a Starmie-Gemini can use this move.");
 				return null;
 			}
 		},
 		onModifyType(move, pokemon) {
-			if (pokemon.species.name === 'Starmie-Risen') {
+			if (pokemon.species.name === 'Starmie-Gemini-Risen') {
 				move.type = 'Ghost';
 			} else {
 				move.type = 'Psychic';
@@ -182,11 +182,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 		},
 		onPrepareHit(target, source, move) {
 			this.attrLastMove('[still]');
-			if (source.species.name === 'Starmie-Risen') {
-				this.add('-anim', source, "Blood Moon", source);
-			} else {
-				this.add('-anim', source, "Twin Beam", source);
-			}
+			this.add('-anim', source, "Twin Beam", target);
 		},
 		target: "normal",
 		type: "Psychic",
