@@ -105,7 +105,6 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 				} else {
 					pokemon.m.wolfsbane = this.effectState.source;
 					pokemon.illusion = this.effectState.fake;
-					this.add('detailschange', pokemon.illusion, pokemon.illusion.details);
 					this.effectState.spent = true;
 				}
 			},
