@@ -156,7 +156,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 		priority: 0,
 		flags: {protect: 1, mirror: 1},
 		onHit(target, pokemon, move) {
-			if (pokemon.m.complement && !pokemon.m.skip) {
+			if (pokemon.m.complement && !pokemon.m.skip && !pokemon.m.complement.fainted) {
 				// switch to the other Starmie
 				if (this.actions.switchIn(pokemon.m.complement, pokemon.position, this.effect, false)) {
 					pokemon.m.complement.m.skip = true;
