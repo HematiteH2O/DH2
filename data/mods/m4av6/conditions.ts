@@ -189,12 +189,12 @@ export const Conditions: {[k: string]: ConditionData} = {
 				return this.chainModify([0x1333, 0x1000]);
 			}
 		},
-		onResidual() {
+		onFieldResidual() {
 			this.add('-weather', 'Desert Gales', '[upkeep]');
 			this.add('-message', `The desert gales are raging!`);
 			this.eachEvent('Weather');
 		},
-		onEnd() {
+		onFieldEnd() {
 			this.add('-weather', 'none', '[silent]');
 			this.add('-message', `The desert gales subsided!`);
 		},
@@ -234,12 +234,12 @@ export const Conditions: {[k: string]: ConditionData} = {
 				return null;
 			}
 		},
-		onResidual() {
+		onFieldResidual() {
 			this.add('-weather', 'Diamond Dust', '[upkeep]');
 			this.add('-message', `The air is sparkling with diamond dust!`);
 			this.eachEvent('Weather');
 		},
-		onEnd() {
+		onFieldEnd() {
 			this.add('-weather', 'none', '[silent]');
 			this.add('-message', `The cloud of diamond dust blew away!`);
 		},
