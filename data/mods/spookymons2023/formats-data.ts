@@ -12,7 +12,7 @@ export const FormatsData: {[k: string]: ModdedSpeciesFormatsData} = {
 	// Hematite's
 	wolfsbrain: { tier: "Spooky" },
 	calyrexunova: { tier: "Spooky" },
-	starmiegemini: { tier: "Spooky" },
+	starmiefallen: { tier: "Spooky" },
 
 	// ink's
 	pikachucosplay: { tier: "Spooky" },
