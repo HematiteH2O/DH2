@@ -158,7 +158,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 		onHit(target, pokemon, move) {
 			if (pokemon.m.complement && !pokemon.m.skip && !pokemon.m.complement.fainted) {
 				// switch to the other Starmie
-				if (this.actions.switchIn(pokemon.m.complement, pokemon.position, this.effect, false)) {
+				if (this.actions.switchIn(pokemon.m.complement, pokemon.position, this.effect, false) && target.hp) {
 					pokemon.m.complement.m.skip = true;
 					this.actions.useMove('geminilaser', pokemon.m.complement);
 					pokemon.m.complement.m.skip = null;
