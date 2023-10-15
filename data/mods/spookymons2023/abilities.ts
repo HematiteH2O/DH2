@@ -19,7 +19,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 		shortDesc: "The first time the Pokémon's HP falls below half, it self-replicates...",
 		onEmergencyExit(target) {
 			if (this.effectState.busted) return; // only once per battle aksdjfh
-			if (pokemon.baseSpecies.name === 'Starmie-Fallen' && !pokemon.transformed) {
+			if (target.baseSpecies.name === 'Starmie-Fallen' && !target.transformed) {
 				this.effectState.busted = true; // making sure right away--
 				this.add('-activate', target, 'ability: Divide');
 				this.add('-message', `${(target.illusion ? target.illusion.name : target.name)} cast off the injured part of its body...`);
@@ -57,7 +57,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				newPoke.clearVolatile();
 				newPoke.position = newPos;
 				target.side.pokemon[newPos] = newPoke;
-				this.add('poke', source.side.pokemon[newPos].side.id, source.side.pokemon[newPos].details, '');
+				this.add('poke', target.side.pokemon[newPos].side.id, target.side.pokemon[newPos].details, '');
 				this.add('-message', `${newPoke.name} was added to ${newPoke.side.name}'s team!`);
 			}
 		},
