@@ -15,6 +15,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			if (!newMon.abilities && copyData.abilities) newMon.abilities = copyData.abilities;
 			if (!newMon.num && copyData.num) newMon.num = copyData.num * -1; // inverting the original's dex number
 			if (!newMon.genderRatio && copyData.genderRatio) newMon.genderRatio = copyData.genderRatio;
+			if (!newMon.gender && copyData.gender) newMon.gender = copyData.gender;
 			if (!newMon.heightm && copyData.heightm) newMon.heightm = copyData.heightm;
 			if (!newMon.weightkg && copyData.weightkg) newMon.weightkg = copyData.weightkg;
 			if (!newMon.color && copyData.color) newMon.color = copyData.color;
