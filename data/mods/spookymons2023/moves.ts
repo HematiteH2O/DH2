@@ -20,7 +20,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 					break;
 				}
 			}
-			if (werewolf) {
+			if (werewolf) { // before the move attempts to work
 				if (werewolf.fainted) {
 					this.hint(`Your team's Baneful Transformation is ${werewolf.name}, who has already been defeated!`, true, source.side);
 					return false;
@@ -29,9 +29,12 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 					this.hint(`Your team's Baneful Transformation is ${werewolf.name}, who is already active!`, true, source.side);
 					return false;
 				}
+			}
+			// now the move will definitely try to be used, and...
+			if (!source.side.addSlotCondition(source, 'banefultransformation')) return false;
+			// ... if we make it this far, we know it's happening!
+			if (werewolf) {
 				this.add('-anim', source, "Haze", source);
-				werewolf.addVolatile('banefultransformation');
-				this.runEvent('BeforeSwitchIn', werewolf);
 				this.actions.switchIn(werewolf, source.position, this.effect, false);
 				return null;
 			}
@@ -48,6 +51,36 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 			this.add('-anim', source, "Haze", source);
 		},
 		condition: {
+			onStart(pokemon, source) { // initializing the Illusion
+				const newPoke = new Pokemon(source.set, source.side);
+				const doNotCarryOver = [
+					'baseSpecies', 'species', 'gender', 'name',
+					'fullname', 'side', 'fainted', 'status', 'hp', 'illusion',
+					'transformed', 'position', 'isActive', 'faintQueued',
+					'subFainted', 'getHealth', 'getDetails', 'moveSlots', 'ability',
+				];
+				for (const [key, value] of Object.entries(source)) {
+					if (doNotCarryOver.includes(key)) continue;
+					// @ts-ignore
+					newPoke[key] = value;
+				}
+				newPoke.gender = '';
+				newPoke.baseSpecies = {
+					id: 'banefultransformation',
+					name: 'Baneful Transformation',
+					forme: '',
+					types: ["???"],
+					baseStats: {hp: 60, atk: 60, def: 85, spa: 85, spd: 75, spe: 111},
+					weightkg: 13,
+				};
+				newPoke.species = newPoke.baseSpecies;
+				newPoke.name = "???";
+				newPoke.set.name = "???";
+				newPoke.clearVolatile();
+
+				this.effectState.fake = newPoke; // save this to be used as an Illusion later!
+			},
+
 			// mechanical distinctions of the monster (not at all sure if any or all of these will be kept)
 			onEffectiveness(typeMod, target, type, move) { // Neurotoxin
 				if (!target || move.category === 'Status' || !target.runImmunity(move.type)) return;
@@ -67,32 +100,13 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 
 			// should appear as a monster
 			onBeforeSwitchIn(pokemon) {
-				const newPoke = new Pokemon(pokemon.set, pokemon.side);
-				const doNotCarryOver = [
-					'baseSpecies', 'species', 'gender', 'name',
-					'fullname', 'side', 'fainted', 'status', 'hp', 'illusion',
-					'transformed', 'position', 'isActive', 'faintQueued',
-					'subFainted', 'getHealth', 'getDetails', 'moveSlots', 'ability',
-				];
-				for (const [key, value] of Object.entries(pokemon)) {
-					if (doNotCarryOver.includes(key)) continue;
-					// @ts-ignore
-					newPoke[key] = value;
+				if (this.effectState.spent) {
+					pokemon.side.removeSlotCondition(pokemon, 'banefultransformation');
+				} else {
+					pokemon.m.wolfsbane = this.effectState.source;
+					pokemon.illusion = this.effectState.fake;
+					this.effectState.spent = true;
 				}
-				newPoke.gender = '';
-				newPoke.baseSpecies = {
-					id: 'banefultransformation',
-					name: 'Baneful Transformation',
-					forme: '',
-					types: ["???"],
-					baseStats: {hp: 60, atk: 60, def: 85, spa: 85, spd: 75, spe: 111},
-					weightkg: 13,
-				};
-				newPoke.species = newPoke.baseSpecies;
-				newPoke.clearVolatile();
-				pokemon.illusion = newPoke;
-				pokemon.illusion.name = "???";
-				pokemon.illusion.set.name = "???";
 			},
 			onSwap(pokemon) {
 				this.add('-message', `Grrrrrr...`);
@@ -105,14 +119,15 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 				this.add('-ability', pokemon, 'Neurotoxin');
 				this.add('-message', `The Baneful Transformation won't take super-effective damage from poisoned attackers!`);
 			},
-			// tiny bit of backup to make sure the original Wolfsbrain's properties aren't messed with... should test to see if this matters!
 			onSwitchOut(pokemon) {
 				pokemon.illusion = null;
+				pokemon.side.removeSlotCondition(pokemon, 'banefultransformation');
 			},
 			onFaint(pokemon) {
 				pokemon.illusion = null;
 				this.add('-end', pokemon, 'Illusion');
 				this.add('-message', `The Baneful Transformation was ${pokemon.name}!`);
+				pokemon.side.removeSlotCondition(pokemon, 'banefultransformation');
 			},
 
 			// moves hidden while appearing as a monster
@@ -120,13 +135,9 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 				move.name = 'an unknown move';
 			},
 			onPrepareHit(target, source, move) {
-				if (source === this.effectState.target) {
-					this.attrLastMove('[still]');
-					this.add('-anim', source, "Mist", source);
-				} else {
-					this.attrLastMove('[still]');
-					this.add('-anim', target, "Crush Claw", source);
-				}
+				this.attrLastMove('[still]');
+				this.add('-anim', source, "Haze", source);
+				if (target) this.add('-anim', target, "Hone Claws", source);
 			},
 		},
 		target: "normal",
