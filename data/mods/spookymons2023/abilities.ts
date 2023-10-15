@@ -50,6 +50,10 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				if (newPoke.hp < 1) newPoke.hp = 1;
 				if (newPoke.name === 'Pollux') newPoke.name = 'Castor'; // just for fun
 
+				// for Gemini Laser:
+				newPoke.m.complement = target;
+				target.m.complement = newPoke;
+
 				newPoke.clearVolatile();
 				newPoke.position = newPos;
 				target.side.pokemon[newPos] = newPoke;
