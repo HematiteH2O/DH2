@@ -32,7 +32,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				const newPoke = new Pokemon(target.set, target.side);
 				const newPos = target.side.pokemon.length - 1;
 				const doNotCarryOver = [
-					'm',
+					'm', 'switchedIn',
 					'fullname', 'side', 'fainted', 'hp', 'illusion',
 					'transformed', 'position', 'isActive', 'faintQueued',
 					'subFainted', 'getHealth', 'getDetails', 'ability',
@@ -72,7 +72,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				newPoke.sethp(newPoke.maxhp / 2);
 
 				this.add('poke', target.side.pokemon[newPos].side.id, target.side.pokemon[newPos].details, '');
-				this.add('-message', `${newPoke.name} was added to ${newPoke.side.name}'s team!`);
+				this.add('-message', `A copy of ${newPoke.name} was added to ${newPoke.side.name}'s team!`);
 			}
 		},
 		name: "Mitosis",
