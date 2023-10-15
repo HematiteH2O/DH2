@@ -21,7 +21,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 		shortDesc: "The first time the Pokémon's HP falls below half, it self-replicates...",
 		onEmergencyExit(target) {
 			if (this.effectState.busted) return; // only once per battle aksdjfh
-			if (target.baseSpecies.name === 'Starmie-Fallen' && !target.transformed) {
+			if (target.baseSpecies.name === 'Starmie-Gemini' && !target.transformed) {
 				this.effectState.busted = true; // making sure right away--
 				this.add('-activate', target, 'ability: Divide');
 				this.add('-message', `${(target.illusion ? target.illusion.name : target.name)} cast off the injured part of its body...`);
@@ -42,17 +42,12 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 					// @ts-ignore
 					newPoke[key] = value;
 				}
-				newPoke.species = this.dex.species.get('starmierisen');
-				newPoke.baseSpecies = this.dex.species.get('starmierisen');
+				newPoke.species = this.dex.species.get('starmiegeminirisen');
+				newPoke.baseSpecies = this.dex.species.get('starmiegeminirisen');
 				newPoke.baseMaxhp = Math.floor(Math.floor(
-				2 * newPoke.species.baseStats['hp'] + newPoke.set.ivs['hp'] + Math.floor(newPoke.set.evs['hp'] / 4) + 100
-			) * newPoke.level / 100 + 10);
+					2 * newPoke.species.baseStats['hp'] + newPoke.set.ivs['hp'] + Math.floor(newPoke.set.evs['hp'] / 4) + 100
+				) * newPoke.level / 100 + 10);
 				newPoke.maxhp = newPoke.baseMaxhp;
-
-				if (newPoke.name === 'Pollux') {
-					newPoke.name = 'Castor'; // just for fun
-					newPoke.set.name = 'Castor'; // just for fun
-				}
 
 				// for Gemini Laser:
 				newPoke.m.complement = target;
@@ -75,7 +70,6 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				newPoke.status = '';
 				newPoke.hp = 1; // Needed so hp functions works
 				newPoke.sethp(newPoke.maxhp / 2);
-				this.add('-formechange', newPoke, newPoke.species.name, '[silent]');
 
 				this.add('poke', target.side.pokemon[newPos].side.id, target.side.pokemon[newPos].details, '');
 				this.add('-message', `${newPoke.name} was added to ${newPoke.side.name}'s team!`);
