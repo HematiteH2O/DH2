@@ -166,7 +166,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 			}
 		},
 		onTry(source) {
-			if (!(source.species === 'Starmie-Fallen' || source.species === 'Starmie-Risen')) {
+			if (source.species.name !== 'Starmie-Fallen' && source.species.name !== 'Starmie-Risen') {
 				this.attrLastMove('[still]');
 				this.add('-fail', source, 'move: Gemini Laser');
 				this.hint("Only a Starmie-Fallen or Starmie-Risen can use this move.");
