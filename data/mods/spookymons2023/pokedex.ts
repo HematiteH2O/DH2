@@ -46,13 +46,13 @@ export const Pokedex: {[speciesid: string]: ModdedSpeciesData} = {
 		otherFormes: ["Starmie-Fallen", "Starmie-Risen"],
 		formeOrder: ["Starmie", "Starmie-Fallen", "Starmie-Risen"],
 	},
-	starmiefallen: {
-		name: "Starmie-Fallen",
+	starmiegemini: {
+		name: "Starmie-Gemini",
 		baseSpecies: "Starmie",
-		forme: "Fallen",
+		forme: "Gemini",
 		copyData: "Starmie",
 		baseStats: {hp: 115, atk: 100, def: 85, spa: 100, spd: 85, spe: 60},
-		abilities: {0: "Divide"}, // How do you NOT call this Mitosis? I literally can't believe you
+		abilities: {0: "Mitosis"}, // illegal
 		movepoolAdditions: ["geminilaser", "painsplit"],
 		movepoolDeletions: ["recover"],
 		heightm: 1.1,
@@ -60,20 +60,20 @@ export const Pokedex: {[speciesid: string]: ModdedSpeciesData} = {
 		color: "Purple",
 		creator: "Hematite",
 	},
-	starmierisen: {
-		name: "Starmie-Risen",
+	starmiegeminirisen: {
+		name: "Starmie-Gemini-Risen",
 		baseSpecies: "Starmie",
-		forme: "Risen",
+		forme: "Gemini-Risen",
 		copyData: "Starmie",
 		types: ["Water", "Ghost"],
 		baseStats: {hp: 60, atk: 100, def: 85, spa: 100, spd: 85, spe: 115},
-		abilities: {0: "Divide"},
+		abilities: {0: "Mitosis"},
 		movepoolAdditions: ["geminilaser", "painsplit"],
 		movepoolDeletions: ["recover"],
 		heightm: 1.1,
 		weightkg: 40,
 		color: "Purple",
-		battleOnly: "Starmie-Fallen",
+		battleOnly: "Starmie-Gemini",
 		creator: "Hematite",
 	},
 
