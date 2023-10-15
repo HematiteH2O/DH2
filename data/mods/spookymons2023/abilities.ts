@@ -17,13 +17,13 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 		rating: 4,
 		num: -2001,
 	},
-	divide: {
+	mitosis: {
 		shortDesc: "The first time the Pokémon's HP falls below half, it self-replicates...",
 		onEmergencyExit(target) {
 			if (this.effectState.busted) return; // only once per battle aksdjfh
 			if (target.baseSpecies.name === 'Starmie-Gemini' && !target.transformed) {
 				this.effectState.busted = true; // making sure right away--
-				this.add('-activate', target, 'ability: Divide');
+				this.add('-activate', target, 'ability: Mitosis');
 				this.add('-message', `${(target.illusion ? target.illusion.name : target.name)} cast off the injured part of its body...`);
 				this.add('-anim', target, "Double Team", target);
 				target.side.pokemonLeft++;
@@ -75,7 +75,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				this.add('-message', `${newPoke.name} was added to ${newPoke.side.name}'s team!`);
 			}
 		},
-		name: "Divide",
+		name: "Mitosis",
 		rating: 4,
 		num: -2002,
 	},
