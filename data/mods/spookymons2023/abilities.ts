@@ -70,7 +70,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				newPoke.status = '';
 				newPoke.hp = 1; // Needed so hp functions works
 				newPoke.sethp(newPoke.maxhp / 2);
-				this.add('-heal', newPoke, newPoke.getHealth, '[from] move: Revival Blessing');
+				this.battle.add('-formechange', newPoke, newPoke.species.name, '[silent]');
 
 				this.add('poke', target.side.pokemon[newPos].side.id, target.side.pokemon[newPos].details, '');
 				this.add('-message', `${newPoke.name} was added to ${newPoke.side.name}'s team!`);
