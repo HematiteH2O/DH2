@@ -32,7 +32,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				const newPoke = new Pokemon(target.set, target.side);
 				const newPos = target.side.pokemon.length - 1;
 				const doNotCarryOver = [
-					'species', 'baseSpecies',
+					'm',
 					'fullname', 'side', 'fainted', 'status', 'hp', 'illusion',
 					'transformed', 'position', 'isActive', 'faintQueued',
 					'subFainted', 'getHealth', 'getDetails', 'moveSlots', 'ability',
@@ -48,9 +48,11 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				2 * newPoke.species.baseStats['hp'] + newPoke.set.ivs['hp'] + Math.floor(newPoke.set.evs['hp'] / 4) + 100
 			) * newPoke.level / 100 + 10);
 				newPoke.maxhp = newPoke.baseMaxhp;
-				newPoke.hp = this.clampIntRange(Math.floor(newPoke.maxHP / 2), 1); // begin at half HP
-				if (newPoke.hp < 1) newPoke.hp = 1;
-				if (newPoke.name === 'Pollux') newPoke.name = 'Castor'; // just for fun
+				newPoke.hp = newPoke.maxhp - Math.floor(newPoke.maxHP / 2); // begin at half HP
+				if (newPoke.name === 'Pollux') {
+					newPoke.name = 'Castor'; // just for fun
+					newPoke.set.name = 'Castor'; // just for fun
+				}
 
 				// for Gemini Laser:
 				newPoke.m.complement = target;
