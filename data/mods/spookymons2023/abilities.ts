@@ -1,3 +1,5 @@
+import {Pokemon} from "../../../sim/pokemon";
+
 export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 	neurotoxin: {
 		shortDesc: "Suppresses the type advantages of moves used by poisoned attackers.",
