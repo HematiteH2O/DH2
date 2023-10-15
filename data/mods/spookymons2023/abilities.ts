@@ -42,8 +42,8 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 					// @ts-ignore
 					newPoke[key] = value;
 				}
-				newPoke.species = 'starmierisen';
-				newPoke.baseSpecies = 'starmierisen';
+				newPoke.species = this.dex.species.get('starmierisen');
+				newPoke.baseSpecies = this.dex.species.get('starmierisen');
 				newPoke.baseMaxhp = Math.floor(Math.floor(
 				2 * newPoke.species.baseStats['hp'] + newPoke.set.ivs['hp'] + Math.floor(newPoke.set.evs['hp'] / 4) + 100
 			) * newPoke.level / 100 + 10);
