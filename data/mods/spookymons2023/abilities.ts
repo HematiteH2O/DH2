@@ -48,11 +48,6 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				2 * newPoke.species.baseStats['hp'] + newPoke.set.ivs['hp'] + Math.floor(newPoke.set.evs['hp'] / 4) + 100
 			) * newPoke.level / 100 + 10);
 				newPoke.maxhp = newPoke.baseMaxhp;
-				newPoke.hp = newPoke.maxhp - Math.floor(newPoke.maxHP / 2); // begin at half HP
-				if (newPoke.name === 'Pollux') {
-					newPoke.name = 'Castor'; // just for fun
-					newPoke.set.name = 'Castor'; // just for fun
-				}
 
 				// for Gemini Laser:
 				newPoke.m.complement = target;
@@ -61,6 +56,22 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				newPoke.clearVolatile();
 				newPoke.position = newPos;
 				target.side.pokemon[newPos] = newPoke;
+
+				if (newPoke.position < target.side.active.length) {
+					this.queue.addChoice({
+						choice: 'instaswitch',
+						pokemon: newPoke,
+						target: newPoke,
+					});
+				}
+				newPoke.fainted = false;
+				newPoke.faintQueued = false;
+				newPoke.subFainted = false;
+				newPoke.status = '';
+				newPoke.hp = 1; // Needed so hp functions works
+				newPoke.sethp(newPoke.maxhp / 2);
+				this.add('-heal', newPoke, newPoke.getHealth, '[from] move: Revival Blessing');
+
 				this.add('poke', target.side.pokemon[newPos].side.id, target.side.pokemon[newPos].details, '');
 				this.add('-message', `${newPoke.name} was added to ${newPoke.side.name}'s team!`);
 			}
