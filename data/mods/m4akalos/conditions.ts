@@ -9,7 +9,7 @@ export const Conditions: {[k: string]: ConditionData} = {
 			}
 			return 5;
 		},
-		onStart(battle, source, effect) {
+		onFieldStart(field, source, effect) {
 			if (effect?.effectType === 'Ability') {
 				if (this.gen <= 5) this.effectState.duration = 0;
 				this.add('-ability', source, 'Diamond Dust');
@@ -34,11 +34,12 @@ export const Conditions: {[k: string]: ConditionData} = {
 				return null;
 			}
 		},
-		onResidual() {
+		onFieldResidual() {
 			this.add('-weather', 'Diamond Dust', '[upkeep]');
 			this.add('-message', `The air is sparkling with diamond dust!`);
+			this.eachEvent('Weather');
 		},
-		onEnd() {
+		onFieldEnd() {
 			this.add('-weather', 'none', '[silent]');
 			this.add('-message', `The cloud of diamond dust blew away!`);
 		},
