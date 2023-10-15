@@ -31,7 +31,10 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 				}
 			}
 			// now the move will definitely try to be used, and...
+			const backupname = source.name;
+			source.name = '???';
 			if (!source.side.addSlotCondition(source, 'banefultransformation')) return false;
+			source.name = backupname;
 			// ... if we make it this far, we know it's happening!
 			if (werewolf) {
 				this.add('-anim', source, "Haze", source);
