@@ -85,7 +85,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			return {side: this.side.id, secret, shared};
 		},
 	},
-*/
 	actions: {
 
 	switchIn(pokemon: Pokemon, pos: number, sourceEffect: Effect | null = null, isDrag?: boolean) { // modded for Baneful Transformation
@@ -191,6 +190,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 		return true;
 	}
+*/
 
 	},
 };
