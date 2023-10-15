@@ -134,8 +134,8 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 			},
 			onPrepareHit(target, source, move) {
 				this.attrLastMove('[still]');
-				this.add('-anim', source, "Haze", source);
-				if (target) this.add('-anim', target, "Hone Claws", source);
+				this.add('-anim', target, "Haze", target);
+				if (target) this.add('-anim', source, "Hone Claws", target);
 			},
 		},
 		target: "normal",
