@@ -42,8 +42,12 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				}
 				newPoke.species = 'starmierisen';
 				newPoke.baseSpecies = 'starmierisen';
-				newPoke.maxhp = newPoke.baseMaxhp; // for dynamax
-				newPoke.hp = newPoke.baseMaxhp;
+				newPoke.baseMaxhp = Math.floor(Math.floor(
+				2 * newPoke.species.baseStats['hp'] + newPoke.set.ivs['hp'] + Math.floor(newPoke.set.evs['hp'] / 4) + 100
+			) * newPoke.level / 100 + 10);
+				newPoke.maxhp = newPoke.baseMaxhp;
+				newPoke.hp = this.clampIntRange(Math.floor(newPoke.maxHP / 2), 1); // begin at half HP
+				if (newPoke.hp < 1) newPoke.hp = 1;
 				if (newPoke.name === 'Pollux') newPoke.name = 'Castor'; // just for fun
 
 				newPoke.clearVolatile();
