@@ -142,4 +142,54 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 		type: "Psychic",
 		contestType: "Clever",
 	},
+
+	// Pumpkin Spice Mix goes here
+
+	geminilaser: {
+		num: -2003,
+		accuracy: 100,
+		basePower: 40,
+		category: "Special",
+		shortDesc: "Type depends on form. The user pivots to its other half, which also uses the move.",
+		name: "Gemini Laser",
+		pp: 20,
+		priority: 0,
+		flags: {protect: 1, mirror: 1},
+		onHit(target, pokemon, move) {
+			if (pokemon.m.complement && !pokemon.m.skip) {
+				// switch to the other Starmie
+				if (this.actions.switchIn(pokemon.m.complement, pokemon.position, this.effect, false)) {
+					pokemon.m.complement.m.skip = true;
+					this.actions.useMove('geminilaser', pokemon.m.complement);
+					pokemon.m.complement.m.skip = null;
+				}
+			}
+		},
+		onTry(source) {
+			if (!(source.species === 'Starmie-Fallen' || source.species === 'Starmie-Risen')) {
+				this.attrLastMove('[still]');
+				this.add('-fail', source, 'move: Gemini Laser');
+				this.hint("Only a Starmie-Fallen or Starmie-Risen can use this move.");
+				return null;
+			}
+		},
+		onModifyType(move, pokemon) {
+			if (pokemon.species.name === 'Starmie-Risen') {
+				move.type = 'Ghost';
+			} else {
+				move.type = 'Psychic';
+			}
+		},
+		onPrepareHit(target, source, move) {
+			this.attrLastMove('[still]');
+			if (source.species.name === 'Starmie-Risen') {
+				this.add('-anim', source, "Blood Moon", source);
+			} else {
+				this.add('-anim', source, "Twin Beam", source);
+			}
+		},
+		target: "normal",
+		type: "Psychic",
+		contestType: "Clever",
+	},
 };
