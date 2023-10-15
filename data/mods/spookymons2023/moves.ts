@@ -31,10 +31,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 				}
 			}
 			// now the move will definitely try to be used, and...
-			const backupname = source.name;
-			source.name = '???';
 			if (!source.side.addSlotCondition(source, 'banefultransformation')) return false;
-			source.name = backupname;
 			// ... if we make it this far, we know it's happening!
 			if (werewolf) {
 				this.add('-anim', source, "Haze", source);
@@ -108,6 +105,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 				} else {
 					pokemon.m.wolfsbane = this.effectState.source;
 					pokemon.illusion = this.effectState.fake;
+					this.add('detailschange', pokemon.illusion, pokemon.illusion.details);
 					this.effectState.spent = true;
 				}
 			},
@@ -136,6 +134,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 				move.name = 'an unknown move';
 			},
 			onPrepareHit(target, source, move) {
+				if (move.id === 'banefultransformation') return;
 				this.attrLastMove('[still]');
 				this.add('-anim', target, "Haze", target);
 				if (target) this.add('-anim', source, "Hone Claws", target);
