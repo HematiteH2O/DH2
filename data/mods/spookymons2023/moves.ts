@@ -121,13 +121,11 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 			},
 			onSwitchOut(pokemon) {
 				pokemon.illusion = null;
-				pokemon.side.removeSlotCondition(pokemon, 'banefultransformation');
 			},
 			onFaint(pokemon) {
 				pokemon.illusion = null;
 				this.add('-end', pokemon, 'Illusion');
 				this.add('-message', `The Baneful Transformation was ${pokemon.name}!`);
-				pokemon.side.removeSlotCondition(pokemon, 'banefultransformation');
 			},
 
 			// moves hidden while appearing as a monster
