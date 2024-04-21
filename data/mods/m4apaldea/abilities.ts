@@ -6,7 +6,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 		onResidual(pokemon) {
 			if (
 				pokemon.baseSpecies.baseSpecies !== 'Brambleghast' || pokemon.transformed || !pokemon.hp || !pokemon.activeTurns ||
-				pokemon.species.id === 'brambleghast' || pokemon.species.id === 'brambleghastmegatangled' ||
+				pokemon.species.id === 'brambleghast' || pokemon.species.id === 'brambleghastmegatangled'
 			) return;
 			this.add('-activate', pokemon, 'ability: Accumulate');
 			this.add('-message', `${pokemon.name} called for help!`);
