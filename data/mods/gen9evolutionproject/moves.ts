@@ -131,7 +131,6 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 		condition: {
 			duration: 2,
 			onStart(pokemon, source) {
-				console.log(`last damage: ` + this.activeTarget.lastDamage);
 				if (this.activeMove.id !== 'renewingring' || !this.activeTarget.lastDamage) return false;
 				this.effectState.hp = this.activeTarget.lastDamage / 2;
 				this.add('-anim', source, "Wish", source);
