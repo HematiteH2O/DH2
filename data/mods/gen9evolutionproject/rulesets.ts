@@ -41,7 +41,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 				}
 			} else {
 				this.add('-start', pokemon, 'typechange', pokemon.getTypes(true).join('/'), '[silent]');
-				if (pokemon.switchedIn) {
+				if (!pokemon.switchedIn) {
 					this.runEvent('DataMod', pokemon);
 					pokemon.switchedIn = true;
 				}
