@@ -166,8 +166,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 	patchnote: { // Datagon2 and Datagon-Z
 		onSourceModifyDamage(damage, source, target, move) {
 			let mod = 1;
-			if (this.dex.getEffectiveness(target.getTypes()[0], move.type)) mod /= 2;
-			if (move.type === 'Bug') return this.chainModify(0.5);
+			if (this.dex.types.get(move.type).damageTaken[target.getTypes()[0]] === 1) mod /= 2;
 			return this.chainModify(mod);
 		},
 		flags: {breakable: 1},
