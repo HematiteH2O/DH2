@@ -133,8 +133,8 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 		condition: {
 			duration: 2,
 			onStart(pokemon, source) {
-				if (!this.activeMove || !this.activeMove.id || this.activeMove.id !== 'renewingring') return false;
-				this.effectState.hp = this.activeMove.totalDamage / 2; // please work
+				if (!this.lastDamage || !this.lastMove.id !== 'renewingring') return false;
+				this.effectState.hp = this.lastDamage / 2; // please work
 			},
 			onResidualOrder: 4,
 			onEnd(target) {
