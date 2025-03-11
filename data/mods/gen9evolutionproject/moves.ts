@@ -131,11 +131,11 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 		condition: {
 			duration: 2,
 			onStart(pokemon, source) {
-				console.log(`active move: ` + this.activeMove);
-				console.log(`last move: ` + this.lastMove);
-				console.log(`last damage: ` + this.lastDamage);
-				if (!this.lastDamage || !this.lastMove.id !== 'renewingring') return false;
-				this.effectState.hp = this.lastDamage / 2; // please work
+				console.log(`last damage: ` + this.activeTarget.lastDamage);
+				if (this.activeMove.id !== 'renewingring' || this.activeTarget.lastDamage) return false;
+				this.effectState.hp = this.activeTarget.lastDamage / 2;
+				this.add('-anim', source, "Wish", source);
+				this.add('-message', `${this.effectState.source.illusion ? this.effectState.source.illusion.name : this.effectState.source.name} made a wish for the new year!`);
 			},
 			onResidualOrder: 4,
 			onEnd(target) {
@@ -151,8 +151,6 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 			this.attrLastMove('[still]');
 			this.add('-anim', source, "Ice Hammer", source);
 			this.add('-anim', source, "Hyper Voice", target);
-			this.add('-anim', source, "Wish", source);
-			// this might be silly I'll see how it looks
 		},
 		secondary: null,
 		target: "normal",
