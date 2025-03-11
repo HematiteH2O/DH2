@@ -131,6 +131,9 @@ export const FormatsData: {[k: string]: ModdedSpeciesFormatsData} = {
 	dusglow: {tier: "Evo 1"},
 	weltenschertz: {tier: "S1P2"},
 
+	hawlucha: {tier: "Canon"},
+	hawlucharudo: {tier: "S1P2"},
+
 	// SLATE 1 PROMPT 3
 
 	golett: {tier: "Evo (NFE)"},
