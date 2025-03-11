@@ -199,14 +199,15 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 		slotCondition: 'blownfuse',
 		condition: {
 			duration: 4,
-			onAfterMoveSecondarySelf(target, source, move) {
+			onAfterMoveSecondarySelf(pokemon, target, move) {
 				if (move.id === 'rapidspin' || move.id === 'mortalspin') {
-					source.side.removeSlotCondition(source, 'blownfuse');
+					pokemon.side.removeSlotCondition(pokemon, 'blownfuse');
 				}
 			},
 			onAnyAfterMove(target, source, move) {
 				if (move.id === 'tidyup' || move.id === 'defog' || move.id === 'gmaxwindrage') {
-					this.effectState.target.side.removeSlotCondition(source, 'blownfuse');
+					const pokemon = this.effectState.target;
+					pokemon.side.removeSlotCondition(pokemon, 'blownfuse');
 				}
 			},
 			onAnyCheckBlownFuse(target, source, move) {
