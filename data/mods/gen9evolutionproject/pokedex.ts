@@ -945,6 +945,26 @@ export const Pokedex: {[speciesid: string]: ModdedSpeciesData} = {
 		creator: "Paulluxx",
 	},
 
+	hawlucha: {
+		inherit: true,
+		otherFormes: ["Hawlucha-Rudo"],
+		formeOrder: ["Hawlucha", "Hawlucha-Rudo"],
+	},
+	hawlucharudo: {
+		name: "Hawlucha-Rudo",
+		baseSpecies: "Hawlucha",
+		forme: "Rudo",
+		copyData: "Hawlucha",
+		
+		types: ["Poison", "Flying"],
+		baseStats: {hp: 78, atk: 82, def: 80, spa: 74, spd: 68, spe: 118},
+		abilities: {0: "Limber", 1: "Cheap Tricks", H: "Mold Breaker"},
+		movepoolAdditions: ["partingshot", "gunkshot", "sludgebomb", "venoshock"],
+		movepoolDeletions: ["closecombat"],
+
+		creator: "Albatross",
+	},
+
 	// SLATE 1 PROMPT 3
 
 	golett: {
