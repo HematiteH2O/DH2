@@ -132,7 +132,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 			duration: 2,
 			onStart(pokemon, source) {
 				console.log(`last damage: ` + this.activeTarget.lastDamage);
-				if (this.activeMove.id !== 'renewingring' || this.activeTarget.lastDamage) return false;
+				if (this.activeMove.id !== 'renewingring' || !this.activeTarget.lastDamage) return false;
 				this.effectState.hp = this.activeTarget.lastDamage / 2;
 				this.add('-anim', source, "Wish", source);
 				this.add('-message', `${this.effectState.source.illusion ? this.effectState.source.illusion.name : this.effectState.source.name} made a wish for the new year!`);
