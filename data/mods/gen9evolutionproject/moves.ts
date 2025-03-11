@@ -251,7 +251,8 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 		},
 		onPrepareHit(target, source, move) {
 			this.attrLastMove('[still]');
-			this.add('-anim', source, "Soul-Stealing 7-Star Strike", source);
+			this.add('-anim', source, "Skitter Smack", target);
+			this.add('-anim', source, "Shadow Punch", target); // wanted to use Soul-Stealing 7-Star Strike, but it uses the Z-Move visual...
 		},
 		target: "allAdjacentFoes",
 		type: "Ghost",
