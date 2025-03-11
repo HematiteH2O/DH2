@@ -3180,7 +3180,9 @@ export const Formats: FormatList = [
 			}
 		},
 		checkCanLearn(move, species, lsetData, set) { // Tera Blast is universal in VGC, but not in singles
-			if (move.name === 'Tera Blast') return null;
+			const problem = this.checkCanLearn(move, this.dex.species.get(set.species));
+			if (problem && move.name !== 'Tera Blast') return problem;
+			return null;
 		},
 		onValidateSet(set) {
 			const unobtainables = [
