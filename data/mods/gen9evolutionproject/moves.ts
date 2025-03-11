@@ -22,7 +22,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 		},
 		onPrepareHit(target, source, move) {
 			this.attrLastMove('[still]');
-			this.add('-anim', source, "Haze", target);
+			this.add('-anim', source, "Chip Away", source);
 		},
 		secondary: null,
 		target: "self",
@@ -229,8 +229,8 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 		},
 		onPrepareHit(target, source, move) {
 			this.attrLastMove('[still]');
-			this.add('-anim', source, "Spark", source);
 			this.add('-anim', source, "First Impression", target);
+			this.add('-anim', target, "Spark", target);
 		},
 		secondary: null,
 		target: "normal",
@@ -331,20 +331,25 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 		flags: {contact: 1, protect: 1, mirror: 1, metronome: 1},
 		volatileStatus: 'entanglement',
 		condition: {
-			onStart(target) {
-				this.add('-start', target, 'move: Entanglement');
+			onStart(pokemon, source) {
+				this.add('-start', source, 'move: Entanglement');
+				this.effectState.boundDivisor = source.hasItem('bindingband') ? 6 : 8;
 			},
-			onResidualOrder: 8,
+			onResidualOrder: 13,
 			onResidual(pokemon) {
-				const target = this.getAtSlot(pokemon.volatiles['entanglement'].sourceSlot);
-				if (!target || target.fainted || target.hp <= 0) {
-					this.debug('Nothing to drain');
+				const source = this.effectState.source;
+				if (source && (!source.isActive || source.hp <= 0 || source.fainted || !source.activeTurns)) {
+					delete pokemon.volatiles['entanglement'];
+					this.add('-end', pokemon, this.effectState.sourceEffect, '[entanglement]', '[silent]');
 					return;
 				}
-				const damage = this.damage(pokemon.baseMaxhp / 8, pokemon, target);
-				if (damage) {
-					this.heal(damage, target, pokemon);
-				}
+				if (this.damage(pokemon.baseMaxhp / this.effectState.boundDivisor, pokemon, target, 'leechseed')) this.heal(damage, target, pokemon);
+			},
+			onEnd(pokemon) {
+				this.add('-end', pokemon, this.effectState.sourceEffect, '[entanglement]');
+			},
+			onTrapPokemon(pokemon) {
+				if (this.effectState.source?.isActive) pokemon.tryTrap();
 			},
 		},
 		onPrepareHit(target, source, move) {
@@ -354,7 +359,6 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 		},
 		onHit(target, source, move) {
 			source.addVolatile('trapped', target, move, 'trapper');
-			target.addVolatile('trapped', source, move, 'trapper');
 		},
 		secondary: null,
 		target: "normal",
