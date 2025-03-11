@@ -46,7 +46,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				const learnset = this.dataCache.Learnsets[this.toID(copyMoves)].learnset;
 				for (const moveid in learnset) {
 					this.modData('Learnsets', id).learnset[moveid] = learnset[moveid].filter(
-						(method) => !(method.includes('S') && !(notm.contains(moveid) && (method.includes('M') || method.includes('T'))) && (!gen9only.contains(id) || method.startsWith('9')))
+						(method) => !(method.includes('S') && !(notm.includes(moveid) && (method.includes('M') || method.includes('T'))) && (!gen9only.includes(id) || method.startsWith('9')))
 					);
 				}
 				if (newMon.movepoolAdditions) {
