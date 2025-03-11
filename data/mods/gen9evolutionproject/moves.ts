@@ -43,7 +43,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 		onAfterHit(target) {
 			if (target.hasType('Ice')) return;
 			if (!target.addType('Ice')) return;
-			this.add('-start', target, 'typeadd', 'Ice', '[from] move: Freeze Tag');
+			this.add('-start', target, 'typeadd', 'Ice');
 		},
 		secondary: null,
 		onPrepareHit(target, source, move) {
@@ -79,7 +79,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 		secondary: null,
 		onPrepareHit(target, source, move) {
 			this.attrLastMove('[still]');
-			this.add('-anim', source, "Aurora Beam", target);
+			this.add('-anim', source, "Aurora Beam", source);
 		},
 		target: "allAdjacentFoes",
 		type: "Ice",
