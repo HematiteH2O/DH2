@@ -140,7 +140,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 			onResidualOrder: 4,
 			onEnd(target) {
 				if (target && !target.fainted) {
-					const damage = this.heal(this.effectState.hp, target, target);
+					const damage = target.heal(this.effectState.hp);
 					if (damage) {
 						this.add('-heal', target, target.getHealth, '[from] move: Wish', '[wisher] ' + this.effectState.source.name); // I do want it to look like Wish
 					}
@@ -333,7 +333,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 		volatileStatus: 'entanglement',
 		condition: {
 			onStart(pokemon, source) {
-				this.add('-start', source, 'move: Entanglement');
+				this.add('-start', pokemon, 'move: Entanglement');
 				this.effectState.boundDivisor = source.hasItem('bindingband') ? 6 : 8;
 			},
 			onResidualOrder: 13,
@@ -344,7 +344,10 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 					this.add('-end', pokemon, this.effectState.sourceEffect, '[entanglement]', '[silent]');
 					return;
 				}
-				if (this.damage(pokemon.baseMaxhp / this.effectState.boundDivisor, pokemon, source, 'leechseed')) this.heal(damage, source, pokemon);
+				const damage = this.damage(pokemon.baseMaxhp / 8, pokemon, source);
+				if (damage) {
+					this.heal(damage, source, pokemon);
+				}
 			},
 			onEnd(pokemon) {
 				this.add('-end', pokemon, this.effectState.sourceEffect, '[entanglement]');
