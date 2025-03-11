@@ -6,6 +6,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		customDoublesTiers: ['Pokémon of the Day!', 'S1P1', 'S1P2', 'S1P3', 'Evo 1', 'Canon', 'Evo (NFE)'],
 	},
 	init() {
+		let megaList = [];
 		for (const id in this.dataCache.Pokedex) {
 			const notm = ['terablast', 'hiddenpower']; // certain moves don't count TMs
 			const gen9only = [
