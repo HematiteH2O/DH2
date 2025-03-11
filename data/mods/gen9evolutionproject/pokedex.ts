@@ -13,7 +13,7 @@ export const Pokedex: {[speciesid: string]: ModdedSpeciesData} = {
 		types: ["Fighting", "Ice"],
 		baseStats: {hp: 107, atk: 137, def: 82, spa: 62, spd: 92, spe: 53},
 		abilities: {0: "Iron Barbs", 1: "Iron Fist", H: "Anger Point"},
-		movepoolAdditions: ["machpunch", "snowin"],
+		movepoolAdditions: ["machpunch", "shaveoff"],
 
 		prevo: "Crabominable",
 		evoType: "other",
