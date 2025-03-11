@@ -225,7 +225,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 			if (move.type === 'Rock') return this.chainModify(0.5);
 		},
 		onDamage(damage, target, source, effect) {
-			if (effect && (effect.id === 'stealthrock' || effect.id === 'shatteringclay')) {
+			if (effect && (effect.id === 'stealthrock')) {
 				damage /= 2;
 			}
 		},
@@ -267,6 +267,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 	},
 	shatteringclay: { // Potthereal
 		onDamagingHit(damage, target, source, move) {
+			if (move.category !== 'Physical') return;
 			let activated = false;
 			for (const pokemon of this.getAllActive()) {
 				if (pokemon === target || pokemon.fainted) continue;
@@ -275,7 +276,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 					activated = true;
 				}
 				const typeMod = this.clampIntRange(pokemon.runEffectiveness(this.dex.getActiveMove('stealthrock')), -6, 6);
-				this.damage(pokemon.maxhp * Math.pow(2, typeMod) / 8, pokemon, target, '[from] move: Stealth Rock');
+				this.damage(pokemon.maxhp * Math.pow(2, typeMod) / 8, pokemon, target, 'stealthrock');
 			}
 		},
 		flags: {},
