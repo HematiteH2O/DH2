@@ -17,7 +17,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			if (this.dataCache.Learnsets[id]) {
 				for (const moveid in notm) {
 					if (this.dataCache.Learnsets[id].learnset && this.dataCache.Learnsets[id].learnset[moveid]) {
-						this.modData('Learnsets', id).learnset[moveid] = this.dataCache.Learnsets[id].learnset[moveid].filter((method) => (!method.includes('M') && !method.includes('T')));
+						// check if it learns the move naturally
+						let learns = false;
+						for (const method in this.dataCache.Learnsets[id].learnset[moveid]) {
+							if (method.includes('L') || method.includes('E')) learns = true
+						}
+						if (!learns) delete this.modData('Learnsets', id).learnset[moveid];
 					}
 				}
 			}
@@ -46,7 +51,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				const learnset = this.dataCache.Learnsets[this.toID(copyMoves)].learnset;
 				for (const moveid in learnset) {
 					this.modData('Learnsets', id).learnset[moveid] = learnset[moveid].filter(
-						(method) => !(method.includes('S') && !(notm.includes(moveid) && (method.includes('M') || method.includes('T'))) && (!gen9only.includes(id) || method.startsWith('9')))
+						(method) => !(method.includes('S') || (notm.includes(moveid) && (method.includes('M') || method.includes('T'))) || (gen9only.includes(id) && !(method.startsWith('9'))))
 					);
 				}
 				if (newMon.movepoolAdditions) {
