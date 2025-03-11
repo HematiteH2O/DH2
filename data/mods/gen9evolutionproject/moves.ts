@@ -188,34 +188,44 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 		contestType: "Cute",
 		shortDesc: "Boosts Defense, accuracy, Rollout and Ice Ball.",
 	},
-	blowfuse: {
+	blownfuse: {
 		num: -7,
 		accuracy: true,
 		basePower: 0,
 		category: "Status",
-		name: "Blow Fuse",
+		name: "Blown Fuse",
 		pp: 20,
 		priority: 4,
 		flags: {reflectable: 1, metronome: 1},
-		slotCondition: 'blowfuse',
+		slotCondition: 'blownfuse',
 		condition: {
 			onAnyAfterMoveSecondarySelf(target, source, move) {
 				if (move.id === 'tidyup' || move.id === 'defog' || move.id === 'gmaxwindrage') {
-					this.effectState.side.removeSlotCondition(source, 'blowfuse');
+					this.effectState.side.removeSlotCondition(source, 'blownfuse');
 				}
 				if (move.id === 'rapidspin' || move.id === 'mortalspin') {
-					source.side.removeSlotCondition(source, 'blowfuse');
+					source.side.removeSlotCondition(source, 'blownfuse');
 				}
 			},
 			onAfterMoveSecondarySelf(source, target, move) {
 				if (move.category === 'Physical' && source.isGrounded() && !source.hasType('Electric') && move.id !== 'rapidspin' && move.id !== 'mortalspin') {
 					source.setStatus('brn', source, move);
 				}
-			}
+			},
+			onStart(target) {
+				this.add('-message', `A fuse short-circuited around ${target.illusion ? target.illusion.name : target.name}!`);
+				this.hint(`For 4 turns, using a physical move from where ${target.illusion ? target.illusion.name : target.name} is standing will result in a burn.`);
+				this.hint(`Electric-types and non-grounded Pokémon are unaffected.`);
+				this.hint(`You can clear a blown fuse with moves like Rapid Spin and Defog!`);
+			},
+			onEnd(target) {
+				this.add('-message', `The blown fuse around ${target.illusion ? target.illusion.name : target.name} disappeared.`);
+			},
 		},
 		onPrepareHit(target, source, move) {
 			this.attrLastMove('[still]');
-			this.add('-anim', source, "Astonish", source);
+			this.add('-anim', source, "Spark", source);
+			this.add('-anim', source, "First Impression", target);
 		},
 		secondary: null,
 		target: "normal",
