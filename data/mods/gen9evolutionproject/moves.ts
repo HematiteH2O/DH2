@@ -202,13 +202,19 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 		flags: {reflectable: 1, metronome: 1},
 		slotCondition: 'blownfuse',
 		condition: {
-			onAnyAfterMoveSecondarySelf(target, source, move) {
-				if (move.id === 'tidyup' || move.id === 'defog' || move.id === 'gmaxwindrage') {
-					this.effectState.side.removeSlotCondition(source, 'blownfuse');
-				}
+			duration: 4,
+			onAfterMoveSecondarySelf(target, source, move) {
 				if (move.id === 'rapidspin' || move.id === 'mortalspin') {
 					source.side.removeSlotCondition(source, 'blownfuse');
 				}
+			},
+			onAnyAfterMove(target, source, move) {
+				if (move.id === 'tidyup' || move.id === 'defog' || move.id === 'gmaxwindrage') {
+					this.effectState.target.side.removeSlotCondition(source, 'blownfuse');
+				}
+			},
+			onAnyCheckBlownFuse(target, source, move) {
+				return true; // relevant for Corviknight-Variant
 			},
 			onAfterMoveSecondarySelf(source, target, move) {
 				if (move.category === 'Physical' && source.isGrounded() && !source.hasType('Electric') && move.id !== 'rapidspin' && move.id !== 'mortalspin') {
@@ -235,6 +241,35 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 		type: "Electric",
 		contestType: "Cool",
 		shortDesc: "4 turns: grounded Pokémon in target slot burned after using physical moves, except Electric-types.",
+	},
+	defog: {
+		inherit: true,
+		onHit(target, source, move) {
+			let success = false;
+			if (!target.volatiles['substitute'] || move.infiltrates) success = !!this.boost({evasion: -1});
+			const removeTarget = [
+				'reflect', 'lightscreen', 'auroraveil', 'safeguard', 'mist', 'spikes', 'toxicspikes', 'stealthrock', 'stickyweb', 'gmaxsteelsurge',
+			];
+			const removeAll = [
+				'spikes', 'toxicspikes', 'stealthrock', 'stickyweb', 'gmaxsteelsurge',
+			];
+			for (const targetCondition of removeTarget) {
+				if (target.side.removeSideCondition(targetCondition)) {
+					if (!removeAll.includes(targetCondition)) continue;
+					this.add('-sideend', target.side, this.dex.conditions.get(targetCondition).name, '[from] move: Defog', '[of] ' + source);
+					success = true;
+				}
+			}
+			for (const sideCondition of removeAll) {
+				if (source.side.removeSideCondition(sideCondition)) {
+					this.add('-sideend', source.side, this.dex.conditions.get(sideCondition).name, '[from] move: Defog', '[of] ' + source);
+					success = true;
+				}
+			}
+			if (this.runEvent('CheckBlownFuse', source)) success = true; // relevant for Corviknight-Variant since some sets can't lower evasion
+			this.field.clearTerrain();
+			return success;
+		},
 	},
 	shadowbox: {
 		num: -8,
