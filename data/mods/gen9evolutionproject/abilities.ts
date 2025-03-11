@@ -492,7 +492,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 			if (target.item || source.item || (!yourItem && !myItem)) {
 				if (yourItem) target.item = yourItem.id;
 				if (myItem) source.item = myItem.id;
-				return false;
+				return;
 			}
 			if (
 				(myItem && !this.singleEvent('TakeItem', myItem, source.itemState, target, source, move, myItem)) ||
@@ -500,19 +500,20 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 			) {
 				if (yourItem) target.item = yourItem.id;
 				if (myItem) source.item = myItem.id;
-				return false;
+				return;
 			}
-			this.add('-activate', source, 'move: Trick', '[of] ' + target);
-			this.add('-anim', target, "Switcheroo", source); // fun
+			this.add('-ability', target, 'Cheap Tricks');
+			this.add('-activate', target, 'move: Trick', '[of] ' + target);
+			this.add('-anim', target, "Switcheroo", target); // fun
 			if (myItem) {
 				target.setItem(myItem);
-				this.add('-item', target, myItem, '[from] ability: Cheap Tricks', '[of] ' + target);
+				this.add('-item', target, myItem, '[silent]', '[from] ability: Cheap Tricks', '[of] ' + target);
 			} else {
 				this.add('-enditem', target, yourItem, '[silent]', '[from] ability: Cheap Tricks', '[of] ' + target);
 			}
 			if (yourItem) {
 				source.setItem(yourItem);
-				this.add('-item', source, yourItem, '[from] ability: Cheap Tricks', '[of] ' + target);
+				this.add('-item', source, yourItem, '[silent]', '[from] ability: Cheap Tricks', '[of] ' + target);
 			} else {
 				this.add('-enditem', source, myItem, '[silent]', '[from] ability: Cheap Tricks', '[of] ' + target);
 			}
