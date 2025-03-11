@@ -233,6 +233,8 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 			if (move.type === 'Rock') return this.chainModify(0.5);
 		},
 		onDamage(damage, target, source, effect) {
+			console.log(`effect: ` + effect);
+			console.log(`effect.id: ` + effect.id);
 			if (effect && (effect === 'stealthrock')) {
 				damage /= 2;
 			}
