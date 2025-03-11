@@ -15,12 +15,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 			// movepool corrections
 			if (this.dataCache.Learnsets[id]) {
-				for (const moveid in notm) {
+				for (const moveid of notm) {
 					if (this.dataCache.Learnsets[id].learnset && this.dataCache.Learnsets[id].learnset[moveid]) {
 						// check if it learns the move naturally
 						let learns = false;
 						for (const method in this.dataCache.Learnsets[id].learnset[moveid]) {
-							if (method.includes('L') || method.includes('E')) learns = true
+							if (method.charAt(1) === 'L' || method.charAt(1) === 'E') learns = true;
 						}
 						if (!learns) delete this.modData('Learnsets', id).learnset[moveid];
 					}
