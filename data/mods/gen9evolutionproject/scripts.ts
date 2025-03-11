@@ -16,7 +16,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			// movepool corrections
 			if (this.dataCache.Learnsets[id]) {
 				for (const moveid in notm) {
-					if (this.dataCache.Learnsets[id].learnset[moveid]) {
+					if (this.dataCache.Learnsets[id].learnset && this.dataCache.Learnsets[id].learnset[moveid]) {
 						this.modData('Learnsets', id).learnset[moveid] = this.dataCache.Learnsets[id].learnset[moveid].filter((method) => (!method.includes('M') && !method.includes('T')));
 					}
 				}
