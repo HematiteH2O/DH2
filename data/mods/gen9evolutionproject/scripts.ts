@@ -42,7 +42,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			if (!newMon.color && copyData.color) newMon.color = copyData.color;
 			if (!newMon.eggGroups && copyData.eggGroups) newMon.eggGroups = copyData.eggGroups;
 
-			customList.push(id);
+			if (!newMon.evos) customList.push(id); // only fully-evolved Pokémon of the Day!
 
 			let copyMoves = newMon.copyData;
 			if (newMon.copyMoves) copyMoves = newMon.copyMoves;
