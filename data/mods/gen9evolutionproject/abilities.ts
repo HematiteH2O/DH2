@@ -276,7 +276,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 					activated = true;
 				}
 				const typeMod = this.clampIntRange(pokemon.runEffectiveness(this.dex.getActiveMove('stealthrock')), -6, 6);
-				this.damage(pokemon.maxhp * Math.pow(2, typeMod) / 8, pokemon, target);
+				this.damage(pokemon.maxhp * Math.pow(2, typeMod) / 8, pokemon, target, '[from] move: Stealth Rock');
 			}
 		},
 		flags: {},
