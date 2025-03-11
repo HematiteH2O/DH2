@@ -479,6 +479,50 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 		rating: 3,
 		num: -22,
 	},
+	cheaptricks: { // Hawlucha-Rudo
+		onSourceModifyDamage(damage, source, target, move) {
+			if (move.type === 'Dark') return this.chainModify(0.5);
+		},
+		onTryHitPriority: 1,
+		onTryHit(target, source, move) {
+			if (target === source || move.type !== 'Dark' || move.category === 'Status' || source.hasAbility('stickyhold')) return;
+			
+			const yourItem = target.takeItem(source);
+			const myItem = source.takeItem();
+			if (target.item || source.item || (!yourItem && !myItem)) {
+				if (yourItem) target.item = yourItem.id;
+				if (myItem) source.item = myItem.id;
+				return false;
+			}
+			if (
+				(myItem && !this.singleEvent('TakeItem', myItem, source.itemState, target, source, move, myItem)) ||
+				(yourItem && !this.singleEvent('TakeItem', yourItem, target.itemState, source, target, move, yourItem))
+			) {
+				if (yourItem) target.item = yourItem.id;
+				if (myItem) source.item = myItem.id;
+				return false;
+			}
+			this.add('-activate', source, 'move: Trick', '[of] ' + target);
+			this.add('-anim', target, "Switcheroo", source); // fun
+			if (myItem) {
+				target.setItem(myItem);
+				this.add('-item', target, myItem, '[from] ability: Cheap Tricks', '[of] ' + target);
+			} else {
+				this.add('-enditem', target, yourItem, '[silent]', '[from] ability: Cheap Tricks', '[of] ' + target);
+			}
+			if (yourItem) {
+				source.setItem(yourItem);
+				this.add('-item', source, yourItem, '[from] ability: Cheap Tricks', '[of] ' + target);
+			} else {
+				this.add('-enditem', source, myItem, '[silent]', '[from] ability: Cheap Tricks', '[of] ' + target);
+			}
+		},
+		flags: {breakable: 1},
+		name: "Cheap Tricks",
+		shortDesc: "Hit by Dark moves: halves damage, swaps items before hit.",
+		rating: 3,
+		num: -23,
+	},
 
 // modded canon Abilities
 
