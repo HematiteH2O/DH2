@@ -1128,7 +1128,7 @@ export const Pokedex: {[speciesid: string]: ModdedSpeciesData} = {
 		types: ["Psychic", "Grass"],
 		baseStats: {hp: 98, atk: 107, def: 85, spa: 53, spd: 65, spe: 87},
 		abilities: {0: "Chain Link", 1: "Unburden", H: "Withering Glare"},
-		movepoolAdditions: ["grassyglide", "powerwhip", "barrier", "bulletseed", "grassyterrain", "psychicterrain", "seedbomb", "trickroom", "zenheadbutt"],
+		movepoolAdditions: ["entanglement", "grassyglide", "powerwhip", "barrier", "bulletseed", "grassyterrain", "psychicterrain", "seedbomb", "trickroom", "zenheadbutt"],
 		movepoolDeletions: ["irondefense", "metalsound", "steelbeam"],
 
 		prevo: "Corvisquire",
