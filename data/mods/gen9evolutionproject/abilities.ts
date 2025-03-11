@@ -422,25 +422,23 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 	},
 	scaleshift: { // Ma'adowrian Frosmoth - please work the same
 		onUpdate(pokemon) {
-			if (!pokemon.isStarted || pokemon.terastallized) return; // should activate *after* Data Mod
-			let newtype = null;
+			let newtype = pokemon.baseSpecies.types[0];
 			for (const ally of pokemon.side.active) {
+				let scaletype = ally.types[0];
+				if (ally.terastallized) scaletype = ally.teraType;
 				if (ally && ally !== pokemon && !ally.fainted && !ally.hasAbility('scaleshift') &&
-					ally.types[0] !== pokemon.baseSpecies.types[0] &&
-					ally.types[0] !== pokemon.baseSpecies.types[1]) {
-					newtype = ally.types[0];
+					scaletype !== pokemon.baseSpecies.types[0] &&
+					scaletype !== pokemon.baseSpecies.types[1]) {
+					newtype = scaletype;
 					break;
 				}
 			}
-			if (newtype) {
-				pokemon.m.scaleshift = newtype;
-				const typecombo = [newtype, pokemon.baseSpecies.types[1]];
-				if (pokemon.getTypes().join() === typecombo.join() || !pokemon.setType(typecombo)) return;
-				this.add('-ability', pokemon, 'Scale Shift');
-				this.add('-start', pokemon, 'typechange', pokemon.getTypes(true).join('/'));
-			} else {
-				pokemon.m.scaleshift = null;
-			} // sets pokemon.m.scaleshift to use for Dispersion even when Terastallized
+			pokemon.m.scaleshift = newtype; // sets pokemon.m.scaleshift to use for Dispersion even when Terastallized
+			if (!pokemon.isStarted || pokemon.terastallized) return; // shouldn't change types until after Data Mod
+			const typecombo = [newtype, pokemon.baseSpecies.types[1]];
+			if (pokemon.getTypes().join() === typecombo.join() || !pokemon.setType(typecombo)) return;
+			this.add('-ability', pokemon, 'Scale Shift');
+			this.add('-start', pokemon, 'typechange', pokemon.getTypes(true).join('/'));
 		},
 		onEnd(pokemon) {
 			pokemon.m.scaleshift = null;
