@@ -320,7 +320,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 		contestType: "Beautiful",
 		shortDesc: "Restores the user's item.",
 	},
-	entanglement: { // stolen from Blue thanks--
+	entanglement: {
 		num: -10,
 		accuracy: 100,
 		basePower: 50,
@@ -352,7 +352,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 				if (this.effectState.source?.isActive) pokemon.tryTrap();
 			},
 		},
-		onPrepareHit(target, source, move) {
+		onPrepareHit(target, source, move) { // Blue picked the animation!
 			this.attrLastMove('[still]');
 			this.add('-anim', source, "Nasty Plot");
 			this.add('-anim', source, "Dream Eater", target);
