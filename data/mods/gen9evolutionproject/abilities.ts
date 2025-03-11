@@ -15,9 +15,17 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 		onUpdate(pokemon) {
 			if (pokemon.isStarted && pokemon.species.name === 'Hibearlax-Berserk' && pokemon.status === 'slp') {
 				pokemon.formeChange('Hibearlax', this.effect);
+				this.add('-start', pokemon, 'typechange', pokemon.getTypes(true).join('/'), '[silent]');
+				this.add('-message', `${pokemon.name} is hibernating!`);
 			}
 			if (pokemon.isStarted && pokemon.species.name === 'Hibearlax' && !(pokemon.status === 'slp')) {
 				pokemon.formeChange('Hibearlax-Berserk', this.effect);
+				this.add('-start', pokemon, 'typechange', pokemon.getTypes(true).join('/'), '[silent]');
+				this.add('-message', `${pokemon.name} went berserk!`);
+				if (!this.effectState.busted) {
+					this.runEvent('DataMod', pokemon);
+					this.effectState.busted = true;
+				}
 			}
 		},
 		flags: {failroleplay: 1, noreceiver: 1, noentrain: 1, notrace: 1, failskillswap: 1, cantsuppress: 1},
@@ -502,16 +510,25 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				if (pokemon.species.id === 'darmanitangalar') pokemon.formeChange('Darmanitan-Galar-Zen');
 				if (pokemon.species.id === 'qwilfishkalos') {
 					pokemon.formeChange('Qwilfish-Kalos-Zen');
-					this.runEvent('DataMod', pokemon);
+					this.add('-start', pokemon, 'typechange', pokemon.getTypes(true).join('/'), '[silent]');
+					if (!this.effectState.busted) {
+						this.runEvent('DataMod', pokemon);
+						this.effectState.busted = true;
+					}
 				}
 				if (pokemon.species.id === 'overchill') {
 					pokemon.formeChange('Overchill-Zen');
-					this.runEvent('DataMod', pokemon);
+					this.add('-start', pokemon, 'typechange', pokemon.getTypes(true).join('/'), '[silent]');
+					if (!this.effectState.busted) {
+						this.runEvent('DataMod', pokemon);
+						this.effectState.busted = true;
+					}
 				}
 			},
 			onEnd(pokemon) {
 				if (['Zen', 'Galar-Zen', 'Kalos-Zen'].includes(pokemon.species.forme)) {
 					pokemon.formeChange(pokemon.species.battleOnly as string);
+					this.add('-start', pokemon, 'typechange', pokemon.getTypes(true).join('/'), '[silent]');
 				}
 			},
 		},
