@@ -212,7 +212,7 @@ export const Pokedex: {[speciesid: string]: ModdedSpeciesData} = {
 		creator: "lydian",
 	},
 	hibearlaxberserk: {
-		name: "Hibearlax",
+		name: "Hibearlax-Berserk",
 		copyData: "Snorlax",
 		baseSpecies: "Hibearlax",
 		forme: "Berserk",
