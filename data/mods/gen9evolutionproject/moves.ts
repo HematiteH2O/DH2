@@ -66,9 +66,11 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 		flags: {charge: 1, protect: 1, mirror: 1, metronome: 1, nosleeptalk: 1, failinstruct: 1},
 		onTryMove(attacker, defender, move) {
 			if (attacker.removeVolatile(move.id)) {
+				this.add('-anim', attacker, "Subzero Slammer", defender);
 				return;
 			}
 			this.add('-prepare', attacker, move.name);
+			this.add('-anim', attacker, "Aurora Veil", defender);
 			this.boost({spd: 1}, attacker, attacker, move);
 			if (!this.runEvent('ChargeMove', attacker, defender, move)) {
 				return;
@@ -77,10 +79,6 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 			return null;
 		},
 		secondary: null,
-		onPrepareHit(target, source, move) {
-			this.attrLastMove('[still]');
-			this.add('-anim', source, "Aurora Beam", source);
-		},
 		target: "allAdjacentFoes",
 		type: "Ice",
 		contestType: "Beautiful",
