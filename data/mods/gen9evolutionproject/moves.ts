@@ -133,6 +133,9 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 		condition: {
 			duration: 2,
 			onStart(pokemon, source) {
+				console.log(`active move: ` + this.activeMove);
+				console.log(`last move: ` + this.lastMove);
+				console.log(`last damage: ` + this.lastDamage);
 				if (!this.lastDamage || !this.lastMove.id !== 'renewingring') return false;
 				this.effectState.hp = this.lastDamage / 2; // please work
 			},
