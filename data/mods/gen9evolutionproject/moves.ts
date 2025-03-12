@@ -343,9 +343,9 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 					this.add('-end', pokemon, this.effectState.sourceEffect, '[entanglement]', '[silent]');
 					return;
 				}
-				const damage = this.damage(pokemon.baseMaxhp / 8, pokemon, source);
+				const damage = this.damage(pokemon.baseMaxhp / 8, pokemon, source, 'leechseed');
 				if (damage) {
-					this.heal(damage, source, pokemon);
+					this.heal(damage, source, pokemon, 'leechseed');
 				}
 			},
 			onEnd(pokemon) {
