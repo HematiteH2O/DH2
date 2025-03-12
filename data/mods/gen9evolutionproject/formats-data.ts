@@ -79,7 +79,7 @@ export const FormatsData: {[k: string]: ModdedSpeciesFormatsData} = {
 	numeldormant: {tier: "Evo (NFE)"},
 	camerupt: {tier: "Canon"},
 	dormedary: {tier: "Evo (NFE)"},
-	dormaderupt: {tier: "S1P2"},
+	dormaderupt: {tier: "S1P1"},
 
 	// SLATE 1 PROMPT 2
 
