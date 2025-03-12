@@ -563,18 +563,11 @@ export const Pokedex: {[speciesid: string]: ModdedSpeciesData} = {
 		movepoolAdditions: ["slackoff", "afteryou", "avalanche", "blizzard", "icebeam", "icespinner", "iciclecrash", "icywind", "meteorbeam", "snowscape"],
 		movepoolDeletions: ["ember", "eruption", "fireblast", "firespin", "flamecharge", "flamethrower", "heatcrash", "heatwave", "incinerate", "lavaplume", "overheat", "temperflare", "willowisp"],
 
-		evos: ["Camerupt-Dormant"],
+		evos: ["Dormedary"],
 		creator: "BotwNerd",
 	},
-	camerupt: {
-		inherit: true,
-		otherFormes: ["Camerupt-Dormant"],
-		formeOrder: ["Camerupt", "Camerupt-Dormant"],
-	},
-	cameruptdormant: {
-		name: "Camerupt-Dormant",
-		baseSpecies: "Camerupt",
-		forme: "Dormant",
+	dormedary: {
+		name: "Dormedary",
 		copyData: "Camerupt",
 
 		types: ["Rock", "Ice"],
@@ -598,7 +591,7 @@ export const Pokedex: {[speciesid: string]: ModdedSpeciesData} = {
 		movepoolAdditions: ["mountaingale", "sheercold", "slackoff", "afteryou", "avalanche", "blizzard", "explosion", "icebeam", "icespinner", "iciclecrash", "icywind", "meteorbeam", "selfdestruct", "snowscape"],
 		movepoolDeletions: ["ember", "fireblast", "firespin", "flamecharge", "flamethrower", "heatcrash", "heatwave", "incinerate", "overheat", "temperflare", "willowisp"],
 
-		prevo: "Camerupt-Dormant",
+		prevo: "Dormedary",
 		evoType: "other",
 		evoCondition: "A newly-discovered evolution",
 		creator: "BotwNerd",
