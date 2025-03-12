@@ -233,9 +233,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 			if (move.type === 'Rock') return this.chainModify(0.5);
 		},
 		onDamage(damage, target, source, effect) {
-			console.log(`effect: ` + effect);
-			console.log(`effect.id: ` + effect.id);
-			if (effect && (effect === 'stealthrock')) {
+			if (effect && (effect.id === 'stealthrock' || effect === 'Stealth Rock')) {
 				damage /= 2;
 			}
 		},
@@ -504,18 +502,18 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 			}
 			this.add('-ability', target, 'Cheap Tricks');
 			this.add('-activate', target, 'move: Trick', '[of] ' + target);
-			this.add('-anim', target, "Switcheroo", target); // fun
+			this.add('-anim', source, "Switcheroo", target); // fun
 			if (myItem) {
 				target.setItem(myItem);
-				this.add('-item', target, myItem, '[silent]', '[from] ability: Cheap Tricks', '[of] ' + target);
+				this.add('-item', target, myItem, '[from] move: Switcheroo');
 			} else {
-				this.add('-enditem', target, yourItem, '[silent]', '[from] ability: Cheap Tricks', '[of] ' + target);
+				this.add('-enditem', target, yourItem, '[from] move: Switcheroo');
 			}
 			if (yourItem) {
 				source.setItem(yourItem);
-				this.add('-item', source, yourItem, '[silent]', '[from] ability: Cheap Tricks', '[of] ' + target);
+				this.add('-item', source, yourItem, '[from] move: Switcheroo');
 			} else {
-				this.add('-enditem', source, myItem, '[silent]', '[from] ability: Cheap Tricks', '[of] ' + target);
+				this.add('-enditem', source, myItem, '[from] move: Switcheroo');
 			}
 		},
 		flags: {breakable: 1},
