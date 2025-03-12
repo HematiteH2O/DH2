@@ -591,6 +591,9 @@ export const Pokedex: {[speciesid: string]: ModdedSpeciesData} = {
 		movepoolAdditions: ["mountaingale", "sheercold", "slackoff", "afteryou", "avalanche", "blizzard", "explosion", "icebeam", "icespinner", "iciclecrash", "icywind", "meteorbeam", "selfdestruct", "snowscape"],
 		movepoolDeletions: ["ember", "fireblast", "firespin", "flamecharge", "flamethrower", "heatcrash", "heatwave", "incinerate", "overheat", "temperflare", "willowisp"],
 
+		heightm: 2.5,
+		weightkg: 320.5,
+
 		prevo: "Dormedary",
 		evoType: "other",
 		evoCondition: "A newly-discovered evolution",
