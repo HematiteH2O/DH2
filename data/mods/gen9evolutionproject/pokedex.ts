@@ -1010,7 +1010,7 @@ export const Pokedex: {[speciesid: string]: ModdedSpeciesData} = {
 		copyData: "Hawlucha",
 		
 		types: ["Poison", "Flying"],
-		baseStats: {hp: 83, atk: 92, def: 95, spa: 74, spd: 63, spe: 93},
+		baseStats: {hp: 78, atk: 107, def: 90, spa: 64, spd: 63, spe: 98},
 		abilities: {0: "Limber", 1: "Cheap Tricks", H: "Mold Breaker"},
 		movepoolAdditions: ["partingshot", "gunkshot", "sludgebomb", "venoshock"],
 		movepoolDeletions: ["closecombat"],
