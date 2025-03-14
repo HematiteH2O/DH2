@@ -308,7 +308,8 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 				if (damage) {
 					this.add('-anim', source, "Dream Eater", pokemon);
 					this.add('-anim', source, "Ingrain", source);
-					this.heal(damage, source, pokemon, 'Leech Seed');
+					let fakeSeed = {name: 'Leech Seed', id: 'leechseed'}; // silent visual + Big Root compatibility
+					this.heal(damage, source, pokemon, fakeSeed);
 				}
 			},
 			onEnd(pokemon) {
