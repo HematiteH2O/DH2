@@ -71,12 +71,9 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 		num: -4,
 	},
 	mindful: { // Hieroswine
-		onHit(target, source, move) {
+		onAfterMoveSecondary(target, source, move) {
 			if (!target.hp || target === source) return;
-			if (move.category == 'Status') {
-				// TODO: return if the move failed? is there something other than onHit I can use...
-				this.boost({spa: 1});
-			}
+			if (move.category === 'Status') this.boost({spa: 1});
 		},
 		flags: {},
 		name: "Mindful",
@@ -358,6 +355,9 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 		onStart(pokemon) {
 			this.add('-ability', pokemon, 'Withering Glare');
 			this.add('-message', `${pokemon.name}'s intensity prevents all Pokémon's stats from being changed!`);
+		},
+		onTryHeal(damage, target, source, effect) { // UNDO THIS AFTER A TEST
+			console.log(effect);
 		},
 		onAnyTryBoost(boost, target, source, effect) {
 			let showMsg = false;
