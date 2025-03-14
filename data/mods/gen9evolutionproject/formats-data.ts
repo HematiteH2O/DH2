@@ -69,7 +69,7 @@ export const FormatsData: {[k: string]: ModdedSpeciesFormatsData} = {
 	persianalola: {tier: "Evo!"},
 	perrserker: {tier: "Evo!"},
 	carnelion: {tier: "Evo!"},
-	carnelionvariant: {tier: "Evo!"},
+	carnelionsnowcap: {tier: "Evo!"},
 
 	pyukumuku: {tier: "Evo!"},
 	pyukumukuhisui: {tier: "Evo!"},
