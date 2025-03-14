@@ -320,8 +320,9 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 		},
 		onPrepareHit(target, source, move) {
 			this.attrLastMove('[still]');
-			this.add('-anim', source, "Nasty Plot");
-			this.add('-anim', source, "Frenzy Plant", target);
+			this.add('-anim', source, "Anchor Shot", target);
+			this.add('-anim', source, "Embargo", source);
+			this.add('-anim', source, "Embargo", target);
 		},
 		onHit(target, source, move) {
 			source.addVolatile('trapped', target, move, 'trapper');
