@@ -1059,15 +1059,8 @@ export const Pokedex: {[speciesid: string]: ModdedSpeciesData} = {
 		creator: "lydian",
 	},
 
-	uxie: {
-		inherit: true,
-		otherFormes: ["Uxie-Ultra"],
-		formeOrder: ["Uxie", "Uxie-Ultra"],
-	},
-	uxieultra: {
-		name: "Uxie-Ultra",
-		baseSpecies: "Uxie",
-		forme: "Ultra",
+	ultrauxie: {
+		name: "Ultra Uxie", // can't Tera if "Ultra" is its form name
 		copyData: "Uxie",
 
 		types: ["Electric"],
