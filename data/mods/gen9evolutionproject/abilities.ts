@@ -262,13 +262,13 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 			}
 		},
 		onSourceModifyDamage(damage, source, target, move) {
-			if (move.category === 'Special') {
+			if (move.category === 'Special' && target.hp === target.maxhp) {
 				return this.chainModify(0.5);
 			}
 		},
 		flags: {breakable: 1},
 		name: "Divinated Protection",
-		shortDesc: "Halves damage from special moves; Ghost immunity.",
+		shortDesc: "Ghost-immune; at full HP, halves damage from special moves.",
 		rating: 3,
 		num: -15,
 	},
