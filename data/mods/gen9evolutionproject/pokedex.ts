@@ -1555,4 +1555,23 @@ export const Pokedex: {[speciesid: string]: ModdedSpeciesData} = {
 		evoItem: "Shiny Stone",
 		creator: "quagsi",
 	},
+
+	sandaconda: {
+		inherit: true,
+		evos: ["Coilrig"],
+	},
+	coilrig: {
+		name: "Coilrig",
+		copyData: "Sandaconda",
+
+		types: ["Ground", "Poison"],
+		baseStats: {hp: 77, atk: 107, def: 130, spa: 105, spd: 75, spe: 41},
+		abilities: {0: "Sand Spit", 1: "Shed Skin", H: "Liquid Ooze"},
+		movepoolAdditions: ["painsplit", "poisongas", "sludgebomb", "toxic", "venoshock"],
+
+		prevo: "Sandaconda",
+		evoType: "other",
+		evoCondition: "A newly-discovered evolution",
+		creator: "Hematite",
+	},
 };
