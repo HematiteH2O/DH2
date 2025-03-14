@@ -356,9 +356,6 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 			this.add('-ability', pokemon, 'Withering Glare');
 			this.add('-message', `${pokemon.name}'s intensity prevents all Pokémon's stats from being changed!`);
 		},
-		onTryHeal(damage, target, source, effect) { // UNDO THIS AFTER A TEST
-			console.log(effect);
-		},
 		onAnyTryBoost(boost, target, source, effect) {
 			let showMsg = false;
 			let i: BoostID;
