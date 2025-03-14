@@ -72,8 +72,9 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 	},
 	mindful: { // Hieroswine
 		onHit(target, source, move) {
-			if (!target.hp) return;
+			if (!target.hp || target === source) return;
 			if (move.category == 'Status') {
+				// TODO: return if the move failed? is there something other than onHit I can use...
 				this.boost({spa: 1});
 			}
 		},
@@ -354,6 +355,10 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 		num: -17,
 	},
 	witheringglare: { // Verdant Corviknight
+		onStart(pokemon) {
+			this.add('-ability', pokemon, 'Withering Glare');
+			this.add('-message', `${this.effectState.target.name}'s intensity prevents all Pokémon's stats from being changed!`);
+		},
 		onAnyTryBoost(boost, target, source, effect) {
 			let showMsg = false;
 			let i: BoostID;
@@ -470,6 +475,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				return this.effectState.target;
 			}
 		},
+		shortDesc: "Draws in Ground-type moves to raise Attack.",
 		flags: {breakable: 1},
 		name: "Centrifuge",
 		rating: 3,
