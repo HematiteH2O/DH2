@@ -26,8 +26,8 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 		},
 		onSwitchIn(pokemon) {
 			const switchedIn = pokemon.switchedIn;
-			if ((pokemon.illusion ? pokemon.illusion.tagline : pokemon.tagline)) {
-				this.hint(`${pokemon.illusion ? pokemon.illusion.tagline : pokemon.tagline}`);
+			if ((pokemon.illusion ? pokemon.illusion.set.tagline : pokemon.set.tagline)) {
+				this.hint(`${pokemon.illusion ? pokemon.illusion.set.tagline : pokemon.set.tagline}`);
 			}
 			if (pokemon.illusion) {
 				this.add('-start', pokemon, 'typechange', pokemon.illusion.getTypes(true).join('/'), '[silent]');
