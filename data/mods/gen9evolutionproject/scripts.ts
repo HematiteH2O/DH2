@@ -94,14 +94,13 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					set.gender = 'F';
 					line = line.slice(0, -4);
 				}
-				if (line.endsWith('}')) {
-					let tagline;
-					[line, tagline] = line.split(' {');
-					set.tagline = tagline;
-				}
 				if (line.endsWith(')') && line.includes('(')) {
-					const [name, species] = line.slice(0, -1).split('(');
+					let [name, species] = line.slice(0, -1).split('(');
 					set.species = Dex.species.get(species).name;
+					if (name.endsWith('}') && name.includes('{')) {
+						let [name, tagline] = name.slice(0, -1).split('{');
+						set.tagline = tagline;
+					}
 					set.name = name.trim();
 				} else {
 					set.species = Dex.species.get(line).name;
