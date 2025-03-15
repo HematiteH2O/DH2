@@ -94,6 +94,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					set.gender = 'F';
 					line = line.slice(0, -4);
 				}
+				if (line.endsWith('}')) {
+					let tagline;
+					[line, tagline] = line.split(' {');
+					set.tagline = tagline;
+				}
 				if (line.endsWith(')') && line.includes('(')) {
 					const [name, species] = line.slice(0, -1).split('(');
 					set.species = Dex.species.get(species).name;
@@ -150,9 +155,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (isNaN(value)) value = 31;
 					set.ivs[statid] = value;
 				}
-			} else if (line.startsWith('Tagline: ')) {
-				line = line.slice(9);
-				set.tagline = line.trim();
 			} else if (/^[A-Za-z]+ (N|n)ature/.test(line)) {
 				let natureIndex = line.indexOf(' Nature');
 				if (natureIndex === -1) natureIndex = line.indexOf(' nature');
