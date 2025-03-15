@@ -26,7 +26,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 		},
 		onSwitchIn(pokemon) {
 			const switchedIn = pokemon.switchedIn;
-			if ((pokemon.illusion ? pokemon.illusion.tagline : pokemon.tagline) {
+			if ((pokemon.illusion ? pokemon.illusion.tagline : pokemon.tagline)) {
 				this.add('-message', `${pokemon.illusion ? pokemon.illusion.tagline : pokemon.tagline}`);
 			},
 			if (pokemon.illusion) {
