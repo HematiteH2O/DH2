@@ -302,7 +302,7 @@ export const FormatsData: {[k: string]: ModdedSpeciesFormatsData} = {
 
 	gible: {tier: "(Prevo)"},
 	gabite: {tier: "(Prevo)"},
-	garchomp: {tier: "Evo!"},
+	garchomp: {tier: "Evo!"}, // banned
 	pelagicjaw: {tier: "Evo!"},
 
 	kabuto: {tier: "(Prevo)"},
@@ -314,8 +314,11 @@ export const FormatsData: {[k: string]: ModdedSpeciesFormatsData} = {
 	mudsdale: {tier: "Evo!"},
 	mudsdalesinnoh: {tier: "Evo!"},
 
-	// Tapu Koko, Tapu Lele, Tapu Bulu and Tapu Fini might appear in a later VGC series but aren't being added yet
 	tapukiki: {tier: "Evo!"},
+	tapukoko: {tier: "Evo!"}, // the tapu are currently banned even from VGC, but including for future VGC series
+	tapulele: {tier: "Evo!"},
+	tapufini: {tier: "Evo!"},
+	tapubulu: {tier: "Evo!"},
 
 	nickit: {tier: "(Prevo)"},
 	thievul: {tier: "(Prevo)"},
@@ -351,16 +354,17 @@ export const FormatsData: {[k: string]: ModdedSpeciesFormatsData} = {
 
 	// SLATE 2 PROMPT 3
 
-	// Zacian and Zamazenta might appear in a later VGC series but aren't being added yet
 	zavender: {tier: "Evo!"}, // this is an NFE but it should still be easy to find
+	zacian: {tier: "Evo!"}, // DON'T WORRY THEY'RE BANNED aksdfjh just putting them here for VGC later
+	zaciancrowned: {tier: "Evo!"},
+	zamazenta: {tier: "Evo!"},
+	zamazentacrowned: {tier: "Evo!"},
 
 	grubbin: {tier: "(Prevo)"},
 	charjabug: {tier: "(Prevo)"},
 	charjabugchained: {tier: "(Prevo)"},
 	vikavolt: {tier: "Evo!"},
 	charjouleak: {tier: "Evo!"},
-
-	// Deoxys might appear in a later VGC series but isn't being added yet
 
 	uraxys: {tier: "(Prevo)"},
 	riboxysu: {tier: "Evo!"},
@@ -370,6 +374,10 @@ export const FormatsData: {[k: string]: ModdedSpeciesFormatsData} = {
 	riboxysa: {tier: "Evo!"},
 	guaxys: {tier: "(Prevo)"},
 	riboxysg: {tier: "Evo!"},
+	deoxys: {tier: "Evo!"}, // DON'T WORRY THEY'RE BANNED aksdjfhg
+	deoxysattack: {tier: "Evo!"},
+	deoxysdefense: {tier: "Evo!"},
+	deoxysspeed: {tier: "Evo!"},
 
 	stunfisk: {tier: "Evo!"},
 	stunfiskgalar: {tier: "Evo!"},
@@ -395,6 +403,4 @@ export const FormatsData: {[k: string]: ModdedSpeciesFormatsData} = {
 	dragonair: {tier: "(Prevo)"},
 	dragonite: {tier: "Evo!"},
 	dragoracle: {tier: "Evo!"},
-
-	// notes on future VGC series: tapu, Deoxys, Zacian and Zamazenta (restricted)
 };
