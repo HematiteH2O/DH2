@@ -602,7 +602,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 		onHit(target, source) {
 			const stolenBoosts: Partial<BoostsTable> = {};
 			let i: BoostID;
-			for (i in target.boosts) stolenBoosts[i] = boost[i];
+			for (i in target.boosts) stolenBoosts[i] = target.boosts[i];
 			if (Object.keys(positiveBoosts).length > 0) {
 				this.boost(positiveBoosts, pokemon);
 				target.clearBoosts();
