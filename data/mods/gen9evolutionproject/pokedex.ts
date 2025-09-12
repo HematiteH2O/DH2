@@ -1887,7 +1887,7 @@ export const Pokedex: {[speciesid: string]: ModdedSpeciesData} = {
 		otherFormes: ["Shiftry-Johto"],
 		formeOrder: ["Shiftry", "Shiftry-Johto"],
 	},
-	shiftyjohto: {
+	shiftryjohto: {
 		name: "Shiftry-Johto",
 		baseSpecies: "Shiftry",
 		forme: "Johto",
