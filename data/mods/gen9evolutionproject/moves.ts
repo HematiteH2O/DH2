@@ -657,7 +657,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 				this.boost({[bestStat]: -1}, target);
 			},
 		},
-		target: "normal",
+		target: "allAdjacentFoes",
 		type: "Bug",
 		contestType: "Clever",
 		shortDesc: "Damage is 1/4 of target's HP. Lowers target's best stat.",
