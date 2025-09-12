@@ -421,62 +421,100 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 		pp: 10,
 		priority: 0,
 		flags: {contact: 1, bite: 1, allyanim: 1, metronome: 1, futuremove: 1},
-		onTryHit(source) {
-			if (!this.canSwitch(source.side) || source.volatiles['commanded']) {
-				this.attrLastMove('[still]');
-				this.add('-fail', source);
-				return this.NOT_FAIL;
-			}
-		},
-		selfSwitch: true,
 		ignoreImmunity: true,
 		onTry(source, target) {
-			if (!target.side.addSlotCondition(target, 'futuremove')) return false;
-			Object.assign(target.side.slotConditions[target.position]['futuremove'], {
-				duration: 3,
-				move: 'futuresight',
-				source: source,
-				sourcePosition: source.position,
-				moveData: {
-					id: 'pranceandpierce',
-					name: "Prance and Pierce",
-					accuracy: 100,
-					basePower: 100,
-					category: "Physical",
-					priority: 0,
-					flags: {contact: 1, bite: 1, allyanim: 1, metronome: 1, futuremove: 1},
-					onTryHit(source, move) {
-						// if the source isn't on the field...
-						if (source && !source.isActive && source.hp && this.canSwitch(source.Side)) {
-							switchIn(source, move.sourcePosition);
-						}
+			if (this.canSwitch(source.side)) {
+				if (!target.side.addSlotCondition(target, 'pranceandpierce')) return false;
+				Object.assign(target.side.slotConditions[target.position]['pranceandpierce'], {
+					duration: 3,
+					move: 'pranceandpierce',
+					source: source,
+					sourcePosition: source.position,
+					moveData: {
+						id: 'pranceandpierce',
+						name: "Prance and Pierce",
+						accuracy: 100,
+						basePower: 100,
+						category: "Physical",
+						priority: 0,
+						flags: {contact: 1, bite: 1, allyanim: 1, metronome: 1, futuremove: 1},
+						selfSwitch: false,
+						ignoreImmunity: false,
+						effectType: 'Move',
+						secondary: {
+							chance: 100,
+							status: 'psn',
+						},
+						type: 'Ghost',
 					},
-					selfSwitch: false,
-					ignoreImmunity: false,
-					effectType: 'Move',
-					secondary: {
-						chance: 100,
-						status: 'psn',
-					},
-					type: 'Ghost',
-				},
-			});
-			this.add('-start', source, 'move: Prance and Pierce');
+				});
+				for (const side of this.sides) {
+					for (const active of side.active) {
+						active.switchFlag = false;
+					}
+				}
+				source.switchFlag = true;
+				this.add('-message', `${source.illusion ? source.illusion.name : source.name} pranced away... for now!`);
+			} else {
+				return false;
+			}
 			return this.NOT_FAIL;
 		},
 		onPrepareHit(target, source, move) {
 			this.attrLastMove('[still]');
 			this.add('-anim', source, "Bounce", source);
-			this.add('-anim', source, "Super Fang", target);
 		},
-		secondary: {
-			chance: 100,
-			status: 'psn',
+		condition: {
+			// this is a slot condition
+			name: 'pranceandpierce',
+			duration: 3,
+			onResidualOrder: 3,
+			onEnd(target) {
+				const data = this.effectState;
+				// time's up; time to hit! :D
+				const move = this.dex.moves.get(data.move);
+				if (target.fainted || target === data.source) {
+					this.hint(`${move.name} did not hit because the target is ${(target.fainted ? 'fainted' : 'the user')}.`);
+					return;
+				}
+				if (source && !source.isActive && source.hp && this.canSwitch(source.Side)) {
+					switchIn(source, data.sourcePosition);
+					this.add('-message', `${source.illusion ? source.illusion.name : source.name} pranced back onto the field!`);
+				}
+				this.add('-message', `${target.illusion ? target.illusion.name : target.name} was pierced by the Prance and Pierce attack!`);
+				onPrepareHit(target, source, move) {
+					this.attrLastMove('[still]');
+					if (source.isActive) {
+						this.add('-anim', source, "Super Fang", target);
+					} else {
+						this.add('-anim', target, "Super Fang", target);
+					}
+				},
+				target.removeVolatile('Protect');
+				target.removeVolatile('Endure');
+	
+				if (data.source.hasAbility('infiltrator') && this.gen >= 6) {
+					data.moveData.infiltrates = true;
+				}
+				if (data.source.hasAbility('normalize') && this.gen >= 6) {
+					data.moveData.type = 'Normal';
+				}
+				const hitMove = new this.dex.Move(data.moveData) as ActiveMove;
+	
+				this.actions.trySpreadMoveHit([target], data.source, hitMove, true);
+				target.setStatus('psn', source, data.move);
+				if (data.source.isActive && data.source.hasItem('lifeorb') && this.gen >= 5) {
+					this.singleEvent('AfterMoveSecondarySelf', data.source.getItem(), data.source.itemState, data.source, target, data.source.getItem());
+				}
+				this.activeMove = null;
+	
+				this.checkWin();
+			},
 		},
 		target: "normal",
 		type: "Ghost",
 		contestType: "Clever",
-		shortDesc: "User pivots out, then comes back in to attack two turns later. Poison target.",
+		shortDesc: "User pivots out, then comes back in to attack two turns later. Poisons target.",
 	},
 	grandfinale: {
 		num: -15,
