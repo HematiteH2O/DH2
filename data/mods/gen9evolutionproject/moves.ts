@@ -482,7 +482,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 					return;
 				}
 				if (source && !source.isActive && source.hp && this.canSwitch(source.side)) {
-					this.switchIn(source, data.sourcePosition);
+					this.actions.switchIn(source, data.sourcePosition);
 					this.add('-message', `${source.illusion ? source.illusion.name : source.name} pranced back onto the field!`);
 				}
 				this.add('-message', `${target.illusion ? target.illusion.name : target.name} was pierced by the Prance and Pierce attack!`);
