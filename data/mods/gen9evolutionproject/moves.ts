@@ -475,7 +475,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 			onResidualOrder: 3,
 			onEnd(target) {
 				const data = this.effectState;
-				// time's up; time to hit! :D
+				const source = data.source;
 				const move = this.dex.moves.get(data.move);
 				if (target.fainted || target === data.source) {
 					this.hint(`${move.name} did not hit because the target is ${(target.fainted ? 'fainted' : 'the user')}.`);
