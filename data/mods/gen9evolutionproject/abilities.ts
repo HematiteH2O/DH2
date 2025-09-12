@@ -659,14 +659,15 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 
 				// all checks passed, so change type now
 				this.add('-ability', pokemon, 'Inspirit');
+				this.add('-message', `${pokemon.name} switched types with its partner!`);
 
-				this.add('-start', pokemon, 'typechange', '[from] move: Reflect Type', '[of] ' + ally);
 				pokemon.setType(newSourceBaseTypes);
 				pokemon.addedType = newSourceAddedType;
+				this.add('-start', pokemon, 'typechange', pokemon.getTypes(true).join('/'), '[silent]');
 
-				this.add('-start', ally, 'typechange', '[from] move: Reflect Type', '[of] ' + pokemon);
 				ally.setType(newAllyBaseTypes);
 				ally.addedType = newAllyAddedType;
+				this.add('-start', ally, 'typechange', ally.getTypes(true).join('/'), '[silent]');
 
 				// and... this is just easier okay ;-;
 				pokemon.knownType = true;
@@ -675,7 +676,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				const bestStat = ally.getBestStat(false, true);
 				this.boost({[bestStat]: 1}, pokemon, null, true);
 
-				// not that it matters, but let's only do it once in Triples or similar
+				// not that it matters right now, but let's only do it once in Triples or similar
 				break;
 			}
 		},
