@@ -383,6 +383,52 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 		shortDesc: "Spread + changes type to match Scale Shift.",
 	},
 
+	// Slate 2
+
+/*
+Wallow			Water		Physical	50	100	10
+The higher the user's Sp. Def stat, the greater the damage this move deals.
+Hitting a target raises the Sp. Def stat.
+
+Prance and Pierce			Ghost		Physical	100	100	10
+Before attacking, the user switches places with a party Pokémon in waiting, if any.
+Two turns after this move is used, it finally returns to the field to attack a random active opponent.
+This also poisons the target.
+(biting)
+
+Grand Finale			Fire		Physical	25	90	10
+A consecutive three-strike attack that becomes more powerful with each successful hit. (25 -> 50 -> 75)
+After using this move, the user will no longer be Fire type. (Fails if the user is not Fire-type.)​
+If it lands all three hits, the user rushes back to switch places with a party Pokémon in waiting.								
+
+Slime Cannon			Poison		Special	110	100	5
+A slimy, somewhat befuddling all-out attack.​
+When the user knocks out a target with this move, all remaining Pokémon adjacent to the target have their Attack and Sp. Atk lowered (including the user and its allies).​
+(blocked by Bulletproof)
+
+Total Eclipse			Dark		Status	--	--	10
+The user steals its ally's stat changes.
+For the rest of the turn, any damage taken by the ally is instead taken by the user.
+This move can't be used twice in a row.
+
+Flowing Flare			Fire		Special	--	100	10
+This move inflicts damage using the Attack or Sp. Atk stat - whichever is higher for the user.
+The faster the user is than the target, the greater the move's power. (scales the same as Electro Ball, except that the max BP is 180 instead of 150)
+
+Paranoia			Bug		Special	--	95	10
+An attack that reduces each target's current HP by a quarter.
+This also lowers each target's most proficient stat.
+(spread)
+
+Psykick			Psychic		Physical	70	100	15
+This also leaves the target incapable of using the same move twice in a row.								
+
+Empathic Pulse			Psychic		Status	--	100	5
+The user transfers its status conditions to adjacent opponents.
+This also raises its most proficient stat.
+(spread)
+*/
+
 // modded canon moves
 
 	defog: {
