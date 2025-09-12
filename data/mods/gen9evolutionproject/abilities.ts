@@ -573,7 +573,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 		rating: 3,
 		num: -25,
 	},
-	powersurge: {
+	powersurge: { // for Tapu Kiki
 		onStart(pokemon) {
 			if (this.field.terrain) {
 				this.add('-ability', pokemon, 'Power Surge');
@@ -605,7 +605,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 		rating: 3,
 		num: -26,
 	},
-	slimetime: {
+	slimetime: { // for Mr. Slime
 		onStart(pokemon) {
 			let activated = false;
 			for (const target of pokemon.side.active) {
@@ -625,7 +625,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 		rating: -1,
 		num: -27,
 	},
-	inspirit: {
+	inspirit: { // for Johtonian Shiftry
 		shortDesc: "On switch-in: swaps type with ally, boosts a stat based on ally's best.",
 		onStart(pokemon) {
 			if (pokemon.species && (pokemon.species.num === 493 || pokemon.species.num === 773)) return;
@@ -684,7 +684,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 		rating: 0, // Showdown does this if there's no singles effect so I guess I should match it
 		num: -28,
 	},
-	noblepotential: {
+	noblepotential: { // for Zavender
 		shortDesc: "On switch-in, this Pokémon's highest stat is raised by 1 stage. Once per battle.",
 		onStart(pokemon) {
 			if (pokemon.nobleBoost) return;
@@ -697,7 +697,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 		rating: 3.5,
 		num: -29,
 	},
-	batteryleak: {
+	batteryleak: { // for Chained Charjabug and Charjouleak
 		shortDesc: "30% chance a Pokémon making contact with this Pokémon will be badly poisoned.",
 		onDamagingHit(damage, target, source, move) {
 			if (this.checkMoveMakesContact(move, source, target)) {
@@ -743,7 +743,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 		rating: 4,
 		num: -31,
 	},
-	archetype: {
+	archetype: { // for Spirited Away
 		shortDesc: "Lowering a target's stat boosts this Pokémon the same amount.",
 		onAnyAfterBoost(boost, target, source, effect) {
 			const pokemon = this.effectState.target;
