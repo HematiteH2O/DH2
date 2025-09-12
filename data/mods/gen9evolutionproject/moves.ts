@@ -561,25 +561,15 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 		priority: 3,
 		flags: {bypasssub: 1, noassist: 1, failcopycat: 1, allyanim: 1, cantusetwice: 1},
 		onHit(target, source) {
+			const stolenBoosts: Partial<BoostsTable> = {};
 			let i: BoostID;
-			for (i in target.boosts) {
-				source.boosts[i] = target.boosts[i];
+			for (i in target.boosts) stolenBoosts[i] = boost[i];
+			if (Object.keys(positiveBoosts).length > 0) {
+				this.boost(positiveBoosts, pokemon);
+				target.clearBoosts();
+				this.add('-clearboost', target);
 			}
-			const volatilesToCopy = ['dragoncheer', 'focusenergy', 'gmaxchistrike', 'laserfocus'];
-			for (const volatile of volatilesToCopy) {
-				if (target.volatiles[volatile]) {
-					source.addVolatile(volatile);
-					if (volatile === 'gmaxchistrike') source.volatiles[volatile].layers = target.volatiles[volatile].layers;
-					if (volatile === 'dragoncheer') source.volatiles[volatile].hasDragonType = target.volatiles[volatile].hasDragonType;
-				} else {
-					source.removeVolatile(volatile);
-				}
-			}
-			this.add('-copyboost', source, target, '[from] move: Total Eclipse');
-			target.clearBoosts();
-			this.add('-clearboost', target);
-			this.add('-message', `${source.illusion ? source.illusion.name : source.name} will take damage for ${target.illusion ? target.illusion.name : target.name} this turn!`);
-			target.addVolatile('totaleclipse');
+			if (target.addVolatile('totaleclipse')) this.add('-message', `${source.illusion ? source.illusion.name : source.name} will take damage for ${target.illusion ? target.illusion.name : target.name} this turn!`);
 		},
 		onPrepareHit(target, source, move) {
 			this.attrLastMove('[still]');
@@ -589,7 +579,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 		condition: {
 			duration: 1,
 			onDamage(damage, target, source, effect) {
-				if (effect.effectType !== 'Move' && this.effectState.source.isActive && this.effectState.source.hp) {
+				if (effect.effectType === 'Move' && this.effectState.source.isActive && this.effectState.source.hp) {
 					this.add('-message', `${this.effectState.source.illusion ? this.effectState.source.illusion.name : this.effectState.source.name} took damage for ${target.illusion ? target.illusion.name : target.name}!`);
 					this.damage(this.effectState.source(damage), source, target);
 					return false;
@@ -701,8 +691,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 		self: {
 			onHit(pokemon) {
 				const bestStat = pokemon.getBestStat(false, true);
-				this.boost({[bestStat]: 1}, pokemon);
-				pokemon.cureStatus();
+				if (pokemon.cureStatus()) this.boost({[bestStat]: 1}, pokemon);
 			},
 		},
 		onPrepareHit(target, source, move) {
