@@ -1990,7 +1990,7 @@ export const Pokedex: {[speciesid: string]: ModdedSpeciesData} = {
 		movepoolAdditions: ["aromatherapy", "refresh", "dracometeor", "psychicnoise", "psychicterrain"],
 		movepoolDeletions: ["nastyplot", "superpower", "zapcannon", "counter", "mirrorcoat", "extremespeed"],
 
-		evos: "Riboxys U",
+		evos: ["Riboxys U"],
 		creator: "Paulluxx",
 	},
 	riboxysu: {
@@ -2019,7 +2019,7 @@ export const Pokedex: {[speciesid: string]: ModdedSpeciesData} = {
 		movepoolAdditions: ["aromatherapy", "electroshot", "refresh", "psychicnoise", "psychicterrain"],
 		movepoolDeletions: ["nastyplot", "recover", "counter", "mirrorcoat", "extremespeed"],
 
-		evos: "Riboxys C",
+		evos: ["Riboxys C"],
 		creator: "Paulluxx",
 	},
 	riboxysc: {
@@ -2049,7 +2049,7 @@ export const Pokedex: {[speciesid: string]: ModdedSpeciesData} = {
 		movepoolAdditions: ["aromatherapy", "refresh", "meteorbeam", "psychicnoise", "psychicterrain"],
 		movepoolDeletions: ["nastyplot", "cosmicpower", "superpower", "zapcannon", "extremespeed"],
 
-		evos: "Riboxys A",
+		evos: ["Riboxys A"],
 		creator: "Paulluxx",
 	},
 	riboxysa: {
@@ -2079,7 +2079,7 @@ export const Pokedex: {[speciesid: string]: ModdedSpeciesData} = {
 		movepoolAdditions: ["aromatherapy", "refresh", "skullbash", "psychicnoise", "psychicterrain"],
 		movepoolDeletions: ["nastyplot", "cosmicpower", "superpower", "zapcannon", "counter", "mirrorcoat"],
 
-		evos: "Riboxys G",
+		evos: ["Riboxys G"],
 		creator: "Paulluxx",
 	},
 	riboxysg: {
