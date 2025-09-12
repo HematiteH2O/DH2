@@ -1920,9 +1920,10 @@ export const Pokedex: {[speciesid: string]: ModdedSpeciesData} = {
 		name: "Zavender",
 		copyData: "Zacian",
 
-		types: ["Fighting", "Ghost"],
-		baseStats: {hp: 80, atk: 92, def: 70, spa: 70, spd: 60, spe: 108},
-		abilities: {0: "Aerilate", 1: "Wind Rider", H: "Inspirit"},
+		types: ["Steel"],
+		baseStats: {hp: 80, atk: 80, def: 80, spa: 80, spd: 80, spe: 80},
+		abilities: {0: "Noble Potential"},
+		movepoolDeletions: ["airslash", "assurance", "brutalswing", "falseswipe", "mistyterrain", "nobleroar", "poisonjab", "psychocut", "quickguard", "sacredsword", "solarblade", "swordsdance"],
 
 		evos: ["Zacian", "Zamazenta"],
 		creator: "Gravity Monkey",
