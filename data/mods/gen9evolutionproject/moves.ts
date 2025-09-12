@@ -604,7 +604,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 			let i: BoostID;
 			for (i in target.boosts) stolenBoosts[i] = target.boosts[i];
 			if (Object.keys(stolenBoosts).length > 0) {
-				this.boost(stolenBoosts, pokemon);
+				this.boost(stolenBoosts, source);
 				target.clearBoosts();
 				this.add('-clearboost', target);
 			}
