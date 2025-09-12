@@ -537,7 +537,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 				}
 				for (const debuff of targets) {
 					if (targets.length === 1) this.add('-message', `${debuff.illusion ? debuff.illusion.name : debuff.name} was covered in slime!`);
-					this.boost({atk: -1, spa: -1}, debuff, source);
+					this.boost({atk: -1, spa: -1}, debuff, pokemon);
 				}
 			}
 		},
