@@ -528,7 +528,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 			if (!target || target.fainted || target.hp <= 0) {
 				const targets: Pokemon[] = [];
 				for (const valid of this.getAllActive()) {
-					targets.push(pokemon);
+					targets.push(valid);
 					// not going to care about being adjacent because there are no Triples right now and it seems like it stops counting when the target faints
 				}
 				if (!targets.length) return;
@@ -537,7 +537,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 				}
 				for (const debuff of targets) {
 					if (targets.length === 1) this.add('-message', `${debuff.illusion ? debuff.illusion.name : debuff.name} was covered in slime!`);
-					this.boost({atk: -1, spa: -1}, debuff);
+					this.boost({atk: -1, spa: -1}, debuff, pokemon);
 				}
 			}
 		},
