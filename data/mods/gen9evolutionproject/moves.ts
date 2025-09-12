@@ -422,6 +422,10 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 		priority: 0,
 		flags: {contact: 1, bite: 1, allyanim: 1, metronome: 1, futuremove: 1},
 		ignoreImmunity: true,
+		secondary: {
+			chance: 100,
+			status: 'psn',
+		},
 		onTry(source, target) {
 			if (this.canSwitch(source.side)) {
 				if (!target.side.addSlotCondition(target, 'pranceandpierce')) return false;
@@ -482,14 +486,12 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 					this.add('-message', `${source.illusion ? source.illusion.name : source.name} pranced back onto the field!`);
 				}
 				this.add('-message', `${target.illusion ? target.illusion.name : target.name} was pierced by the Prance and Pierce attack!`);
-				onPrepareHit(target, source, move) {
-					this.attrLastMove('[still]');
-					if (source.isActive) {
-						this.add('-anim', source, "Super Fang", target);
-					} else {
-						this.add('-anim', target, "Super Fang", target);
-					}
-				},
+				this.attrLastMove('[still]');
+				if (source.isActive) {
+					this.add('-anim', source, "Super Fang", target);
+				} else {
+					this.add('-anim', target, "Super Fang", target);
+				}
 				target.removeVolatile('Protect');
 				target.removeVolatile('Endure');
 	
@@ -502,7 +504,6 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 				const hitMove = new this.dex.Move(data.moveData) as ActiveMove;
 	
 				this.actions.trySpreadMoveHit([target], data.source, hitMove, true);
-				target.setStatus('psn', source, data.move);
 				if (data.source.isActive && data.source.hasItem('lifeorb') && this.gen >= 5) {
 					this.singleEvent('AfterMoveSecondarySelf', data.source.getItem(), data.source.itemState, data.source, target, data.source.getItem());
 				}
