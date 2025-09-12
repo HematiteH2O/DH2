@@ -1809,6 +1809,7 @@ export const Pokedex: {[speciesid: string]: ModdedSpeciesData} = {
 		prevo: "Mime Jr.",
 		evoType: "other",
 		evoCondition: "A newly-discovered evolution",
+		evos: ["Mr. Slime"],
 		creator: "Hematite",
 	},
 	mrthyme: {
@@ -1958,6 +1959,7 @@ export const Pokedex: {[speciesid: string]: ModdedSpeciesData} = {
 
 		prevo: "Grubbin",
 		evoType: "other",
+		evos: ["Charjouleak"],
 		evoCondition: "A newly-discovered evolution",
 		creator: "lydian",
 	},
@@ -1977,7 +1979,125 @@ export const Pokedex: {[speciesid: string]: ModdedSpeciesData} = {
 		creator: "lydian",
 	},
 
-	// Riboxys line here one sec
+	// I hope I did these movepools right aksdjhf
+	uraxys: {
+		name: "Uraxys",
+		copyData: "Deoxys",
+
+		types: ["Dragon", "Poison"],
+		baseStats: {hp: 53, atk: 53, def: 53, spa: 59, spd: 53, spe: 149},
+		abilities: {0: "Patch Note", H: "Two-Minded", S: "Beast Boost"},
+		movepoolAdditions: ["aromatherapy", "refresh", "dracometeor", "psychicnoise", "psychicterrain"],
+		movepoolDeletions: ["nastyplot", "superpower", "zapcannon", "counter", "mirrorcoat", "extremespeed"],
+
+		evos: "Riboxys U",
+		creator: "Paulluxx",
+	},
+	riboxysu: {
+		name: "Riboxys U",
+		copyData: "Deoxys",
+
+		types: ["Dragon", "Poison"],
+		baseStats: {hp: 83, atk: 83, def: 83, spa: 89, spd: 83, spe: 149},
+		abilities: {0: "Patch Note", H: "Two-Minded", S: "Beast Boost"},
+		movepoolAdditions: ["aromatherapy", "refresh", "dracometeor", "psychicnoise", "psychicterrain"],
+		movepoolDeletions: ["nastyplot", "superpower", "zapcannon", "counter", "mirrorcoat", "extremespeed"],
+
+		prevo: "Uraxys",
+		evoType: "other",
+		evoCondition: "A newly-discovered evolution",
+		creator: "Paulluxx",
+	},
+	cytoxys: {
+		name: "Cytoxys",
+		copyData: "Deoxys-Attack",
+		copyMoves: "Deoxys",
+
+		types: ["Bug", "Electric"],
+		baseStats: {hp: 53, atk: 59, def: 53, spa: 53, spd: 149, spe: 53},
+		abilities: {0: "Patch Note", H: "Two-Minded", S: "Beast Boost"},
+		movepoolAdditions: ["aromatherapy", "electroshot", "refresh", "psychicnoise", "psychicterrain"],
+		movepoolDeletions: ["nastyplot", "recover", "counter", "mirrorcoat", "extremespeed"],
+
+		evos: "Riboxys C",
+		creator: "Paulluxx",
+	},
+	riboxysc: {
+		name: "Riboxys C",
+		copyData: "Deoxys-Attack",
+		copyMoves: "Deoxys",
+
+		types: ["Bug", "Electric"],
+		baseStats: {hp: 83, atk: 89, def: 83, spa: 83, spd: 149, spe: 83},
+		abilities: {0: "Patch Note", H: "Two-Minded", S: "Beast Boost"},
+		movepoolAdditions: ["aromatherapy", "electroshot", "refresh", "psychicnoise", "psychicterrain"],
+		movepoolDeletions: ["nastyplot", "recover", "counter", "mirrorcoat", "extremespeed"],
+
+		prevo: "Cytoxys",
+		evoType: "other",
+		evoCondition: "A newly-discovered evolution",
+		creator: "Paulluxx",
+	},
+	adexys: {
+		name: "Adexys",
+		copyData: "Deoxys-Defense",
+		copyMoves: "Deoxys",
+
+		types: ["Ghost", "Rock"],
+		baseStats: {hp: 149, atk: 53, def: 53, spa: 53, spd: 59, spe: 53},
+		abilities: {0: "Patch Note", H: "Two-Minded", S: "Beast Boost"},
+		movepoolAdditions: ["aromatherapy", "refresh", "meteorbeam", "psychicnoise", "psychicterrain"],
+		movepoolDeletions: ["nastyplot", "cosmicpower", "superpower", "zapcannon", "extremespeed"],
+
+		evos: "Riboxys A",
+		creator: "Paulluxx",
+	},
+	riboxysa: {
+		name: "Riboxys A",
+		copyData: "Deoxys-Defense",
+		copyMoves: "Deoxys",
+
+		types: ["Ghost", "Rock"],
+		baseStats: {hp: 149, atk: 83, def: 83, spa: 83, spd: 89, spe: 83},
+		abilities: {0: "Patch Note", H: "Two-Minded", S: "Beast Boost"},
+		movepoolAdditions: ["aromatherapy", "refresh", "meteorbeam", "psychicnoise", "psychicterrain"],
+		movepoolDeletions: ["nastyplot", "cosmicpower", "superpower", "zapcannon", "extremespeed"],
+
+		prevo: "Adexys",
+		evoType: "other",
+		evoCondition: "A newly-discovered evolution",
+		creator: "Paulluxx",
+	},
+	guaxys: {
+		name: "Guaxys",
+		copyData: "Deoxys-Speed",
+		copyMoves: "Deoxys",
+
+		types: ["Bug", "Normal"],
+		baseStats: {hp: 53, atk: 53, def: 149, spa: 53, spd: 53, spe: 59},
+		abilities: {0: "Patch Note", H: "Two-Minded", S: "Beast Boost"},
+		movepoolAdditions: ["aromatherapy", "refresh", "skullbash", "psychicnoise", "psychicterrain"],
+		movepoolDeletions: ["nastyplot", "cosmicpower", "superpower", "zapcannon", "counter", "mirrorcoat"],
+
+		evos: "Riboxys G",
+		creator: "Paulluxx",
+	},
+	riboxysg: {
+		name: "Riboxys G",
+		copyData: "Deoxys-Speed",
+		copyMoves: "Deoxys",
+
+		types: ["Bug", "Normal"],
+		baseStats: {hp: 83, atk: 83, def: 149, spa: 83, spd: 83, spe: 89},
+		abilities: {0: "Patch Note", H: "Two-Minded", S: "Beast Boost"},
+		movepoolAdditions: ["aromatherapy", "refresh", "skullbash", "psychicnoise", "psychicterrain"],
+		movepoolDeletions: ["nastyplot", "cosmicpower", "superpower", "zapcannon", "counter", "mirrorcoat"],
+
+		prevo: "Guaxys",
+		evoType: "other",
+		evoCondition: "A newly-discovered evolution",
+		creator: "Paulluxx",
+	},
 
 	stunfisk: {
 		inherit: true,
