@@ -528,10 +528,8 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 			if (!target || target.fainted || target.hp <= 0) {
 				const targets: Pokemon[] = [];
 				for (const valid of this.getAllActive()) {
-					if (valid.isAdjacent(target)) {
-						// This move affects every grounded Grass-type Pokemon in play.
-						targets.push(pokemon);
-					}
+					targets.push(pokemon);
+					// not going to care about being adjacent because there are no Triples right now and it seems like it stops counting when the target faints
 				}
 				if (!targets.length) return;
 				if (targets.length > 1) {
