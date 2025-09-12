@@ -481,7 +481,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 					this.hint(`${move.name} did not hit because the target is ${(target.fainted ? 'fainted' : 'the user')}.`);
 					return;
 				}
-				if (source && !source.isActive && source.hp && this.canSwitch(source.Side)) {
+				if (source && !source.isActive && source.hp && this.canSwitch(source.side)) {
 					switchIn(source, data.sourcePosition);
 					this.add('-message', `${source.illusion ? source.illusion.name : source.name} pranced back onto the field!`);
 				}
