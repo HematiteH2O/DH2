@@ -669,7 +669,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				ally.addedType = newAllyAddedType;
 
 				// and... this is just easier okay ;-;
-				source.knownType = true;
+				pokemon.knownType = true;
 				ally.knownType = true;
 
 				const bestStat = ally.getBestStat(false, true);
