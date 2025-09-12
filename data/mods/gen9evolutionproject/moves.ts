@@ -620,7 +620,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 			onDamage(damage, target, source, effect) {
 				if (effect.effectType === 'Move' && this.effectState.source.isActive && this.effectState.source.hp) {
 					this.add('-message', `${this.effectState.source.illusion ? this.effectState.source.illusion.name : this.effectState.source.name} took damage for ${target.illusion ? target.illusion.name : target.name}!`);
-					this.damage(this.effectState.source(damage), source, target);
+					this.damage(damage, this.effectState.source, source, effect);
 					return false;
 				}
 			},
