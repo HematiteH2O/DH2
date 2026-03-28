@@ -87,11 +87,11 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						if (species.abilities[0]) {
 							let ability = this.dex.abilities.get(species.abilities[0]);
 							if (ability.num && ability.num < 0) { // report custom Abilities only
-								customGuide += `<br><div class="message"><li class="result"><span class="col namecol">${ability.name}</span>`;
+								customGuide += `<br><div class="message"><li class="result"><span class="col namecol"><strong>${ability.name}</strong></span>`;
 								if (ability.longDesc) {
-										customGuide += `<span class="col abilitydesccol">${ability.longDesc}</span>`;
+										customGuide += `<br><font size="2" color="#686868">"${ability.longDesc}</font>`;
 								} else if (ability.shortDesc) {
-										customGuide += `<span class="col abilitydesccol">${ability.shortDesc}</span>`;
+										customGuide += `<br><font size="2" color="#686868">"${ability.shortDesc}</font>`;
 								}
 								customGuide += `</li></div>`;
 							}
@@ -99,11 +99,11 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						if (species.abilities[1]) {
 							let ability = this.dex.abilities.get(species.abilities[1]);
 							if (ability.num && ability.num < 0) { // report custom Abilities only
-								customGuide += `<br><div class="message"><li class="result"><span class="col namecol">${ability.name}</span>`;
+								customGuide += `<br><div class="message"><li class="result"><span class="col namecol"><strong>${ability.name}</strong></span>`;
 								if (ability.longDesc) {
-										customGuide += `<span class="col abilitydesccol">${ability.longDesc}</span>`;
+										customGuide += `<br><font size="2" color="#686868">"${ability.longDesc}</font>`;
 								} else if (ability.shortDesc) {
-										customGuide += `<span class="col abilitydesccol">${ability.shortDesc}</span>`;
+										customGuide += `<br><font size="2" color="#686868">"${ability.shortDesc}</font>`;
 								}
 								customGuide += `</li></div>`;
 							}
@@ -111,11 +111,11 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						if (species.abilities['H']) {
 							let ability = this.dex.abilities.get(species.abilities['H']);
 							if (ability.num && ability.num < 0) { // report custom Abilities only
-								customGuide += `<br><div class="message"><li class="result"><span class="col namecol">${ability.name}</span>`;
+								customGuide += `<br><div class="message"><li class="result"><span class="col namecol"><strong>${ability.name}</strong></span>`;
 								if (ability.longDesc) {
-										customGuide += `<span class="col abilitydesccol">${ability.longDesc}</span>`;
+										customGuide += `<br><font size="2" color="#686868">"${ability.longDesc}</font>`;
 								} else if (ability.shortDesc) {
-										customGuide += `<span class="col abilitydesccol">${ability.shortDesc}</span>`;
+										customGuide += `<br><font size="2" color="#686868">"${ability.shortDesc}</font>`;
 								}
 								customGuide += `</li></div>`;
 							}
@@ -123,11 +123,11 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						if (species.abilities['S']) {
 							let ability = this.dex.abilities.get(species.abilities['S']);
 							if (ability.num && ability.num < 0) { // report custom Abilities only
-								customGuide += `<br><div class="message"><li class="result"><span class="col namecol">${ability.name}</span>`;
+								customGuide += `<br><div class="message"><li class="result"><span class="col namecol"><strong>${ability.name}</strong></span>`;
 								if (ability.longDesc) {
-										customGuide += `<span class="col abilitydesccol">${ability.longDesc}</span>`;
+										customGuide += `<br><font size="2" color="#686868">"${ability.longDesc}</font>`;
 								} else if (ability.shortDesc) {
-										customGuide += `<span class="col abilitydesccol">${ability.shortDesc}</span>`;
+										customGuide += `<br><font size="2" color="#686868">"${ability.shortDesc}</font>`;
 								}
 								customGuide += `</li></div>`;
 							}
@@ -142,11 +142,11 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 									if (power < 2) power = "—";
 									let acc = move.accuracy;
 									if (acc === true) acc = "—";
-									customGuide += `<br><div class="message"><ul class="utilichart"><li class="result"><span class="col movenamecol">${move.name}</span><span class="col typecol"><img src="https://play.pokemonshowdown.com/sprites/types/${move.type}.png" alt="${move.type} width="32" height="14"><img src="https://play.pokemonshowdown.com/sprites/categories/${move.category}.png" alt="${move.category}" width="32" height="14"></span><span class="col labelcol"><em>Power</em><br>${power}</span><span class="col widelabelcol"><em>Accuracy</em><br>${acc}</span><span class="col pplabelcol"><em>PP</em><br>${Math.floor(move.pp * 8 / 5)}</span></li></ul></div>`;
+									customGuide += `<br><div class="message"><ul class="utilichart"><li class="result"><span class="col movenamecol"><strong>${move.name}</strong></span><span class="col typecol"><img src="https://play.pokemonshowdown.com/sprites/types/${move.type}.png" alt="${move.type} width="32" height="14"><img src="https://play.pokemonshowdown.com/sprites/categories/${move.category}.png" alt="${move.category}" width="32" height="14"></span><span class="col labelcol"><em>Power</em><br>${power}</span><span class="col widelabelcol"><em>Accuracy</em><br>${acc}</span><span class="col pplabelcol"><em>PP</em><br>${Math.floor(move.pp * 8 / 5)}</span></li></ul></div>`;
 									if (move.longDesc) {
-										customGuide += `<span class="col movedesccol">${move.longDesc}</span>`;
+										customGuide += `<font size="2" color="#686868">"${move.longDesc}</font>`;
 									} else if (move.shortDesc) {
-										customGuide += `<span class="col movedesccol">${move.shortDesc}</span>`;
+										customGuide += `<font size="2" color="#686868">"${move.shortDesc}</font>`;
 									}
 								}
 							}
