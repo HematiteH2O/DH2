@@ -536,7 +536,6 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 		accuracy: 90,
 		basePower: 25,
 		basePowerCallback(pokemon, target, move) {
-			if (move.hit === 3) move.selfSwitch = true; // I hope this works
 			return 25 * move.hit;
 		},
 		onTryMove(pokemon, target, move) {
@@ -544,6 +543,9 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 			this.add('-fail', pokemon, 'move: Grand Finale');
 			this.attrLastMove('[still]');
 			return null;
+		},
+		onDamage(damage, target, source, move) {
+			if (damage >= target.hp || move.hit === 3) move.selfSwitch = true; // I hope this works
 		},
 		onAfterMove(pokemon) {
 			pokemon.setType(pokemon.getTypes(true).map(type => type === "Fire" ? "???" : type));
@@ -566,7 +568,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 		type: "Fire",
 		zMove: {basePower: 120},
 		maxMove: {basePower: 140},
-		longDesc: `A consecutive three-strike attack that becomes more powerful with each successful hit. <em>(25 -> 50 -> 75)</em><br>After using this move, the user will no longer be Fire type. <em>(Fails if the user is not Fire-type.)</em><br>If it lands all three hits, the user rushes back to switch places with a party Pokémon in waiting.`,
+		longDesc: `A consecutive three-strike attack that becomes more powerful with each successful hit. <em>(25 -> 50 -> 75)</em><br>After using this move, the user will no longer be Fire type. <em>(Fails if the user is not Fire-type.)</em><br>If it lands all three hits or knocks out the target, the user rushes back to switch places with a party Pokémon in waiting.`,
 		shortDesc: "Hits up to 3 times (25 -> 50 -> 75). Removes Fire type; if hits all 3, pivots out.",
 	},
 	slimecannon: {
