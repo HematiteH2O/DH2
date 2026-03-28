@@ -14,7 +14,7 @@ export const Formats: FormatData[] = [
 			'Tapu Koko', 'Tapu Lele', 'Tapu Bulu', 'Tapu Fini', 'Zacian', 'Zamazenta', 'Deoxys',
 			'Moody', 'Baton Pass', 'Shed Tail', 'Last Respects',
 			// temporary measure pending bugfix:
-			'Lopunny-Kitakami' ++ 'Wish',
+			'Lopunny-Kitakami ++ Wish',
 		],
 		onValidateTeam(team, format) {
 			/**@type {{[k: string]: true}} */
