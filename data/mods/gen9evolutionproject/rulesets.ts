@@ -94,6 +94,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 										customGuide += `<span class="col abilitydesccol">${ability.shortDesc}</span>`;
 								}
 								customGuide += `</li><br>`;
+							}
 						}
 						if (species.abilities[1]) {
 							let ability = this.dex.abilities.get(species.abilities[1]);
@@ -105,6 +106,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 										customGuide += `<span class="col abilitydesccol">${ability.shortDesc}</span>`;
 								}
 								customGuide += `</li><br>`;
+							}
 						}
 						if (species.abilities['H']) {
 							let ability = this.dex.abilities.get(species.abilities['H']);
@@ -116,6 +118,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 										customGuide += `<span class="col abilitydesccol">${ability.shortDesc}</span>`;
 								}
 								customGuide += `</li><br>`;
+							}
 						}
 						if (species.abilities['S']) {
 							let ability = this.dex.abilities.get(species.abilities['S']);
@@ -127,6 +130,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 										customGuide += `<span class="col abilitydesccol">${ability.shortDesc}</span>`;
 								}
 								customGuide += `</li><br>`;
+							}
 						}
 						// custom moves
 						if (species.movepoolAdditions) {
