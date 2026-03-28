@@ -144,9 +144,9 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 									if (acc === true) acc = "—";
 									customGuide += `<br><div class="message"><ul class="utilichart"><li class="result"><span class="col movenamecol"><strong>${move.name}</strong></span><span class="col typecol"><img src="https://play.pokemonshowdown.com/sprites/types/${move.type}.png" alt="${move.type} width="32" height="14"><img src="https://play.pokemonshowdown.com/sprites/categories/${move.category}.png" alt="${move.category}" width="32" height="14"></span><span class="col labelcol"><em>Power</em><br>${power}</span><span class="col widelabelcol"><em>Accuracy</em><br>${acc}</span><span class="col pplabelcol"><em>PP</em><br>${Math.floor(move.pp * 8 / 5)}</span></li></ul></div>`;
 									if (move.longDesc) {
-										customGuide += `<div class="message"><font color="#686868">${move.longDesc}</font></div>`;
+										customGuide += `<span width="488px"><font size="8px" color="#777777">${move.longDesc}</font></span>`;
 									} else if (move.shortDesc) {
-										customGuide += `<div class="message"><font color="#686868">${move.shortDesc}</font></div>`;
+										customGuide += `<span width="488px"><font size="8px" color="#777777">${move.shortDesc}</font></span>`;
 									}
 								}
 							}
