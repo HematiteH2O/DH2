@@ -17,7 +17,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 				let hideBox = `raw|<div class="infobox" open><details class ="details"><summary>Fakemon on ${side.name}'s team</summary>`;
 				for (const pokemon of side.pokemon) {
 					// add one more line between each Fakemon
-					if (extraLineBreak) hideBox += 	`<br>`;
+					if (extraLineBreak) hideBox += `<br><br>`;
 					else extraLineBreak = true;
 					
 					let species = this.dex.species.get(pokemon.species.name);
@@ -31,7 +31,61 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						hideBox += `<div class="message"><ul class="utilichart"><li class="result"><span class="col pokemonnamecol" style="white-space: nowrap">` + species.name + `</span> <span class="col typecol"><img src="http://play.pokemonshowdown.com/sprites/types/${species.types[0]}.png" alt="${species.types[0]}" height="14" width="32">`;
 						if (species.types[1]) hideBox += `<img src="http://play.pokemonshowdown.com/sprites/types/${species.types[1]}.png" alt="${species.types[1]}" height="14" width="32">`;
 						hideBox += `</span></li><br><li class="result"><span style="float: left ; min-height: 26px"><span class="col abilitycol">` + abilities + `</span><span class="col abilitycol"></span></span></li><br><li class="result"><span style="float: left ; min-height: 26px"><span class="col statcol"><em>HP</em><br>` + baseStats.hp + `</span> <span class="col statcol"><em>Atk</em><br>` + baseStats.atk + `</span> <span class="col statcol"><em>Def</em><br>` + baseStats.def + `</span> <span class="col statcol"><em>SpA</em><br>` + baseStats.spa + `</span> <span class="col statcol"><em>SpD</em><br>` + baseStats.spd + `</span> <span class="col statcol"><em>Spe</em><br>` + baseStats.spe + `</span> </span></li><li style="clear: both"></li></ul></div>`;
-						if (species.creator) hideBox += `<div class="hint">${species.name} was created by ${species.creator}!</div>`;
+						
+						let customGuide = `raw|<div class="infobox" open><details class ="details"><summary>More details on ${species.name}</summary>`;
+						// creator
+						if (species.creator) {
+							customGuide += `<div class="hint"><br>${species.name} was created by ${species.creator}!</div><br>`;
+						}
+						// movepool changes
+						const gen9only = [
+							'Plankteenie', 'Mareanie-Drifter', 'Toxapex-Glacial', 'Nemesyst', 'Numel-Dormant', 'Dormedary', 'Dormaderupt',
+							'Uraxys', 'Cytoxys', 'Adexys', 'Guaxys', 'Riboxys-U', 'Riboxys-C', 'Riboxys-A', 'Riboxys-G',
+						];
+						customGuide += `<br><div class="hint">Its movepool is based on ${species.copyMoves ? species.copyMoves : species.copyData}'s`;
+						if (gen9only.includes(species.name)) customGuide += ` <strong>Gen IX</strong> movepool`;
+						if (species.movepoolAdditions) {
+							customGuide += `,<br>and it gained the move`;
+							if (species.movepoolAdditions.length > 1) customGuide += `s`;
+							let order = 0;
+							for (const moveid of species.movepoolAdditions) {
+								order++;
+								let move = this.dex.moves.get(moveid);
+								if (order < movepoolAdditions.length) {
+									customGuide += ` ${move.name}`;
+									if (order + 1 < movepoolAdditions.length) customGuide += `,`;
+								}
+								else {
+									if (movepoolAdditions.length !== 1) customGuide += ` and`;
+									customGuide += ` ${move.name}`;
+								}
+							}
+						}
+						if (species.movepoolDeletions) {
+							customGuide += `,<br>but it lost the move`;
+							if (species.movepoolDeletions.length > 1) customGuide += `s`;
+							let order = 0;
+							for (const moveid of species.movepoolDeletions) {
+								order++;
+								let move = this.dex.moves.get(moveid);
+								if (order < movepoolDeletions.length) {
+									customGuide += ` ${move.name}`;
+									if (order + 1 < movepoolDeletions.length) customGuide += `,`;
+								}
+								else {
+									if (movepoolDeletions.length !== 1) customGuide += ` and`;
+									customGuide += ` ${move.name}`;
+								}
+							}
+						}
+						if (!species.movepoolAdditions && !species.movepoolDeletions) customGuide += ` with no changes`;
+						customGuide += `.</div><br>`;
+						// custom Abilities
+						// each should start with <br> and end with <br> for spacing
+						// custom moves
+						// each should start with <br> and end with <br> for spacing
+						let customGuide += `</details></div>`;
+						hideBox += customGuide;
 					}
 				}
 				hideBox += 	`</details></div>`;
