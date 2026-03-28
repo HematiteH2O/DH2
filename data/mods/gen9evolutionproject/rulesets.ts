@@ -142,7 +142,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 									if (power < 2) power = "—";
 									let acc = move.accuracy;
 									if (acc === true) acc = "—";
-									customGuide += `<br><div class="message"><ul class="utilichart"><li class="result"><span class="col movenamecol"><strong>${move.name}</strong></span><span class="col typecol"><img src="//play.pokemonshowdown.com/sprites/types/${move.type}.png" alt="${move.type} width="32" height="14"><img src="//play.pokemonshowdown.com/sprites/types/${move.category}.png" alt="${move.category} width="32" height="14"></span><span class="col labelcol"><em>Power</em><br>${power}</span><span class="col widelabelcol"><em>Accuracy</em><br>${acc}</span><span class="col pplabelcol"><em>PP</em><br>${Math.floor(move.pp * 8 / 5)}</span>`;
+									customGuide += `<br><div class="message"><ul class="utilichart"><li class="result"><span class="col movenamecol"><strong>${move.name}</strong></span><span class="col typecol"><img src="//play.pokemonshowdown.com/sprites/types/${move.type}.png" alt="${move.type} width="32" height="14"><img src="//play.pokemonshowdown.com/sprites/types/${move.category}.png" alt="${move.category}" width="32" height="14"></span><span class="col labelcol"><em>Power</em><br>${power}</span><span class="col widelabelcol"><em>Accuracy</em><br>${acc}</span><span class="col pplabelcol"><em>PP</em><br>${Math.floor(move.pp * 8 / 5)}</span>`;
 									if (move.longDesc) {
 										customGuide += `<span class="col movedesccol">${move.longDesc}</span>`;
 									} else if (move.shortDesc) {
