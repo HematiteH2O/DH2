@@ -181,6 +181,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				this.runSwitch(pokemon);
 				
 				// additional REALLY janky Prance and Pierce hard-coding...
+				console.log(side.slotConditions);
+				for (const slotConditionPosition in side.slotConditions) {
+					console.log(slotConditionPosition);
+					console.log(side.slotConditions[slotConditionPosition]);
+				}
 				if (side.slotConditions[prevPosition]) {
 					console.log("rescuing stray slot conditions");
 					for (const id in side.slotConditions[prevPosition]) {
