@@ -597,7 +597,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 		category: "Status",
 		name: "Total Eclipse",
 		pp: 10,
-		priority: 3,
+		priority: 0,
 		flags: {bypasssub: 1, noassist: 1, failcopycat: 1, allyanim: 1, cantusetwice: 1},
 		onHit(target, source) {
 			const stolenBoosts: Partial<BoostsTable> = {};
