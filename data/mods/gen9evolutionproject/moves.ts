@@ -496,8 +496,8 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 					return;
 				}
 				if (source && !source.isActive && source.hp && this.canSwitch(source.side)) {
-					this.actions.switchIn(source, data.sourcePosition + 1);
-					console.log(`switched into: ` + data.sourcePosition + 1);
+					this.actions.switchIn(source, data.sourcePosition - 1);
+					console.log(`switched into: ` + data.sourcePosition - 1);
 					console.log(`new source position: ` + source.position);
 					this.add('-message', `${source.illusion ? source.illusion.name : source.name} pranced back onto the field!`);
 				}
