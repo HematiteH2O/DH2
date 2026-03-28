@@ -36,7 +36,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						
 						// creator
 						if (species.creator) {
-							customGuide += `<div class="hint"><br>${species.name} was created by ${species.creator}!</div><br>`;
+							customGuide += `<div class="hint"><br>${species.name} was created by ${species.creator}!</div>`;
 						}
 						
 						// movepool changes
@@ -81,57 +81,58 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 							}
 						}
 						if (!species.movepoolAdditions && !species.movepoolDeletions) customGuide += ` with no changes`;
-						customGuide += `.</div><br>`;
+						customGuide += `.</div>`;
 						
 						// custom Abilities
 						if (species.abilities[0]) {
 							let ability = this.dex.abilities.get(species.abilities[0]);
 							if (ability.num && ability.num < 0) { // report custom Abilities only
-								customGuide += `<br><li class="result"><span class="col namecol"><strong>${species.abilities[0]}</strong></span>`;
+								customGuide += `<br><div class="message"><ul class="utilichart"><li class="result"><span class="col namecol"><strong>${ability.name}</strong></span>`;
 								if (ability.longDesc) {
 										customGuide += `<span class="col abilitydesccol">${ability.longDesc}</span>`;
 								} else if (ability.shortDesc) {
 										customGuide += `<span class="col abilitydesccol">${ability.shortDesc}</span>`;
 								}
-								customGuide += `</li><br>`;
+								customGuide += `</li></ul></div>`;
 							}
 						}
 						if (species.abilities[1]) {
 							let ability = this.dex.abilities.get(species.abilities[1]);
 							if (ability.num && ability.num < 0) { // report custom Abilities only
-								customGuide += `<br><li class="result"><span class="col namecol"><strong>${species.abilities[0]}</strong></span>`;
+								customGuide += `<br><div class="message"><ul class="utilichart"><li class="result"><span class="col namecol"><strong>${ability.name}</strong></span>`;
 								if (ability.longDesc) {
 										customGuide += `<span class="col abilitydesccol">${ability.longDesc}</span>`;
 								} else if (ability.shortDesc) {
 										customGuide += `<span class="col abilitydesccol">${ability.shortDesc}</span>`;
 								}
-								customGuide += `</li><br>`;
+								customGuide += `</li></ul></div>`;
 							}
 						}
 						if (species.abilities['H']) {
 							let ability = this.dex.abilities.get(species.abilities['H']);
 							if (ability.num && ability.num < 0) { // report custom Abilities only
-								customGuide += `<br><li class="result"><span class="col namecol"><strong>${species.abilities[0]}</strong></span>`;
+								customGuide += `<br><div class="message"><ul class="utilichart"><li class="result"><span class="col namecol"><strong>${ability.name}</strong></span>`;
 								if (ability.longDesc) {
 										customGuide += `<span class="col abilitydesccol">${ability.longDesc}</span>`;
 								} else if (ability.shortDesc) {
 										customGuide += `<span class="col abilitydesccol">${ability.shortDesc}</span>`;
 								}
-								customGuide += `</li><br>`;
+								customGuide += `</li></ul></div>`;
 							}
 						}
 						if (species.abilities['S']) {
 							let ability = this.dex.abilities.get(species.abilities['S']);
 							if (ability.num && ability.num < 0) { // report custom Abilities only
-								customGuide += `<br><li class="result"><span class="col namecol"><strong>${species.abilities[0]}</strong></span>`;
+								customGuide += `<br><div class="message"><ul class="utilichart"><li class="result"><span class="col namecol"><strong>${ability.name}</strong></span>`;
 								if (ability.longDesc) {
 										customGuide += `<span class="col abilitydesccol">${ability.longDesc}</span>`;
 								} else if (ability.shortDesc) {
 										customGuide += `<span class="col abilitydesccol">${ability.shortDesc}</span>`;
 								}
-								customGuide += `</li><br>`;
+								customGuide += `</li></ul></div>`;
 							}
 						}
+						
 						// custom moves
 						if (species.movepoolAdditions) {
 							for (const moveid of species.movepoolAdditions) {
@@ -141,21 +142,21 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 									if (power < 2) power = "—";
 									let acc = move.accuracy;
 									if (acc === true) acc = "—";
-									customGuide += `<br><li class="result"><span class="col movenamecol"><strong>${move.name}</strong></span><span class="col typecol"><img src="//play.pokemonshowdown.com/sprites/types/${move.type}.png" alt="${move.type} width="32" height="14"><img src="//play.pokemonshowdown.com/sprites/types/${move.category}.png" alt="${move.category} width="32" height="14"></span><span class="col labelcol"><em>Power</em><br>${power}</span><span class="col widelabelcol"><em>Accuracy</em><br>${acc}</span><span class="col pplabelcol"><em>PP</em><br>${Math.floor(move.pp * 8 / 5)}</span>`;
+									customGuide += `<br><div class="message"><ul class="utilichart"><li class="result"><span class="col movenamecol"><strong>${move.name}</strong></span><span class="col typecol"><img src="//play.pokemonshowdown.com/sprites/types/${move.type}.png" alt="${move.type} width="32" height="14"><img src="//play.pokemonshowdown.com/sprites/types/${move.category}.png" alt="${move.category} width="32" height="14"></span><span class="col labelcol"><em>Power</em><br>${power}</span><span class="col widelabelcol"><em>Accuracy</em><br>${acc}</span><span class="col pplabelcol"><em>PP</em><br>${Math.floor(move.pp * 8 / 5)}</span>`;
 									if (move.longDesc) {
 										customGuide += `<span class="col movedesccol">${move.longDesc}</span>`;
 									} else if (move.shortDesc) {
 										customGuide += `<span class="col movedesccol">${move.shortDesc}</span>`;
 									}
-									customGuide += `</li><br>`;
+									customGuide += `</li></ul></div>`;
 								}
 							}
 						}
 
 						// other info
-						if (species.description) customGuide += `<div class="hint"><br>${species.description}</div><br>`;
+						if (species.description) customGuide += `<br><div class="hint"><br>${species.description}</div>`;
 						
-						customGuide += `</details></div>`;
+						customGuide += `<br></details></div>`;
 						hideBox += customGuide;
 					}
 				}
