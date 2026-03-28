@@ -134,7 +134,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						}
 						
 						// custom moves
-						if (species.movepoolAdditions) {fw
+						if (species.movepoolAdditions) {
 							for (const moveid of species.movepoolAdditions) {
 								let move = this.dex.moves.get(moveid);
 								if (move.num < 0) { // report custom moves only
