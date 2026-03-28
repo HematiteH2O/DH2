@@ -108,7 +108,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 								customGuide += `</li></div>`;
 							}
 						}
-						if (species.abilities['H') {
+						if (species.abilities['H']) {
 							let ability = this.dex.abilities.get(species.abilities['H']);
 							if (ability.num && ability.num < 0) { // report custom Abilities only
 								customGuide += `<br><div class="message"><li class="result"><span class="col namecol">${ability.name}</span>`;
@@ -121,7 +121,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 							}
 						}
 						if (species.abilities['S']) {
-							let ability = this.dex.abilities.get(species.abilities[0]);
+							let ability = this.dex.abilities.get(species.abilities['S']);
 							if (ability.num && ability.num < 0) { // report custom Abilities only
 								customGuide += `<br><div class="message"><li class="result"><span class="col namecol">${ability.name}</span>`;
 								if (ability.longDesc) {
