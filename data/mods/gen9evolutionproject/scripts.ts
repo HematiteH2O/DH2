@@ -1,4 +1,4 @@
-import {Pokemon, EffectState} from '...../sim/pokemon'; // for Prance and Pierce test
+import {Pokemon, EffectState} from '..../sim/pokemon'; // for Prance and Pierce test
 
 export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 	teambuilderConfig: {
