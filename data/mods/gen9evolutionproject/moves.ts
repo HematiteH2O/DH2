@@ -465,7 +465,6 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 						type: 'Ghost',
 					},
 				});
-				console.log(`Prance and Pierce source position: ` + source.position);
 				for (const side of this.sides) {
 					for (const active of side.active) {
 						active.switchFlag = false;
