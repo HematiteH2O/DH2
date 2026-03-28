@@ -549,8 +549,9 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 			pokemon.setType(pokemon.getTypes(true).map(type => type === "Fire" ? "???" : type));
 			this.add('-start', pokemon, 'typechange', pokemon.getTypes().join('/'), '[from] move: Burn Up'); // I think this still needs Burn Up's message
 		},
-		onAfterMoveSecondarySelf(pokemon, target, move) {
-			if (!target || target.fainted || target.hp <= 0) move.selfSwitch = true;
+		onDamagePriority: -101,
+		onDamage(damage, target, source, move) {
+			if (damage >= target.hp) move.selfSwitch = true;
 		},
 		category: "Physical",
 		name: "Grand Finale",
