@@ -51,12 +51,12 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 							for (const moveid of species.movepoolAdditions) {
 								order++;
 								let move = this.dex.moves.get(moveid);
-								if (order < movepoolAdditions.length) {
+								if (order < species.movepoolAdditions.length) {
 									customGuide += ` ${move.name}`;
-									if (order + 1 < movepoolAdditions.length) customGuide += `,`;
+									if (order + 1 < species.movepoolAdditions.length) customGuide += `,`;
 								}
 								else {
-									if (movepoolAdditions.length !== 1) customGuide += ` and`;
+									if (species.movepoolAdditions.length !== 1) customGuide += ` and`;
 									customGuide += ` ${move.name}`;
 								}
 							}
@@ -68,12 +68,12 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 							for (const moveid of species.movepoolDeletions) {
 								order++;
 								let move = this.dex.moves.get(moveid);
-								if (order < movepoolDeletions.length) {
+								if (order < species.movepoolDeletions.length) {
 									customGuide += ` ${move.name}`;
-									if (order + 1 < movepoolDeletions.length) customGuide += `,`;
+									if (order + 1 < species.movepoolDeletions.length) customGuide += `,`;
 								}
 								else {
-									if (movepoolDeletions.length !== 1) customGuide += ` and`;
+									if (species.movepoolDeletions.length !== 1) customGuide += ` and`;
 									customGuide += ` ${move.name}`;
 								}
 							}
