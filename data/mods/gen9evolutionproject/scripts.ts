@@ -92,6 +92,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				this.battle.hint("A switch failed because the Pokémon trying to switch in is already in.");
 				return false;
 			}
+			
+			const prevPosition = pokemon.position; // janky Prance and Pierce fix pt. 1
 	
 			const side = pokemon.side;
 			if (pos >= side.active.length) {
@@ -173,10 +175,21 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			if (isDrag && this.battle.gen === 2) pokemon.draggedIn = this.battle.turn;
 			pokemon.previouslySwitchedIn++;
 	
-			if ((isDrag && this.battle.gen >= 5) || (sourceEffect && sourceEffect === "Prance and Pierce")) { // modded for Prance and Pierce
+			if ((isDrag && this.battle.gen >= 5) || (sourceEffect && sourceEffect === "Prance and Pierce")) { // this line modded for Prance and Pierce
 				// runSwitch happens immediately so that Mold Breaker can make hazards bypass Clear Body and Levitate
 				this.battle.singleEvent('PreStart', pokemon.getAbility(), pokemon.abilityState, pokemon);
 				this.runSwitch(pokemon);
+				
+				// additional REALLY janky Prance and Pierce hard-coding...
+				if (side.slotConditions[prevPosition]) {
+					console.log("rescuing stray slot conditions");
+					for (const id in side.slotConditions[prevPosition]) {
+						side.slotConditions[pos][id] = side.slotConditions[prevPosition][id];
+						delete side.slotConditions[prevPosition][id];
+					}
+				} else {
+					console.log("no stray slot conditions found");
+				}
 			} else {
 				this.battle.queue.insertChoice({choice: 'runUnnerve', pokemon});
 				this.battle.queue.insertChoice({choice: 'runSwitch', pokemon});
