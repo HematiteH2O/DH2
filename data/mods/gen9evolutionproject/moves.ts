@@ -496,9 +496,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 					return;
 				}
 				if (source && !source.isActive && source.hp && this.canSwitch(source.side)) {
-					this.actions.switchIn(source, data.sourcePosition);
-					console.log(`switched into: ` + data.sourcePosition);
-					console.log(`new source position: ` + source.position);
+					this.actions.switchIn(source, data.sourcePosition, "Prance and Pierce");
 					this.add('-message', `${source.illusion ? source.illusion.name : source.name} pranced back onto the field!`);
 				}
 				this.add('-message', `${target.illusion ? target.illusion.name : target.name} was pierced by the Prance and Pierce attack!`);
