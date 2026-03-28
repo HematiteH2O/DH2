@@ -13,9 +13,13 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			}
 			for (const side of this.sides) {
 				let showFakemon = false;
-				let hideBox = `raw|<div class="infobox" open><details class ="details"><summary>${side.name}'s Fakemon</summary>`;
-				// if (showFakemon) {}
+				let extraLineBreak = false;
+				let hideBox = `raw|<div class="infobox" open><details class ="details"><summary>Fakemon on ${side.name}'s team</summary>`;
 				for (const pokemon of side.pokemon) {
+					// add one more line between each Fakemon
+					if (extraLineBreak) hideBox += 	`<br>`;
+					else extraLineBreak = true;
+					
 					let species = this.dex.species.get(pokemon.species.name);
 					if (species.copyData) { // all modded things in Evo have this
 						showFakemon = true;
@@ -26,7 +30,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						const baseStats = species.baseStats;
 						hideBox += `<div class="message"><ul class="utilichart"><li class="result"><span class="col pokemonnamecol" style="white-space: nowrap">` + species.name + `</span> <span class="col typecol"><img src="http://play.pokemonshowdown.com/sprites/types/${species.types[0]}.png" alt="${species.types[0]}" height="14" width="32">`;
 						if (species.types[1]) hideBox += `<img src="http://play.pokemonshowdown.com/sprites/types/${species.types[1]}.png" alt="${species.types[1]}" height="14" width="32">`;
-						hideBox += `</span> <span style="float: left ; min-height: 26px"><span class="col abilitycol">` + abilities + `</span><span class="col abilitycol"></span></span><br><span style="float: left ; min-height: 26px"><span class="col statcol"><em>HP</em><br>` + baseStats.hp + `</span> <span class="col statcol"><em>Atk</em><br>` + baseStats.atk + `</span> <span class="col statcol"><em>Def</em><br>` + baseStats.def + `</span> <span class="col statcol"><em>SpA</em><br>` + baseStats.spa + `</span> <span class="col statcol"><em>SpD</em><br>` + baseStats.spd + `</span> <span class="col statcol"><em>Spe</em><br>` + baseStats.spe + `</span> </span></li><li style="clear: both"></li></ul></div>`;
+						hideBox += `</span></li><br><li class="result"><span style="float: left ; min-height: 26px"><span class="col abilitycol">` + abilities + `</span><span class="col abilitycol"></span></span></li><br><li class="result"><span style="float: left ; min-height: 26px"><span class="col statcol"><em>HP</em><br>` + baseStats.hp + `</span> <span class="col statcol"><em>Atk</em><br>` + baseStats.atk + `</span> <span class="col statcol"><em>Def</em><br>` + baseStats.def + `</span> <span class="col statcol"><em>SpA</em><br>` + baseStats.spa + `</span> <span class="col statcol"><em>SpD</em><br>` + baseStats.spd + `</span> <span class="col statcol"><em>Spe</em><br>` + baseStats.spe + `</span> </span></li><li style="clear: both"></li></ul></div>`;
 						if (species.creator) hideBox += `<div class="hint">${species.name} was created by ${species.creator}!</div>`;
 					}
 				}
