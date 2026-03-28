@@ -11,10 +11,9 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 					this.add('poke', pokemon.side.id, details, '');
 				}
 			}
-			this.makeRequest('teampreview');
 			for (const side of this.sides) {
 				let showFakemon = false;
-				let hideBox = `raw|<button onclick="toggleBox()">${side.name}'s Fakemon:</button><div id="fakemonBox" style="display: none;">`;
+				let hideBox = `raw|<div class="infobox" open><details class ="details"><summary>${side.name}'s Fakemon</summary>`;
 				// if (showFakemon) {}
 				for (const pokemon of side.pokemon) {
 					let species = this.dex.species.get(pokemon.species.name);
@@ -31,7 +30,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						if (species.creator) hideBox += `<div class="hint">${species.name} was created by ${species.creator}!</div>`;
 					}
 				}
-				hideBox += 	`</div>`;
+				hideBox += 	`</details></div>`;
 				if (showFakemon) this.add(`${hideBox}`);
 			}
 		},
