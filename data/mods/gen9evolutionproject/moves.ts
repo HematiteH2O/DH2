@@ -544,8 +544,9 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 			this.attrLastMove('[still]');
 			return null;
 		},
+		onDamagePriority: -101,
 		onDamage(damage, target, source, move) {
-			if (damage >= target.hp || move.hit === 3) move.selfSwitch = true; // I hope this works
+			if (damage >= target.hp || move.hit === 3) move.selfSwitch = true;
 		},
 		onAfterMove(pokemon) {
 			pokemon.setType(pokemon.getTypes(true).map(type => type === "Fire" ? "???" : type));
