@@ -1,3 +1,5 @@
+import {Pokemon, EffectState} from '...../sim/pokemon'; // for Prance and Pierce test
+
 export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 	teambuilderConfig: {
 		excludeStandardTiers: true,
@@ -87,9 +89,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 	},
 	side: {
 		removeSlotCondition(target: Pokemon | number, status: string | Effect) {
-			console.log(`Wish target: ` + target);
+			console.log(status + ` target: ` + target);
 			if (target instanceof Pokemon) target = target.position;
-			console.log(`Wish target.position: ` + target);
+			console.log(status + ` target position: ` + target);
 			status = this.battle.dex.conditions.get(status) as Effect;
 			if (!this.slotConditions[target][status.id]) return false;
 			this.battle.singleEvent('End', status, this.slotConditions[target][status.id], this.active[target]);
