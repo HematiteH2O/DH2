@@ -496,21 +496,8 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 					return;
 				}
 				if (source && !source.isActive && source.hp && this.canSwitch(source.side)) {
-					const prevPosition = source.position;
-					const newActivePosition = data.sourcePosition;
-					
-					this.add('-message', `${source.illusion ? source.illusion.name : source.name} pranced back onto the field!`);
+					this.add('-message', `${source.illusion ? source.illusion.name : source.name} is ready to prance back onto the field!`);
 					this.actions.switchIn(source, data.sourcePosition, "Prance and Pierce");
-					
-					// hard-coding to fix the Wish interaction
-					console.log(`prevPosition is ` + prevPosition + ` - this is the one I expect to be 4`);
-					console.log(`newActivePosition is ` + newActivePosition + ` - this is the one I expect to be 0`);
-					if (source.side.slotConditions[prevPosition]) {
-						for (const id in source.side.slotConditions[prevPosition]) {
-							source.side.slotConditions[newActivePosition][id] = source.side.slotConditions[prevPosition][id];
-							delete source.side.slotConditions[prevPosition][id];
-						}
-					}
 				}
 				if (source && source.isActive && source.hp) { // don't resolve the move if Lopunny faints to hazards
 					this.add('-message', `${target.illusion ? target.illusion.name : target.name} was pierced by the Prance and Pierce attack!`);
