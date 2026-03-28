@@ -603,7 +603,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 		target: "normal",
 		type: "Poison",
 		contestType: "Clever",
-		longDesc: `A slimy, somewhat befuddling all-out attack.<br>When the user knocks out a target with this move, all remaining Pokémon adjacent to the target have their Attack and Sp. Atk lowered <em>(including the user and its allies)</em>.<br><em>(blocked by Bulletproof)</em>`,
+		longDesc: `A slimy, somewhat befuddling all-out attack.<br>When the user knocks out a target with this move, all remaining Pokémon adjacent to the target have their Attack and Sp. Atk lowered (including the user and its allies).<br><em>(blocked by Bulletproof)</em>`,
 		shortDesc: "If target is KOed, -1 to everyone's Attack and Sp. Atk.",
 	},
 	totaleclipse: {
