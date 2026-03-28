@@ -91,7 +91,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		removeSlotCondition(target: Pokemon | number, status: string | Effect) {
 			if (target instanceof Pokemon) target = target.position;
 			status = this.battle.dex.conditions.get(status) as Effect;
-			if (this.slotConditions[target]) target = 0; // modded for Prance and Pierce
+			
+			if (!this.slotConditions[target]) target = 0; // modded for Prance and Pierce
+			if (!this.slotConditions[target]) return false; // modded for Prance and Pierce
+			
 			if (!this.slotConditions[target][status.id]) return false;
 			this.battle.singleEvent('End', status, this.slotConditions[target][status.id], this.active[target]);
 			delete this.slotConditions[target][status.id];
