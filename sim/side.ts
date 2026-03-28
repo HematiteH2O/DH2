@@ -374,8 +374,11 @@ export class Side {
 	}
 
 	removeSlotCondition(target: Pokemon | number, status: string | Effect) {
+		console.log(`status: ` + status + `; target: ` + target); // modded
 		if (target instanceof Pokemon) target = target.position;
+		console.log(`status: ` + status + `; target: ` + target); // modded
 		status = this.battle.dex.conditions.get(status) as Effect;
+		console.log(`status: ` + status + `; target: ` + target); // modded
 		if (!this.slotConditions[target][status.id]) return false;
 		this.battle.singleEvent('End', status, this.slotConditions[target][status.id], this.active[target]);
 		delete this.slotConditions[target][status.id];
