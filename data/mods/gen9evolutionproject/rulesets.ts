@@ -14,10 +14,10 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			for (const side of this.sides) {
 				let showFakemon = false;
 				let extraLineBreak = false;
-				let hideBox = `raw|<div class="infobox" open><details class ="details"><summary>Fakemon on ${side.name}'s team</summary>`;
+				let hideBox = `<div class="infobox" open><details class ="details"><summary>Fakemon on ${side.name}'s team</summary>`;
 				for (const pokemon of side.pokemon) {
 					// add one more line between each Fakemon
-					if (extraLineBreak) hideBox += `<br><br>`;
+					if (extraLineBreak) hideBox += `<br>`;
 					else extraLineBreak = true;
 					
 					let species = this.dex.species.get(pokemon.species.name);
@@ -33,10 +33,12 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						hideBox += `</span></li><br><li class="result"><span style="float: left ; min-height: 26px"><span class="col abilitycol">` + abilities + `</span><span class="col abilitycol"></span></span></li><br><li class="result"><span style="float: left ; min-height: 26px"><span class="col statcol"><em>HP</em><br>` + baseStats.hp + `</span> <span class="col statcol"><em>Atk</em><br>` + baseStats.atk + `</span> <span class="col statcol"><em>Def</em><br>` + baseStats.def + `</span> <span class="col statcol"><em>SpA</em><br>` + baseStats.spa + `</span> <span class="col statcol"><em>SpD</em><br>` + baseStats.spd + `</span> <span class="col statcol"><em>Spe</em><br>` + baseStats.spe + `</span> </span></li><li style="clear: both"></li></ul></div>`;
 						
 						let customGuide = `raw|<div class="infobox" open><details class ="details"><summary>More details on ${species.name}</summary>`;
+						
 						// creator
 						if (species.creator) {
 							customGuide += `<div class="hint"><br>${species.name} was created by ${species.creator}!</div><br>`;
 						}
+						
 						// movepool changes
 						const gen9only = [
 							'Plankteenie', 'Mareanie-Drifter', 'Toxapex-Glacial', 'Nemesyst', 'Numel-Dormant', 'Dormedary', 'Dormaderupt',
@@ -45,7 +47,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						customGuide += `<br><div class="hint">Its movepool is based on ${species.copyMoves ? species.copyMoves : species.copyData}'s`;
 						if (gen9only.includes(species.name)) customGuide += ` <strong>Gen IX</strong> movepool`;
 						if (species.movepoolAdditions) {
-							customGuide += `,<br>and it gained the move`;
+							customGuide += `,<br>and it <strong>gained</strong> the move`;
 							if (species.movepoolAdditions.length > 1) customGuide += `s`;
 							let order = 0;
 							for (const moveid of species.movepoolAdditions) {
@@ -62,7 +64,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 							}
 						}
 						if (species.movepoolDeletions) {
-							customGuide += `,<br>but it lost the move`;
+							customGuide += `,<br>but it <strong>lost</strong> the move`;
 							if (species.movepoolDeletions.length > 1) customGuide += `s`;
 							let order = 0;
 							for (const moveid of species.movepoolDeletions) {
@@ -80,10 +82,46 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						}
 						if (!species.movepoolAdditions && !species.movepoolDeletions) customGuide += ` with no changes`;
 						customGuide += `.</div><br>`;
+						
 						// custom Abilities
-						// each should start with <br> and end with <br> for spacing
+						if (species.abilities[0]) {
+							let ability = this.dex.abilities.get(species.abilities[0]);
+							if (ability.num && ability.num < 0) { // report custom Abilities only
+								customGuide += `<br><li class="result"><span class="col namecol"><strong>${species.abilities[0]}</strong></span>`;
+								if (ability.longDesc) {
+										customGuide += `<span class="col abilitydesccol">${ability.longDesc}</span>`;
+								} else if (ability.shortDesc) {
+										customGuide += `<span class="col abilitydesccol">${ability.shortDesc}</span>`;
+								}
+								customGuide += `</li><br>
+						}
+						let abilities = species.abilities[0];
+						if (species.abilities[1]) abilities += ` / ${species.abilities[1]}`;
+						if (species.abilities['H']) abilities += ` // ${species.abilities['H']}`;
+						if (species.abilities['S']) abilities += ` // (${species.abilities['S']})`;
 						// custom moves
-						// each should start with <br> and end with <br> for spacing
+						if (species.movepoolAdditions) {
+							for (const moveid of species.movepoolAdditions) {
+								let move = this.dex.moves.get(moveid);
+								if (move.num < 0) { // report custom moves only
+									let power = move.basePower;
+									if (power < 2) power = "—";
+									let acc = move.accuracy;
+									if (acc === true) acc = "—";
+									customGuide += `<br><li class="result"><span class="col movenamecol"><strong>${move.name}</strong></span><span class="col typecol"><img src="//play.pokemonshowdown.com/sprites/types/${move.type}.png" alt="${move.type} width="32" height="14"><img src="//play.pokemonshowdown.com/sprites/types/${move.category}.png" alt="${move.category} width="32" height="14"></span><span class="col labelcol"><em>Power</em><br>${power}</span><span class="col widelabelcol"><em>Accuracy</em><br>${acc}</span><span class="col pplabelcol"><em>PP</em><br>${Math.floor(move.pp * 8 / 5)}</span>`;
+									if (move.longDesc) {
+										customGuide += `<span class="col movedesccol">${move.longDesc}</span>`;
+									} else if (move.shortDesc) {
+										customGuide += `<span class="col movedesccol">${move.shortDesc}</span>`;
+									}
+									customGuide += `</li><br>`;
+								}
+							}
+						}
+
+						// other info
+						if (species.description) customGuide += `<div class="hint"><br>${species.description}</div><br>`;
+						
 						customGuide += `</details></div>`;
 						hideBox += customGuide;
 					}
