@@ -536,6 +536,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 		accuracy: 90,
 		basePower: 25,
 		basePowerCallback(pokemon, target, move) {
+			if (move.hit === 3) move.selfSwitch = true;
 			return 25 * move.hit;
 		},
 		onTryMove(pokemon, target, move) {
@@ -544,13 +545,12 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 			this.attrLastMove('[still]');
 			return null;
 		},
-		onDamagePriority: -101,
-		onDamage(damage, target, source, move) {
-			if (damage >= target.hp || move.hit === 3) move.selfSwitch = true;
-		},
 		onAfterMove(pokemon) {
 			pokemon.setType(pokemon.getTypes(true).map(type => type === "Fire" ? "???" : type));
 			this.add('-start', pokemon, 'typechange', pokemon.getTypes().join('/'), '[from] move: Burn Up'); // I think this still needs Burn Up's message
+		},
+		onAfterMoveSecondarySelf(pokemon, target, move) {
+			if (!target || target.fainted || target.hp <= 0) move.selfSwitch = true;
 		},
 		category: "Physical",
 		name: "Grand Finale",
