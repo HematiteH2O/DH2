@@ -84,7 +84,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						// each should start with <br> and end with <br> for spacing
 						// custom moves
 						// each should start with <br> and end with <br> for spacing
-						let customGuide += `</details></div>`;
+						customGuide += `</details></div>`;
 						hideBox += customGuide;
 					}
 				}
