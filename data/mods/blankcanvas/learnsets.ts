@@ -4624,7 +4624,6 @@ export const Learnsets: {[k: string]: LearnsetData} = {
 			drainpunch: ["9L1"],
 			thunderwave: ["9L1"],
 			doubleedge: ["9L1"],
-			explosion: ["9L1"],
 			drainingkiss: ["9L1"],
 			thundershock: ["9L1"],
 			shockwave: ["9L1"],
