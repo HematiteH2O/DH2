@@ -465,6 +465,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 						type: 'Ghost',
 					},
 				});
+				console.log(`Prance and Pierce source position: ` + source.position);
 				for (const side of this.sides) {
 					for (const active of side.active) {
 						active.switchFlag = false;
@@ -496,6 +497,8 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 				}
 				if (source && !source.isActive && source.hp && this.canSwitch(source.side)) {
 					this.actions.switchIn(source, data.sourcePosition);
+					console.log(`switched into: ` + data.sourcePosition);
+					console.log(`new source position: ` + source.position);
 					this.add('-message', `${source.illusion ? source.illusion.name : source.name} pranced back onto the field!`);
 				}
 				this.add('-message', `${target.illusion ? target.illusion.name : target.name} was pierced by the Prance and Pierce attack!`);
