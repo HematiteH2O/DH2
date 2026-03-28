@@ -26,7 +26,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						let abilities = species.abilities[0];
 						if (species.abilities[1]) abilities += ` / ${species.abilities[1]}`;
 						if (species.abilities['H']) abilities += ` // ${species.abilities['H']}`;
-						if (species.abilities['S']) abilities += ` // (${species.abilities['S']})`;
+						if (species.abilities['S']) abilities += ` // <em>(${species.abilities['S']})</em>`;
 						const baseStats = species.baseStats;
 						hideBox += `<div class="message"><ul class="utilichart"><li class="result"><span class="col pokemonnamecol" style="white-space: nowrap">` + species.name + `</span> <span class="col typecol"><img src="http://play.pokemonshowdown.com/sprites/types/${species.types[0]}.png" alt="${species.types[0]}" height="14" width="32">`;
 						if (species.types[1]) hideBox += `<img src="http://play.pokemonshowdown.com/sprites/types/${species.types[1]}.png" alt="${species.types[1]}" height="14" width="32">`;
@@ -93,12 +93,41 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 								} else if (ability.shortDesc) {
 										customGuide += `<span class="col abilitydesccol">${ability.shortDesc}</span>`;
 								}
-								customGuide += `</li><br>
+								customGuide += `</li><br>`;
 						}
-						let abilities = species.abilities[0];
-						if (species.abilities[1]) abilities += ` / ${species.abilities[1]}`;
-						if (species.abilities['H']) abilities += ` // ${species.abilities['H']}`;
-						if (species.abilities['S']) abilities += ` // (${species.abilities['S']})`;
+						if (species.abilities[1]) {
+							let ability = this.dex.abilities.get(species.abilities[1]);
+							if (ability.num && ability.num < 0) { // report custom Abilities only
+								customGuide += `<br><li class="result"><span class="col namecol"><strong>${species.abilities[0]}</strong></span>`;
+								if (ability.longDesc) {
+										customGuide += `<span class="col abilitydesccol">${ability.longDesc}</span>`;
+								} else if (ability.shortDesc) {
+										customGuide += `<span class="col abilitydesccol">${ability.shortDesc}</span>`;
+								}
+								customGuide += `</li><br>`;
+						}
+						if (species.abilities['H']) {
+							let ability = this.dex.abilities.get(species.abilities['H']);
+							if (ability.num && ability.num < 0) { // report custom Abilities only
+								customGuide += `<br><li class="result"><span class="col namecol"><strong>${species.abilities[0]}</strong></span>`;
+								if (ability.longDesc) {
+										customGuide += `<span class="col abilitydesccol">${ability.longDesc}</span>`;
+								} else if (ability.shortDesc) {
+										customGuide += `<span class="col abilitydesccol">${ability.shortDesc}</span>`;
+								}
+								customGuide += `</li><br>`;
+						}
+						if (species.abilities['S']) {
+							let ability = this.dex.abilities.get(species.abilities['S']);
+							if (ability.num && ability.num < 0) { // report custom Abilities only
+								customGuide += `<br><li class="result"><span class="col namecol"><strong>${species.abilities[0]}</strong></span>`;
+								if (ability.longDesc) {
+										customGuide += `<span class="col abilitydesccol">${ability.longDesc}</span>`;
+								} else if (ability.shortDesc) {
+										customGuide += `<span class="col abilitydesccol">${ability.shortDesc}</span>`;
+								}
+								customGuide += `</li><br>`;
+						}
 						// custom moves
 						if (species.movepoolAdditions) {
 							for (const moveid of species.movepoolAdditions) {
