@@ -1,3 +1,5 @@
+import { Pokemon, EffectState } from '../../../sim/pokemon';
+
 export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 	teambuilderConfig: {
 		excludeStandardTiers: true,
@@ -85,6 +87,17 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		this.modData('FormatsData', customList[random2]).tier = "Pokémon of the Day!";
 		this.modData('FormatsData', customList[random3]).tier = "Pokémon of the Day!";
 	},
+	side: {
+		removeSlotCondition(target: Pokemon | number, status: string | Effect) {
+			if (target instanceof Pokemon) target = target.position;
+			status = this.battle.dex.conditions.get(status) as Effect;
+			if (this.slotConditions[target]) target = 0; // modded for Prance and Pierce
+			if (!this.slotConditions[target][status.id]) return false;
+			this.battle.singleEvent('End', status, this.slotConditions[target][status.id], this.active[target]);
+			delete this.slotConditions[target][status.id];
+			return true;
+		}
+	},
 	actions: {
 		// modded for Prance and Pierce
 		switchIn(pokemon: Pokemon, pos: number, sourceEffect: Effect | null = null, isDrag?: boolean) {
@@ -92,8 +105,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				this.battle.hint("A switch failed because the Pokémon trying to switch in is already in.");
 				return false;
 			}
-			
-			const prevPosition = pokemon.position; // janky Prance and Pierce fix pt. 1
 	
 			const side = pokemon.side;
 			if (pos >= side.active.length) {
@@ -179,22 +190,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// runSwitch happens immediately so that Mold Breaker can make hazards bypass Clear Body and Levitate
 				this.battle.singleEvent('PreStart', pokemon.getAbility(), pokemon.abilityState, pokemon);
 				this.runSwitch(pokemon);
-				
-				// additional REALLY janky Prance and Pierce hard-coding...
-				console.log(side.slotConditions);
-				for (const slotConditionPosition in side.slotConditions) {
-					console.log(slotConditionPosition);
-					console.log(side.slotConditions[slotConditionPosition]);
-				}
-				if (side.slotConditions[prevPosition]) {
-					console.log("rescuing stray slot conditions");
-					for (const id in side.slotConditions[prevPosition]) {
-						side.slotConditions[pos][id] = side.slotConditions[prevPosition][id];
-						delete side.slotConditions[prevPosition][id];
-					}
-				} else {
-					console.log("no stray slot conditions found");
-				}
 			} else {
 				this.battle.queue.insertChoice({choice: 'runUnnerve', pokemon});
 				this.battle.queue.insertChoice({choice: 'runSwitch', pokemon});
