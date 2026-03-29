@@ -255,11 +255,15 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 							if (target.volatiles && target.volatiles[effect.id] && target.volatiles[effect.id].source) credit = target.volatiles[effect.id].source;
 							if (target.side.sideConditions && target.side.sideConditions[effect.id] && target.side.sideConditions[effect.id].source) credit = target.side.sideConditions[effect.id].source;
 							if (target.side.slotConditions && target.side.slotConditions[target.position] && target.side.slotConditions[target.position][effect.id] && target.side.slotConditions[target.position][effect.id].source) credit = target.side.slotConditions[target.position][effect.id].source;
+							if (this.field.getWeather && this.field.getWeather() === effect.id && this.field.getWeather().source) credit = this.field.getWeather().source;
+							if (this.field.getTerrain && this.field.getTerrain() === effect.id && this.field.getTerrain().source) credit = this.field.getTerrain().source;
 						}
 						if (effect.name) {
 							if (target.volatiles && target.volatiles[effect.name] && target.volatiles[effect.name].source) credit = target.volatiles[effect.name].source;
 							if (target.side.sideConditions && target.side.sideConditions[effect.name] && target.side.sideConditions[effect.name].source) credit = target.side.sideConditions[effect.name].source;
 							if (target.side.slotConditions && target.side.slotConditions[target.position] && target.side.slotConditions[target.position][effect.name] && target.side.slotConditions[target.position][effect.name].source) credit = target.side.slotConditions[target.position][effect.name].source;
+							if (this.field.getWeather && this.field.getWeather() === effect.name && this.field.getWeather().source) credit = this.field.getWeather().source;
+							if (this.field.getTerrain && this.field.getTerrain() === effect.name && this.field.getTerrain().source) credit = this.field.getTerrain().source;
 						}
 						break;
 					// case 'Pokemon':
@@ -322,10 +326,21 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			
 			if (credit) {
 				let healPercent = (damage / target.maxhp * 100);
+				let foeHealPercent = 0;
+				
+				if (damage > (target.maxhp - target.hp)) {
+					healPercent = ((target.maxhp - target.hp) / target.maxhp * 100);
+				}
+				if (credit && credit.side && target && target.side && credit.side !== target.side) {
+					foeHealPercent = healPercent;
+					healPercent = 0;
+				}
 				if (this.funStats.heals[credit]) {
 					this.funStats.heals[credit] += healPercent;
+					this.funStats.foeHeals[credit] += foeHealPercent;
 				} else {
 					this.funStats.heals[credit] = healPercent;
+					this.funStats.foeHeals[credit] = foeHealPercent;
 				}
 			}
 			
@@ -355,11 +370,15 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 							if (target.volatiles && target.volatiles[effect.id] && target.volatiles[effect.id].source) credit = target.volatiles[effect.id].source;
 							if (target.side.sideConditions && target.side.sideConditions[effect.id] && target.side.sideConditions[effect.id].source) credit = target.side.sideConditions[effect.id].source;
 							if (target.side.slotConditions && target.side.slotConditions[target.position] && target.side.slotConditions[target.position][effect.id] && target.side.slotConditions[target.position][effect.id].source) credit = target.side.slotConditions[target.position][effect.id].source;
+							if (this.field.getWeather && this.field.getWeather() === effect.id && this.field.getWeather().source) credit = this.field.getWeather().source;
+							if (this.field.getTerrain && this.field.getTerrain() === effect.id && this.field.getTerrain().source) credit = this.field.getTerrain().source;
 						}
 						if (effect.name) {
 							if (target.volatiles && target.volatiles[effect.name] && target.volatiles[effect.name].source) credit = target.volatiles[effect.name].source;
 							if (target.side.sideConditions && target.side.sideConditions[effect.name] && target.side.sideConditions[effect.name].source) credit = target.side.sideConditions[effect.name].source;
 							if (target.side.slotConditions && target.side.slotConditions[target.position] && target.side.slotConditions[target.position][effect.name] && target.side.slotConditions[target.position][effect.name].source) credit = target.side.slotConditions[target.position][effect.name].source;
+							if (this.field.getWeather && this.field.getWeather() === effect.name && this.field.getWeather().source) credit = this.field.getWeather().source;
+							if (this.field.getTerrain && this.field.getTerrain() === effect.name && this.field.getTerrain().source) credit = this.field.getTerrain().source;
 						}
 						break;
 					// case 'Pokemon':
@@ -422,10 +441,24 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			
 			if (credit) {
 				let damagePercent = (damage / target.maxhp * 100);
+				let allyDamage = 0;
+				let overkill = 0;
+				if (damage > target.hp) {
+					damagePercent = (target.hp / target.maxhp * 100);
+					overkill = ((damage - target.hp) / target.maxhp * 100);
+				}
+				if (credit && credit.side && target && target.side && credit.side !== target.side) {
+					allyDamage = damagePercent;
+					damagePercent = 0;
+				}
 				if (this.funStats.damage[credit]) {
 					this.funStats.damage[credit] += damagePercent;
+					this.funStats.allyDamage[credit] += allyDamage;
+					this.funStats.overkill[credit] += overkill;
 				} else {
 					this.funStats.damage[credit] = damagePercent;
+					this.funStats.allyDamage[credit] = allyDamage;
+					this.funStats.overkill[credit] = overkill;
 				}
 			}
 			
