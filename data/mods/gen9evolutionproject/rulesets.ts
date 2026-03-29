@@ -216,9 +216,11 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 				moveCrits: {},
 			};
 		},
-		onAnyHeal(target, source, effect, finalDamage) {
-			// will have to hard-code Pain Split, but this should cover everything else
-			if (!finalDamage) return;
+		onHeal(target, source, effect, damage) {
+			// this should cover *most* things right away
+			// will want to hard-code for Pain Split
+			// and maybe make exceptions for some Abilities (ex. Rain Dish, Volt Absorb) and Tricking a healing item
+			if (!damage) return;
 			let credit = source;
 			if (!credit && effect) {
 				console.log(effect);
@@ -227,7 +229,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			}
 			if (!credit && target) credit = target;
 			if (credit) {
-				let healPercent = (finalDamage / target.maxhp);
+				let healPercent = (damage / target.maxhp);
 				if (this.funStats.heals[credit]) {
 					this.funStats.heals[credit] += healPercent;
 				} else {
