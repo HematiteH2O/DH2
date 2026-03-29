@@ -244,9 +244,17 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			if (effect && effect.effectType) {
 				switch (effect.effectType) {
 					case 'Condition':
-						if (target.volatiles && target.volatiles[effect] && target.volatiles[effect].source) credit = target.volatiles[effect].source;
-						if (target.side.sideConditions && target.side.sideConditions[effect] && target.side.sideConditions[effect].source) credit = target.side.sideConditions[effect].source;
-						if (target.side.slotConditions && target.side.slotConditions[target.position] && target.side.slotConditions[target.position][effect] && target.side.slotConditions[target.position][effect].source) credit = target.side.slotConditions[target.position][effect].source;
+						console.log(effect);
+						if (effect.id) {
+							if (target.volatiles && target.volatiles[effect.id] && target.volatiles[effect.id].source) credit = target.volatiles[effect.id].source;
+							if (target.side.sideConditions && target.side.sideConditions[effect.id] && target.side.sideConditions[effect.id].source) credit = target.side.sideConditions[effect.id].source;
+							if (target.side.slotConditions && target.side.slotConditions[target.position] && target.side.slotConditions[target.position][effect.id] && target.side.slotConditions[target.position][effect.id].source) credit = target.side.slotConditions[target.position][effect.id].source;
+						}
+						if (effect.name) {
+							if (target.volatiles && target.volatiles[effect.name] && target.volatiles[effect.name].source) credit = target.volatiles[effect.name].source;
+							if (target.side.sideConditions && target.side.sideConditions[effect.name] && target.side.sideConditions[effect.name].source) credit = target.side.sideConditions[effect.name].source;
+							if (target.side.slotConditions && target.side.slotConditions[target.position] && target.side.slotConditions[target.position][effect.name] && target.side.slotConditions[target.position][effect.name].source) credit = target.side.slotConditions[target.position][effect.name].source;
+						}
 						break;
 					case 'Pokemon':
 						credit = effect;
@@ -257,7 +265,6 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 					case 'Item':
 						// can I track the original holder of the item and how it was obtained?
 						// Symbiosis, Trick, Thief, et cetera
-						credit = target;
 						break;
 					case 'Ability':
 						// if it's an immunity Ability, credit the attacker
@@ -266,6 +273,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						// if it's Poison Heal, credit the one who inflicted the poison if possible
 						// if it's Hospitality, credit the Hospitality ally
 						// any other edge cases? double-check customs
+						break;
 					// case 'Format':
 					// case 'Nature':
 					// case 'Ruleset':
@@ -279,7 +287,8 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						break;
 					case 'Status':
 						// credit the status setter
-						if (target.status && target.status === effect && target.status.source) credit = target.status.source;
+						if (effect.id && target.status && target.status === effect.id && target.status.source) credit = target.status.source;
+						if (effect.name && target.status && target.status === effect.name && target.status.source) credit = target.status.source;
 						break;
 					// case 'Terastal':
 					// case 'Rule':
@@ -324,9 +333,17 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			if (effect && effect.effectType) {
 				switch (effect.effectType) {
 					case 'Condition':
-						if (target.volatiles && target.volatiles[effect] && target.volatiles[effect].source) credit = target.volatiles[effect].source;
-						if (target.side.sideConditions && target.side.sideConditions[effect] && target.side.sideConditions[effect].source) credit = target.side.sideConditions[effect].source;
-						if (target.side.slotConditions && target.side.slotConditions[target.position] && target.side.slotConditions[target.position][effect] && target.side.slotConditions[target.position][effect].source) credit = target.side.slotConditions[target.position][effect].source;
+						console.log(effect);
+						if (effect.id) {
+							if (target.volatiles && target.volatiles[effect.id] && target.volatiles[effect.id].source) credit = target.volatiles[effect.id].source;
+							if (target.side.sideConditions && target.side.sideConditions[effect.id] && target.side.sideConditions[effect.id].source) credit = target.side.sideConditions[effect.id].source;
+							if (target.side.slotConditions && target.side.slotConditions[target.position] && target.side.slotConditions[target.position][effect.id] && target.side.slotConditions[target.position][effect.id].source) credit = target.side.slotConditions[target.position][effect.id].source;
+						}
+						if (effect.name) {
+							if (target.volatiles && target.volatiles[effect.name] && target.volatiles[effect.name].source) credit = target.volatiles[effect.name].source;
+							if (target.side.sideConditions && target.side.sideConditions[effect.name] && target.side.sideConditions[effect.name].source) credit = target.side.sideConditions[effect.name].source;
+							if (target.side.slotConditions && target.side.slotConditions[target.position] && target.side.slotConditions[target.position][effect.name] && target.side.slotConditions[target.position][effect.name].source) credit = target.side.slotConditions[target.position][effect.name].source;
+						}
 						break;
 					case 'Pokemon':
 						credit = effect;
@@ -337,11 +354,14 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 					case 'Item':
 						// can I track the original holder of the item and how it was obtained?
 						// Symbiosis, Trick, Thief, et cetera
-						credit = target;
 						break;
 					case 'Ability':
-						// damage cases not done
-						// https://bulbapedia.bulbagarden.net/wiki/Category:Damage-inflicting_Abilities
+						// if it's an immunity Ability, credit the attacker
+						if (this.activeMove) credit = this.activePokemon;
+						// if it's a weather Ability like Dry Skin, credit the field effect setter if possible
+						// if it's Poison Heal, credit the one who inflicted the poison if possible
+						// if it's Hospitality, credit the Hospitality ally
+						// any other edge cases? double-check customs
 						break;
 					// case 'Format':
 					// case 'Nature':
@@ -356,7 +376,8 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						break;
 					case 'Status':
 						// credit the status setter
-						if (target.status && target.status === effect && target.status.source) credit = target.status.source;
+						if (effect.id && target.status && target.status === effect.id && target.status.source) credit = target.status.source;
+						if (effect.name && target.status && target.status === effect.name && target.status.source) credit = target.status.source;
 						break;
 					// case 'Terastal':
 					// case 'Rule':
