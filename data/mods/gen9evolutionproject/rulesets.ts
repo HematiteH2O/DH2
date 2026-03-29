@@ -224,6 +224,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			};
 			// hits taken are already recorded (see Rage Fist)
 		},
+		// TODO: also list the *names* of the effects, excluding moves for damage?
 		onHeal(damage, target, source, effect) {
 			if (!damage) return;
 
@@ -246,6 +247,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						if (target.volatiles && target.volatiles[effect] && target.volatiles[effect].source) credit = target.volatiles[effect].source;
 						if (target.side.sideConditions && target.side.sideConditions[effect] && target.side.sideConditions[effect].source) credit = target.side.sideConditions[effect].source;
 						if (target.side.slotConditions && target.side.slotConditions[target.position] && target.side.slotConditions[target.position][effect] && target.side.slotConditions[target.position][effect].source) credit = target.side.slotConditions[target.position][effect].source;
+						break;
 					case 'Pokemon':
 						credit = effect;
 						break;
@@ -256,6 +258,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						// can I track the original holder of the item and how it was obtained?
 						// Symbiosis, Trick, Thief, et cetera
 						credit = target;
+						break;
 					case 'Ability':
 						// if it's an immunity Ability, credit the attacker
 						if (this.activeMove) credit = this.activePokemon;
@@ -277,6 +280,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 					case 'Status':
 						// credit the status setter
 						if (target.status && target.status === effect && target.status.source) credit = target.status.source;
+						break;
 					// case 'Terastal':
 					// case 'Rule':
 					// case 'ValidatorRule':
@@ -323,6 +327,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						if (target.volatiles && target.volatiles[effect] && target.volatiles[effect].source) credit = target.volatiles[effect].source;
 						if (target.side.sideConditions && target.side.sideConditions[effect] && target.side.sideConditions[effect].source) credit = target.side.sideConditions[effect].source;
 						if (target.side.slotConditions && target.side.slotConditions[target.position] && target.side.slotConditions[target.position][effect] && target.side.slotConditions[target.position][effect].source) credit = target.side.slotConditions[target.position][effect].source;
+						break;
 					case 'Pokemon':
 						credit = effect;
 						break;
@@ -333,13 +338,11 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						// can I track the original holder of the item and how it was obtained?
 						// Symbiosis, Trick, Thief, et cetera
 						credit = target;
+						break;
 					case 'Ability':
-						// if it's an immunity Ability, credit the attacker
-						if (this.activeMove) credit = this.activePokemon;
-						// if it's a weather Ability like Dry Skin, credit the field effect setter if possible
-						// if it's Poison Heal, credit the one who inflicted the poison if possible
-						// if it's Hospitality, credit the Hospitality ally
-						// any other edge cases? double-check customs
+						// damage cases not done
+						// https://bulbapedia.bulbagarden.net/wiki/Category:Damage-inflicting_Abilities
+						break;
 					// case 'Format':
 					// case 'Nature':
 					// case 'Ruleset':
@@ -354,6 +357,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 					case 'Status':
 						// credit the status setter
 						if (target.status && target.status === effect && target.status.source) credit = target.status.source;
+						break;
 					// case 'Terastal':
 					// case 'Rule':
 					// case 'ValidatorRule':
