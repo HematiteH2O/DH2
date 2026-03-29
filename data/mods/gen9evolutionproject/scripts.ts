@@ -87,11 +87,40 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				|| ['porygon2', 'accelgor'].includes(id) // exceptions so far: Porygon2 and Accelgor
 			)) continue;
 			
+			// banlist
+			let singlesbanned = false;
+			let vgcbanned = false;
+			if ([
+				'toxapex', 'noivernvariant', 'chandelure', 'corviknight', 'darmanitan', 'darmanitangalar', 'excadrill', 'hawlucha', 'garchomp', 'velocinobi',
+				'dragonite', 'tapukoko', 'tapulele', 'tapubulu', 'tapufini', 'zacian', 'zaciancrowned', 'zamazenta', 'zamazentacrowned', 'deoxys',
+				'deoxysattack', 'deoxysdefense', 'deoxysspeed',
+			].includes(id)) singlesbanned = true;
+			if ([
+				'dragonite', 'tapukoko', 'tapulele', 'tapubulu', 'tapufini', 'zacian', 'zaciancrowned', 'zamazenta', 'zamazentacrowned', 'deoxys',
+				'deoxysattack', 'deoxysdefense', 'deoxysspeed',
+			].includes(id)) vgcbanned = true;
+			if (singlesbanned && vgcbanned) continue;
+			
 			const monDex = this.dataCache.Pokedex[id];
 			const monLearnset = this.dataCache.Learnsets[id].learnset;
 			// if (!poke || !poke.num || !poke.abilities || !poke.types || !poke.baseStats)
-			let randomizerInfo = `<br>${monDex.num}~${monDex.name}~${monDex.types[0]}~${monDex.types[1] ? monDex.types[1] : " "}`;
-			// bare minimum for testing for now
+			let randomizerInfo = `<br>`;
+			// icon
+			if (monDex.copyData) {
+				randomizerInfo += `=IMAGE("https://github.com/scoopapa/DH2/blob/main/data/mods/gen9evolutionproject/sprites/icons/` + id + `.png",3)~`;
+			} else {
+				randomizerInfo += `=IMAGE("https://www.smogon.com/forums//media/minisprites/` + id + `.png",3)~`;
+			}
+			// name and type
+			randomizerInfo+= `${monDex.num}~${monDex.name}~${monDex.types[0]}~${monDex.types[1] ? monDex.types[1] : " "}~`;
+			// Abilities
+			let abilities = monDex.abilities[0];
+			if (monDex.abilities[1]) abilities += ` / ${monDex.abilities[1]}`;
+			if (monDex.abilities['H']) abilities += ` // ${monDex.abilities['H']}`;
+			if (monDex.abilities['S']) abilities += ` // (${monDex.abilities['S']})`;
+			randomizerInfo+= `${abilities}~`;
+			// stats
+			randomizerInfo+= `${monDex.baseStats.hp}~${monDex.baseStats.atk}~${monDex.baseStats.def}~${monDex.baseStats.spa}~${monDex.baseStats.spd}~${monDex.baseStats.spe}~`;
 			
 			// singles goals
 			
