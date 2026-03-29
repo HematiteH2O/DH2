@@ -87,6 +87,31 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		this.modData('FormatsData', customList[random2]).tier = "Pokémon of the Day!";
 		this.modData('FormatsData', customList[random3]).tier = "Pokémon of the Day!";
 	},
+	win(side?: SideID | '' | Side | null) { // I just need some kind of cue to respond to
+		if (this.ended) return false;
+		if (side && typeof side === 'string') {
+			side = this.getSide(side);
+		} else if (!side || !this.sides.includes(side)) {
+			side = null;
+		}
+		this.winner = side ? side.name : '';
+
+		this.add('');
+		if (side?.allySide) {
+			this.add('win', side.name + ' & ' + side.allySide.name);
+		} else if (side) {
+			this.add('win', side.name);
+		} else {
+			this.add('tie');
+		}
+		this.ended = true;
+		this.requestState = '';
+		for (const s of this.sides) {
+			if (s) s.activeRequest = null;
+		}
+		runEvent('BattleFinished', side); // only modded line
+		return true;
+	}
 	side: {
 		removeSlotCondition(target: Pokemon | number, status: string | Effect) {
 			if (target instanceof Pokemon) target = target.position;
