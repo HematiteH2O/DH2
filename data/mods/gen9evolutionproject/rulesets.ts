@@ -209,33 +209,50 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 		onBegin() {
 			this.funStats = {
 				damage: {},
+				allyDamage: {},
 				heals: {},
+				foeHeals: {},
 				pokemonMisses: {},
 				moveMisses: {},
 				pokemonCrits: {},
 				moveCrits: {},
 			};
+			// hits taken are already recorded (see Rage Fist)
 		},
 		onHeal(target, source, effect, damage) {
-			// this should cover *most* things right away
-			// will want to hard-code for Pain Split
-			// and maybe make exceptions for some Abilities (ex. Rain Dish, Volt Absorb) and Tricking a healing item
 			if (!damage) return;
-			let credit = source;
-			if (!credit && effect) {
-				console.log(effect);
+			
+			console.log(`target:`);
+			console.log(target);
+			console.log(`source:`);
+			console.log(source);
+			console.log(`effect:`);
+			console.log(effect);
+			console.log(`damage:`);
+			console.log(damage);
+
+			// attribute the source of the healing
+			let credit = null;
+			if (effect) {
 				if (effect.source) credit = effect.source;
 				if (effect.effectData.source) credit = effect.effectData.source;
 			}
+			if (!credit && source) credit = source;
 			if (!credit && target) credit = target;
+
+			// this should cover *most* things right away;
+			// will want to hard-code for Pain Split
+			// and maybe make exceptions for some Abilities (ex. Rain Dish, Volt Absorb) and Tricking a healing item
+			
 			if (credit) {
-				let healPercent = (damage / target.maxhp);
+				let healPercent = (damage / target.maxhp * 100);
 				if (this.funStats.heals[credit]) {
 					this.funStats.heals[credit] += healPercent;
 				} else {
 					this.funStats.heals[credit] = healPercent;
 				}
 			}
+			
 			console.log(this.funStats);
 		},
 		/*
