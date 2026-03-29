@@ -248,7 +248,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			}
 	
 			return true;
-		}
+		},
 		// modded for move miss tally (for fun)
 		hitStepAccuracy(targets: Pokemon[], pokemon: Pokemon, move: ActiveMove) {
 			const hitResults = [];
