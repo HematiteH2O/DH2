@@ -224,7 +224,14 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			};
 			// hits taken are already recorded (see Rage Fist)
 		},
+		
 		// TODO: also list the *names* of the effects, excluding moves for damage?
+		// HARD-CODING TO DO:
+		// Destiny Bond, Perish Body/Perish Song, self-KO moves (damage)
+		// Revival Blessing (heal) + *maybe* Power Construct, Tera Shift, special Terastallized states
+		// Pain Split (both)
+		
+		onHealPriority: -200,
 		onHeal(damage, target, source, effect) {
 			if (!damage) return;
 
@@ -244,7 +251,6 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			if (effect && effect.effectType) {
 				switch (effect.effectType) {
 					case 'Condition':
-						console.log(effect);
 						if (effect.id) {
 							if (target.volatiles && target.volatiles[effect.id] && target.volatiles[effect.id].source) credit = target.volatiles[effect.id].source;
 							if (target.side.sideConditions && target.side.sideConditions[effect.id] && target.side.sideConditions[effect.id].source) credit = target.side.sideConditions[effect.id].source;
@@ -256,19 +262,33 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 							if (target.side.slotConditions && target.side.slotConditions[target.position] && target.side.slotConditions[target.position][effect.name] && target.side.slotConditions[target.position][effect.name].source) credit = target.side.slotConditions[target.position][effect.name].source;
 						}
 						break;
-					case 'Pokemon':
-						credit = effect;
-						break;
+					// case 'Pokemon':
 					case 'Move':
-						credit = this.activePokemon;
+						if (this.activePokemon) credit = this.activePokemon;
 						break;
 					case 'Item':
-						// can I track the original holder of the item and how it was obtained?
-						// Symbiosis, Trick, Thief, et cetera
+						// TODO: in case of items that affect the holder, I might track the original holder of the item,
+						// as well as the reason it ended up on a different Pokémon?
+						// For damage, that's only Sticky Barb, Black Sludge and Life Orb;
+						// for healing, any item should count
+						// Otherwise, the default attribution is good enough as-is
 						break;
 					case 'Ability':
-						// if it's an immunity Ability, credit the attacker
-						if (this.activeMove) credit = this.activePokemon;
+						if (effect.name) {
+							if (["Dry Skin", "Frigid Focus", "Ice Body", "Rain Dish", "Solar Power"].includes(effect.name)) { // weather Abilities
+								if (this.field.getWeather() && this.field.getWeather().source) credit = this.field.getWeather().source;
+							}
+							if (["Dry Skin", "Earth Eater", "Volt Absorb", "Water Absorb"].includes(effect.name)) { // type immunity Abilities
+								if (this.activeMove && this.activePokemon) credit = this.activePokemon;
+							}
+							// Dry Skin is in both lists, but the activeMove one is second so it overwrites the weather credit (in case it gets hit with a Water move while it's raining)
+							
+							// Abilities like Hospitality, Bad Dreams and Aftermath already provide proper credit
+							
+							// Poison Heal should credit the status source, buuut...
+							if (["Poison Heal"].includes(effect.name) && target.status.source) credit = target.status.source;
+							// TODO: hard-coding for Toxic Spikes!
+						}
 						// if it's a weather Ability like Dry Skin, credit the field effect setter if possible
 						// if it's Poison Heal, credit the one who inflicted the poison if possible
 						// if it's Hospitality, credit the Hospitality ally
@@ -286,7 +306,8 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						if (this.field.getWeather() && this.field.getWeather().source) credit = this.field.getWeather().source;
 						break;
 					case 'Status':
-						// credit the status setter
+						// TODO: hard-coding for Blown Fuse and Toxic Spikes
+						// in general, credit the status setter
 						if (effect.id && target.status && target.status === effect.id && target.status.source) credit = target.status.source;
 						if (effect.name && target.status && target.status === effect.name && target.status.source) credit = target.status.source;
 						break;
@@ -299,10 +320,6 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			if (!credit && source) credit = source;
 			if (!credit && target) credit = target;
 			
-			// this should cover *most* things right away;
-			// will want to hard-code for Pain Split
-			// and maybe make exceptions for some Abilities (ex. Rain Dish, Volt Absorb) and Tricking a healing item
-			
 			if (credit) {
 				let healPercent = (damage / target.maxhp * 100);
 				if (this.funStats.heals[credit]) {
@@ -314,6 +331,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			
 			console.log(this.funStats);
 		},
+		onDamagePriority: -200,
 		onDamage(damage, target, source, effect) {
 			if (!damage) return;
 
@@ -333,7 +351,6 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			if (effect && effect.effectType) {
 				switch (effect.effectType) {
 					case 'Condition':
-						console.log(effect);
 						if (effect.id) {
 							if (target.volatiles && target.volatiles[effect.id] && target.volatiles[effect.id].source) credit = target.volatiles[effect.id].source;
 							if (target.side.sideConditions && target.side.sideConditions[effect.id] && target.side.sideConditions[effect.id].source) credit = target.side.sideConditions[effect.id].source;
@@ -345,19 +362,33 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 							if (target.side.slotConditions && target.side.slotConditions[target.position] && target.side.slotConditions[target.position][effect.name] && target.side.slotConditions[target.position][effect.name].source) credit = target.side.slotConditions[target.position][effect.name].source;
 						}
 						break;
-					case 'Pokemon':
-						credit = effect;
-						break;
+					// case 'Pokemon':
 					case 'Move':
-						credit = this.activePokemon;
+						if (this.activePokemon) credit = this.activePokemon;
 						break;
 					case 'Item':
-						// can I track the original holder of the item and how it was obtained?
-						// Symbiosis, Trick, Thief, et cetera
+						// TODO: in case of items that affect the holder, I might track the original holder of the item,
+						// as well as the reason it ended up on a different Pokémon?
+						// For damage, that's only Sticky Barb, Black Sludge and Life Orb;
+						// for healing, any item should count
+						// Otherwise, the default attribution is good enough as-is
 						break;
 					case 'Ability':
-						// if it's an immunity Ability, credit the attacker
-						if (this.activeMove) credit = this.activePokemon;
+						if (effect.name) {
+							if (["Dry Skin", "Frigid Focus", "Ice Body", "Rain Dish", "Solar Power"].includes(effect.name)) { // weather Abilities
+								if (this.field.getWeather() && this.field.getWeather().source) credit = this.field.getWeather().source;
+							}
+							if (["Dry Skin", "Earth Eater", "Volt Absorb", "Water Absorb"].includes(effect.name)) { // type immunity Abilities
+								if (this.activeMove && this.activePokemon) credit = this.activePokemon;
+							}
+							// Dry Skin is in both lists, but the activeMove one is second so it overwrites the weather credit (in case it gets hit with a Water move while it's raining)
+							
+							// Abilities like Hospitality, Bad Dreams and Aftermath already provide proper credit
+							
+							// Poison Heal should credit the status source, buuut...
+							if (["Poison Heal"].includes(effect.name) && target.status.source) credit = target.status.source;
+							// TODO: hard-coding for Toxic Spikes!
+						}
 						// if it's a weather Ability like Dry Skin, credit the field effect setter if possible
 						// if it's Poison Heal, credit the one who inflicted the poison if possible
 						// if it's Hospitality, credit the Hospitality ally
@@ -375,7 +406,8 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						if (this.field.getWeather() && this.field.getWeather().source) credit = this.field.getWeather().source;
 						break;
 					case 'Status':
-						// credit the status setter
+						// TODO: hard-coding for Blown Fuse and Toxic Spikes
+						// in general, credit the status setter
 						if (effect.id && target.status && target.status === effect.id && target.status.source) credit = target.status.source;
 						if (effect.name && target.status && target.status === effect.name && target.status.source) credit = target.status.source;
 						break;
@@ -387,10 +419,6 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			
 			if (!credit && source) credit = source;
 			if (!credit && target) credit = target;
-			
-			// this should cover *most* things right away;
-			// will want to hard-code for Pain Split
-			// and maybe make exceptions for some Abilities (ex. Rain Dish, Volt Absorb) and Tricking a healing item
 			
 			if (credit) {
 				let damagePercent = (damage / target.maxhp * 100);
