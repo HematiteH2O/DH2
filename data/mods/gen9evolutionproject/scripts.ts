@@ -109,7 +109,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		for (const s of this.sides) {
 			if (s) s.activeRequest = null;
 		}
-		runEvent('BattleFinished', side); // only modded line
+		this.runEvent('BattleFinished', side); // only modded line
 		return true;
 	},
 	side: {
