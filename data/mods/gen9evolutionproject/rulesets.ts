@@ -223,15 +223,23 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 		onHeal(damage, target, source, effect) {
 			if (!damage) return;
 
-			console.log(`heal notes`);
+			console.log(`HEAL NOTES`);
 			console.log(`target:`);
-			console.log((target.fullname ? target.fullname : target) + (target.hp ? ` with HP ` + target.hp : ` `));
+			console.log(((target && target.fullname) ? target.fullname : target) + (target.hp ? ` with HP ` + target.hp : ` `));
 			console.log(`source:`);
-			console.log(source.fullname ? source.fullname : source);
+			console.log((source && source.fullname) ? source.fullname : source);
 			console.log(`effect:`);
 			console.log(effect);
 			console.log(`damage:`);
 			console.log(damage);
+			if (effect && effect.effectState) {
+				console.log(`effect effectState:`);
+				console.log(this.effectState);
+			}
+			if (this && this.effectState) {
+				console.log(`battle effectState:`);
+				console.log(this.effectState);
+			}
 
 			// attribute the source of the healing
 			let credit = null;
@@ -260,15 +268,23 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 		onAnyDamage(damage, target, source, effect) {
 			if (!damage) return;
 
-			console.log(`damage notes`);
+			console.log(`DAMAGE NOTES`);
 			console.log(`target:`);
-			console.log((target.fullname ? target.fullname : target) + (target.hp ? ` with HP ` + target.hp : ` `));
+			console.log(((target && target.fullname) ? target.fullname : target) + (target.hp ? ` with HP ` + target.hp : ` `));
 			console.log(`source:`);
-			console.log(source.fullname ? source.fullname : source);
+			console.log((source && source.fullname) ? source.fullname : source);
 			console.log(`effect:`);
 			console.log(effect);
 			console.log(`damage:`);
 			console.log(damage);
+			if (effect && effect.effectState) {
+				console.log(`effect effectState:`);
+				console.log(this.effectState);
+			}
+			if (this && this.effectState) {
+				console.log(`battle effectState:`);
+				console.log(this.effectState);
+			}
 		},
 	},
 };
