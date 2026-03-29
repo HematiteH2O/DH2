@@ -353,14 +353,14 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						
 						// adding method:
 						if (method) {
-							if (!this.funStats.foeHealMethod[credit]) this.funStats.foeHealMethod[credit]: string[] = [];
+							if (!this.funStats.foeHealMethod[credit]) this.funStats.foeHealMethod[credit] = [];
 							if (!this.funStats.foeHealMethod[credit].includes(method)) this.funStats.foeHealMethod[credit].push(method);
 						}
 					}
 				} else {
 					// adding method:
 					if (method) {
-						if (!this.funStats.healMethod[credit]) this.funStats.healMethod[credit]: string[] = [];
+						if (!this.funStats.healMethod[credit]) this.funStats.healMethod[credit] = [];
 						if (!this.funStats.healMethod[credit].includes(method)) this.funStats.healMethod[credit].push(method);
 					}
 				}
@@ -500,7 +500,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						
 						// adding method:
 						if (method) {
-							if (!this.funStats.allyDamageMethod[credit]) this.funStats.allyDamageMethod[credit]: string[] = [];
+							if (!this.funStats.allyDamageMethod[credit]) this.funStats.allyDamageMethod[credit] = [];
 							if (!this.funStats.allyDamageMethod[credit].includes(method)) this.funStats.allyDamageMethod[credit].push(method);
 						}
 					}
@@ -510,7 +510,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						if (effect && effect.effectType && effect.effectType === "Move") method = "attacks";
 						
 						// adding method:
-						if (!this.funStats.damageMethod[credit]) this.funStats.damageMethod[credit]: string[] = [];
+						if (!this.funStats.damageMethod[credit]) this.funStats.damageMethod[credit] = [];
 						if (!this.funStats.damageMethod[credit].includes(method)) this.funStats.damageMethod[credit].push(method);
 					}
 				}
