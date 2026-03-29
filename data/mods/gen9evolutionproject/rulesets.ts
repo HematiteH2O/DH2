@@ -209,16 +209,14 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 		onBegin() {
 			this.funStats = { // report the record-holder in each category only if conditions are met
 				damage: {}, // always report
+				damageMethod: {},
 				allyDamage: {}, // only report if more than any opponent damaged its team
+				allyDamageMethod: {},
 				
-				heals: {}, // only report if more than 100%?
-				foeHeals: {}, // only report if more than it healed its own team
-
-				pokemonMisses: {}, // only report if 3 or more
-				moveMisses: {}, // only report if 3 or more and not all the same user (since otherwise it's above)
-				
-				pokemonCrits: {}, // only report if 3 or more and no boosted crit rate
-				moveCrits: {}, // only report if 3 or more and no boosted crit rate
+				heal: {}, // only report if more than 100%?
+				healMethod: {}, // only report if more than 100%?
+				foeHeal: {}, // only report if more than it healed its own team
+				foeHealMethod: {}, // only report if more than 100%?
 				
 				overkill: {}, // only report if more than 100%?
 			};
@@ -343,23 +341,39 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 				if (credit.side) console.log(`Credit's side is ` + credit.side);
 				if (target.side) console.log(`Target's side is ` + target.side);
 				if (credit.side !== target.side) console.log(`These are different, so this *should* be foeHeal`);
+
+				let method = null;
+				if (effect && effect.name) method = effect.name;
+				else if (effect && effect.id) method = effect.id;
 				
 				if (credit && target && credit.side && target.side) {
 					if (credit.side !== target.side) { // it's a foeHeal if you heal the other team
 						foeHealPercent = healPercent;
 						healPercent = 0;
+						
+						// adding method:
+						if (method) {
+							if (!this.funStats.foeHealMethod[credit]) this.funStats.foeHealMethod[credit]: string[] = [];
+							if (!this.funStats.foeHealMethod[credit].includes(method)) this.funStats.foeHealMethod[credit].push(method);
+						}
+					}
+				} else {
+					// adding method:
+					if (method) {
+						if (!this.funStats.healMethod[credit]) this.funStats.healMethod[credit]: string[] = [];
+						if (!this.funStats.healMethod[credit].includes(method)) this.funStats.healMethod[credit].push(method);
 					}
 				}
 				
 				credit = credit.side.name + `'s ` + credit.name;
 				
-				if (this.funStats.heals[credit]) {
-					this.funStats.heals[credit] += healPercent;
-				} else this.funStats.heals[credit] = healPercent;
+				if (this.funStats.heal[credit]) {
+					this.funStats.heal[credit] += healPercent;
+				} else this.funStats.heal[credit] = healPercent;
 				
-				if (this.funStats.foeHeals[credit]) {
-					this.funStats.foeHeals[credit] += foeHealPercent;
-				} else this.funStats.foeHeals[credit] = foeHealPercent;
+				if (this.funStats.foeHeal[credit]) {
+					this.funStats.foeHeal[credit] += foeHealPercent;
+				} else this.funStats.foeHeal[credit] = foeHealPercent;
 				
 			}
 			
@@ -474,11 +488,30 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 				if (target.side) console.log(`Target's side is ` + target.side);
 				if (credit.side === target.side) console.log(`These are the same, so this *should* be allyDamage`);
 				
+				let method = null;
+				if (effect && effect.name) method = effect.name;
+				else if (effect && effect.id) method = effect.id;
+				
 				if (credit && target && credit.side && target.side) {
 					if (credit.side === target.side) { // it's an allyDamage if you hurt the same team
 						allyDamage = damagePercent;
 						damagePercent = 0;
 						overkill = 0;
+						
+						// adding method:
+						if (method) {
+							if (!this.funStats.allyDamageMethod[credit]) this.funStats.allyDamageMethod[credit]: string[] = [];
+							if (!this.funStats.allyDamageMethod[credit].includes(method)) this.funStats.allyDamageMethod[credit].push(method);
+						}
+					}
+				} else {
+					if (method) {
+						// for damage, you should also generalize damaging moves
+						if (effect && effect.effectType && effect.effectType === "Move") method = "attacks";
+						
+						// adding method:
+						if (!this.funStats.damageMethod[credit]) this.funStats.damageMethod[credit]: string[] = [];
+						if (!this.funStats.damageMethod[credit].includes(method)) this.funStats.damageMethod[credit].push(method);
 					}
 				}
 				
