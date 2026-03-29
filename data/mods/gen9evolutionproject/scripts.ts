@@ -111,7 +111,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		}
 		runEvent('BattleFinished', side); // only modded line
 		return true;
-	}
+	},
 	side: {
 		removeSlotCondition(target: Pokemon | number, status: string | Effect) {
 			if (target instanceof Pokemon) target = target.position;
