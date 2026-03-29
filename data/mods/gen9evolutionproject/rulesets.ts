@@ -3,6 +3,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 		effectType: 'Rule',
 		name: 'Data Mod',
 		desc: 'When a new Pokémon switches in for the first time, information about its types, stats and Abilities is displayed to both players.',
+		
 		onTeamPreview() {
 			this.add('clearpoke');
 			for (const side of this.sides) {
@@ -169,8 +170,8 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 				this.add('-start', pokemon, 'typechange', pokemon.getTypes(true).join('/'), '[silent]');
 				let abilities = species.abilities[0];
 				if (species.abilities[1]) abilities += ` / ${species.abilities[1]}`;
-				if (species.abilities['H']) abilities += ` / ${species.abilities['H']}`;
-				if (species.abilities['S']) abilities += ` / ${species.abilities['S']}`;
+				if (species.abilities['H']) abilities += ` // ${species.abilities['H']}`;
+				if (species.abilities['S']) abilities += ` // <em>${species.abilities['S']}</em>`;
 				const baseStats = species.baseStats;
 				const type = species.types[0];
 				if (species.types[1]) {
@@ -203,5 +204,44 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 				}
 			}
 		},
-	},
+		
+		// battle stats for fun
+		onBegin() {
+			this.funStats = {
+				damage: {},
+				heals: {},
+				pokemonMisses: {},
+				moveMisses: {},
+				pokemonCrits: {},
+				moveCrits: {},
+			};
+		},
+		onAnyHeal(target, source, effect, finalDamage) {
+			// will have to hard-code Pain Split, but this should cover everything else
+			if (!finalDamage) return;
+			let credit = source;
+			if (!credit && effect) {
+				console.log(effect);
+				if (effect.source) credit = effect.source;
+				if (effect.effectData.source) credit = effect.effectData.source;
+			}
+			if (!credit && target) credit = target;
+			if (credit) {
+				let healPercent = (finalDamage / target.maxhp);
+				if (this.funStats.heals[credit]) {
+					this.funStats.heals[credit] += healPercent;
+				} else {
+					this.funStats.heals[credit] = healPercent;
+				}
+			}
+			console.log(this.funStats);
+		},
+		/*
+		onAnyDamage(damage, target, source, effect) {
+			if (effect.effectType !== 'Move') {
+				if (effect.effectType === 'Ability') this.add('-activate', source, 'ability: ' + effect.name);
+				return false;
+			}
+		},
+		*/
 };
