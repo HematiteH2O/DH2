@@ -76,6 +76,30 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 			}
 		}
+		
+		// OKAY HEADS-UP:
+		// the below is for *my personal convenience* for randbats set generation - it should be *commented out* in any patch that actually gets loaded to DH
+		// I'm keeping it around so I can run it the same way every time I add a new slate
+		// don't forget to comment it out!!!
+		for (const id in this.dataCache.Pokedex) {
+			if (!(
+				(this.modData('FormatsData', id).tier && this.modData('FormatsData', id).tier === "Evo!") // only the "Evo!" tier matters - nothing is PotD yet and prevos shouldn't be included
+				|| ['porygon2', 'accelgor'].includes(id) // exceptions so far: Porygon2 and Accelgor
+			)) continue;
+			
+			const monDex = this.dataCache.Pokedex[id];
+			const monLearnset = this.dataCache.Learnsets[id].learnset;
+			// if (!poke || !poke.num || !poke.abilities || !poke.types || !poke.baseStats)
+			let randomizerInfo = `raw|${monDex.num}~${mon.name}~${mon.types[0]}~${mon.types[1] ? mon.types[1] : " "}`;
+			// bare minimum for testing for now
+			
+			// singles goals
+			
+			// VGC goals
+			
+			monDex.randomizerInfo = randomizerInfo;
+		}
+		// end commented-out section	
 
 		let random1 = Math.floor(Math.random() * customList.length);
 		let random2 = Math.floor(Math.random() * (customList.length - 1));
