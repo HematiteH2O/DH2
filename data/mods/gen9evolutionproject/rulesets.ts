@@ -215,6 +215,12 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 					}
 				}
 			}
+			// super-effective move count
+			if (!move.damage && !move.damageCallback && target.getMoveHitData(move).typeMod > 0) {
+				if (source.m.superEffectiveHits) {
+					source.m.superEffectiveHits++;
+				} else source.m.superEffectiveHits = 1;
+			}
 		},
 		
 		// battle stats for fun
@@ -555,14 +561,6 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			}
 			
 			console.log(this.funStats);
-		},
-		// super-effective move count
-		onDamagingHit(damage, target, source, move) {
-			if (!move.damage && !move.damageCallback && target.getMoveHitData(move).typeMod > 0) {
-				if (source.m.superEffectiveHits) {
-					source.m.superEffectiveHits++;
-				} else source.m.superEffectiveHits = 1;
-			}
 		},
 		onBattleFinished() {
 			// I think I have everything I want for now set up, but I can add more over time
