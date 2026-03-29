@@ -255,15 +255,15 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 							if (target.volatiles && target.volatiles[effect.id] && target.volatiles[effect.id].source) credit = target.volatiles[effect.id].source;
 							if (target.side.sideConditions && target.side.sideConditions[effect.id] && target.side.sideConditions[effect.id].source) credit = target.side.sideConditions[effect.id].source;
 							if (target.side.slotConditions && target.side.slotConditions[target.position] && target.side.slotConditions[target.position][effect.id] && target.side.slotConditions[target.position][effect.id].source) credit = target.side.slotConditions[target.position][effect.id].source;
-							if (this.field.getWeather && this.field.getWeather() === effect.id && this.field.getWeather().source) credit = this.field.getWeather().source;
-							if (this.field.getTerrain && this.field.getTerrain() === effect.id && this.field.getTerrain().source) credit = this.field.getTerrain().source;
+							if (this.field.getWeather && this.field.getWeather().id === effect.id && this.field.getWeather().source) credit = this.field.getWeather().source;
+							if (this.field.getTerrain && this.field.getTerrain().id === effect.id && this.field.getTerrain().source) credit = this.field.getTerrain().source;
 						}
 						if (effect.name) {
 							if (target.volatiles && target.volatiles[effect.name] && target.volatiles[effect.name].source) credit = target.volatiles[effect.name].source;
 							if (target.side.sideConditions && target.side.sideConditions[effect.name] && target.side.sideConditions[effect.name].source) credit = target.side.sideConditions[effect.name].source;
 							if (target.side.slotConditions && target.side.slotConditions[target.position] && target.side.slotConditions[target.position][effect.name] && target.side.slotConditions[target.position][effect.name].source) credit = target.side.slotConditions[target.position][effect.name].source;
-							if (this.field.getWeather && this.field.getWeather() === effect.name && this.field.getWeather().source) credit = this.field.getWeather().source;
-							if (this.field.getTerrain && this.field.getTerrain() === effect.name && this.field.getTerrain().source) credit = this.field.getTerrain().source;
+							if (this.field.getWeather && this.field.getWeather().name === effect.name && this.field.getWeather().source) credit = this.field.getWeather().source;
+							if (this.field.getTerrain && this.field.getTerrain().name === effect.name && this.field.getTerrain().source) credit = this.field.getTerrain().source;
 						}
 						break;
 					// case 'Pokemon':
@@ -325,23 +325,34 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			if (!credit && target) credit = target;
 			
 			if (credit) {
+				
 				let healPercent = (damage / target.maxhp * 100);
 				let foeHealPercent = 0;
 				
-				if (damage > (target.maxhp - target.hp)) {
+				if (damage > (target.maxhp - target.hp)) { // no overheal
 					healPercent = ((target.maxhp - target.hp) / target.maxhp * 100);
 				}
-				if (credit && credit.side && target && target.side && credit.side !== target.side) {
+
+				/*
+				if (credit && credit.side && target && target.side && (credit.side !== target.side)) { // this doesn't work
 					foeHealPercent = healPercent;
 					healPercent = 0;
 				}
+				*/
+				
+				console.log(`Attributed ` + (effect.name ? effect.name : effect) + ` to ` + (credit.fullname ? credit.fullname : credit));
+				if (credit.side) console.log(`Credit's side is ` + credit.side);
+				if (target.side) console.log(`Target's side is ` + target.side);
+				if (credit.side !== target.side) console.log(`These are different, so this *should* be foeHeal`);
+				
 				if (this.funStats.heals[credit]) {
 					this.funStats.heals[credit] += healPercent;
+				} else this.funStats.heals[credit] = healPercent;
+				
+				if (this.funStats.foeHeals[credit]) {
 					this.funStats.foeHeals[credit] += foeHealPercent;
-				} else {
-					this.funStats.heals[credit] = healPercent;
-					this.funStats.foeHeals[credit] = foeHealPercent;
-				}
+				} else this.funStats.foeHeals[credit] = foeHealPercent;
+				
 			}
 			
 			console.log(this.funStats);
@@ -370,15 +381,15 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 							if (target.volatiles && target.volatiles[effect.id] && target.volatiles[effect.id].source) credit = target.volatiles[effect.id].source;
 							if (target.side.sideConditions && target.side.sideConditions[effect.id] && target.side.sideConditions[effect.id].source) credit = target.side.sideConditions[effect.id].source;
 							if (target.side.slotConditions && target.side.slotConditions[target.position] && target.side.slotConditions[target.position][effect.id] && target.side.slotConditions[target.position][effect.id].source) credit = target.side.slotConditions[target.position][effect.id].source;
-							if (this.field.getWeather && this.field.getWeather() === effect.id && this.field.getWeather().source) credit = this.field.getWeather().source;
-							if (this.field.getTerrain && this.field.getTerrain() === effect.id && this.field.getTerrain().source) credit = this.field.getTerrain().source;
+							if (this.field.getWeather && this.field.getWeather().id === effect.id && this.field.getWeather().source) credit = this.field.getWeather().source;
+							if (this.field.getTerrain && this.field.getTerrain().id === effect.id && this.field.getTerrain().source) credit = this.field.getTerrain().source;
 						}
 						if (effect.name) {
 							if (target.volatiles && target.volatiles[effect.name] && target.volatiles[effect.name].source) credit = target.volatiles[effect.name].source;
 							if (target.side.sideConditions && target.side.sideConditions[effect.name] && target.side.sideConditions[effect.name].source) credit = target.side.sideConditions[effect.name].source;
 							if (target.side.slotConditions && target.side.slotConditions[target.position] && target.side.slotConditions[target.position][effect.name] && target.side.slotConditions[target.position][effect.name].source) credit = target.side.slotConditions[target.position][effect.name].source;
-							if (this.field.getWeather && this.field.getWeather() === effect.name && this.field.getWeather().source) credit = this.field.getWeather().source;
-							if (this.field.getTerrain && this.field.getTerrain() === effect.name && this.field.getTerrain().source) credit = this.field.getTerrain().source;
+							if (this.field.getWeather && this.field.getWeather().name === effect.name && this.field.getWeather().source) credit = this.field.getWeather().source;
+							if (this.field.getTerrain && this.field.getTerrain().name === effect.name && this.field.getTerrain().source) credit = this.field.getTerrain().source;
 						}
 						break;
 					// case 'Pokemon':
@@ -440,26 +451,43 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			if (!credit && target) credit = target;
 			
 			if (credit) {
+				
 				let damagePercent = (damage / target.maxhp * 100);
 				let allyDamage = 0;
 				let overkill = 0;
+				
 				if (damage > target.hp) {
 					damagePercent = (target.hp / target.maxhp * 100);
 					overkill = ((damage - target.hp) / target.maxhp * 100);
 				}
-				if (credit && credit.side && target && target.side && credit.side !== target.side) {
+
+				/*
+				if (credit && credit.side && target && target.side && (credit.side !== target.side)) { // this doesn't work
 					allyDamage = damagePercent;
 					damagePercent = 0;
 				}
+				*/
+				
+				console.log(`Attributed ` + (effect.name ? effect.name : effect) + ` to ` + (credit.fullname ? credit.fullname : credit));
+				if (credit.side) console.log(`Credit's side is ` + credit.side);
+				if (target.side) console.log(`Target's side is ` + target.side);
+				if (credit.side !== target.side) console.log(`These are different, so this *should* be allyDamage`);
+				
+				// damage
 				if (this.funStats.damage[credit]) {
 					this.funStats.damage[credit] += damagePercent;
+				} else this.funStats.damage[credit] = damagePercent;
+
+				// ally damage
+				if (this.funStats.allyDamage[credit]) {
 					this.funStats.allyDamage[credit] += allyDamage;
-					this.funStats.overkill[credit] += overkill;
-				} else {
-					this.funStats.damage[credit] = damagePercent;
-					this.funStats.allyDamage[credit] = allyDamage;
-					this.funStats.overkill[credit] = overkill;
-				}
+				} else this.funStats.allyDamage[credit] = allyDamage;
+
+				// overkill
+				if (this.funStats.overkill[credit]) {
+					this.funStats.overkill[credit] += damagePercent;
+				} else this.funStats.overkill[credit] = damagePercent;
+				
 			}
 			
 			console.log(this.funStats);
