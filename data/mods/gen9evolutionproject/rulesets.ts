@@ -271,11 +271,11 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 					// case 'Ruleset':
 					case 'Terrain':
 						// credit the terrain setter
-						if (field.getTerrain() && field.getTerrain().source) credit = field.getTerrain().source;
+						if (this.field.getTerrain() && this.field.getTerrain().source) credit = this.field.getTerrain().source;
 						break;
 					case 'Weather':
 						// credit the weather setter
-						if (field.getWeather() && field.getWeather().source) credit = field.getWeather().source;
+						if (this.field.getWeather() && this.field.getWeather().source) credit = this.field.getWeather().source;
 						break;
 					case 'Status':
 						// credit the status setter
@@ -348,11 +348,11 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 					// case 'Ruleset':
 					case 'Terrain':
 						// credit the terrain setter
-						if (field.getTerrain() && field.getTerrain().source) credit = field.getTerrain().source;
+						if (this.field.getTerrain() && this.field.getTerrain().source) credit = this.field.getTerrain().source;
 						break;
 					case 'Weather':
 						// credit the weather setter
-						if (field.getWeather() && field.getWeather().source) credit = field.getWeather().source;
+						if (this.field.getWeather() && this.field.getWeather().source) credit = this.field.getWeather().source;
 						break;
 					case 'Status':
 						// credit the status setter
