@@ -5,6 +5,18 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 		desc: 'When a new Pokémon switches in for the first time, information about its types, stats and Abilities is displayed to both players.',
 		
 		onTeamPreview() {
+			// OKAY HEADS-UP:
+			// the below is for *my personal convenience* for randbats set generation - it should be *commented out* in any patch that actually gets loaded to DH
+			// I'm keeping it around so I can run it the same way every time I add a new slate
+			// don't forget to comment it out!!!
+			let randomizerData = `raw|<div class="infobox" open><details class ="details"><summary>Randomizer set summary exports</summary>`;
+			for (const id in this.dex.data.Pokedex) {
+				if (this.dex.data.Pokedex[id] && this.dex.data.Pokedex[id].randomizerInfo) randomizerData += this.dex.data.Pokedex[id].randomizerInfo;
+			}
+			randomizerData += `</details></div>`;
+			this.add(`${randomizerData}`);
+			// end commented-out section
+			
 			this.add('clearpoke');
 			for (const side of this.sides) {
 				for (const pokemon of side.pokemon) {
