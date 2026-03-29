@@ -90,7 +90,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			const monDex = this.dataCache.Pokedex[id];
 			const monLearnset = this.dataCache.Learnsets[id].learnset;
 			// if (!poke || !poke.num || !poke.abilities || !poke.types || !poke.baseStats)
-			let randomizerInfo = `raw|${monDex.num}~${mon.name}~${mon.types[0]}~${mon.types[1] ? mon.types[1] : " "}`;
+			let randomizerInfo = `<br>${monDex.num}~${mon.name}~${mon.types[0]}~${mon.types[1] ? mon.types[1] : " "}`;
 			// bare minimum for testing for now
 			
 			// singles goals
