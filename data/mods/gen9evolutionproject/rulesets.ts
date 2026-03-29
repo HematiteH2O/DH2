@@ -216,16 +216,18 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 				moveMisses: {},
 				pokemonCrits: {},
 				moveCrits: {},
+				overkill: {},
 			};
 			// hits taken are already recorded (see Rage Fist)
 		},
-		onHeal(target, source, effect, damage) {
+		onHeal(damage, target, source, effect) {
 			if (!damage) return;
-			
+
+			console.log(`heal notes`);
 			console.log(`target:`);
-			console.log(target);
+			console.log((target.fullname ? target.fullname : target) + (target.hp ? ` with HP ` + target.hp));
 			console.log(`source:`);
-			console.log(source);
+			console.log(source.fullname ? source.fullname : source);
 			console.log(`effect:`);
 			console.log(effect);
 			console.log(`damage:`);
@@ -235,7 +237,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			let credit = null;
 			if (effect) {
 				if (effect.source) credit = effect.source;
-				if (effect.effectData.source) credit = effect.effectData.source;
+				if (effect.effectData && effect.effectData.source) credit = effect.effectData.source;
 			}
 			if (!credit && source) credit = source;
 			if (!credit && target) credit = target;
@@ -255,13 +257,18 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			
 			console.log(this.funStats);
 		},
-		/*
 		onAnyDamage(damage, target, source, effect) {
-			if (effect.effectType !== 'Move') {
-				if (effect.effectType === 'Ability') this.add('-activate', source, 'ability: ' + effect.name);
-				return false;
-			}
+			if (!damage) return;
+
+			console.log(`damage notes`);
+			console.log(`target:`);
+			console.log((target.fullname ? target.fullname : target) + (target.hp ? ` with HP ` + target.hp));
+			console.log(`source:`);
+			console.log(source.fullname ? source.fullname : source);
+			console.log(`effect:`);
+			console.log(effect);
+			console.log(`damage:`);
+			console.log(damage);
 		},
-		*/
 	},
 };
