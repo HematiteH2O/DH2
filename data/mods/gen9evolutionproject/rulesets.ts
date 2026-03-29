@@ -229,27 +229,30 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			console.log(`source:`);
 			console.log((source && source.fullname) ? source.fullname : source);
 			console.log(`effect:`);
-			console.log(effect);
+			console.log(((effect && effect.name) ? effect.name : effect) + (effect.effectType ? ` of type ` + effect.effectType : ` `));
+			console.log((effect && effect.name) ? effect.name : effect);
 			console.log(`damage:`);
 			console.log(damage);
-			if (effect && effect.effectState) {
-				console.log(`effect effectState:`);
-				console.log(this.effectState);
-			}
-			if (this && this.effectState) {
-				console.log(`battle effectState:`);
-				console.log(this.effectState);
-			}
 
 			// attribute the source of the healing
 			let credit = null;
-			if (effect) {
-				if (effect.source) credit = effect.source;
-				if (effect.effectData && effect.effectData.source) credit = effect.effectData.source;
+			/*
+			if (effect && effect.effectType) {
+				if (effect.effectType === "Condition") {
+					// have to track down the condition (ex. Wish)
+					// slot condition? side condition? field effect?
+				}
+
+// type EffectType =
+//	'Condition' | 'Pokemon' | 'Move' | 'Item' | 'Ability' | 'Format' |
+//	'Nature' | 'Ruleset' | 'Terrain' | 'Weather' | 'Status' | 'Terastal' | 'Rule' | 'ValidatorRule';
+
 			}
+			*/
+			
 			if (!credit && source) credit = source;
 			if (!credit && target) credit = target;
-
+			
 			// this should cover *most* things right away;
 			// will want to hard-code for Pain Split
 			// and maybe make exceptions for some Abilities (ex. Rain Dish, Volt Absorb) and Tricking a healing item
@@ -265,7 +268,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			
 			console.log(this.funStats);
 		},
-		onAnyDamage(damage, target, source, effect) {
+		onDamage(damage, target, source, effect) {
 			if (!damage) return;
 
 			console.log(`DAMAGE NOTES`);
@@ -274,17 +277,44 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			console.log(`source:`);
 			console.log((source && source.fullname) ? source.fullname : source);
 			console.log(`effect:`);
-			console.log(effect);
+			console.log(((effect && effect.name) ? effect.name : effect) + (effect.effectType ? ` of type ` + effect.effectType : ` `));
+			console.log((effect && effect.name) ? effect.name : effect);
 			console.log(`damage:`);
 			console.log(damage);
-			if (effect && effect.effectState) {
-				console.log(`effect effectState:`);
-				console.log(this.effectState);
+
+			// attribute the source of the healing
+			let credit = null;
+			/*
+			if (effect && effect.effectType) {
+				if (effect.effectType === "Condition") {
+					// have to track down the condition (ex. Wish)
+					// slot condition? side condition? field effect?
+				}
+
+// type EffectType =
+//	'Condition' | 'Pokemon' | 'Move' | 'Item' | 'Ability' | 'Format' |
+//	'Nature' | 'Ruleset' | 'Terrain' | 'Weather' | 'Status' | 'Terastal' | 'Rule' | 'ValidatorRule';
+
 			}
-			if (this && this.effectState) {
-				console.log(`battle effectState:`);
-				console.log(this.effectState);
+			*/
+			
+			if (!credit && source) credit = source;
+			if (!credit && target) credit = target;
+			
+			// this should cover *most* things right away;
+			// will want to hard-code for Pain Split
+			// and maybe make exceptions for some Abilities (ex. Rain Dish, Volt Absorb) and Tricking a healing item
+			
+			if (credit) {
+				let damagePercent = (damage / target.maxhp * 100);
+				if (this.funStats.damage[credit]) {
+					this.funStats.damage[credit] += damagePercent;
+				} else {
+					this.funStats.damage[credit] = damagePercent;
+				}
 			}
+			
+			console.log(this.funStats);
 		},
 	},
 };
