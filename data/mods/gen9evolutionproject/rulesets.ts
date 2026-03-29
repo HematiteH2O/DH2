@@ -290,7 +290,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 							// Abilities like Hospitality, Bad Dreams and Aftermath already provide proper credit
 							
 							// Poison Heal should credit the status source, buuut...
-							if (["Poison Heal"].includes(effect.name) && target.status.source) credit = target.status.source;
+							if (["Poison Heal"].includes(effect.name) && target.statusState) credit = target.statusState.source;
 							// TODO: hard-coding for Toxic Spikes!
 						}
 						// if it's a weather Ability like Dry Skin, credit the field effect setter if possible
@@ -312,8 +312,8 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 					case 'Status':
 						// TODO: hard-coding for Blown Fuse and Toxic Spikes
 						// in general, credit the status setter
-						if (effect.id && target.status && target.status === effect.id && target.status.source) credit = target.status.source;
-						if (effect.name && target.status && target.status === effect.name && target.status.source) credit = target.status.source;
+						if (effect.id && target.status && target.status === effect.id && target.statusState) credit = target.statusState.source;
+						if (effect.name && target.status && target.status === effect.name && target.statusState) credit = target.statusState.source;
 						break;
 					// case 'Terastal':
 					// case 'Rule':
@@ -424,7 +424,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 							// Abilities like Hospitality, Bad Dreams and Aftermath already provide proper credit
 							
 							// Poison Heal should credit the status source, buuut...
-							if (["Poison Heal"].includes(effect.name) && target.status.source) credit = target.status.source;
+							if (["Poison Heal"].includes(effect.name) && target.statusState) credit = target.statusState.source;
 							// TODO: hard-coding for Toxic Spikes!
 						}
 						// if it's a weather Ability like Dry Skin, credit the field effect setter if possible
@@ -446,8 +446,8 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 					case 'Status':
 						// TODO: hard-coding for Blown Fuse and Toxic Spikes
 						// in general, credit the status setter
-						if (effect.id && target.status && target.status === effect.id && target.status.source) credit = target.status.source;
-						if (effect.name && target.status && target.status === effect.name && target.status.source) credit = target.status.source;
+						if (effect.id && target.status && target.status === effect.id && target.statusState) credit = target.statusState.source;
+						if (effect.name && target.status && target.status === effect.name && target.statusState) credit = target.statusState.source;
 						break;
 					// case 'Terastal':
 					// case 'Rule':
