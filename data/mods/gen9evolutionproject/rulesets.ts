@@ -207,16 +207,20 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 		
 		// battle stats for fun
 		onBegin() {
-			this.funStats = {
-				damage: {},
-				allyDamage: {},
-				heals: {},
-				foeHeals: {},
-				pokemonMisses: {},
-				moveMisses: {},
-				pokemonCrits: {},
-				moveCrits: {},
-				overkill: {},
+			this.funStats = { // report the record-holder in each category only if conditions are met
+				damage: {}, // always report
+				allyDamage: {}, // only report if more than any opponent damaged its team
+				
+				heals: {}, // only report if more than 100%?
+				foeHeals: {}, // only report if more than it healed its own team
+
+				pokemonMisses: {}, // only report if 3 or more
+				moveMisses: {}, // only report if 3 or more and not all the same user (since otherwise it's above)
+				
+				pokemonCrits: {}, // only report if 3 or more and no boosted crit rate
+				moveCrits: {}, // only report if 3 or more and no boosted crit rate
+				
+				overkill: {}, // only report if more than 100%?
 			};
 			// hits taken are already recorded (see Rage Fist)
 		},
@@ -230,25 +234,54 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			console.log((source && source.fullname) ? source.fullname : source);
 			console.log(`effect:`);
 			console.log(((effect && effect.name) ? effect.name : effect) + (effect.effectType ? ` of type ` + effect.effectType : ` `));
-			console.log((effect && effect.name) ? effect.name : effect);
 			console.log(`damage:`);
 			console.log(damage);
 
 			// attribute the source of the healing
 			let credit = null;
-			/*
+			
 			if (effect && effect.effectType) {
-				if (effect.effectType === "Condition") {
-					// have to track down the condition (ex. Wish)
-					// slot condition? side condition? field effect?
+				switch (effect.effectType) {
+					case 'Condition':
+						if (target.volatiles && target.volatiles[effect] && target.volatiles[effect].source) credit = target.volatiles[effect].source;
+						if (target.side.sideConditions && target.side.sideConditions[effect] && target.side.sideConditions[effect].source) credit = target.side.sideConditions[effect].source;
+						if (target.side.slotConditions && target.side.slotConditions[target.position] && target.side.slotConditions[target.position][effect] && target.side.slotConditions[target.position][effect].source) credit = target.side.slotConditions[target.position][effect].source;
+					case 'Pokemon':
+						credit = effect;
+						break;
+					case 'Move':
+						credit = this.activePokemon;
+						break;
+					case 'Item':
+						// can I track the original holder of the item and how it was obtained?
+						// Symbiosis, Trick, Thief, et cetera
+						credit = target;
+					case 'Ability':
+						// if it's an immunity Ability, credit the attacker
+						if (this.activeMove) credit = this.activePokemon;
+						// if it's a weather Ability like Dry Skin, credit the field effect setter if possible
+						// if it's Poison Heal, credit the one who inflicted the poison if possible
+						// if it's Hospitality, credit the Hospitality ally
+						// any other edge cases? double-check customs
+					// case 'Format':
+					// case 'Nature':
+					// case 'Ruleset':
+					case 'Terrain':
+						// credit the terrain setter
+						if (field.getTerrain() && field.getTerrain().source) credit = field.getTerrain().source;
+						break;
+					case 'Weather':
+						// credit the weather setter
+						if (field.getWeather() && field.getWeather().source) credit = field.getWeather().source;
+						break;
+					case 'Status':
+						// credit the status setter
+						if (target.status && target.status === effect && target.status.source) credit = target.status.source;
+					// case 'Terastal':
+					// case 'Rule':
+					// case 'ValidatorRule':
 				}
-
-// type EffectType =
-//	'Condition' | 'Pokemon' | 'Move' | 'Item' | 'Ability' | 'Format' |
-//	'Nature' | 'Ruleset' | 'Terrain' | 'Weather' | 'Status' | 'Terastal' | 'Rule' | 'ValidatorRule';
-
 			}
-			*/
 			
 			if (!credit && source) credit = source;
 			if (!credit && target) credit = target;
@@ -278,25 +311,54 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			console.log((source && source.fullname) ? source.fullname : source);
 			console.log(`effect:`);
 			console.log(((effect && effect.name) ? effect.name : effect) + (effect.effectType ? ` of type ` + effect.effectType : ` `));
-			console.log((effect && effect.name) ? effect.name : effect);
 			console.log(`damage:`);
 			console.log(damage);
 
-			// attribute the source of the healing
+			// attribute the source of the damage
 			let credit = null;
-			/*
+			
 			if (effect && effect.effectType) {
-				if (effect.effectType === "Condition") {
-					// have to track down the condition (ex. Wish)
-					// slot condition? side condition? field effect?
+				switch (effect.effectType) {
+					case 'Condition':
+						if (target.volatiles && target.volatiles[effect] && target.volatiles[effect].source) credit = target.volatiles[effect].source;
+						if (target.side.sideConditions && target.side.sideConditions[effect] && target.side.sideConditions[effect].source) credit = target.side.sideConditions[effect].source;
+						if (target.side.slotConditions && target.side.slotConditions[target.position] && target.side.slotConditions[target.position][effect] && target.side.slotConditions[target.position][effect].source) credit = target.side.slotConditions[target.position][effect].source;
+					case 'Pokemon':
+						credit = effect;
+						break;
+					case 'Move':
+						credit = this.activePokemon;
+						break;
+					case 'Item':
+						// can I track the original holder of the item and how it was obtained?
+						// Symbiosis, Trick, Thief, et cetera
+						credit = target;
+					case 'Ability':
+						// if it's an immunity Ability, credit the attacker
+						if (this.activeMove) credit = this.activePokemon;
+						// if it's a weather Ability like Dry Skin, credit the field effect setter if possible
+						// if it's Poison Heal, credit the one who inflicted the poison if possible
+						// if it's Hospitality, credit the Hospitality ally
+						// any other edge cases? double-check customs
+					// case 'Format':
+					// case 'Nature':
+					// case 'Ruleset':
+					case 'Terrain':
+						// credit the terrain setter
+						if (field.getTerrain() && field.getTerrain().source) credit = field.getTerrain().source;
+						break;
+					case 'Weather':
+						// credit the weather setter
+						if (field.getWeather() && field.getWeather().source) credit = field.getWeather().source;
+						break;
+					case 'Status':
+						// credit the status setter
+						if (target.status && target.status === effect && target.status.source) credit = target.status.source;
+					// case 'Terastal':
+					// case 'Rule':
+					// case 'ValidatorRule':
 				}
-
-// type EffectType =
-//	'Condition' | 'Pokemon' | 'Move' | 'Item' | 'Ability' | 'Format' |
-//	'Nature' | 'Ruleset' | 'Terrain' | 'Weather' | 'Status' | 'Terastal' | 'Rule' | 'ValidatorRule';
-
 			}
-			*/
 			
 			if (!credit && source) credit = source;
 			if (!credit && target) credit = target;
