@@ -345,6 +345,8 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 				let method = null;
 				if (effect && effect.name) method = effect.name;
 				else if (effect && effect.id) method = effect.id;
+				// if I don't like how certain statuses are labeled (for instance, if I want to replace "brn" with "burn damage" or "Sandstorm" with "sand chip"),
+				// I can manually overwrite them here
 				
 				if (credit && target && credit.side && target.side) {
 					if (credit.side !== target.side) { // it's a foeHeal if you heal the other team
@@ -493,6 +495,8 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 				let method = null;
 				if (effect && effect.name) method = effect.name;
 				else if (effect && effect.id) method = effect.id;
+				// if I don't like how certain statuses are labeled (for instance, if I want to replace "brn" with "burn damage" or "Sandstorm" with "sand chip"),
+				// I can manually overwrite them here
 				
 				if (credit && target && credit.side && target.side) {
 					if (credit.side === target.side) { // it's an allyDamage if you hurt the same team
