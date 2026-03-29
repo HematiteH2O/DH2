@@ -265,6 +265,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 							if (this.field.getWeather && this.field.getWeather().name === effect.name && this.field.getWeather().source) credit = this.field.getWeather().source;
 							if (this.field.getTerrain && this.field.getTerrain().name === effect.name && this.field.getTerrain().source) credit = this.field.getTerrain().source;
 						}
+						if (this.field.getTerrain()) console.log(this.field.getTerrain());
 						break;
 					// case 'Pokemon':
 					case 'Move':
@@ -330,20 +331,23 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 				let foeHealPercent = 0;
 				
 				if (damage > (target.maxhp - target.hp)) { // no overheal
+					console.log(`perceived overheal: ` + damage + ` damage is greater than ` + (target.maxhp - target.hp) + ` lost HP`);
+					console.log(`heal percent reduced from ` + healPercent);
 					healPercent = ((target.maxhp - target.hp) / target.maxhp * 100);
+					console.log(`to ` + healPercent);
 				}
 
-				/*
-				if (credit && credit.side && target && target.side && (credit.side !== target.side)) { // this doesn't work
-					foeHealPercent = healPercent;
-					healPercent = 0;
-				}
-				*/
-				
 				console.log(`Attributed ` + (effect.name ? effect.name : effect) + ` to ` + (credit.fullname ? credit.fullname : credit));
 				if (credit.side) console.log(`Credit's side is ` + credit.side);
 				if (target.side) console.log(`Target's side is ` + target.side);
 				if (credit.side !== target.side) console.log(`These are different, so this *should* be foeHeal`);
+				
+				if (credit && target && credit.side && target.side) {
+					if (credit.side !== target.side) { // it's a foeHeal if you heal the other team
+						foeHealPercent = healPercent;
+						healPercent = 0;
+					}
+				}
 				
 				if (this.funStats.heals[credit]) {
 					this.funStats.heals[credit] += healPercent;
@@ -461,17 +465,18 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 					overkill = ((damage - target.hp) / target.maxhp * 100);
 				}
 
-				/*
-				if (credit && credit.side && target && target.side && (credit.side !== target.side)) { // this doesn't work
-					allyDamage = damagePercent;
-					damagePercent = 0;
-				}
-				*/
-				
 				console.log(`Attributed ` + (effect.name ? effect.name : effect) + ` to ` + (credit.fullname ? credit.fullname : credit));
 				if (credit.side) console.log(`Credit's side is ` + credit.side);
 				if (target.side) console.log(`Target's side is ` + target.side);
-				if (credit.side !== target.side) console.log(`These are different, so this *should* be allyDamage`);
+				if (credit.side === target.side) console.log(`These are the same, so this *should* be allyDamage`);
+				
+				if (credit && target && credit.side && target.side) {
+					if (credit.side === target.side) { // it's an allyDamage if you hurt the same team
+						allyDamage = damagePercent;
+						damagePercent = 0;
+						overkill = 0;
+					}
+				}
 				
 				// damage
 				if (this.funStats.damage[credit]) {
@@ -485,8 +490,8 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 
 				// overkill
 				if (this.funStats.overkill[credit]) {
-					this.funStats.overkill[credit] += damagePercent;
-				} else this.funStats.overkill[credit] = damagePercent;
+					this.funStats.overkill[credit] += overkill;
+				} else this.funStats.overkill[credit] = overkill;
 				
 			}
 			
