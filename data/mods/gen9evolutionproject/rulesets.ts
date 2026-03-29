@@ -540,11 +540,21 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			
 			console.log(this.funStats);
 		},
-		onBattleFinished() {
-			this.add('-message', `onBattleFinished() - do I need this? does this appear in the right place?!`);
+		// super-effective move count
+		onDamagingHit(damage, target, source, move) {
+			if (!move.damage && !move.damageCallback && target.getMoveHitData(move).typeMod > 0) {
+				if (source.m.superEffectiveHits) {
+					source.m.superEffectiveHits++;
+				} else source.m.superEffectiveHits = 1;
+			}
 		},
-		onBattleEnd() {
-			this.add('-message', `onBattleEnd() - this is a test; does this work on its own?`);
+		onBattleFinished() {
+			// I think I have everything I want for now set up, but I can add more over time
+			// this.funStats
+			// pokemon.m.superEffectiveHits (what landed the most SE hits)
+			// pokemon.m.movesMissed (what missed the most moves)
+			// pokemon.timesAttacked (what took the most attacks)
+			this.add('-message', `This is a placeholder! The battle has ended, and now fun stats can go here.`);
 		},
 	},
 };
