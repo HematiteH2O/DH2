@@ -225,7 +225,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 
 			console.log(`heal notes`);
 			console.log(`target:`);
-			console.log((target.fullname ? target.fullname : target) + (target.hp ? ` with HP ` + target.hp));
+			console.log((target.fullname ? target.fullname : target) + (target.hp ? ` with HP ` + target.hp : ` `));
 			console.log(`source:`);
 			console.log(source.fullname ? source.fullname : source);
 			console.log(`effect:`);
@@ -262,7 +262,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 
 			console.log(`damage notes`);
 			console.log(`target:`);
-			console.log((target.fullname ? target.fullname : target) + (target.hp ? ` with HP ` + target.hp));
+			console.log((target.fullname ? target.fullname : target) + (target.hp ? ` with HP ` + target.hp : ` `));
 			console.log(`source:`);
 			console.log(source.fullname ? source.fullname : source);
 			console.log(`effect:`);
