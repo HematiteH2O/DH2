@@ -265,6 +265,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 							if (this.field.getWeather && this.field.getWeather().id === effect.name && this.field.weather && this.field.weather.source) credit = this.field.weather.source;
 							if (this.field.getTerrain && this.field.getTerrain().id === effect.name && this.field.terrain && this.field.terrain.source) credit = this.field.terrain.source;
 						}
+						if (this.field.terrain) console.log(this.field.terrain);
 						break;
 					// case 'Pokemon':
 					case 'Move':
@@ -350,6 +351,8 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						healPercent = 0;
 					}
 				}
+				
+				credit = credit.side.name + `'s ` + credit.name;
 				
 				if (this.funStats.heals[credit]) {
 					this.funStats.heals[credit] += healPercent;
@@ -479,6 +482,8 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						overkill = 0;
 					}
 				}
+				
+				credit = credit.side.name + `'s ` + credit.name;
 				
 				// damage
 				if (this.funStats.damage[credit]) {
