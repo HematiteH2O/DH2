@@ -255,17 +255,16 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 							if (target.volatiles && target.volatiles[effect.id] && target.volatiles[effect.id].source) credit = target.volatiles[effect.id].source;
 							if (target.side.sideConditions && target.side.sideConditions[effect.id] && target.side.sideConditions[effect.id].source) credit = target.side.sideConditions[effect.id].source;
 							if (target.side.slotConditions && target.side.slotConditions[target.position] && target.side.slotConditions[target.position][effect.id] && target.side.slotConditions[target.position][effect.id].source) credit = target.side.slotConditions[target.position][effect.id].source;
-							if (this.field.getWeather && this.field.getWeather().id === effect.id && this.field.weather && this.field.weather.source) credit = this.field.weather.source;
-							if (this.field.getTerrain && this.field.getTerrain().id === effect.id && this.field.terrain && this.field.terrain.source) credit = this.field.terrain.source;
+							if (this.field.getWeather && this.field.getWeather().id === effect.id && this.field.weatherState && this.field.weatherState.source) credit = this.field.weatherState.source;
+							if (this.field.getTerrain && this.field.getTerrain().id === effect.id && this.field.terrainState && this.field.terrainState.source) credit = this.field.terrainState.source;
 						}
 						if (effect.name) {
 							if (target.volatiles && target.volatiles[effect.name] && target.volatiles[effect.name].source) credit = target.volatiles[effect.name].source;
 							if (target.side.sideConditions && target.side.sideConditions[effect.name] && target.side.sideConditions[effect.name].source) credit = target.side.sideConditions[effect.name].source;
 							if (target.side.slotConditions && target.side.slotConditions[target.position] && target.side.slotConditions[target.position][effect.name] && target.side.slotConditions[target.position][effect.name].source) credit = target.side.slotConditions[target.position][effect.name].source;
-							if (this.field.getWeather && this.field.getWeather().id === effect.name && this.field.weather && this.field.weather.source) credit = this.field.weather.source;
-							if (this.field.getTerrain && this.field.getTerrain().id === effect.name && this.field.terrain && this.field.terrain.source) credit = this.field.terrain.source;
+							if (this.field.getWeather && this.field.getWeather().id === effect.name && this.field.weatherState && this.field.weatherState.source) credit = this.field.weatherState.source;
+							if (this.field.getTerrain && this.field.getTerrain().id === effect.name && this.field.terrainState && this.field.terrainState.source) credit = this.field.terrainState.source;
 						}
-						if (this.field.terrain) console.log(this.field.terrain);
 						break;
 					// case 'Pokemon':
 					case 'Move':
@@ -281,7 +280,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 					case 'Ability':
 						if (effect.name) {
 							if (["Dry Skin", "Frigid Focus", "Ice Body", "Rain Dish", "Solar Power"].includes(effect.name)) { // weather Abilities
-								if (this.field.getWeather() && this.field.weather && this.field.weather.source) credit = this.field.weather.source;
+								if (this.field.getWeather() && this.field.weatherState && this.field.weatherState.source) credit = this.field.weatherState.source;
 							}
 							if (["Dry Skin", "Earth Eater", "Volt Absorb", "Water Absorb"].includes(effect.name)) { // type immunity Abilities
 								if (this.activeMove && this.activePokemon) credit = this.activePokemon;
@@ -390,15 +389,15 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 							if (target.volatiles && target.volatiles[effect.id] && target.volatiles[effect.id].source) credit = target.volatiles[effect.id].source;
 							if (target.side.sideConditions && target.side.sideConditions[effect.id] && target.side.sideConditions[effect.id].source) credit = target.side.sideConditions[effect.id].source;
 							if (target.side.slotConditions && target.side.slotConditions[target.position] && target.side.slotConditions[target.position][effect.id] && target.side.slotConditions[target.position][effect.id].source) credit = target.side.slotConditions[target.position][effect.id].source;
-							if (this.field.getWeather && this.field.getWeather().id === effect.id && this.field.weather && this.field.weather.source) credit = this.field.weather.source;
-							if (this.field.getTerrain && this.field.getTerrain().id === effect.id && this.field.terrain && this.field.terrain.source) credit = this.field.terrain.source;
+							if (this.field.getWeather && this.field.getWeather().id === effect.id && this.field.weatherState && this.field.weatherState.source) credit = this.field.weatherState.source;
+							if (this.field.getTerrain && this.field.getTerrain().id === effect.id && this.field.terrainState && this.field.terrainState.source) credit = this.field.terrainState.source;
 						}
 						if (effect.name) {
 							if (target.volatiles && target.volatiles[effect.name] && target.volatiles[effect.name].source) credit = target.volatiles[effect.name].source;
 							if (target.side.sideConditions && target.side.sideConditions[effect.name] && target.side.sideConditions[effect.name].source) credit = target.side.sideConditions[effect.name].source;
 							if (target.side.slotConditions && target.side.slotConditions[target.position] && target.side.slotConditions[target.position][effect.name] && target.side.slotConditions[target.position][effect.name].source) credit = target.side.slotConditions[target.position][effect.name].source;
-							if (this.field.getWeather && this.field.getWeather().id === effect.name && this.field.weather && this.field.weather.source) credit = this.field.weather.source;
-							if (this.field.getTerrain && this.field.getTerrain().id === effect.name && this.field.terrain && this.field.terrain.source) credit = this.field.terrain.source;
+							if (this.field.getWeather && this.field.getWeather().id === effect.name && this.field.weatherState && this.field.weatherState.source) credit = this.field.weatherState.source;
+							if (this.field.getTerrain && this.field.getTerrain().id === effect.name && this.field.terrainState && this.field.terrainState.source) credit = this.field.terrainState.source;
 						}
 						break;
 					// case 'Pokemon':
@@ -415,7 +414,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 					case 'Ability':
 						if (effect.name) {
 							if (["Dry Skin", "Frigid Focus", "Ice Body", "Rain Dish", "Solar Power"].includes(effect.name)) { // weather Abilities
-								if (this.field.getWeather() && this.field.weather && this.field.weather.source) credit = this.field.weather.source;
+								if (this.field.getWeather() && this.field.weatherState && this.field.weatherState.source) credit = this.field.weatherState.source;
 							}
 							if (["Dry Skin", "Earth Eater", "Volt Absorb", "Water Absorb"].includes(effect.name)) { // type immunity Abilities
 								if (this.activeMove && this.activePokemon) credit = this.activePokemon;
