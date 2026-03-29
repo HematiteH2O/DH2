@@ -540,5 +540,11 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			
 			console.log(this.funStats);
 		},
+		onBattleFinished() {
+			this.add('-message', `onBattleFinished() - do I need this? does this appear in the right place?!`);
+		}
+		onBattleEnd() {
+			this.add('-message', `onBattleEnd() - this is a test; does this work on its own?`);
+		}
 	},
 };
