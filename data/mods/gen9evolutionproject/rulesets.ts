@@ -1,3 +1,5 @@
+import { Teams } from '../../../sim/teams';
+
 export const Rulesets: {[k: string]: ModdedFormatData} = {
 	datamod: {
 		effectType: 'Rule',
@@ -568,11 +570,15 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			// pokemon.m.superEffectiveHits (what landed the most SE hits)
 			// pokemon.m.movesMissed (what missed the most moves)
 			// pokemon.timesAttacked (what took the most attacks)
-			this.add('-message', `This is a placeholder! The battle has ended, and now fun stats can go here.`);
+			// pokemon.set.hasBeenRandomized is also something I can check
+			this.add(`raw|This is a placeholder! The battle has ended, and now fun stats can go here.<hr>Did the horizontal rule show up? Please tell me it did!`);
 			for (const side of this.sides) {
-				for (const pokemon of side.pokemon) {
-					if (pokemon.set && pokemon.set.hasBeenRandomized) console.log(pokemon.name);
-					// can I still tell even at the end of battle that something has been randomized?
+				let randomized = 0;
+				for (const pokemon of side.pokemon) if (pokemon.set && pokemon.set.hasBeenRandomized) randomized++;
+				if (randomized === side.team.length) {
+					this.hint(`${side.name}'s team was randomly generated!`);
+					this.hint(`If you want to use it again, you can copy it from here:`);
+					this.add('showteam', side.id, Teams.pack(team));
 				}
 			}
 		},
