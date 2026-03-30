@@ -106,7 +106,13 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			// if (!poke || !poke.num || !poke.abilities || !poke.types || !poke.baseStats)
 			let randomizerInfo = `<br>`;
 			// icon
-			if (monDex.copyData) {
+			if ([
+				'mycecroak', 'whiscazu', 'dewgongvariant', 'carnelion', 'noivernvariant', 'voltangent', 'dusglow',
+				'aleon', 'overchill', 'overchillzen', 'mantinevariant', 'parascelium', 'malamaralola', 'excadrillhisui', 'dedellite', 'coilrig',
+				'velocinobi', 'stunfiskvariant',
+			].includes(id)) {
+				randomizerInfo += `=IMAGE("https://raw.githubusercontent.com/scoopapa/DH2/refs/heads/main/data/mods/evolutionproject/sprites/icons/` + id + `.png",3)~`;
+			} else if (monDex.copyData) {
 				randomizerInfo += `=IMAGE("https://raw.githubusercontent.com/scoopapa/DH2/refs/heads/main/data/mods/gen9evolutionproject/sprites/icons/` + id + `.png",3)~`;
 			} else {
 				randomizerInfo += `=IMAGE("https://www.smogon.com/forums//media/minisprites/` + id + `.png",3)~`;
