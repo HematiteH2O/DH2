@@ -31,6 +31,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 			];
 		}
+		return team;
 	},
 	init() {
 		let customList = [];
