@@ -327,7 +327,7 @@ export class TeamValidator {
 			skipSets?: {[name: string]: {[key: string]: boolean}},
 		} = {}
 	): string[] | null {
-		if (team && this.format.validateTeam) {
+		if ((team || this.format.teamOptional) && this.format.validateTeam) { // MODDED for partial randbats
 			return this.format.validateTeam.call(this, team, options) || null;
 		}
 		return this.baseValidateTeam(team, options);
