@@ -658,7 +658,10 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			let maxDamage = 0;
 			let damageRecordHolder = null;
 			let damageRecordMethod = null;
-			let damageRecordTie = false; // not implemented yet!
+			
+			let damageRecordTie = false;
+			let damageRecordHolderTie = [];
+			
 			if (this.funStats.damage) {
 				console.log(`it does exist`);
 				console.log(this.funStats.damage.length);
@@ -667,35 +670,59 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 					console.log(this.funStats.damage[i]);
 					console.log(maxDamage);
 					if (this.funStats.damage[i] > maxDamage) {
+						damageRecordTie = false;
+						damageRecordHolderTie = []; // reset
+						
 						maxDamage = this.funStats.damage[i];
 						damageRecordHolder = i;
-						console.log(this.funStats.damageMethod[i]);
+						damageRecordHolderTie.push(i);
+						
 						if (this.funStats.damageMethod[i]) damageRecordMethod = this.funStats.damageMethod[i];
 						else damageRecordMethod = null;
+					} else if (this.funStats.damage[i] === maxDamage) {
+						damageRecordTie = true;
+						damageRecordHolderTie.push(i);
+						// don't report methods in case of ties
 					}
 				}
 			}
-			if (maxDamage > 0 && damageRecordHolder) {
-				let damageReport = `The Pokémon that did the most damage was ${damageRecordHolder}.<br>`;
-				if (damageRecordMethod) {
-					if (damageRecordMethod.length && damageRecordMethod.length > 1) {
-						damageReport += `Between `;
-						let order = 0;
-						for (const damageMethod of damageRecordMethod) {
-							order++;
-							if (order < damageRecordMethod.length) {
-								damageReport += ` ${damageMethod}`;
-								if (order + 1 < damageRecordMethod.length) damageReport += `,`;
-							}
-							else damageReport += ` and ${damageMethod}`;
-						}
-					} else {
-						damageReport += `With ${damageRecordMethod[0]}`;
+			if (damageRecordTie && damageRecordHolderTie && damageRecordHolderTie.length && damageRecordHolderTie.length > 1 && maxDamage > 0) {
+				// absolute safety msjhdfg
+				let damageReport = `<br>The Pokémon that did the most damage were `;
+				let order = 0;
+				for (const tiedRecordHolder of damageRecordHolderTie) {
+					order++;
+					if (order < damageRecordHolderTie.length) {
+						damageReport += ` ${tiedRecordHolder}`;
+						if (order + 1 < damageRecordHolderTie.length) overkillReport += `,`;
 					}
-					damageReport += `, i`;
-				} else damageReport += `I`;
-				damageReport += `t dealt <strong>${Math.round(maxDamage*10)/10}</strong>% in total damage to the opposing team!<br>`;
+					else damageReport += ` and ${tiedRecordHolder}`;
+				}
+				damageReport += `,<br>who somehow tied by each dealing <strong>${Math.round(maxDamage*10)/10}</strong>% to the opposing team!<br>`;
 				statsReveal += damageReport;
+			} else {
+				if (maxDamage > 0 && damageRecordHolder) {
+					let damageReport = `The Pokémon that did the most damage was ${damageRecordHolder}.<br>`;
+					if (damageRecordMethod) {
+						if (damageRecordMethod.length && damageRecordMethod.length > 1) {
+							damageReport += `Between `;
+							let order = 0;
+							for (const damageMethod of damageRecordMethod) {
+								order++;
+								if (order < damageRecordMethod.length) {
+									damageReport += ` ${damageMethod}`;
+									if (order + 1 < damageRecordMethod.length) damageReport += `,`;
+								}
+								else damageReport += ` and ${damageMethod}`;
+							}
+						} else {
+							damageReport += `With ${damageRecordMethod[0]}`;
+						}
+						damageReport += `, i`;
+					} else damageReport += `I`;
+					damageReport += `t dealt <strong>${Math.round(maxDamage*10)/10}</strong>% in total damage to the opposing team!<br>`;
+					statsReveal += damageReport;
+				}
 			}
 
 			// overkill
@@ -726,7 +753,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			}
 
 			if (statsReveal !== `raw|<div class="hint">`) {
-				statsReveal += `<br></div><hr>`;
+				statsReveal += `</div><hr>`;
 				this.add(statsReveal);
 			}
 			/*
