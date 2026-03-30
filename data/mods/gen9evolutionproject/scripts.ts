@@ -107,7 +107,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			let randomizerInfo = `<br>`;
 			// icon
 			if (monDex.copyData) {
-				randomizerInfo += `=IMAGE("https://github.com/scoopapa/DH2/blob/main/data/mods/gen9evolutionproject/sprites/icons/` + id + `.png",3)~`;
+				randomizerInfo += `=IMAGE("https://raw.githubusercontent.com/scoopapa/DH2/refs/heads/main/data/mods/gen9evolutionproject/sprites/icons/` + id + `.png",3)~`;
 			} else {
 				randomizerInfo += `=IMAGE("https://www.smogon.com/forums//media/minisprites/` + id + `.png",3)~`;
 			}
