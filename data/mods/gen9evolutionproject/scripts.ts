@@ -14,6 +14,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		if (team && team.length === 6) return team;
 		
 		if (!team) team = [];
+		let setLevel = 100;
+		if (this.ruleTable.adjustLevel) level = this.ruleTable.adjustLevel;
+		console.log(level);
+		console.log(this.activePerHalf);
+		
 		let set = {
 				name: 'Default Rootsnoot',
 				species: 'Rootsnoot',
