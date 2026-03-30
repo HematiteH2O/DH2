@@ -1,4 +1,5 @@
 import { Pokemon, EffectState } from '../../../sim/pokemon';
+import { Teams } from '../../../sim/teams';
 
 export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 	teambuilderConfig: {
@@ -7,6 +8,30 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		customTiers: ['Pokémon of the Day!', 'Evo!', '(Prevo)'],
 		customDoublesTiers: ['Pokémon of the Day!', 'Evo!', '(Prevo)'],
 	},
+	getTeam(options) { // randomizer
+		let team = options.team;
+		if (typeof team === 'string') team = Teams.unpack(team);
+		if (team && team.length === 6) return team;
+		
+		if (!team) team = [];
+		let set = {
+				name: 'Default Rootsnoot',
+				species: 'Rootsnoot',
+				item: 'Rocky Helmet',
+				ability: 'Grassy Surge',
+				moves: [ 'Volt Switch' ],
+				nature: '',
+				evs: { hp: 4, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 },
+				happiness: 255,
+				hpType: '',
+				pokeball: '',
+				gigantamax: false,
+				dynamaxLevel: 10,
+				teraType: 'Rock',
+		}
+		team.push(set);
+		return team;
+	}
 	randomTest(team) {
 		if (team) {
 			for (const set of team) {
