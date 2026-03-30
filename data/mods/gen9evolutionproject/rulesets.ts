@@ -527,10 +527,12 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 				if (!this.funStats.overkill.damage || overkill > this.funStats.overkill.damage) {
 					this.funStats.overkill.damage = overkill;
 					this.funStats.overkill.highlights = [];
-					this.funStats.overkill.highlights.push(`${credit} with ${method} into ${target.name}`);
+					// "The biggest overkill was..."
+					this.funStats.overkill.highlights.push(`when ${credit} damaged ${target.name} with ${method}`);
+					// "... which did ${this.funStats.overkill.damage}% more damage than necessary!"
 				} else if (overkill === this.funStats.overkill.damage) {
 					if (!this.funStats.overkill.highlights) this.funStats.overkill.highlights = [];
-					this.funStats.overkill.highlights.push(`${credit} with ${method} into ${target.name}`);
+					this.funStats.overkill.highlights.push(`when ${credit} damaged ${target.name} with ${method}`);
 				}
 				
 				if (credit && target && credit.side && target.side) {
@@ -601,12 +603,12 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 
 			// report stats
 			let anyStatsShown = false;
-			
+
+			// max damage
 			let maxDamage = 0;
 			let damageRecordHolder = null;
 			let damageRecordMethod = null;
 			let damageRecordTie = false; // not implemented yet!
-			
 			if (this.funStats.damage) {
 				console.log(`it does exist`);
 				console.log(this.funStats.damage.length);
@@ -624,7 +626,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			}
 			if (maxDamage > 0 && damageRecordHolder) {
 				anyStatsShown = true;
-				let damageReport = `raw|The Pokémon that did the most damage was <em>${damageRecordHolder}</em>!<br>`;
+				let damageReport = `raw|<br>The Pokémon that did the most damage was <em>${damageRecordHolder}</em>!<br>`;
 				if (damageRecordMethod) {
 					if (damageRecordMethod.length && damageRecordMethod.length > 1) {
 						damageReport += `Between `;
@@ -641,7 +643,29 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						damageReport += `With ${damageRecordMethod[0]}`;
 					}
 				}
-				damageReport += `, it dealt ${Math.round(maxDamage*1000)/10}% in total damage to the opposing team!`;
+				damageReport += `, it dealt ${Math.round(maxDamage*1000)/10}% in total damage to the opposing team!<br>`;
+			}
+
+			// overkill
+			if (
+				this.funStats.overkill && this.funStats.overkill.damage && this.funStats.overkill.damage > 0 &&
+				this.funStats.overkill.highlights && this.funStats.overkill.highlights.length
+			) {
+				anyStatsShown = true;
+				let overkillReport = `raw|<br>The biggest overkill was `;
+				if (this.funStats.overkill.highlights.length > 1) {
+					overkillReport += `a tie between `;
+					let order = 0;
+					for (const overkillHighlight of this.funStats.overkill.highlights) {
+						order++;
+						if (order < this.funStats.overkill.highlights.length) {
+							overkillReport += ` ${overkillHighlight}`;
+							if (order + 1 < this.funStats.overkill.highlights.length) customGuide += `,`;
+						}
+						else overkillReport += ` and ${overkillHighlight}`;
+					}
+				} else overkillReport += `${this.funStats.overkill.highlights[0]}`;
+				overkillReport += `, which did ${Math.round(this.funStats.overkill.damage*1000)/10}% more damage than necessary!`;
 			}
 
 			if (anyStatsShown) this.add(`raw|<hr>`);
