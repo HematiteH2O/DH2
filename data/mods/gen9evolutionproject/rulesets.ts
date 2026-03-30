@@ -6,6 +6,28 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 		name: 'Data Mod',
 		desc: 'When a new Pokémon switches in for the first time, information about its types, stats and Abilities is displayed to both players.',
 		
+		onBegin() {
+			// messages can be displayed here, such as if we ever have a banner
+			
+			// initializing battle stats for fun
+			this.funStats = { // report the record-holder in each category only if conditions are met
+				damage: {}, // always report
+				damageMethod: {},
+				allyDamage: {}, // only report if more than any opponent damaged its team
+				allyDamageMethod: {},
+				
+				heal: {}, // only report if more than 100%?
+				healMethod: {}, // only report if more than 100%?
+				foeHeal: {}, // only report if more than it healed its own team
+				foeHealMethod: {}, // only report if more than 100%?
+				
+				overkill: {}, // only report if more than 100%?
+			};
+			// hits taken are already recorded (see Rage Fist)
+		},
+
+		// actual Data Mod feature
+		
 		onTeamPreview() {
 			// OKAY HEADS-UP:
 			// the below is for *my personal convenience* for randbats set generation - it should be *commented out* in any patch that actually gets loaded to DH
@@ -224,26 +246,9 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 				} else source.m.superEffectiveHits = 1;
 			}
 		},
+
+		// battle stats feature
 		
-		// battle stats for fun
-		onBegin() {
-			this.funStats = { // report the record-holder in each category only if conditions are met
-				damage: {}, // always report
-				damageMethod: {},
-				allyDamage: {}, // only report if more than any opponent damaged its team
-				allyDamageMethod: {},
-				
-				heal: {}, // only report if more than 100%?
-				healMethod: {}, // only report if more than 100%?
-				foeHeal: {}, // only report if more than it healed its own team
-				foeHealMethod: {}, // only report if more than 100%?
-				
-				overkill: {}, // only report if more than 100%?
-			};
-			// hits taken are already recorded (see Rage Fist)
-		},
-		
-		// TODO: also list the *names* of the effects, excluding moves for damage?
 		// HARD-CODING TO DO:
 		// Destiny Bond, Perish Body/Perish Song, self-KO moves (damage)
 		// Revival Blessing (heal) + *maybe* Power Construct, Tera Shift, special Terastallized states
