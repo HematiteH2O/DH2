@@ -31,33 +31,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		}
 		team.push(set);
 		return team;
-	}
-	randomTest(team) {
-		if (team) {
-			for (const set of team) {
-				set.species = 'Smeargle';
-			}
-			return team;
-		} else {
-			const randTeam = [];
-			let set = {
-					name: 'Default Rootsnoot',
-					species: 'Rootsnoot',
-					item: 'Rocky Helmet',
-					ability: 'Grassy Surge',
-					moves: [ 'Volt Switch' ],
-					nature: '',
-					evs: { hp: 4, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 },
-					happiness: 255,
-					hpType: '',
-					pokeball: '',
-					gigantamax: false,
-					dynamaxLevel: 10,
-					teraType: 'Rock',
-			}
-			randTeam.push(set);
-			return randTeam;
-		}
 	},
 	init() {
 		let customList = [];
