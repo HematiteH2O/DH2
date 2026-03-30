@@ -7,21 +7,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		customTiers: ['Pokémon of the Day!', 'Evo!', '(Prevo)'],
 		customDoublesTiers: ['Pokémon of the Day!', 'Evo!', '(Prevo)'],
 	},
-	'team-validator': {
-		validateTeam(
-			team: PokemonSet[] | null,
-			options: {
-				removeNicknames?: boolean,
-				skipSets?: {[name: string]: {[key: string]: boolean}},
-			} = {}
-		): string[] | null {
-			if (!team) return [`You don't have a team, but being able to see that is good! This works!`];
-			if (team && this.format.validateTeam) {
-				return this.format.validateTeam.call(this, team, options) || null;
-			}
-			return this.baseValidateTeam(team, options);
-		}
-	},
 	init() {
 		let customList = [];
 		let dexNo = -1;
@@ -447,6 +432,81 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				hitResults[i] = true;
 			}
 			return hitResults;
+		}
+	},
+	teamvalidator: {
+		validateTeam(
+			team: PokemonSet[] | null,
+			options: {
+				removeNicknames?: boolean,
+				skipSets?: {[name: string]: {[key: string]: boolean}},
+			} = {}
+		): string[] | null {
+			if (!team) return [`Test 1: You don't have a team, but being able to see that is good! This works!`];
+			if (team && this.format.validateTeam) {
+				return this.format.validateTeam.call(this, team, options) || null;
+			}
+			return this.baseValidateTeam(team, options);
+		}
+	},
+	teamValidator: {
+		validateTeam(
+			team: PokemonSet[] | null,
+			options: {
+				removeNicknames?: boolean,
+				skipSets?: {[name: string]: {[key: string]: boolean}},
+			} = {}
+		): string[] | null {
+			if (!team) return [`Test 2: You don't have a team, but being able to see that is good! This works!`];
+			if (team && this.format.validateTeam) {
+				return this.format.validateTeam.call(this, team, options) || null;
+			}
+			return this.baseValidateTeam(team, options);
+		}
+	},
+	validator: {
+		validateTeam(
+			team: PokemonSet[] | null,
+			options: {
+				removeNicknames?: boolean,
+				skipSets?: {[name: string]: {[key: string]: boolean}},
+			} = {}
+		): string[] | null {
+			if (!team) return [`Test 3: You don't have a team, but being able to see that is good! This works!`];
+			if (team && this.format.validateTeam) {
+				return this.format.validateTeam.call(this, team, options) || null;
+			}
+			return this.baseValidateTeam(team, options);
+		}
+	},
+	'team-validator': {
+		validateTeam(
+			team: PokemonSet[] | null,
+			options: {
+				removeNicknames?: boolean,
+				skipSets?: {[name: string]: {[key: string]: boolean}},
+			} = {}
+		): string[] | null {
+			if (!team) return [`Test 4: You don't have a team, but being able to see that is good! This works!`];
+			if (team && this.format.validateTeam) {
+				return this.format.validateTeam.call(this, team, options) || null;
+			}
+			return this.baseValidateTeam(team, options);
+		}
+	},
+	`team-validator`: {
+		validateTeam(
+			team: PokemonSet[] | null,
+			options: {
+				removeNicknames?: boolean,
+				skipSets?: {[name: string]: {[key: string]: boolean}},
+			} = {}
+		): string[] | null {
+			if (!team) return [`Test 5: You don't have a team, but being able to see that is good! This works!`];
+			if (team && this.format.validateTeam) {
+				return this.format.validateTeam.call(this, team, options) || null;
+			}
+			return this.baseValidateTeam(team, options);
 		}
 	},
 };
