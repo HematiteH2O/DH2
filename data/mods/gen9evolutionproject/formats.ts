@@ -49,6 +49,7 @@ export const Formats: FormatData[] = [
 			if (!team || team.length < 6) {
 				// this is when you should randbats it
 				team = Scripts.randomTest(team);
+				options.team = team;
 			}
 			
 			if (!Array.isArray(team)) {
