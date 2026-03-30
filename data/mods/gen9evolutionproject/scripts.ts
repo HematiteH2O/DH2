@@ -220,15 +220,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		}
 		// end commented-out section	
 
-		let random1 = Math.floor(Math.random() * customList.length);
-		let random2 = Math.floor(Math.random() * (customList.length - 1));
-		let random3 = Math.floor(Math.random() * (customList.length - 2));
-		if (random2 >= random1) random2 += 1;
-		if (random3 >= random1) random3 += 1;
-		if (random3 >= random2) random3 += 1;
-		this.modData('FormatsData', customList[random1]).tier = "Pokémon of the Day!";
-		this.modData('FormatsData', customList[random2]).tier = "Pokémon of the Day!";
-		this.modData('FormatsData', customList[random3]).tier = "Pokémon of the Day!";
+		let potd1 = this.sample(customList);
+		let potd2 = this.sample(customList.filter(id => id !== potd1));
+		let potd3 = this.sample(customList.filter(id => id !== potd1 && id !== potd2));
+		this.modData('FormatsData', potd1).tier = "Pokémon of the Day!";
+		this.modData('FormatsData', potd2).tier = "Pokémon of the Day!";
+		this.modData('FormatsData', potd3).tier = "Pokémon of the Day!";
 	},
 	
 	win(side?: SideID | '' | Side | null) { // modded to cue end-of-battle messages
