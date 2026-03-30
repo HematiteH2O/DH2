@@ -404,7 +404,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						healPercent = 0;
 
 						// adding method:
-						credit = `${credit.side.name}'s ${credit.name}`;
+						credit = `${credit.side.name}'s <strong>${credit.name}</strong>`;
 						
 						if (method) {
 							if (!this.funStats.foeHealMethod[credit]) this.funStats.foeHealMethod[credit] = [];
@@ -412,7 +412,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						}
 					} else {
 						// adding method:
-						credit = `${credit.side.name}'s ${credit.name}`;
+						credit = `${credit.side.name}'s <strong>${credit.name}</strong>`;
 						
 						if (method) {
 							if (!this.funStats.healMethod[credit]) this.funStats.healMethod[credit] = [];
@@ -578,11 +578,11 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 					this.funStats.overkill.damage = overkill;
 					this.funStats.overkill.highlights = [];
 					// "The biggest overkill was..."
-					this.funStats.overkill.highlights.push(`when ${credit.side.name}'s ${credit.name} damaged ${target.side.name}'s ${target.name} with ${method}`);
+					this.funStats.overkill.highlights.push(`when ${credit.side.name}'s <strong>${credit.name}</strong> damaged ${target.side.name}'s <strong>${target.name}</strong> with ${method}`);
 					// "... which did ${this.funStats.overkill.damage}% more damage than necessary!"
 				} else if (overkill === this.funStats.overkill.damage) {
 					if (!this.funStats.overkill.highlights) this.funStats.overkill.highlights = [];
-					this.funStats.overkill.highlights.push(`when ${credit.side.name}'s ${credit.name} damaged ${target.side.name}'s ${target.name} with ${method}`);
+					this.funStats.overkill.highlights.push(`when ${credit.side.name}'s <strong>${credit.name}</strong> damaged ${target.side.name}'s <strong>${target.name}</strong> with ${method}`);
 				}
 				
 				if (credit && target && credit.side && target.side) {
@@ -591,7 +591,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						damagePercent = 0;
 						
 						// adding method:
-						credit = `${credit.side.name}'s ${credit.name}`;
+						credit = `${credit.side.name}'s <strong>${credit.name}</strong>`;
 						
 						if (method) {
 							if (!this.funStats.allyDamageMethod[credit]) this.funStats.allyDamageMethod[credit] = [];
@@ -599,7 +599,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						}
 					} else {
 						// adding method
-						credit = `${credit.side.name}'s ${credit.name}`;
+						credit = `${credit.side.name}'s <strong>${credit.name}</strong>`;
 						
 						if (method) {
 							// for damage, you should also generalize damaging moves
@@ -652,7 +652,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			}
 
 			// report stats
-			let statsReveal = `raw|`;
+			let statsReveal = `raw|<div class="hint">`;
 
 			// max damage
 			let maxDamage = 0;
@@ -694,7 +694,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 					}
 					damageReport += `, i`;
 				} else damageReport += `I`;
-				damageReport += `t dealt <em>${Math.round(maxDamage*10)/10}</em>% in total damage to the opposing team!<br>`;
+				damageReport += `t dealt <strong>${Math.round(maxDamage*10)/10}</strong>% in total damage to the opposing team!<br>`;
 				statsReveal += damageReport;
 			}
 
@@ -721,12 +721,12 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						else overkillReport += ` and ${overkillHighlight}`;
 					}
 				} else overkillReport += `${this.funStats.overkill.highlights[0]}`;
-				overkillReport += `, which did <em>${Math.round(this.funStats.overkill.damage*10)/10}</em>% more damage than necessary!<br>`;
+				overkillReport += `, which did <strong>${Math.round(this.funStats.overkill.damage*10)/10}</strong>% more damage than necessary!<br>`;
 				statsReveal += overkillReport;
 			}
 
-			if (statsReveal !== `raw|`) {
-				statsReveal += `<br><hr>`;
+			if (statsReveal !== `raw|<div class="hint">`) {
+				statsReveal += `<br></div><hr>`;
 				this.add(statsReveal);
 			}
 			/*
