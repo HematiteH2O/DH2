@@ -127,10 +127,90 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			randomizerInfo+= `${abilities}~`;
 			// stats
 			randomizerInfo+= `${monDex.baseStats.hp}~${monDex.baseStats.atk}~${monDex.baseStats.def}~${monDex.baseStats.spa}~${monDex.baseStats.spd}~${monDex.baseStats.spe}~`;
+
+
 			
-			// singles goals
+			// // // general goals
 			
-			// VGC goals
+			// list custom elements
+			// list STABs
+
+			
+			
+			// // // singles goals
+			
+			// setup: sweeper
+			// setup: breaker
+			// wallbreaker without setup reliance (ex. Band/Specs)
+			// priority
+			
+			// Spikes/Stealth Rock
+			// hazard control
+			// pivoting
+			
+			// Knock Off
+			// "doesn't mind Knock Off"
+			// contact punisher
+			
+			// Toxic Spikes absorber (grounded Poison-type)
+			// Ground immunity
+			// Electric immunity
+
+			// other noteworthy features
+
+/*
+		- responses to specific setup sweepers and bulky attackers identified so far
+
+		- consider Choice Scarf users
+			- consider Speed tiers in the context of setup users
+			- 120+ offense or 110+ BP STABs
+			- cool to have pivoting/momentum, hazards, Knock, Trick
+			- wide SE coverage
+
+		- hazards and hazard control, including moves like Magic Coat
+		- stallbreaking tools
+		- cleric moves
+		- recovery moves
+*/
+			
+			
+			// // // VGC goals
+
+			// priority
+			// Fake Out
+			// anti-priority
+
+			// spread
+			// anti-spread
+
+			// damage mitigation
+			// anti-Intimidate
+
+			// Speed control
+			// anti-Speed control
+
+			// field effects / other themes
+			// other noteworthy features
+			
+/*
+	- priority attacks (for Prankster users, include status moves that call attacks)
+	- spread
+	- Speed control (Tailwind, Trick Room, paralysis, Speed-lowering moves, After You)
+	- field effect interactions (include hazards)
+		- include payoffs and not just setup (ex. Solar Beam, Weather Ball)?
+	- damage mitigation options (screens, Protect variants, Fake Out, redirection, offense-lowering moves, Mud Sport and Water Sport, sleep-inducing moves, Yawn)
+
+	- other interesting effects (group together)
+		- move-binding effects
+		- fixed damage (ex. Destiny Bond, Endeavor, Counter)
+		- Defense- and Sp. Def-lowering moves
+		- support moves (Ally Switch, Heal Pulse, Helping Hand)
+		- pivoting
+		- viable boosting moves
+		- other specific strategies (ex. Skill Swap, Entrainment, Soak, Rototiller, et cetera)
+*/
+
+
 			
 			monDex.randomizerInfo = randomizerInfo;
 		}
