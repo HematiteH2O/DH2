@@ -522,12 +522,21 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 				else if (effect && effect.id) method = effect.id;
 				// if I don't like how certain statuses are labeled (for instance, if I want to replace "brn" with "burn damage" or "Sandstorm" with "sand chip"),
 				// I can manually overwrite them here
+
+				// overkill
+				if (!this.funStats.overkill.damage || overkill > this.funStats.overkill.damage) {
+					this.funStats.overkill.damage = overkill;
+					this.funStats.overkill.highlights = [];
+					this.funStats.overkill.highlights.push(`${credit} with ${method} into ${target.name}`);
+				} else if (overkill === this.funStats.overkill.damage) {
+					if (!this.funStats.overkill.highlights) this.funStats.overkill.highlights = [];
+					this.funStats.overkill.highlights.push(`${credit} with ${method} into ${target.name}`);
+				}
 				
 				if (credit && target && credit.side && target.side) {
 					if (credit.side === target.side) { // it's an allyDamage if you hurt the same team
 						allyDamage = damagePercent;
 						damagePercent = 0;
-						overkill = 0;
 						
 						// adding method:
 						credit = credit.side.name + `'s ` + credit.name;
@@ -559,11 +568,6 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 				if (this.funStats.allyDamage[credit]) {
 					this.funStats.allyDamage[credit] += allyDamage;
 				} else this.funStats.allyDamage[credit] = allyDamage;
-
-				// overkill
-				if (this.funStats.overkill[credit]) {
-					this.funStats.overkill[credit] += overkill;
-				} else this.funStats.overkill[credit] = overkill;
 				
 			}
 			
@@ -603,12 +607,19 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			let damageRecordMethod = null;
 			let damageRecordTie = false; // not implemented yet!
 			
-			if (this.funStats.damage.length) for (const i in this.funStats.damage) {
-				if (this.funStats.damage[i] > maxDamage) {
-					maxDamage = this.funStats.damage[i];
-					damageRecordHolder = i;
-					if (this.funStats.damageMethod[i]) damageRecordMethod = this.funStats.damageMethod[i]
-					else damageRecordMethod = null;
+			if (this.funStats.damage) {
+				console.log(`it does exist`);
+				console.log(this.funStats.damage.length);
+				for (const i in this.funStats.damage) {
+					console.log(i);
+					console.log(this.funStats.damage[i]);
+					console.log(maxDamage);
+					if (this.funStats.damage[i] > maxDamage) {
+						maxDamage = this.funStats.damage[i];
+						damageRecordHolder = i;
+						if (this.funStats.damageMethod[i]) damageRecordMethod = this.funStats.damageMethod[i]
+						else damageRecordMethod = null;
+					}
 				}
 			}
 			if (maxDamage > 0 && damageRecordHolder) {
@@ -624,7 +635,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 								damageReport += ` ${damageMethod}`;
 								if (order + 1 < damageRecordMethod.length) customGuide += `,`;
 							}
-							else damageReport += `and ${damageMethod}`;
+							else damageReport += ` and ${damageMethod}`;
 						}
 					} else {
 						damageReport += `With ${damageRecordMethod[0]}`;
