@@ -577,6 +577,8 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			// pokemon.timesAttacked (what took the most attacks)
 			// pokemon.set.hasBeenRandomized is also something I can check
 			this.add(`raw|<hr>`);
+			
+			// report randomizer teams
 			for (const side of this.sides) {
 				let randomized = 0;
 				for (const pokemon of side.pokemon) if (pokemon.set && pokemon.set.hasBeenRandomized) randomized++;
@@ -592,6 +594,61 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 					this.add(`raw|<hr>`);
 				}
 			}
+
+			// report stats
+			let anyStatsShown = false;
+			
+			let maxDamage = 0;
+			let damageRecordHolder = null;
+			let damageRecordMethod = null;
+			let damageRecordTie = false; // not implemented yet!
+			
+			if (this.funStats.damage.length) for (const i in this.funStats.damage) {
+				if (this.funStats.damage[i] > maxDamage) {
+					maxDamage = this.funStats.damage[i];
+					damageRecordHolder = i;
+					if (this.funStats.damageMethod[i]) damageRecordMethod = this.funStats.damageMethod[i]
+					else damageRecordMethod = null;
+				}
+			}
+			if (maxDamage > 0 && damageRecordHolder) {
+				anyStatsShown = true;
+				let damageReport = `raw|The Pokémon that did the most damage was <em>${damageRecordHolder}</em>!<br>`;
+				if (damageRecordMethod) {
+					if (damageRecordMethod.length && damageRecordMethod.length > 1) {
+						damageReport += `Between `;
+						let order = 0;
+						for (const damageMethod of damageRecordMethod) {
+							order++;
+							if (order < damageRecordMethod.length) {
+								damageReport += ` ${damageMethod}`;
+								if (order + 1 < damageRecordMethod.length) customGuide += `,`;
+							}
+							else damageReport += `and ${damageMethod}`;
+						}
+					} else {
+						damageReport += `With ${damageRecordMethod[0]}`;
+					}
+				}
+				damageReport += `, it dealt ${Math.round(maxDamage*1000)/10}% in total damage to the opposing team!`;
+			}
+
+			if (anyStatsShown) this.add(`raw|<hr>`);
+			/*
+			this.funStats = { // report the record-holder in each category only if conditions are met
+				damage: {}, // always report
+				damageMethod: {},
+				allyDamage: {}, // only report if more than any opponent damaged its team
+				allyDamageMethod: {},
+				
+				heal: {}, // only report if more than 100%?
+				healMethod: {}, // only report if more than 100%?
+				foeHeal: {}, // only report if more than it healed its own team
+				foeHealMethod: {}, // only report if more than 100%?
+				
+				overkill: {}, // only report if more than 100%?
+			};
+			*/
 		},
 	},
 };
