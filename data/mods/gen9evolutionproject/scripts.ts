@@ -7,6 +7,31 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		customTiers: ['Pokémon of the Day!', 'Evo!', '(Prevo)'],
 		customDoublesTiers: ['Pokémon of the Day!', 'Evo!', '(Prevo)'],
 	},
+	randomTest(team) {
+		if (team) {
+			for (const set of team) {
+				set.species = 'Smeargle';
+			}
+		} else {
+			team = [
+				{
+					name: 'Default Rootsnoot',
+					species: 'Rootsnoot',
+					item: 'Rocky Helmet',
+					ability: 'Grassy Surge',
+					moves: [ 'Volt Switch' ],
+					nature: '',
+					evs: { hp: 4, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 },
+					happiness: 255,
+					hpType: '',
+					pokeball: '',
+					gigantamax: false,
+					dynamaxLevel: 10,
+					teraType: 'Rock',
+				}
+			];
+		}
+	},
 	init() {
 		let customList = [];
 		let dexNo = -1;
