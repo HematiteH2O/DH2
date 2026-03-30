@@ -34,13 +34,7 @@ export const Formats: FormatData[] = [
 		searchShow: false,
 		// accommodating randbats
 		teamOptional: true,
-		validateTeam(
-			team: PokemonSet[] | null,
-			options: {
-				removeNicknames?: boolean,
-				skipSets?: {[name: string]: {[key: string]: boolean}},
-			} = {}
-		): string[] | null {
+		validateTeam(this, team, options) {
 			const format = this.format;
 			const dex = this.dex;
 	
@@ -49,7 +43,6 @@ export const Formats: FormatData[] = [
 			if (!team || team.length < 6) {
 				// this is when you should randbats it
 				team = Scripts.randomTest(team);
-				options.team = team;
 			}
 			
 			if (!Array.isArray(team)) {
