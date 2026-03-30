@@ -1,5 +1,4 @@
-export type TeamValidator: import('../../../sim/team-validator').TeamValidator = {
-	inherit: true,
+export class TeamValidator extends Partial<import('../../../sim/team-validator').TeamValidator> {
 	// just testing: does this affect me or everyone?
 	validateTeam(
 		team: PokemonSet[] | null,
