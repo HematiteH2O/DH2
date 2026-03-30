@@ -372,6 +372,31 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 				else if (effect && effect.id) method = effect.id;
 				// if I don't like how certain statuses are labeled (for instance, if I want to replace "brn" with "burn damage" or "Sandstorm" with "sand chip"),
 				// I can manually overwrite them here
+				switch (method) {
+					case 'brn':
+						method = 'burn damage';
+						break;
+					case 'psn':
+						method = 'poison damage';
+						break;
+					case 'tox':
+						method = 'Toxic damage';
+						break;
+					case 'Sandstorm':
+						method = 'sand chip';
+						break;
+					case 'Hail':
+						method = 'hail chip';
+						break;
+					case 'confused':
+						method = 'confusion damage';
+						break;
+					case 'partiallytrapped':
+						if (target.volatiles && target.volatiles.partiallytrapped && target.volatiles.partiallytrapped.sourceEffect) {
+							method = target.volatiles.partiallytrapped.sourceEffect;
+						} else method = 'residual damage from a trapping move';
+						break;
+				}
 				
 				if (credit && target && credit.side && target.side) {
 					if (credit.side !== target.side) { // it's a foeHeal if you heal the other team
@@ -379,7 +404,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						healPercent = 0;
 
 						// adding method:
-						credit = `${credit.side.name}'s <em>${credit.name}</em>`;
+						credit = `${credit.side.name}'s ${credit.name}`;
 						
 						if (method) {
 							if (!this.funStats.foeHealMethod[credit]) this.funStats.foeHealMethod[credit] = [];
@@ -387,7 +412,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						}
 					} else {
 						// adding method:
-						credit = `${credit.side.name}'s <em>${credit.name}</em>`;
+						credit = `${credit.side.name}'s ${credit.name}`;
 						
 						if (method) {
 							if (!this.funStats.healMethod[credit]) this.funStats.healMethod[credit] = [];
@@ -522,17 +547,42 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 				else if (effect && effect.id) method = effect.id;
 				// if I don't like how certain statuses are labeled (for instance, if I want to replace "brn" with "burn damage" or "Sandstorm" with "sand chip"),
 				// I can manually overwrite them here
+				switch (method) {
+					case 'brn':
+						method = 'burn damage';
+						break;
+					case 'psn':
+						method = 'poison damage';
+						break;
+					case 'tox':
+						method = 'Toxic damage';
+						break;
+					case 'Sandstorm':
+						method = 'sand chip';
+						break;
+					case 'Hail':
+						method = 'hail chip';
+						break;
+					case 'confused':
+						method = 'confusion damage';
+						break;
+					case 'partiallytrapped':
+						if (target.volatiles && target.volatiles.partiallytrapped && target.volatiles.partiallytrapped.sourceEffect) {
+							method = target.volatiles.partiallytrapped.sourceEffect;
+						} else method = 'residual damage from a trapping move';
+						break;
+				}
 
 				// overkill
 				if (!this.funStats.overkill.damage || overkill > this.funStats.overkill.damage) {
 					this.funStats.overkill.damage = overkill;
 					this.funStats.overkill.highlights = [];
 					// "The biggest overkill was..."
-					this.funStats.overkill.highlights.push(`when ${credit.side.name}'s <em>${credit.name}</em> damaged ${target.side.name}'s <em>${target.name}</em> with <em>${method}</em>`);
+					this.funStats.overkill.highlights.push(`when ${credit.side.name}'s ${credit.name} damaged ${target.side.name}'s ${target.name} with ${method}`);
 					// "... which did ${this.funStats.overkill.damage}% more damage than necessary!"
 				} else if (overkill === this.funStats.overkill.damage) {
 					if (!this.funStats.overkill.highlights) this.funStats.overkill.highlights = [];
-					this.funStats.overkill.highlights.push(`when ${credit.side.name}'s <em>${credit.name}</em> damaged ${target.side.name}'s <em>${target.name}</em> with <em>${method}</em>`);
+					this.funStats.overkill.highlights.push(`when ${credit.side.name}'s ${credit.name} damaged ${target.side.name}'s ${target.name} with ${method}`);
 				}
 				
 				if (credit && target && credit.side && target.side) {
@@ -541,7 +591,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						damagePercent = 0;
 						
 						// adding method:
-						credit = `${credit.side.name}'s <em>${credit.name}</em>`;
+						credit = `${credit.side.name}'s ${credit.name}`;
 						
 						if (method) {
 							if (!this.funStats.allyDamageMethod[credit]) this.funStats.allyDamageMethod[credit] = [];
@@ -549,7 +599,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						}
 					} else {
 						// adding method
-						credit = `${credit.side.name}'s <em>${credit.name}</em>`;
+						credit = `${credit.side.name}'s ${credit.name}`;
 						
 						if (method) {
 							// for damage, you should also generalize damaging moves
@@ -626,7 +676,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 				}
 			}
 			if (maxDamage > 0 && damageRecordHolder) {
-				let damageReport = `<br>The Pokémon that did the most damage was ${damageRecordHolder}!<br>`;
+				let damageReport = `The Pokémon that did the most damage was ${damageRecordHolder}.<br>`;
 				if (damageRecordMethod) {
 					if (damageRecordMethod.length && damageRecordMethod.length > 1) {
 						damageReport += `Between `;
@@ -644,7 +694,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 					}
 					damageReport += `, i`;
 				} else damageReport += `I`;
-				damageReport += `t dealt <em>${Math.round(maxDamage*1000)/10}</em>% in total damage to the opposing team!<br>`;
+				damageReport += `t dealt <em>${Math.round(maxDamage*10)/10}</em>% in total damage to the opposing team!<br>`;
 				statsReveal += damageReport;
 			}
 
@@ -658,7 +708,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 				this.funStats.overkill && this.funStats.overkill.damage && this.funStats.overkill.damage > 0 &&
 				this.funStats.overkill.highlights && this.funStats.overkill.highlights.length
 			) {
-				let overkillReport = `raw|<br>The biggest overkill was `;
+				let overkillReport = `<br>The biggest overkill was `;
 				if (this.funStats.overkill.highlights.length > 1) {
 					overkillReport += `a tie between `;
 					let order = 0;
@@ -671,12 +721,12 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						else overkillReport += ` and ${overkillHighlight}`;
 					}
 				} else overkillReport += `${this.funStats.overkill.highlights[0]}`;
-				overkillReport += `, which did <em>${Math.round(this.funStats.overkill.damage*1000)/10}</em>% more damage than necessary!<br>`;
+				overkillReport += `, which did <em>${Math.round(this.funStats.overkill.damage*10)/10}</em>% more damage than necessary!<br>`;
 				statsReveal += overkillReport;
 			}
 
 			if (statsReveal !== `raw|`) {
-				statsReveal += `<hr>`;
+				statsReveal += `<br><hr>`;
 				this.add(statsReveal);
 			}
 			/*
