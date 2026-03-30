@@ -12,9 +12,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			for (const set of team) {
 				set.species = 'Smeargle';
 			}
+			return team;
 		} else {
-			team = [
-				{
+			const randTeam = [];
+			let set = {
 					name: 'Default Rootsnoot',
 					species: 'Rootsnoot',
 					item: 'Rocky Helmet',
@@ -28,10 +29,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					gigantamax: false,
 					dynamaxLevel: 10,
 					teraType: 'Rock',
-				}
-			];
+			}
+			randTeam.push(set);
+			return randTeam;
 		}
-		return team;
 	},
 	init() {
 		let customList = [];
