@@ -1,4 +1,4 @@
-export const TeamValidator: import('../../../sim/team-validator').TeamValidator {
+export const TeamValidator: import('../../../sim/team-validator').TeamValidator = {
 	// just testing: does this affect me or everyone?
 	validateTeam(
 		team: PokemonSet[] | null,
