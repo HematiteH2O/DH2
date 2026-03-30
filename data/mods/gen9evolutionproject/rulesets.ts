@@ -569,6 +569,12 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			// pokemon.m.movesMissed (what missed the most moves)
 			// pokemon.timesAttacked (what took the most attacks)
 			this.add('-message', `This is a placeholder! The battle has ended, and now fun stats can go here.`);
+			for (const side of this.sides) {
+				for (const pokemon of side.pokemon) {
+					if (pokemon.set && pokemon.set.hasBeenRandomized) console.log(pokemon.name);
+					// can I still tell even at the end of battle that something has been randomized?
+				}
+			}
 		},
 	},
 };
