@@ -1,4 +1,4 @@
-export class TeamValidator {
+export class TeamValidator = {
   inherit: true,
   // just testing: does this affect me or everyone?
   validateTeam(
