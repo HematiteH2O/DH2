@@ -1,4 +1,5 @@
 import { FormatData } from '../../../sim/dex-formats';
+import { Scripts } from './scripts';
 
 export const Formats: FormatData[] = [
 	{
@@ -47,7 +48,7 @@ export const Formats: FormatData[] = [
 			const ruleTable = this.ruleTable;
 			if (!team || team.length < 6) {
 				// this is when you should randbats it
-				team = dex.scripts.randomTest(team);
+				team = Scripts.randomTest(team);
 			}
 			
 			if (!Array.isArray(team)) {
