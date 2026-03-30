@@ -449,29 +449,71 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		if (team && team.length === 6) return team;
 		
 		if (!team) team = [];
-		let setLevel = 100;
-		if (this.ruleTable.adjustLevel) setLevel = this.ruleTable.adjustLevel;
-		console.log(setLevel);
-		console.log(this.activePerHalf);
+		let randSets = [];
 		
-		let set = {
-				name: 'Default Rootsnoot',
-				species: 'Rootsnoot',
-				item: 'Rocky Helmet',
-				ability: 'Grassy Surge',
-				moves: [ 'Volt Switch' ],
-				nature: '',
-				evs: { hp: 4, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 },
-				happiness: 255,
-				hpType: '',
-				pokeball: '',
-				gigantamax: false,
-				dynamaxLevel: 10,
-				teraType: 'Rock',
+		let setLevel = 100;
+		let format = "VGC";
+		if (this.ruleTable.adjustLevel) setLevel = this.ruleTable.adjustLevel;
+		if (this.activePerHalf && this.activePerHalf === 1) format = "singles";
+
+		if (format === "singles") {
+			// first step: assign an up-front list of roles for the team
+			
+			// second step: iterate over existing team members
+			// // - identify which roles they already cover
+			// // - identify "requested support"
+			
+			// third step: a "for" loop until there are as many team members as empty slots - randomize and push Pokémon one at a time to "randSets" (not to "team!")
+			// // - each added Pokémon should log its own "roles" and "requested support" - in case it gets replaced later, it shouldn't be mixed in with the team!
+			// // - within each category: first score by how well they do the listed job; then add bonus points for offensive synergy and for accomplishing the next step
+			// // - #1 priority: "requested support" that isn't present
+			// // // - bonus points for defensive synergy with the specific Pokémon requesting the support
+			// // - #2 priority: roles that aren't present
+			// // - #3 priority: answers (defensive *or* offensive) to threats that aren't covered
+			// // - #4 priority: type balance
+			// this only keeps going until you run out of space for team members
+
+			// fourth step: a "for" loop over each of the already-chosen random team members; a second pass in the order they were chosen
+			// // - check which roles and offered support *only* they fill (no other team members do)
+			// // - check if any other Pokémon not on the team happen to fill all of those roles and offered support
+			// // - if any alternates exist, score the new pool of Pokémon and pick a winner:
+			// // // - #1 priority: the alternate Pokémon also provides any requested support or role that isn't present
+			// // // - #2 priority: the alternate Pokémon also requests support that's already on the team
+			// // // - #3 priority: if offering support, which has the best defensive synergy with the Pokémon requesting support?
+			// // // - #4 priority: which has the best defensive synergy with the team as a whole?
+			// // - pick randomly from the remaining pool!
+
+			// fifth step: start filling in set details (moves, items, Abilities)
+			// // - #1 pass: (teamwide, by role) checking off the already-assigned roles
+			// // - #2 pass: (by individual) choosing STAB(s), which may have conditions attached, and then any leftover details (Tera Types, items, EVs, Abilities) if not established
+
+			// sixth step: nickname check???
+			
+			// finally, push every remaining set to the actual team!
+		} else { // VGC is a placeholder for now
+			// the process should be mostly the same as above, but the roles that count will obviously be different; I want to figure out one teambuilder first
+			// remember: VGC also has item clause!
+			let set = {
+					name: 'Default Rootsnoot',
+					species: 'Rootsnoot',
+					item: 'Rocky Helmet',
+					ability: 'Grassy Surge',
+					moves: [ 'Volt Switch' ],
+					nature: '',
+					evs: { hp: 4, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 },
+					happiness: 255,
+					hpType: '',
+					pokeball: '',
+					gigantamax: false,
+					dynamaxLevel: 10,
+					teraType: 'Rock',
+			}
+			set.hasBeenRandomized = true;
+			team.push(set);
+			if (team.length < 2) team.push(set);
 		}
-		set.hasBeenRandomized = true;
-		team.push(set);
-		if (team.length < 2) team.push(set);
+		// first step: assign roles
+		// second step:
 		return team;
 	},
 };
