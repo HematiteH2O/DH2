@@ -494,19 +494,4 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			return this.baseValidateTeam(team, options);
 		}
 	},
-	`team-validator`: {
-		validateTeam(
-			team: PokemonSet[] | null,
-			options: {
-				removeNicknames?: boolean,
-				skipSets?: {[name: string]: {[key: string]: boolean}},
-			} = {}
-		): string[] | null {
-			if (!team) return [`Test 5: You don't have a team, but being able to see that is good! This works!`];
-			if (team && this.format.validateTeam) {
-				return this.format.validateTeam.call(this, team, options) || null;
-			}
-			return this.baseValidateTeam(team, options);
-		}
-	},
 };
