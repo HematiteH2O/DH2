@@ -455,19 +455,26 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		let format = "VGC";
 		if (this.ruleTable.adjustLevel) setLevel = this.ruleTable.adjustLevel;
 		if (this.activePerHalf && this.activePerHalf === 1) format = "singles";
+		
+		let shiny = false;
+		if (!team.length && this.randomChance(1, 100)) shiny = true; // the whole team will be Shiny
 
 		if (format === "singles") {
 			// first step: assign an up-front list of roles for the team
 			
 			// second step: iterate over existing team members
 			// // - identify which roles they already cover
-			// // - identify "requested support"
+			// // - identify "requested support" (top-priority: something like Grassy Surge is mandatory if a Pokémon has a Grassy Seed)
+			// // - identify "accepted support" (gives bonus points when deciding between candidates for another role, but it's not its own step - something like any terrain for Aleon)
+
+			// step 2.5: if there are no team members at all, introduce a random Evo sub as a starting point
 			
 			// third step: a "for" loop until there are as many team members as empty slots - randomize and push Pokémon one at a time to "randSets" (not to "team!")
-			// // - each added Pokémon should log its own "roles" and "requested support" - in case it gets replaced later, it shouldn't be mixed in with the team!
-			// // - within each category: first score by how well they do the listed job; then add bonus points for offensive synergy and for accomplishing the next step
-			// // - #1 priority: "requested support" that isn't present
-			// // // - bonus points for defensive synergy with the specific Pokémon requesting the support
+			// // - each added Pokémon should log its own "roles" and "requested/accepted support" - in case it gets replaced later, it shouldn't be mixed in with the team!
+			// // - each category should be a binary yes/no for whether the Pokémon can do the listed job effectively
+			// // - then, score the available Pokémon based on satisfying "accepted support," other roles that haven't been filled yet, and type balance before picking a winner
+			// // - #1 priority: any "requested support" that isn't covered
+			// // // - score based on defensive synergy with the specific Pokémon requesting the support
 			// // - #2 priority: roles that aren't present
 			// // - #3 priority: answers (defensive *or* offensive) to threats that aren't covered
 			// // - #4 priority: type balance
@@ -488,11 +495,19 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			// // - #2 pass: (by individual) choosing STAB(s), which may have conditions attached, and then any leftover details (Tera Types, items, EVs, Abilities) if not established
 
 			// sixth step: nickname check???
+			// // - if all 6 sets are random, check the list of teamwide naming schemes; if there are any where all 6 Pokémon have an entry, there's a chance to pull from them!
+			// // - check the list of small group naming schemes; if there are any groups that the random sets completely encompass, go for it!
+			// // - otherwise, if the Pokémon has a set of random names defined in pokedex.ts, sample one of them
+			// // - and if not, no nickname
 			
 			// finally, push every remaining set to the actual team!
-		} else { // VGC is a placeholder for now
-			// the process should be mostly the same as above, but the roles that count will obviously be different; I want to figure out one teambuilder first
-			// remember: VGC also has item clause!
+		}
+		
+		// VGC is a placeholder for now
+		// the process should be mostly the same as above, but the roles that count will obviously be different; I want to figure out one teambuilder first
+		// remember: VGC also has item clause!
+
+		if (!team || !team.length || team.length < 2) { // so it doesn't crash when it's not done aksdjfh
 			let set = {
 					name: 'Default Rootsnoot',
 					species: 'Rootsnoot',
