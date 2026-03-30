@@ -15,8 +15,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		
 		if (!team) team = [];
 		let setLevel = 100;
-		if (this.ruleTable.adjustLevel) level = this.ruleTable.adjustLevel;
-		console.log(level);
+		if (this.ruleTable.adjustLevel) setLevel = this.ruleTable.adjustLevel;
+		console.log(setLevel);
 		console.log(this.activePerHalf);
 		
 		let set = {
@@ -34,6 +34,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				dynamaxLevel: 10,
 				teraType: 'Rock',
 		}
+		set.hasBeenRandomized = true;
 		team.push(set);
 		if (team.length < 2) team.push(set);
 		return team;
