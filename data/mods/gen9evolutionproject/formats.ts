@@ -147,7 +147,7 @@ export const Formats: FormatData[] = [
 	
 			if (!problems.length) return null;
 			return problems;
-		}
+		},
 		
 		onValidateTeam(team, format) {
 			/**@type {{[k: string]: true}} */
