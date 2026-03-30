@@ -1,5 +1,8 @@
 import { FormatData } from '../../../sim/dex-formats';
 
+// remember to mod this line, or the randbats feature will go unused!
+// https://github.com/HematiteH2O/DH2/blob/evo-upd-misc/sim/team-validator.ts#L330
+
 export const Formats: FormatData[] = [
 	{
 		name: "[Gen 9] Evolution Project 2",
