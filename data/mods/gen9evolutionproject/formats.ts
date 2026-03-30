@@ -1,5 +1,4 @@
 import { FormatData } from '../../../sim/dex-formats';
-import { Scripts } from './scripts';
 
 export const Formats: FormatData[] = [
 	{
@@ -40,18 +39,16 @@ export const Formats: FormatData[] = [
 	
 			let problems: string[] = [];
 			const ruleTable = this.ruleTable;
-			if (!team || team.length < 6) {
-				// this is when you should randbats it
-				team = Scripts.randomTest(team);
-			}
 			
 			if (!Array.isArray(team)) {
 				throw new Error(`Invalid team data`);
 			}
-	
+
+			/* // team size is addressed on getTeam in scripts.ts
 			if (team.length < ruleTable.minTeamSize) {
 				problems.push(`You must bring at least ${ruleTable.minTeamSize} Pok\u00E9mon (your team has ${team.length}).`);
 			}
+			*/
 			if (team.length > ruleTable.maxTeamSize) {
 				return [`You may only bring up to ${ruleTable.maxTeamSize} Pok\u00E9mon (your team has ${team.length}).`];
 			}
