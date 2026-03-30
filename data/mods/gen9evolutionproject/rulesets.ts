@@ -571,20 +571,21 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			// pokemon.m.movesMissed (what missed the most moves)
 			// pokemon.timesAttacked (what took the most attacks)
 			// pokemon.set.hasBeenRandomized is also something I can check
-			this.add(`raw|This is a placeholder! The battle has ended, and now fun stats can go here.<hr>Did the horizontal rule show up? Please tell me it did!`);
+			this.add(`raw|<hr>`);
 			for (const side of this.sides) {
 				let randomized = 0;
 				for (const pokemon of side.pokemon) if (pokemon.set && pokemon.set.hasBeenRandomized) randomized++;
 				if (randomized === side.team.length) {
-					this.hint(`${side.name}'s team was randomly generated!`);
-					this.hint(`If you want to use it again, you can copy it from here:`);
+					this.add(`raw|${side.name}'s team was randomly generated!<br>If you want to use it again, you can copy it from here:`);
 					this.add('showteam', side.id, Teams.pack(side.team));
+					this.add(`raw|<hr>`);
 				} else if (randomized > 0) {
-					this.hint(`Part of ${side.name}'s team was randomly generated!`);
+					this.add(`raw|Part of ${side.name}'s team was randomly generated!<br>If you want to use it again, you can copy it from here:`);
 					this.hint(`If you want to use it again, you can copy it from here:`);
 					let partialTeam = [];
 					for (const set of side.team) if (set && set.hasBeenRandomized) partialTeam.push(set);
 					this.add('showteam', side.id, Teams.pack(partialTeam));
+					this.add(`raw|<hr>`);
 				}
 			}
 		},
