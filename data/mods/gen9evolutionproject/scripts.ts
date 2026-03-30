@@ -8,37 +8,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		customTiers: ['Pokémon of the Day!', 'Evo!', '(Prevo)'],
 		customDoublesTiers: ['Pokémon of the Day!', 'Evo!', '(Prevo)'],
 	},
-	getTeam(options) { // randomizer
-		let team = options.team;
-		if (typeof team === 'string') team = Teams.unpack(team);
-		if (team && team.length === 6) return team;
-		
-		if (!team) team = [];
-		let setLevel = 100;
-		if (this.ruleTable.adjustLevel) setLevel = this.ruleTable.adjustLevel;
-		console.log(setLevel);
-		console.log(this.activePerHalf);
-		
-		let set = {
-				name: 'Default Rootsnoot',
-				species: 'Rootsnoot',
-				item: 'Rocky Helmet',
-				ability: 'Grassy Surge',
-				moves: [ 'Volt Switch' ],
-				nature: '',
-				evs: { hp: 4, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 },
-				happiness: 255,
-				hpType: '',
-				pokeball: '',
-				gigantamax: false,
-				dynamaxLevel: 10,
-				teraType: 'Rock',
-		}
-		set.hasBeenRandomized = true;
-		team.push(set);
-		if (team.length < 2) team.push(set);
-		return team;
-	},
+
+	// GENERATING FAKEMON
+	
 	init() {
 		let customList = [];
 		let dexNo = -1;
@@ -258,7 +230,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		this.modData('FormatsData', customList[random2]).tier = "Pokémon of the Day!";
 		this.modData('FormatsData', customList[random3]).tier = "Pokémon of the Day!";
 	},
-	win(side?: SideID | '' | Side | null) { // I just need some kind of cue to respond to
+	
+	win(side?: SideID | '' | Side | null) { // modded to cue end-of-battle messages
 		if (this.ended) return false;
 		if (side && typeof side === 'string') {
 			side = this.getSide(side);
@@ -283,6 +256,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		this.runEvent('BattleFinished', side); // only modded line
 		return true;
 	},
+	
 	side: {
 		removeSlotCondition(target: Pokemon | number, status: string | Effect) {
 			if (target instanceof Pokemon) target = target.position;
@@ -396,6 +370,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 	
 			return true;
 		},
+		
 		// modded for move miss tally (for fun)
 		hitStepAccuracy(targets: Pokemon[], pokemon: Pokemon, move: ActiveMove) {
 			const hitResults = [];
@@ -465,5 +440,41 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			}
 			return hitResults;
 		}
+	},
+
+
+	
+	// CUSTOM RANDOM TEAM GENERATOR
+	
+	getTeam(options) {
+		let team = options.team;
+		if (typeof team === 'string') team = Teams.unpack(team);
+		if (team && team.length === 6) return team;
+		
+		if (!team) team = [];
+		let setLevel = 100;
+		if (this.ruleTable.adjustLevel) setLevel = this.ruleTable.adjustLevel;
+		console.log(setLevel);
+		console.log(this.activePerHalf);
+		
+		let set = {
+				name: 'Default Rootsnoot',
+				species: 'Rootsnoot',
+				item: 'Rocky Helmet',
+				ability: 'Grassy Surge',
+				moves: [ 'Volt Switch' ],
+				nature: '',
+				evs: { hp: 4, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 },
+				happiness: 255,
+				hpType: '',
+				pokeball: '',
+				gigantamax: false,
+				dynamaxLevel: 10,
+				teraType: 'Rock',
+		}
+		set.hasBeenRandomized = true;
+		team.push(set);
+		if (team.length < 2) team.push(set);
+		return team;
 	},
 };
