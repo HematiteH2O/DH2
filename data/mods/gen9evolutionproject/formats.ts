@@ -49,7 +49,8 @@ export const Formats: FormatData[] = [
 				return [
 					`This is a message confirming that you made it this far!`,
 				];
-			}
+			} else console.log(team); // what's the format for these right now?
+			
 			if (!Array.isArray(team)) {
 				throw new Error(`Invalid team data`);
 			}
