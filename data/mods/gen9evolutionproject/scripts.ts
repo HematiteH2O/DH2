@@ -30,6 +30,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				teraType: 'Rock',
 		}
 		team.push(set);
+		if (team.length < 2) team.push(set);
 		return team;
 	},
 	init() {
