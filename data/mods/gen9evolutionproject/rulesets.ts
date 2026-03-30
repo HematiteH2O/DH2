@@ -578,7 +578,13 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 				if (randomized === side.team.length) {
 					this.hint(`${side.name}'s team was randomly generated!`);
 					this.hint(`If you want to use it again, you can copy it from here:`);
-					this.add('showteam', side.id, Teams.pack(team));
+					this.add('showteam', side.id, Teams.pack(side.team));
+				} else if (randomized > 0) {
+					this.hint(`Part of ${side.name}'s team was randomly generated!`);
+					this.hint(`If you want to use it again, you can copy it from here:`);
+					let partialTeam = [];
+					for (const set of side.team) if (set && set.hasBeenRandomized) partialTeam.push(set);
+					this.add('showteam', side.id, Teams.pack(partialTeam));
 				}
 			}
 		},
