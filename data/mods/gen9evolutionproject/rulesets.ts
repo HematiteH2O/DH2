@@ -624,13 +624,13 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			
 			console.log(this.funStats);
 		},
-		onPainSplit(credit, targetChangePercent, userChangePercent, sameSide) {
+		onPainSplit(sameSide, credit, targetChangePercent, userChangePercent) {
 			console.log(`credit: ` + credit);
 			console.log(`targetChangePercent: ` + targetChangePercent);
 			console.log(`userChangePercent: ` + userChangePercent);
 			console.log(`sameSide: ` + sameSide);
 			// okay, targetChange should be an amount of damage if it's postive or an amount of healing if it's negative
-			if (sameSide) {
+			if (!sameSide) {
 				if (targetChangePercent > 0) {
 					// allyDamage
 					if (this.funStats.allyDamage[credit]) {
@@ -684,20 +684,18 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			console.log(this.funStats);
 		},
 		onRevivalBlessingData(pokemon, target) {
-			console.log(`pokemon: ` + pokemon.name);
-			console.log(`target: ` + target.name);
 			if (this.funStats.heal[`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`]) {
-				this.funStats.heal[`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`] += (target.getHealth / target.maxhp * 100);
-			} else this.funStats.heal[`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`] = target.getHealth (target.getHealth / target.maxhp * 100);
+				this.funStats.heal[`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`] += (target.hp / target.maxhp * 100);
+			} else this.funStats.heal[`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`] = (target.hp / target.maxhp * 100);
 			if (!this.funStats.healMethod[`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`]) this.funStats.healMethod[`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`] = [];
 			this.funStats.healMethod[`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`].push('Revival Blessing');
 			console.log(this.funStats);
 		},
-		onForceFaintData(source, target, effect, d) {
-			console.log(`source: ` + (source.name ? source.name : source));
-			console.log(`target: ` + (target.name ? target.name : target));
-			console.log(`effect: ` + (effect.name ? effect.name : effect));
-			console.log(`d: ` + (d.name ? d.name : d));
+		onForceFaintData(d, target, source, effect) {
+			console.log(`source: ` + ((source && source.name) ? source.name : source));
+			console.log(`target: ` + ((target && target.name) ? target.name : target));
+			console.log(((effect && effect.name) ? effect.name : effect) + (effect.effectType ? ` of type ` + effect.effectType : ` `));
+			console.log(`d: ` + ((d && d.name) ? d.name : d));
 			console.log(this.funStats);
 		},
 		
