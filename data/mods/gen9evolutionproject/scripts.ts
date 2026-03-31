@@ -613,14 +613,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			this.add('-heal', action.target, action.target.getHealth, '[from] move: Revival Blessing');
 			action.pokemon.side.removeSlotCondition(action.pokemon, 'revivalblessing');
 			// ONLY MODDED PART
-			if (this.field.pseudoWeather.datamod) {
-				if (this.field.pseudoWeather.datamod.funStats.heal[`${action.pokemon.side.name}'s <strong>${action.pokemon.name}</strong>`]) {
-					this.field.pseudoWeather.datamod.funStats.heal[`${action.pokemon.side.name}'s <strong>${action.pokemon.name}</strong>`] += (action.target.getHealth / action.target.maxhp * 100);
-				} else this.field.pseudoWeather.datamod.funStats.heal[`${action.pokemon.side.name}'s <strong>${action.pokemon.name}</strong>`] = action.target.getHealth (action.target.getHealth / action.target.maxhp * 100);
-				if (!this.field.pseudoWeather.datamod.funStats.healMethod[`${action.pokemon.side.name}'s <strong>${action.pokemon.name}</strong>`]) this.field.pseudoWeather.datamod.funStats.healMethod[`${action.pokemon.side.name}'s <strong>${action.pokemon.name}</strong>`] = [];
-				this.field.pseudoWeather.datamod.funStats.healMethod[`${action.pokemon.side.name}'s <strong>${action.pokemon.name}</strong>`].push('Revival Blessing');
-				console.log(this.field.pseudoWeather.datamod.funStats);
-			}
+			this.runEvent('RevivalBlessingData', action.pokemon, action.target);
 			// END MODDED PART
 			break;
 		case 'runUnnerve':
