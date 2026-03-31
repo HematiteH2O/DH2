@@ -592,7 +592,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 		},
 		onPainSplit(sameSide, credit, targetChangePercent, userChangePercent) {
 			// okay, targetChange should be an amount of damage if it's postive or an amount of healing if it's negative
-			if (!sameSide) {
+			if (sameSide) {
 				if (targetChangePercent > 0) {
 					// allyDamage
 					if (this.funStats.allyDamage[credit]) {
@@ -648,7 +648,29 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 				this.funStats.heal[`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`] += (target.hp / target.maxhp * 100);
 			} else this.funStats.heal[`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`] = (target.hp / target.maxhp * 100);
 			if (!this.funStats.healMethod[`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`]) this.funStats.healMethod[`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`] = [];
-			if (!this.funStats.damageMethod[`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`].includes('Revival Blessing')) this.funStats.healMethod[`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`].push('Revival Blessing');
+			if (!this.funStats.healMethod[`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`].includes('Revival Blessing')) this.funStats.healMethod[`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`].push('Revival Blessing');
+		},
+		onPerishSongForceKO(target, source) {
+			console.log(`Perish Song force KO`);
+			console.log(`target: ` + target.name);
+			console.log(`source: ` + source.name);
+			if (this.funStats.damage[`${source.side.name}'s <strong>${source.name}</strong>`]) {
+				this.funStats.damage[`${source.side.name}'s <strong>${source.name}</strong>`] += (target.hp / target.maxhp * 100);
+			} else this.funStats.damage[`${source.side.name}'s <strong>${source.name}</strong>`] = (target.hp / target.maxhp * 100);
+			if (!this.funStats.damageMethod[`${source.side.name}'s <strong>${source.name}</strong>`]) this.funStats.damageMethod[`${source.side.name}'s <strong>${source.name}</strong>`] = [];
+			if (!this.funStats.damageMethod[`${source.side.name}'s <strong>${source.name}</strong>`].includes('Perish Song')) this.funStats.damageMethod[`${source.side.name}'s <strong>${source.name}</strong>`].push('Perish Song');
+			console.log(this.funStats);
+		},
+		onDestinyBondForceKO(target, source) {
+			console.log(`Destiny Bond force KO`);
+			console.log(`target: ` + target.name);
+			console.log(`source: ` + source.name);
+			if (this.funStats.damage[`${source.side.name}'s <strong>${source.name}</strong>`]) {
+				this.funStats.damage[`${source.side.name}'s <strong>${source.name}</strong>`] += (target.hp / target.maxhp * 100);
+			} else this.funStats.damage[`${source.side.name}'s <strong>${source.name}</strong>`] = (target.hp / target.maxhp * 100);
+			if (!this.funStats.damageMethod[`${source.side.name}'s <strong>${source.name}</strong>`]) this.funStats.damageMethod[`${source.side.name}'s <strong>${source.name}</strong>`] = [];
+			if (!this.funStats.damageMethod[`${source.side.name}'s <strong>${source.name}</strong>`].includes('Destiny Bond')) this.funStats.damageMethod[`${source.side.name}'s <strong>${source.name}</strong>`].push('Destiny Bond');
+			console.log(this.funStats);
 		},
 		
 		onBattleFinished() {
