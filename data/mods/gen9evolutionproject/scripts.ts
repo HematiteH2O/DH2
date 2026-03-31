@@ -617,7 +617,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				this.funStats.heal[`${action.pokemon.side.name}'s <strong>${action.pokemon.name}</strong>`] += action.target.getHealth;
 			} else this.funStats.heal[`${action.pokemon.side.name}'s <strong>${action.pokemon.name}</strong>`] = action.target.getHealth;
 			if (!this.funStats.healMethod[`${action.pokemon.side.name}'s <strong>${action.pokemon.name}</strong>`]) this.funStats.healMethod[`${action.pokemon.side.name}'s <strong>${action.pokemon.name}</strong>`] = [];
-			this.funStats.healMethod[`${action.pokemon.side.name}'s <strong>${action.pokemon.name}</strong>`]).push('Revival Blessing');
+			this.funStats.healMethod[`${action.pokemon.side.name}'s <strong>${action.pokemon.name}</strong>`].push('Revival Blessing');
 			console.log(this.battle.funStats);
 			// END MODDED PART
 			break;
