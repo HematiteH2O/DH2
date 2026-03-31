@@ -142,7 +142,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 			onResidualOrder: 4,
 			onEnd(target) {
 				if (target && !target.fainted) {
-					const damage = target.heal(this.effectState.hp);
+					const damage = this.heal(this.effectState.hp, target, target);
 					if (damage) {
 						this.add('-heal', target, target.getHealth, '[from] move: Wish', '[wisher] ' + this.effectState.source.name); // I do want it to look like Wish
 					}
