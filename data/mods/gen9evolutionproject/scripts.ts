@@ -80,6 +80,145 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 			}
 		}
+		
+		// OKAY HEADS-UP:
+		// the below is for *my personal convenience* for randbats set generation - it should be *commented out* in any patch that actually gets loaded to DH
+		// I'm keeping it around so I can run it the same way every time I add a new slate
+		// don't forget to comment it out!!!
+		for (const id in this.dataCache.Pokedex) {
+			if (!this.dataCache.Pokedex[id] || !(
+				(this.modData('FormatsData', id) && this.modData('FormatsData', id).tier && this.modData('FormatsData', id).tier === "Evo!") // only the "Evo!" tier matters - nothing is PotD yet and prevos shouldn't be included
+				|| ['porygon2', 'accelgor'].includes(id) // exceptions so far: Porygon2 and Accelgor
+			)) continue;
+			
+			// banlist
+			let singlesbanned = false;
+			let vgcbanned = false;
+			if ([
+				'toxapex', 'noivernvariant', 'chandelure', 'corviknight', 'darmanitan', 'darmanitangalar', 'excadrill', 'hawlucha', 'garchomp', 'velocinobi',
+				'dragonite', 'tapukoko', 'tapulele', 'tapubulu', 'tapufini', 'zacian', 'zaciancrowned', 'zamazenta', 'zamazentacrowned', 'deoxys',
+				'deoxysattack', 'deoxysdefense', 'deoxysspeed',
+			].includes(id)) singlesbanned = true;
+			if ([
+				'dragonite', 'tapukoko', 'tapulele', 'tapubulu', 'tapufini', 'zacian', 'zaciancrowned', 'zamazenta', 'zamazentacrowned', 'deoxys',
+				'deoxysattack', 'deoxysdefense', 'deoxysspeed',
+			].includes(id)) vgcbanned = true;
+			if (singlesbanned && vgcbanned) continue;
+			
+			const monDex = this.dataCache.Pokedex[id];
+			const monLearnset = this.dataCache.Learnsets[id].learnset;
+			// if (!poke || !poke.num || !poke.abilities || !poke.types || !poke.baseStats)
+			let randomizerInfo = `<br>`;
+			// icon
+			if ([
+				'mycecroak', 'whiscazu', 'dewgongvariant', 'carnelion', 'noivernvariant', 'voltangent', 'dusglow',
+				'aleon', 'overchill', 'overchillzen', 'mantinevariant', 'parascelium', 'malamaralola', 'excadrillhisui', 'dedellite', 'coilrig',
+				'velocinobi', 'stunfiskvariant',
+			].includes(id)) {
+				randomizerInfo += `=IMAGE("https://raw.githubusercontent.com/scoopapa/DH2/refs/heads/main/data/mods/evolutionproject/sprites/icons/` + id + `.png",3)~`;
+			} else if (monDex.copyData) {
+				randomizerInfo += `=IMAGE("https://raw.githubusercontent.com/scoopapa/DH2/refs/heads/main/data/mods/gen9evolutionproject/sprites/icons/` + id + `.png",3)~`;
+			} else {
+				randomizerInfo += `=IMAGE("https://www.smogon.com/forums//media/minisprites/` + id + `.png",3)~`;
+			}
+			// name and type
+			randomizerInfo+= `${monDex.num}~${monDex.name}~${monDex.types[0]}~${monDex.types[1] ? monDex.types[1] : " "}~`;
+			// Abilities
+			let abilities = monDex.abilities[0];
+			if (monDex.abilities[1]) abilities += ` / ${monDex.abilities[1]}`;
+			if (monDex.abilities['H']) abilities += ` // ${monDex.abilities['H']}`;
+			if (monDex.abilities['S']) abilities += ` // (${monDex.abilities['S']})`;
+			randomizerInfo+= `${abilities}~`;
+			// stats
+			randomizerInfo+= `${monDex.baseStats.hp}~${monDex.baseStats.atk}~${monDex.baseStats.def}~${monDex.baseStats.spa}~${monDex.baseStats.spd}~${monDex.baseStats.spe}~`;
+
+
+			
+			// // // general goals
+			
+			// list custom elements
+			// list STABs
+
+			
+			
+			// // // singles goals
+			
+			// setup: sweeper
+			// setup: breaker
+			// wallbreaker without setup reliance (ex. Band/Specs)
+			// priority
+			
+			// Spikes/Stealth Rock
+			// hazard control
+			// pivoting
+			
+			// Knock Off
+			// "doesn't mind Knock Off"
+			// contact punisher
+			
+			// Toxic Spikes absorber (grounded Poison-type)
+			// Ground immunity
+			// Electric immunity
+
+			// other noteworthy features
+
+/*
+		- responses to specific setup sweepers and bulky attackers identified so far
+
+		- consider Choice Scarf users
+			- consider Speed tiers in the context of setup users
+			- 120+ offense or 110+ BP STABs
+			- cool to have pivoting/momentum, hazards, Knock, Trick
+			- wide SE coverage
+
+		- hazards and hazard control, including moves like Magic Coat
+		- stallbreaking tools
+		- cleric moves
+		- recovery moves
+*/
+			
+			
+			// // // VGC goals
+
+			// priority
+			// Fake Out
+			// anti-priority
+
+			// spread
+			// anti-spread
+
+			// damage mitigation
+			// anti-Intimidate
+
+			// Speed control
+			// anti-Speed control
+
+			// field effects / other themes
+			// other noteworthy features
+			
+/*
+	- priority attacks (for Prankster users, include status moves that call attacks)
+	- spread
+	- Speed control (Tailwind, Trick Room, paralysis, Speed-lowering moves, After You)
+	- field effect interactions (include hazards)
+		- include payoffs and not just setup (ex. Solar Beam, Weather Ball)?
+	- damage mitigation options (screens, Protect variants, Fake Out, redirection, offense-lowering moves, Mud Sport and Water Sport, sleep-inducing moves, Yawn)
+
+	- other interesting effects (group together)
+		- move-binding effects
+		- fixed damage (ex. Destiny Bond, Endeavor, Counter)
+		- Defense- and Sp. Def-lowering moves
+		- support moves (Ally Switch, Heal Pulse, Helping Hand)
+		- pivoting
+		- viable boosting moves
+		- other specific strategies (ex. Skill Swap, Entrainment, Soak, Rototiller, et cetera)
+*/
+
+
+			
+			monDex.randomizerInfo = randomizerInfo;
+		}
+		// end commented-out section
 
 		let random1 = Math.floor(Math.random() * customList.length);
 		let random2 = Math.floor(Math.random() * (customList.length - 1));
@@ -613,5 +752,98 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		}
 
 		return false;
+	},
+	
+
+	
+	// CUSTOM RANDOM TEAM GENERATOR
+	
+	getTeam(options) {
+		let team = options.team;
+		if (typeof team === 'string') team = Teams.unpack(team);
+		if (team && team.length === 6) return team;
+		
+		if (!team) team = [];
+		let randSets = [];
+		
+		let setLevel = 100;
+		let format = "VGC";
+		if (this.ruleTable.adjustLevel) setLevel = this.ruleTable.adjustLevel;
+		if (this.activePerHalf && this.activePerHalf === 1) format = "singles";
+		
+		let shiny = false;
+		if (!team.length && this.randomChance(1, 100)) shiny = true; // the whole team will be Shiny
+
+		if (format === "singles") {
+			// first step: assign an up-front list of roles for the team
+			
+			// second step: iterate over existing team members
+			// // - identify which roles they already cover
+			// // - identify "requested support" (top-priority: something like Grassy Surge is mandatory if a Pokémon has a Grassy Seed)
+			// // - identify "accepted support" (gives bonus points when deciding between candidates for another role, but it's not its own step - something like any terrain for Aleon)
+
+			// step 2.5: if there are no team members at all, introduce a random Evo sub as a starting point
+			
+			// third step: a "for" loop until there are as many team members as empty slots - randomize and push Pokémon one at a time to "randSets" (not to "team!")
+			// // - each added Pokémon should log its own "roles" and "requested/accepted support" - in case it gets replaced later, it shouldn't be mixed in with the team!
+			// // - each category should be a binary yes/no for whether the Pokémon can do the listed job effectively
+			// // - then, score the available Pokémon based on satisfying "accepted support," other roles that haven't been filled yet, and type balance before picking a winner
+			// // - #1 priority: any "requested support" that isn't covered
+			// // // - score based on defensive synergy with the specific Pokémon requesting the support
+			// // - #2 priority: roles that aren't present
+			// // - #3 priority: answers (defensive *or* offensive) to threats that aren't covered
+			// // - #4 priority: type balance
+			// this only keeps going until you run out of space for team members
+
+			// fourth step: a "for" loop over each of the already-chosen random team members; a second pass in the order they were chosen
+			// // - check which roles and offered support *only* they fill (no other team members do)
+			// // - check if any other Pokémon not on the team happen to fill all of those roles and offered support
+			// // - if any alternates exist, score the new pool of Pokémon and pick a winner:
+			// // // - #1 priority: the alternate Pokémon also provides any requested support or role that isn't present
+			// // // - #2 priority: the alternate Pokémon also requests support that's already on the team
+			// // // - #3 priority: if offering support, which has the best defensive synergy with the Pokémon requesting support?
+			// // // - #4 priority: which has the best defensive synergy with the team as a whole?
+			// // - pick randomly from the remaining pool!
+
+			// fifth step: start filling in set details (moves, items, Abilities)
+			// // - #1 pass: (teamwide, by role) checking off the already-assigned roles
+			// // - #2 pass: (by individual) choosing STAB(s), which may have conditions attached, and then any leftover details (Tera Types, items, EVs, Abilities) if not established
+
+			// sixth step: nickname check???
+			// // - if all 6 sets are random, check the list of teamwide naming schemes; if there are any where all 6 Pokémon have an entry, there's a chance to pull from them!
+			// // - check the list of small group naming schemes; if there are any groups that the random sets completely encompass, go for it!
+			// // - otherwise, if the Pokémon has a set of random names defined in pokedex.ts, sample one of them
+			// // - and if not, no nickname
+			
+			// finally, push every remaining set to the actual team!
+		}
+		
+		// VGC is a placeholder for now
+		// the process should be mostly the same as above, but the roles that count will obviously be different; I want to figure out one teambuilder first
+		// remember: VGC also has item clause!
+
+		if (!team || !team.length || team.length < 2) { // so it doesn't crash when it's not done aksdjfh
+			let set = {
+					name: 'Default Rootsnoot',
+					species: 'Rootsnoot',
+					item: 'Rocky Helmet',
+					ability: 'Grassy Surge',
+					moves: [ 'Volt Switch' ],
+					nature: '',
+					evs: { hp: 4, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 },
+					happiness: 255,
+					hpType: '',
+					pokeball: '',
+					gigantamax: false,
+					dynamaxLevel: 10,
+					teraType: 'Rock',
+			}
+			set.hasBeenRandomized = true;
+			team.push(set);
+			if (team.length < 2) team.push(set);
+		}
+		// first step: assign roles
+		// second step:
+		return team;
 	},
 };
