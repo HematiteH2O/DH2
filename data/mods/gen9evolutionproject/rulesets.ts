@@ -61,12 +61,12 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						for (const evoname of species.evos) {
 							order++;
 							if (order < species.evos.length) {
-								customGuide += ` ${evoname}`;
-								if (order + 1 < species.evos.length) customGuide += `,`;
+								hideBox += ` ${evoname}`;
+								if (order + 1 < species.evos.length) hideBox += `,`;
 							}
 							else {
-								if (species.evos.length !== 1) customGuide += ` and`;
-								customGuide += ` ${evoname}`;
+								if (species.evos.length !== 1) hideBox += ` and`;
+								hideBox += ` ${evoname}`;
 							}
 						}
 						hideBox += `!</div>`;
