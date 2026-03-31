@@ -935,12 +935,12 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			let tankedHitsRecordHolderTie = [];
 			
 			let movesMissedRecord = 0;
-			let movesMissedHolder = null;
+			let movesMissedRecordHolder = null;
 			let movesMissedRecordTie = false;
 			let movesMissedRecordHolderTie = [];
 			
 			let superEffectiveHitsRecord = 0;
-			let superEffectiveHitsHolder = null;
+			let superEffectiveHitsRecordHolder = null;
 			let superEffectiveHitsRecordTie = false;
 			let superEffectiveHitsRecordHolderTie = [];
 			
