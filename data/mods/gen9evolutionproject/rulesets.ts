@@ -741,7 +741,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 				statsReveal += allyDamageReport;
 			} else {
 				if (maxAllyDamage > 0 && allyDamageRecordHolder) {
-					let allyDamageReport = `Whoops! ${allyDamageRecordHolder} hurt its own team more than any other Pokémon.<br>`;
+					let allyDamageReport = `<br>Whoops! ${allyDamageRecordHolder} hurt its own team more than any other Pokémon.<br>`;
 					if (allyDamageRecordMethod) {
 						if (allyDamageRecordMethod.length && allyDamageRecordMethod.length > 1) {
 							allyDamageReport += `Between `;
@@ -812,7 +812,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 				statsReveal += hpRestoreReport;
 			} else {
 				if (maxHpRestore > 0 && hpRestoreRecordHolder) {
-					let hpRestoreReport = `The Pokémon that healed the most was ${hpRestoreRecordHolder}.<br>`;
+					let hpRestoreReport = `<br>The Pokémon that healed the most was ${hpRestoreRecordHolder}.<br>`;
 					if (hpRestoreRecordMethod) {
 						if (hpRestoreRecordMethod.length && hpRestoreRecordMethod.length > 1) {
 							hpRestoreReport += `Between `;
@@ -878,7 +878,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 				statsReveal += foeHealReport;
 			} else {
 				if (maxFoeHeal > 0 && foeHealRecordHolder) {
-					let foeHealReport = `${foeHealRecordHolder} healed the other team more than any other Pokémon.<br>`;
+					let foeHealReport = `<br>${foeHealRecordHolder} healed the other team more than any other Pokémon.<br>`;
 					if (foeHealRecordMethod) {
 						if (foeHealRecordMethod.length && foeHealRecordMethod.length > 1) {
 							foeHealReport += `Between `;
@@ -939,6 +939,11 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			let movesMissedRecordTie = false;
 			let movesMissedRecordHolderTie = [];
 			
+			let movesDodgedRecord = 0;
+			let movesDodgedRecordHolder = null;
+			let movesDodgedRecordTie = false;
+			let movesDodgedRecordHolderTie = [];
+			
 			let superEffectiveHitsRecord = 0;
 			let superEffectiveHitsRecordHolder = null;
 			let superEffectiveHitsRecordTie = false;
@@ -970,6 +975,19 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 					} else if (pokemon.m.movesMissed && pokemon.m.movesMissed === movesMissedRecord) {
 						movesMissedRecordTie = true;
 						movesMissedRecordHolderTie.push(`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`);
+					}
+
+					// moves dodged
+					if (pokemon.m.movesDodged && pokemon.m.movesDodged > movesDodgedRecord) {
+						movesDodgedRecordTie = false;
+						movesDodgedRecordHolderTie = []; // reset
+						
+						movesDodgedRecord = pokemon.m.movesDodged;
+						movesDodgedRecordHolder = `${pokemon.side.name}'s <strong>${pokemon.name}</strong>`;
+						movesDodgedRecordHolderTie.push(`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`);
+					} else if (pokemon.m.movesDodged && pokemon.m.movesDodged === movesDodgedRecord) {
+						movesDodgedRecordTie = true;
+						movesDodgedRecordHolderTie.push(`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`);
 					}
 					
 					// super effective hits
@@ -1003,22 +1021,40 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 				} else tankedHitsReport += `was ${tankedHitsRecordHolder},<br>which was attacked <strong>${tankedHitsRecord}</strong> times!<br>`;
 				statsReveal += tankedHitsReport;
 			}
-			
-			if (movesMissedRecord && movesMissedRecord > 0) {
-				let movesMissedReport = `<br>The Pokémon that struggled the most with accuracy `;
-				if (movesMissedRecordTie) {
-					movesMissedReport += `were `;
+
+			if (movesDodgedRecord && (!movesMissedRecord || movesDodgedRecord > movesMissedRecord)) {
+				// only report one or the other - if they're equal, movesMissed is funnier
+				let movesDodgedReport = `<br>The Pokémon that dodged the most moves was `;
+				if (movesDodgedRecordTie) {
+					movesDodgedReport += `were `;
 					let order = 0;
-					for (const movesMissedInstance of movesMissedRecordHolderTie) {
+					for (const movesDodgedInstance of movesDodgedRecordHolderTie) {
 						order++;
-						if (order < movesMissedRecordHolderTie.length) {
-							movesMissedReport += ` ${movesMissedInstance}`;
-							if (order + 1 < movesMissedRecordHolderTie.length) movesMissedReport += `,`;
+						if (order < movesDodgedRecordHolderTie.length) {
+							movesDodgedReport += ` ${movesDodgedInstance}`;
+							if (order + 1 < movesDodgedRecordHolderTie.length) movesDodgedReport += `,`;
 						}
-						else movesMissedReport += ` and ${movesMissedInstance},<br>which each missed <strong>${movesMissedRecord}</strong> times!<br>`;
+						else movesDodgedReport += ` and ${movesDodgedInstance},<br>which avoided <strong>${movesDodgedRecord}</strong> hits!<br>`;
 					}
-				} else movesMissedReport += `was ${movesMissedRecordHolder},<br>which missed <strong>${movesMissedRecord}</strong> times!<br>Maybe it just needs glasses?<br>`;
-				statsReveal += movesMissedReport;
+				} else movesDodgedReport += `was ${movesDodgedRecordHolder},<br>which avoided <strong>${movesDodgedRecord}</strong> hits!<br>`;
+				statsReveal += movesDodgedReport;
+			} else {
+				if (movesMissedRecord && movesMissedRecord > 0) {
+					let movesMissedReport = `<br>The Pokémon that struggled the most with accuracy `;
+					if (movesMissedRecordTie) {
+						movesMissedReport += `were `;
+						let order = 0;
+						for (const movesMissedInstance of movesMissedRecordHolderTie) {
+							order++;
+							if (order < movesMissedRecordHolderTie.length) {
+								movesMissedReport += ` ${movesMissedInstance}`;
+								if (order + 1 < movesMissedRecordHolderTie.length) movesMissedReport += `,`;
+							}
+							else movesMissedReport += ` and ${movesMissedInstance},<br>which each missed <strong>${movesMissedRecord}</strong> times!<br>`;
+						}
+					} else movesMissedReport += `was ${movesMissedRecordHolder},<br>which missed <strong>${movesMissedRecord}</strong> times!<br>Maybe it just needs glasses?<br>`;
+					statsReveal += movesMissedReport;
+				}
 			}
 			
 			if (superEffectiveHitsRecord && superEffectiveHitsRecord > 0) {
