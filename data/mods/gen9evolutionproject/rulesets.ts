@@ -362,11 +362,6 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 				}
 				*/
 
-				console.log(`Attributed ` + (effect.name ? effect.name : effect) + ` to ` + (credit.fullname ? credit.fullname : credit));
-				if (credit.side) console.log(`Credit's side is ` + credit.side);
-				if (target.side) console.log(`Target's side is ` + target.side);
-				if (credit.side !== target.side) console.log(`These are different, so this *should* be foeHeal`);
-
 				let method = null;
 				if (effect && effect.name) method = effect.name;
 				else if (effect && effect.id) method = effect.id;
@@ -536,11 +531,6 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 					damagePercent = (target.hp / target.maxhp * 100);
 					overkill = ((damage - target.hp) / target.maxhp * 100);
 				}
-
-				console.log(`Attributed ` + (effect.name ? effect.name : effect) + ` to ` + (credit.fullname ? credit.fullname : credit));
-				if (credit.side) console.log(`Credit's side is ` + credit.side);
-				if (target.side) console.log(`Target's side is ` + target.side);
-				if (credit.side === target.side) console.log(`These are the same, so this *should* be allyDamage`);
 				
 				let method = null;
 				if (effect && effect.name) method = effect.name;
@@ -650,8 +640,9 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 					this.add(`raw|<hr>`);
 				}
 			}
-
+			
 			// report stats
+			if (!this.funStats) return; // just in case
 			let statsReveal = `raw|<div class="hint">`;
 
 			// max damage
@@ -663,12 +654,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			let damageRecordHolderTie = [];
 			
 			if (this.funStats.damage) {
-				console.log(`it does exist`);
-				console.log(this.funStats.damage.length);
 				for (const i in this.funStats.damage) {
-					console.log(i);
-					console.log(this.funStats.damage[i]);
-					console.log(maxDamage);
 					if (this.funStats.damage[i] > maxDamage) {
 						damageRecordTie = false;
 						damageRecordHolderTie = []; // reset
@@ -725,12 +711,215 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 				}
 			}
 
+			// max ally damage
+			let maxAllyDamage = 0;
+			let allyDamageRecordHolder = null;
+			let allyDamageRecordMethod = null;
+			
+			let allyDamageRecordTie = false;
+			let allyDamageRecordHolderTie = [];
+			
+			if (this.funStats.allyDamage) {
+				for (const i in this.funStats.allyDamage) {
+					if (this.funStats.allyDamage[i] > maxAllyDamage) {
+						allyDamageRecordTie = false;
+						allyDamageRecordHolderTie = []; // reset
+						
+						maxAllyDamage = this.funStats.allyDamage[i];
+						allyDamageRecordHolder = i;
+						allyDamageRecordHolderTie.push(i);
+						
+						if (this.funStats.allyDamageMethod[i]) allyDamageRecordMethod = this.funStats.allyDamageMethod[i];
+						else allyDamageRecordMethod = null;
+					} else if (this.funStats.allyDamage[i] === maxAllyDamage) {
+						allyDamageRecordTie = true;
+						allyDamageRecordHolderTie.push(i);
+						// don't report methods in case of ties
+					}
+				}
+			}
+			if (allyDamageRecordTie && allyDamageRecordHolderTie && allyDamageRecordHolderTie.length && allyDamageRecordHolderTie.length > 1 && maxAllyDamage > 0) {
+				// absolute safety msjhdfg
+				let allyDamageReport = `<br>`;
+				let order = 0;
+				for (const tiedRecordHolder of allyDamageRecordHolderTie) {
+					order++;
+					if (order < allyDamageRecordHolderTie.length) {
+						allyDamageReport += ` ${tiedRecordHolder}`;
+						if (order + 1 < allyDamageRecordHolderTie.length) overkillReport += `,`;
+					}
+					else allyDamageReport += ` and ${tiedRecordHolder}`;
+				}
+				allyDamageReport += `share the dubious honor of... damaging their own teams the most!<br>They tied by each doing <strong>${Math.round(maxAllyDamage*10)/10}</strong>% to their own side.<br>`;
+				statsReveal += allyDamageReport;
+			} else {
+				if (maxAllyDamage > 0 && allyDamageRecordHolder) {
+					let allyDamageReport = `Whoops! ${allyDamageRecordHolder} hurt its own team more than any other Pokémon.<br>`;
+					if (allyDamageRecordMethod) {
+						if (allyDamageRecordMethod.length && allyDamageRecordMethod.length > 1) {
+							allyDamageReport += `Between `;
+							let order = 0;
+							for (const damageMethod of allyDamageRecordMethod) {
+								order++;
+								if (order < allyDamageRecordMethod.length) {
+									allyDamageReport += ` ${damageMethod}`;
+									if (order + 1 < allyDamageRecordMethod.length) allyDamageReport += `,`;
+								}
+								else allyDamageReport += ` and ${damageMethod}`;
+							}
+						} else {
+							allyDamageReport += `With ${allyDamageRecordMethod[0]}`;
+						}
+						allyDamageReport += `, i`;
+					} else allyDamageReport += `I`;
+					allyDamageReport += `t hurt its own team for <strong>${Math.round(maxAllyDamage*10)/10}</strong>% in total damage.<br>`;
+					if (this.funStats.damage[allyDamageRecordHolder] && maxAllyDamage > this.funStats.damage[allyDamageRecordHolder]) {
+						allyDamageReport += `Incidentally, it only hurt the opposing team for <strong>${Math.round(this.funStats.damage[allyDamageRecordHolder]*10)/10}</strong>%!<br>Darnit, ${allyDamageRecordHolder}! Whose side are you on?!<br>`;
+					} else if (!this.funStats.damage[allyDamageRecordHolder]) {
+						allyDamageReport += `But it never hurt the opposing team at all...<br>`;
+					}
+					statsReveal += allyDamageReport;
+				}
+			}
+			
+			// most supportive
+			let maxHpRestore = 0;
+			let hpRestoreRecordHolder = null;
+			let hpRestoreRecordMethod = null;
+			
+			let hpRestoreRecordTie = false;
+			let hpRestoreRecordHolderTie = [];
+			
+			if (this.funStats.heal) {
+				for (const i in this.funStats.heal) {
+					if (this.funStats.heal[i] > maxHpRestore) {
+						hpRestoreRecordTie = false;
+						hpRestoreRecordHolderTie = []; // reset
+						
+						maxHpRestore = this.funStats.heal[i];
+						hpRestoreRecordHolder = i;
+						hpRestoreRecordHolderTie.push(i);
+						
+						if (this.funStats.healMethod[i]) hpRestoreRecordMethod = this.funStats.healMethod[i];
+						else hpRestoreRecordMethod = null;
+					} else if (this.funStats.heal[i] === maxHpRestore) {
+						hpRestoreRecordTie = true;
+						hpRestoreRecordHolderTie.push(i);
+						// don't report methods in case of ties
+					}
+				}
+			}
+			if (hpRestoreRecordTie && hpRestoreRecordHolderTie && hpRestoreRecordHolderTie.length && hpRestoreRecordHolderTie.length > 1 && maxHpRestore > 0) {
+				// absolute safety msjhdfg
+				let hpRestoreReport = `<br>The Pokémon that healed the most were `;
+				let order = 0;
+				for (const tiedRecordHolder of hpRestoreRecordHolderTie) {
+					order++;
+					if (order < hpRestoreRecordHolderTie.length) {
+						hpRestoreReport += ` ${tiedRecordHolder}`;
+						if (order + 1 < hpRestoreRecordHolderTie.length) overkillReport += `,`;
+					}
+					else hpRestoreReport += ` and ${tiedRecordHolder}`;
+				}
+				hpRestoreReport += `,<br>who each restored <strong>${Math.round(maxHpRestore*10)/10}</strong>% in total HP to their team!<br>`;
+				statsReveal += hpRestoreReport;
+			} else {
+				if (maxHpRestore > 0 && hpRestoreRecordHolder) {
+					let hpRestoreReport = `The Pokémon that healed the most was ${hpRestoreRecordHolder}.<br>`;
+					if (hpRestoreRecordMethod) {
+						if (hpRestoreRecordMethod.length && hpRestoreRecordMethod.length > 1) {
+							hpRestoreReport += `Between `;
+							let order = 0;
+							for (const healMethod of hpRestoreRecordMethod) {
+								order++;
+								if (order < hpRestoreRecordMethod.length) {
+									hpRestoreReport += ` ${healMethod}`;
+									if (order + 1 < hpRestoreRecordMethod.length) hpRestoreReport += `,`;
+								}
+								else hpRestoreReport += ` and ${healMethod}`;
+							}
+						} else {
+							hpRestoreReport += `With ${hpRestoreRecordMethod[0]}`;
+						}
+						hpRestoreReport += `, i`;
+					} else hpRestoreReport += `I`;
+					hpRestoreReport += `t restored <strong>${Math.round(maxHpRestore*10)/10}</strong>% in total HP to its team!<br>`;
+					statsReveal += hpRestoreReport;
+				}
+			}
+
+			// most foe healing
+			let maxFoeHeal = 0;
+			let foeHealRecordHolder = null;
+			let foeHealRecordMethod = null;
+			
+			let foeHealRecordTie = false;
+			let foeHealRecordHolderTie = [];
+			
+			if (this.funStats.foeHeal) {
+				for (const i in this.funStats.foeHeal) {
+					if (this.funStats.foeHeal[i] > maxFoeHeal) {
+						foeHealRecordTie = false;
+						foeHealRecordHolderTie = []; // reset
+						
+						maxFoeHeal = this.funStats.foeHeal[i];
+						foeHealRecordHolder = i;
+						foeHealRecordHolderTie.push(i);
+						
+						if (this.funStats.foeHealMethod[i]) foeHealRecordMethod = this.funStats.foeHealMethod[i];
+						else foeHealRecordMethod = null;
+					} else if (this.funStats.foeHeal[i] === maxFoeHeal) {
+						foeHealRecordTie = true;
+						foeHealRecordHolderTie.push(i);
+						// don't report methods in case of ties
+					}
+				}
+			}
+			if (foeHealRecordTie && foeHealRecordHolderTie && foeHealRecordHolderTie.length && foeHealRecordHolderTie.length > 1 && maxFoeHeal > 0) {
+				// absolute safety msjhdfg
+				let foeHealReport = `<br>`;
+				let order = 0;
+				for (const tiedRecordHolder of foeHealRecordHolderTie) {
+					order++;
+					if (order < foeHealRecordHolderTie.length) {
+						foeHealReport += ` ${tiedRecordHolder}`;
+						if (order + 1 < foeHealRecordHolderTie.length) overkillReport += `,`;
+					}
+					else foeHealReport += ` and ${tiedRecordHolder}`;
+				}
+				foeHealReport += `accidentally tied for... healing the other team the most!<br>They each restored <strong>${Math.round(maxFoeHeal*10)/10}</strong>% in HP to the opposing side.<br>`;
+				statsReveal += foeHealReport;
+			} else {
+				if (maxFoeHeal > 0 && foeHealRecordHolder) {
+					let foeHealReport = `${foeHealRecordHolder} healed the other team more than any other Pokémon.<br>`;
+					if (foeHealRecordMethod) {
+						if (foeHealRecordMethod.length && foeHealRecordMethod.length > 1) {
+							foeHealReport += `Between `;
+							let order = 0;
+							for (const healMethod of foeHealRecordMethod) {
+								order++;
+								if (order < foeHealRecordMethod.length) {
+									foeHealReport += ` ${healMethod}`;
+									if (order + 1 < foeHealRecordMethod.length) foeHealReport += `,`;
+								}
+								else foeHealReport += ` and ${healMethod}`;
+							}
+						} else {
+							foeHealReport += `With ${foeHealRecordMethod[0]}`;
+						}
+						foeHealReport += `, i`;
+					} else foeHealReport += `I`;
+					foeHealReport += `t healed the opposing team for <strong>${Math.round(maxFoeHeal*10)/10}</strong>% in total HP.<br>`;
+					if (this.funStats.heal[foeHealRecordHolder] && maxFoeHeal > this.funStats.heal[foeHealRecordHolder]) {
+						foeHealReport += `Incidentally, it only healed its own team for <strong>${Math.round(this.funStats.heal[foeHealRecordHolder]*10)/10}</strong>%...<br>It's doing its best, okay?<br>`;
+					} else if (!this.funStats.heal[foeHealRecordHolder]) {
+						foeHealReport += `But it never healed its own team at all...<br>`;
+					}
+					statsReveal += foeHealReport;
+				}
+			}
+
 			// overkill
-			console.log(`Overkill troubleshooting:`);
-			console.log(this.funStats.overkill);
-			console.log(this.funStats.overkill.damage);
-			console.log(this.funStats.overkill.highlights);
-			console.log(this.funStats.overkill.highlights.length);
 			if (
 				this.funStats.overkill && this.funStats.overkill.damage && this.funStats.overkill.damage > 0 &&
 				this.funStats.overkill.highlights && this.funStats.overkill.highlights.length
@@ -756,21 +945,8 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 				statsReveal += `</div><hr>`;
 				this.add(statsReveal);
 			}
-			/*
-			this.funStats = { // report the record-holder in each category only if conditions are met
-				damage: {}, // always report
-				damageMethod: {},
-				allyDamage: {}, // only report if more than any opponent damaged its team
-				allyDamageMethod: {},
-				
-				heal: {}, // only report if more than 100%?
-				healMethod: {}, // only report if more than 100%?
-				foeHeal: {}, // only report if more than it healed its own team
-				foeHealMethod: {}, // only report if more than 100%?
-				
-				overkill: {}, // only report if more than 100%?
-			};
-			*/
+
+			// next up: super effective hits and misses
 		},
 	},
 };
