@@ -41,13 +41,6 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			this.add(`${randomizerData}`);
 			// end commented-out section
 			
-			this.add('clearpoke');
-			for (const side of this.sides) {
-				for (const pokemon of side.pokemon) {
-					let details = pokemon.details;
-					this.add('poke', pokemon.side.id, details, '');
-				}
-			}
 			for (const side of this.sides) {
 				let showFakemon = false;
 				let extraLineBreak = false;
@@ -616,12 +609,6 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			console.log(this.funStats);
 		},
 		onBattleFinished() {
-			// I think I have everything I want for now set up, but I can add more over time
-			// this.funStats
-			// pokemon.m.superEffectiveHits (what landed the most SE hits)
-			// pokemon.m.movesMissed (what missed the most moves)
-			// pokemon.timesAttacked (what took the most attacks)
-			// pokemon.set.hasBeenRandomized is also something I can check
 			this.add(`raw|<hr>`);
 			
 			// report randomizer teams
@@ -941,12 +928,120 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 				statsReveal += overkillReport;
 			}
 
+			// other stats
+			let tankedHitsRecord = 0;
+			let tankedHitsRecordHolder = null;
+			let tankedHitsRecordTie = false;
+			let tankedHitsRecordHolderTie = [];
+			
+			let movesMissedRecord = 0;
+			let movesMissedHolder = null;
+			let movesMissedRecordTie = false;
+			let movesMissedRecordHolderTie = [];
+			
+			let superEffectiveHitsRecord = 0;
+			let superEffectiveHitsHolder = null;
+			let superEffectiveHitsRecordTie = false;
+			let superEffectiveHitsRecordHolderTie = [];
+			
+			for (const side of this.sides) {
+				for (const pokemon of side.pokemon) {
+					// hits tanked
+					if (pokemon.timesAttacked && pokemon.timesAttacked > tankedHitsRecord) {
+						tankedHitsRecordTie = false;
+						tankedHitsRecordHolderTie = []; // reset
+						
+						tankedHitsRecord = pokemon.timesAttacked;
+						tankedHitsRecordHolder = `${pokemon.side.name}'s <strong>${pokemon.name}</strong>`;
+						tankedHitsRecordHolderTie.push(`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`);
+					} else if (pokemon.timesAttacked && pokemon.timesAttacked === tankedHitsRecord) {
+						tankedHitsRecordTie = true;
+						tankedHitsRecordHolderTie.push(`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`);
+					}
+
+					// moves missed
+					if (pokemon.m.movesMissed && pokemon.m.movesMissed > movesMissedRecord) {
+						movesMissedRecordTie = false;
+						movesMissedRecordHolderTie = []; // reset
+						
+						movesMissedRecord = pokemon.m.movesMissed;
+						movesMissedRecordHolder = `${pokemon.side.name}'s <strong>${pokemon.name}</strong>`;
+						movesMissedRecordHolderTie.push(`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`);
+					} else if (pokemon.m.movesMissed && pokemon.m.movesMissed === movesMissedRecord) {
+						movesMissedRecordTie = true;
+						movesMissedRecordHolderTie.push(`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`);
+					}
+					
+					// super effective hits
+					if (pokemon.m.superEffectiveHits && pokemon.m.superEffectiveHits > superEffectiveHitsRecord) {
+						superEffectiveHitsRecordTie = false;
+						superEffectiveHitsRecordHolderTie = []; // reset
+						
+						superEffectiveHitsRecord = pokemon.m.superEffectiveHits;
+						superEffectiveHitsRecordHolder = `${pokemon.side.name}'s <strong>${pokemon.name}</strong>`;
+						superEffectiveHitsRecordHolderTie.push(`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`);
+					} else if (pokemon.m.superEffectiveHits && pokemon.m.superEffectiveHits === superEffectiveHitsRecord) {
+						superEffectiveHitsRecordTie = true;
+						superEffectiveHitsRecordHolderTie.push(`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`);
+					}
+				}
+			}
+			
+			if (tankedHitsRecord && tankedHitsRecord > 0) {
+				let tankedHitsReport = `<br>The Pokémon that took the most hits `;
+				if (tankedHitsRecordTie) {
+					tankedHitsReport += `were `;
+					let order = 0;
+					for (const tankedHitsInstance of tankedHitsRecordHolderTie) {
+						order++;
+						if (order < tankedHitsRecordHolderTie.length) {
+							tankedHitsReport += ` ${tankedHitsInstance}`;
+							if (order + 1 < tankedHitsRecordHolderTie.length) tankedHitsReport += `,`;
+						}
+						else tankedHitsReport += ` and ${tankedHitsInstance}, which were each attacked <strong>${tankedHitsRecord}</strong>% times!<br>`;
+					}
+				} else tankedHitsReport += `${tankedHitsRecordHolder}, which was attacked <strong>${tankedHitsRecord}</strong>% times!<br>`;
+				statsReveal += tankedHitsReport;
+			}
+			
+			if (movesMissedRecord && movesMissedRecord > 0) {
+				let movesMissedReport = `<br>The Pokémon that took the most hits `;
+				if (movesMissedRecordTie) {
+					movesMissedReport += `were `;
+					let order = 0;
+					for (const movesMissedInstance of movesMissedRecordHolderTie) {
+						order++;
+						if (order < movesMissedRecordHolderTie.length) {
+							movesMissedReport += ` ${movesMissedInstance}`;
+							if (order + 1 < movesMissedRecordHolderTie.length) movesMissedReport += `,`;
+						}
+						else movesMissedReport += ` and ${movesMissedInstance}, which were each attacked <strong>${movesMissedRecord}</strong>% times!<br>`;
+					}
+				} else movesMissedReport += `${movesMissedRecordHolder}, which was attacked <strong>${movesMissedRecord}</strong>% times!<br>`;
+				statsReveal += movesMissedReport;
+			}
+			
+			if (superEffectiveHitsRecord && superEffectiveHitsRecord > 0) {
+				let superEffectiveHitsReport = `<br>The Pokémon that took the most hits `;
+				if (superEffectiveHitsRecordTie) {
+					superEffectiveHitsReport += `were `;
+					let order = 0;
+					for (const superEffectiveHitsInstance of superEffectiveHitsRecordHolderTie) {
+						order++;
+						if (order < superEffectiveHitsRecordHolderTie.length) {
+							superEffectiveHitsReport += ` ${superEffectiveHitsInstance}`;
+							if (order + 1 < superEffectiveHitsRecordHolderTie.length) superEffectiveHitsReport += `,`;
+						}
+						else superEffectiveHitsReport += ` and ${superEffectiveHitsInstance}, which were each attacked <strong>${superEffectiveHitsRecord}</strong>% times!<br>`;
+					}
+				} else superEffectiveHitsReport += `${superEffectiveHitsRecordHolder}, which was attacked <strong>${superEffectiveHitsRecord}</strong>% times!<br>`;
+				statsReveal += superEffectiveHitsReport;
+			}
+
 			if (statsReveal !== `raw|<div class="hint">`) {
 				statsReveal += `</div><hr>`;
 				this.add(statsReveal);
 			}
-
-			// next up: super effective hits and misses
 		},
 	},
 };
