@@ -493,7 +493,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			if (!credit && source) credit = source;
 			if (!credit && target) credit = target;
 			
-			if (credit) {
+			if (credit && (credit !== target)) { // self-damage no longer counts as ally damage
 				
 				let damagePercent = (damage / target.maxhp * 100);
 				let allyDamage = 0;
@@ -627,14 +627,14 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			}
 
 			// and (pokemon.hp - averagehp) should be an amount of damage if it's postive or an amount of healing if it's negative
-			if (userChangePercent > 0) {
+			/*if (userChangePercent > 0) {
 				// allyDamage
 				if (this.funStats.allyDamage[credit]) {
 					this.funStats.allyDamage[credit] += userChangePercent;
 				} else this.funStats.allyDamage[credit] = userChangePercent;
 				if (!this.funStats.allyDamageMethod[credit]) this.funStats.allyDamageMethod[credit] = [];
 				this.funStats.allyDamageMethod[credit].push('Pain Split');
-			} else if (userChangePercent < 0) {
+			} else */if (userChangePercent < 0) { // self-damage no longer counts as ally damage
 				// heal
 				if (this.funStats.heal[credit]) {
 					this.funStats.heal[credit] -= userChangePercent;
