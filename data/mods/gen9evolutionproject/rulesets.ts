@@ -287,7 +287,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						if (this.activePokemon) credit = this.activePokemon;
 						break;
 					case 'Item':
-						// TODO: in case of items that affect the holder, I might track the original holder of the item,
+						// TO DO: in case of items that affect the holder, I might track the original holder of the item,
 						// as well as the reason it ended up on a different Pokémon?
 						// For damage, that's only Sticky Barb, Black Sludge and Life Orb;
 						// for healing, any item should count
@@ -305,14 +305,12 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 							
 							// Abilities like Hospitality, Bad Dreams and Aftermath already provide proper credit
 							
-							// Poison Heal should credit the status source, buuut...
-							if (["Poison Heal"].includes(effect.name) && target.statusState) credit = target.statusState.source;
-							// TODO: hard-coding for Toxic Spikes!
+							// Poison Heal should credit the status source, but it needs to account for Toxic Spikes
+							if (["Poison Heal"].includes(effect.name) && target.statusState) {
+								credit = target.statusState.source;
+								if (target.statusState.realCredit) credit = target.statusState.realCredit;
+							}
 						}
-						// if it's a weather Ability like Dry Skin, credit the field effect setter if possible
-						// if it's Poison Heal, credit the one who inflicted the poison if possible
-						// if it's Hospitality, credit the Hospitality ally
-						// any other edge cases? double-check customs
 						break;
 					// case 'Format':
 					// case 'Nature':
@@ -326,10 +324,15 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						if (this.field.getWeather() && this.field.getWeather().source) credit = this.field.getWeather().source;
 						break;
 					case 'Status':
-						// TODO: hard-coding for Blown Fuse and Toxic Spikes
 						// in general, credit the status setter
-						if (effect.id && target.status && target.status === effect.id && target.statusState) credit = target.statusState.source;
-						if (effect.name && target.status && target.status === effect.name && target.statusState) credit = target.statusState.source;
+						if (effect.id && target.status && target.status === effect.id && target.statusState) {
+							credit = target.statusState.source;
+							if (target.statusState.realCredit) credit = target.statusState.realCredit; // Blown Fuse and Toxic Spikes
+						}
+						if (effect.name && target.status && target.status === effect.name && target.statusState) {
+							credit = target.statusState.source;
+							if (target.statusState.realCredit) credit = target.statusState.realCredit; // Blown Fuse and Toxic Spikes
+						}
 						break;
 					// case 'Terastal':
 					// case 'Rule':
@@ -358,17 +361,19 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 				let method = null;
 				if (effect && effect.name) method = effect.name;
 				else if (effect && effect.id) method = effect.id;
-				// if I don't like how certain statuses are labeled (for instance, if I want to replace "brn" with "burn damage" or "Sandstorm" with "sand chip"),
-				// I can manually overwrite them here
+				// if I don't like how certain statuses are labeled, I can manually overwrite them here
 				switch (method) {
 					case 'brn':
 						method = 'burn damage';
+						if (target.statusState && target.statusState.realEffect) method = target.statusState.realEffect; // Blown Fuse
 						break;
 					case 'psn':
 						method = 'poison damage';
+						if (target.statusState && target.statusState.realEffect) method = target.statusState.realEffect; // Toxic Spikes
 						break;
 					case 'tox':
 						method = 'Toxic damage';
+						if (target.statusState && target.statusState.realEffect) method = target.statusState.realEffect; // Toxic Spikes
 						break;
 					case 'Sandstorm':
 						method = 'sand chip';
@@ -464,7 +469,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						if (this.activePokemon) credit = this.activePokemon;
 						break;
 					case 'Item':
-						// TODO: in case of items that affect the holder, I might track the original holder of the item,
+						// TO DO: in case of items that affect the holder, I might track the original holder of the item,
 						// as well as the reason it ended up on a different Pokémon?
 						// For damage, that's only Sticky Barb, Black Sludge and Life Orb;
 						// for healing, any item should count
@@ -482,14 +487,12 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 							
 							// Abilities like Hospitality, Bad Dreams and Aftermath already provide proper credit
 							
-							// Poison Heal should credit the status source, buuut...
-							if (["Poison Heal"].includes(effect.name) && target.statusState) credit = target.statusState.source;
-							// TODO: hard-coding for Toxic Spikes!
+							// Poison Heal should credit the status source, but it needs to account for Toxic Spikes
+							if (["Poison Heal"].includes(effect.name) && target.statusState) {
+								credit = target.statusState.source;
+								if (target.statusState.realCredit) credit = target.statusState.realCredit;
+							}
 						}
-						// if it's a weather Ability like Dry Skin, credit the field effect setter if possible
-						// if it's Poison Heal, credit the one who inflicted the poison if possible
-						// if it's Hospitality, credit the Hospitality ally
-						// any other edge cases? double-check customs
 						break;
 					// case 'Format':
 					// case 'Nature':
@@ -503,10 +506,15 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						if (this.field.getWeather() && this.field.getWeather().source) credit = this.field.getWeather().source;
 						break;
 					case 'Status':
-						// TODO: hard-coding for Blown Fuse and Toxic Spikes
 						// in general, credit the status setter
-						if (effect.id && target.status && target.status === effect.id && target.statusState) credit = target.statusState.source;
-						if (effect.name && target.status && target.status === effect.name && target.statusState) credit = target.statusState.source;
+						if (effect.id && target.status && target.status === effect.id && target.statusState) {
+							credit = target.statusState.source;
+							if (target.statusState.realCredit) credit = target.statusState.realCredit; // Blown Fuse and Toxic Spikes
+						}
+						if (effect.name && target.status && target.status === effect.name && target.statusState) {
+							credit = target.statusState.source;
+							if (target.statusState.realCredit) credit = target.statusState.realCredit; // Blown Fuse and Toxic Spikes
+						}
 						break;
 					// case 'Terastal':
 					// case 'Rule':
@@ -531,17 +539,19 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 				let method = null;
 				if (effect && effect.name) method = effect.name;
 				else if (effect && effect.id) method = effect.id;
-				// if I don't like how certain statuses are labeled (for instance, if I want to replace "brn" with "burn damage" or "Sandstorm" with "sand chip"),
-				// I can manually overwrite them here
+				// if I don't like how certain statuses are labeled, I can manually overwrite them here
 				switch (method) {
 					case 'brn':
 						method = 'burn damage';
+						if (target.statusState && target.statusState.realEffect) method = target.statusState.realEffect; // Blown Fuse
 						break;
 					case 'psn':
 						method = 'poison damage';
+						if (target.statusState && target.statusState.realEffect) method = target.statusState.realEffect; // Toxic Spikes
 						break;
 					case 'tox':
 						method = 'Toxic damage';
+						if (target.statusState && target.statusState.realEffect) method = target.statusState.realEffect; // Toxic Spikes
 						break;
 					case 'Sandstorm':
 						method = 'sand chip';
@@ -551,6 +561,9 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						break;
 					case 'confused':
 						method = 'confusion damage';
+						break;
+					case 'Recoil':
+						method = 'recoil';
 						break;
 					case 'partiallytrapped':
 						if (target.volatiles && target.volatiles.partiallytrapped && target.volatiles.partiallytrapped.sourceEffect) {
