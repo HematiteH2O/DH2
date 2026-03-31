@@ -87,29 +87,53 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			}
 			
 			// randbats initialization
-			if (!this.modData('FormatsData', id)) this.dataCache.FormatsData[id] = {};
-			this.modData('FormatsData', id).randbats = {
-				types: [],
-				abilities: [],
-				singles: {
-					requestedSupport: {},
-					offeredSupport: {},
-					acceptedSupport: {},
-				},
-				vgc: {
-					requestedSupport: {},
-					offeredSupport: {},
-					acceptedSupport: {},
-				},
-				resistances: {},
-			};
-			this.modData('FormatsData', id).randbats.types.push(newMon.types[0]);
-			if (newMon.types[1]) this.modData('FormatsData', id).randbats.types.push(newMon.types[1]);
-			this.modData('FormatsData', id).randbats.abilities.push(newMon.abilities[0]);
-			if (newMon.abilities[1]) this.modData('FormatsData', id).randbats.abilities.push(newMon.abilities[1]);
-			if (newMon.abilities['H']) this.modData('FormatsData', id).randbats.abilities.push(newMon.abilities['H']);
-			if (newMon.abilities['S']) this.modData('FormatsData', id).randbats.abilities.push(newMon.abilities['S']);
-			console.log(this.modData('FormatsData', id).randbats);
+			if (
+				this.modData('FormatsData', id) &&
+				(this.modData('FormatsData', id).tier && this.modData('FormatsData', id).tier === "Evo!") // only fully evolved Evo guys
+				|| ['porygon2', 'accelgor'].includes(id) // ... and some pre-evolutions
+			) {
+				
+				// basic structure
+				this.modData('FormatsData', id).randbats = {
+					types: [],
+					abilities: [],
+					singles: {
+						requestedSupport: {},
+						offeredSupport: {},
+						acceptedSupport: {},
+					},
+					vgc: {
+						requestedSupport: {},
+						offeredSupport: {},
+						acceptedSupport: {},
+					},
+					resistances: {},
+				};
+				
+				// banlists
+				if ([
+					'toxapex', 'noivernvariant', 'chandelure', 'corviknight', 'darmanitan', 'darmanitangalar', 'excadrill', 'hawlucha', 'garchomp', 'velocinobi',
+					'dragonite', 'tapukoko', 'tapulele', 'tapubulu', 'tapufini', 'zacian', 'zaciancrowned', 'zamazenta', 'zamazentacrowned', 'deoxys',
+					'deoxysattack', 'deoxysdefense', 'deoxysspeed',
+				].includes(id)) this.modData('FormatsData', id).randbats.singlesBanned = true;
+				if ([
+					'dragonite', 'tapukoko', 'tapulele', 'tapubulu', 'tapufini', 'zacian', 'zaciancrowned', 'zamazenta', 'zamazentacrowned', 'deoxys',
+					'deoxysattack', 'deoxysdefense', 'deoxysspeed',
+				].includes(id)) this.modData('FormatsData', id).randbats.vgcBanned = true;
+				if (this.modData('FormatsData', id).randbats.singlesBanned && this.modData('FormatsData', id).randbats.vgcBanned) continue;
+
+				// basic information
+				this.modData('FormatsData', id).randbats.types.push(newMon.types[0]);
+				if (newMon.types[1]) this.modData('FormatsData', id).randbats.types.push(newMon.types[1]);
+				this.modData('FormatsData', id).randbats.abilities.push(newMon.abilities[0]);
+				if (newMon.abilities[1]) this.modData('FormatsData', id).randbats.abilities.push(newMon.abilities[1]);
+				if (newMon.abilities['H']) this.modData('FormatsData', id).randbats.abilities.push(newMon.abilities['H']);
+				if (newMon.abilities['S']) this.modData('FormatsData', id).randbats.abilities.push(newMon.abilities['S']);
+
+				// then I can start iterating over the movepool
+				
+				console.log(this.modData('FormatsData', id).randbats);
+			}
 		}
 		
 		// OKAY HEADS-UP:
@@ -117,6 +141,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		// I'm keeping it around so I can run it the same way every time I add a new slate
 		// don't forget to comment it out!!!
 		for (const id in this.dataCache.Pokedex) {
+			comtinue; // just skipping this whole thing for now it's not useful yet
 			if (!this.dataCache.Pokedex[id] || !(
 				(this.modData('FormatsData', id) && this.modData('FormatsData', id).tier && this.modData('FormatsData', id).tier === "Evo!") // only the "Evo!" tier matters - nothing is PotD yet and prevos shouldn't be included
 				|| ['porygon2', 'accelgor'].includes(id) // exceptions so far: Porygon2 and Accelgor
