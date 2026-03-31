@@ -768,7 +768,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				effect,
 			});
 			// ONLY MODDED PART
-			this.battle.runEvent('ForceFaintData', source, this, effect, d);
+			this.battle.runEvent('ForceFaintData', source, effect, d);
 			// END MODDED PART
 			return d;
 		}
