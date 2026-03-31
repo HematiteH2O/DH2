@@ -209,7 +209,11 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 			},
 			onAfterMoveSecondarySelf(source, target, move) {
 				if (move.category === 'Physical' && source.isGrounded() && !source.hasType('Electric') && move.id !== 'rapidspin' && move.id !== 'mortalspin') {
-					source.setStatus('brn', source, move);
+					if (source.setStatus('brn', source, move) && source.statusState && this.effectData.source) {
+						// recording for this.funStats
+						source.statusState.realCredit = this.effectData.source;
+						source.statusState.realEffect = 'Blown Fuse';
+					}
 				}
 			},
 			onStart(target) {
@@ -774,6 +778,8 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 	},
 
 // modded canon moves
+	
+	// for Blown Fuse
 
 	defog: {
 		inherit: true,
@@ -932,6 +938,45 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 			}
 			if (success) this.add('-activate', pokemon, 'move: Tidy Up');
 			return !!this.boost({atk: 1, spe: 1}, pokemon, pokemon, null, false, true) || success;
+		},
+	},
+
+	// for this.funStats
+	
+	toxicspikes: {
+		inherit: true,
+		condition: {
+			// this is a side condition
+			onSideStart(side) {
+				this.add('-sidestart', side, 'move: Toxic Spikes');
+				this.effectState.layers = 1;
+			},
+			onSideRestart(side) {
+				if (this.effectState.layers >= 2) return false;
+				this.add('-sidestart', side, 'move: Toxic Spikes');
+				this.effectState.layers++;
+			},
+			onEntryHazard(pokemon) {
+				if (!pokemon.isGrounded()) return;
+				if (pokemon.hasType('Poison')) {
+					this.add('-sideend', pokemon.side, 'move: Toxic Spikes', '[of] ' + pokemon);
+					pokemon.side.removeSideCondition('toxicspikes');
+				} else if (pokemon.hasType('Steel') || pokemon.hasItem('heavydutyboots')) {
+					return;
+				} else if (this.effectState.layers >= 2) {
+					if (pokemon.trySetStatus('tox', pokemon.side.foe.active[0])) {
+						// recording for this.funStats
+						pokemon.statusState.realCredit = this.effectData.source;
+						pokemon.statusState.realEffect = 'Toxic Spikes';
+					}
+				} else {
+					if (pokemon.trySetStatus('psn', pokemon.side.foe.active[0])) {
+						// recording for this.funStats
+						pokemon.statusState.realCredit = this.effectData.source;
+						pokemon.statusState.realEffect = 'Toxic Spikes';
+					}
+				}
+			},
 		},
 	},
 };
