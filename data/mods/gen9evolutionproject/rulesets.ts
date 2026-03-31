@@ -998,14 +998,14 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 							tankedHitsReport += ` ${tankedHitsInstance}`;
 							if (order + 1 < tankedHitsRecordHolderTie.length) tankedHitsReport += `,`;
 						}
-						else tankedHitsReport += ` and ${tankedHitsInstance}, which were each attacked <strong>${tankedHitsRecord}</strong>% times!<br>`;
+						else tankedHitsReport += ` and ${tankedHitsInstance},<br>which were each attacked <strong>${tankedHitsRecord}</strong> times!<br>`;
 					}
-				} else tankedHitsReport += `${tankedHitsRecordHolder}, which was attacked <strong>${tankedHitsRecord}</strong>% times!<br>`;
+				} else tankedHitsReport += `was ${tankedHitsRecordHolder},<br>which was attacked <strong>${tankedHitsRecord}</strong> times!<br>`;
 				statsReveal += tankedHitsReport;
 			}
 			
 			if (movesMissedRecord && movesMissedRecord > 0) {
-				let movesMissedReport = `<br>The Pokémon that took the most hits `;
+				let movesMissedReport = `<br>The Pokémon that struggled the most with accuracy `;
 				if (movesMissedRecordTie) {
 					movesMissedReport += `were `;
 					let order = 0;
@@ -1015,14 +1015,14 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 							movesMissedReport += ` ${movesMissedInstance}`;
 							if (order + 1 < movesMissedRecordHolderTie.length) movesMissedReport += `,`;
 						}
-						else movesMissedReport += ` and ${movesMissedInstance}, which were each attacked <strong>${movesMissedRecord}</strong>% times!<br>`;
+						else movesMissedReport += ` and ${movesMissedInstance},<br>which each missed <strong>${movesMissedRecord}</strong> times!<br>`;
 					}
-				} else movesMissedReport += `${movesMissedRecordHolder}, which was attacked <strong>${movesMissedRecord}</strong>% times!<br>`;
+				} else movesMissedReport += `was ${movesMissedRecordHolder},<br>which missed <strong>${movesMissedRecord}</strong> times!<br>Maybe it just needs glasses?<br>`;
 				statsReveal += movesMissedReport;
 			}
 			
 			if (superEffectiveHitsRecord && superEffectiveHitsRecord > 0) {
-				let superEffectiveHitsReport = `<br>The Pokémon that took the most hits `;
+				let superEffectiveHitsReport = `<br>The Pokémon that landed the most super-effective hits `;
 				if (superEffectiveHitsRecordTie) {
 					superEffectiveHitsReport += `were `;
 					let order = 0;
@@ -1032,9 +1032,9 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 							superEffectiveHitsReport += ` ${superEffectiveHitsInstance}`;
 							if (order + 1 < superEffectiveHitsRecordHolderTie.length) superEffectiveHitsReport += `,`;
 						}
-						else superEffectiveHitsReport += ` and ${superEffectiveHitsInstance}, which were each attacked <strong>${superEffectiveHitsRecord}</strong>% times!<br>`;
+						else superEffectiveHitsReport += ` and ${superEffectiveHitsInstance},<br>with <strong>${superEffectiveHitsRecord}</strong> hits each!<br>`;
 					}
-				} else superEffectiveHitsReport += `${superEffectiveHitsRecordHolder}, which was attacked <strong>${superEffectiveHitsRecord}</strong>% times!<br>`;
+				} else superEffectiveHitsReport += `${superEffectiveHitsRecordHolder},<br>with <strong>${superEffectiveHitsRecord}</strong> hits!<br>`;
 				statsReveal += superEffectiveHitsReport;
 			}
 
