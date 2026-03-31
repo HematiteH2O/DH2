@@ -691,9 +691,8 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			this.funStats.healMethod[`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`].push('Revival Blessing');
 			console.log(this.funStats);
 		},
-		onForceFaintData(d, target, source, effect) {
+		onForceFaintData(d, source, effect) {
 			console.log(`source: ` + ((source && source.name) ? source.name : source));
-			console.log(`target: ` + ((target && target.name) ? target.name : target));
 			console.log(((effect && effect.name) ? effect.name : effect) + (effect.effectType ? ` of type ` + effect.effectType : ` `));
 			console.log(`d: ` + ((d && d.name) ? d.name : d));
 			console.log(this.funStats);
