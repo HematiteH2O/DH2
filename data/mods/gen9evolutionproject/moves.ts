@@ -993,7 +993,7 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 			if (averagehp > pokemon.maxhp) userChange = pokemon.hp - pokemon.maxhp; // overheal
 			let userChangePercent = (userChange / pokemon.maxhp * 100);
 			let sameSide = false;
-			if (target.side === pokemon.side) sameSide = true;
+			if (target.isAlly(pokemon)) sameSide = true;
 			this.runEvent('PainSplit', credit, targetChangePercent, userChangePercent, sameSide);
 			// MODDED PART ENDS HERE
 			
@@ -1001,6 +1001,51 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 			this.add('-sethp', target, target.getHealth, '[from] move: Pain Split', '[silent]');
 			pokemon.sethp(averagehp);
 			this.add('-sethp', pokemon, pokemon.getHealth, '[from] move: Pain Split');
+		},
+	},
+	perishsong: {
+		inherit: true,
+		condition: {
+			duration: 4,
+			onEnd(target) {
+				this.add('-start', target, 'perish0');
+				if (this.effectState.source && this.effectState.source !== target) this.runEvent('PerishSongForceKO', target, this.effectState.source); // only modded line
+				target.faint();
+			},
+			onResidualOrder: 24,
+			onResidual(pokemon) {
+				const duration = pokemon.volatiles['perishsong'].duration;
+				this.add('-start', pokemon, 'perish' + duration);
+			},
+		},
+	},
+	destinybond: {
+		inherit: true,
+		condition: {
+			onStart(pokemon) {
+				this.add('-singlemove', pokemon, 'Destiny Bond');
+			},
+			onFaint(target, source, effect) {
+				if (!source || !effect || target.isAlly(source)) return;
+				if (effect.effectType === 'Move' && !effect.flags['futuremove']) {
+					if (source.volatiles['dynamax']) {
+						this.add('-hint', "Dynamaxed Pokémon are immune to Destiny Bond.");
+						return;
+					}
+					this.add('-activate', target, 'move: Destiny Bond');
+					this.runEvent('DestinyBondForceKO', source, target); // only modded line
+					source.faint();
+				}
+			},
+			onBeforeMovePriority: -1,
+			onBeforeMove(pokemon, target, move) {
+				if (move.id === 'destinybond') return;
+				this.debug('removing Destiny Bond before attack');
+				pokemon.removeVolatile('destinybond');
+			},
+			onMoveAborted(pokemon, target, move) {
+				pokemon.removeVolatile('destinybond');
+			},
 		},
 	},
 };
