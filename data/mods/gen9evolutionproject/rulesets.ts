@@ -592,38 +592,25 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 		},
 		onPainSplit(sameSide, credit, targetChangePercent, userChangePercent) {
 			// okay, targetChange should be an amount of damage if it's postive or an amount of healing if it's negative
-			if (sameSide) {
-				if (targetChangePercent > 0) {
-					// allyDamage
-					if (this.funStats.allyDamage[credit]) {
-						this.funStats.allyDamage[credit] += targetChangePercent;
-					} else this.funStats.allyDamage[credit] = targetChangePercent;
-					if (!this.funStats.allyDamageMethod[credit]) this.funStats.allyDamageMethod[credit] = [];
-					if (!this.funStats.allyDamageMethod[credit].includes('Pain Split')) this.funStats.allyDamageMethod[credit].push('Pain Split');
-				} else if (targetChangePercent < 0) {
-					// heal
-					if (this.funStats.heal[credit]) {
-						this.funStats.heal[credit] -= targetChangePercent;
-					} else this.funStats.heal[credit] = -1 * targetChangePercent;
-					if (!this.funStats.healMethod[credit]) this.funStats.healMethod[credit] = [];
-					if (!this.funStats.healMethod[credit].includes('Pain Split')) this.funStats.healMethod[credit].push('Pain Split');
-				}
-			} else {
-				if (targetChangePercent > 0) {
-					// damage
-					if (this.funStats.damage[credit]) {
-						this.funStats.damage[credit] += targetChangePercent;
-					} else this.funStats.damage[credit] = targetChangePercent;
-					if (!this.funStats.damageMethod[credit]) this.funStats.damageMethod[credit] = [];
-					if (!this.funStats.damageMethod[credit].includes('Pain Split')) this.funStats.damageMethod[credit].push('Pain Split');
-				} else if (targetChangePercent < 0) {
-					// foeHeal
-					if (this.funStats.foeHeal[credit]) {
-						this.funStats.foeHeal[credit] -= targetChangePercent;
-					} else this.funStats.foeHeal[credit] = -1 * targetChangePercent;
-					if (!this.funStats.foeHealMethod[credit]) this.funStats.foeHealMethod[credit] = [];
-					if (!this.funStats.foeHealMethod[credit].includes('Pain Split')) this.funStats.foeHealMethod[credit].push('Pain Split');
-				}
+			
+			// ignoring sameSide because for some reason it's always sending "true"
+			// that means this *TECHNICALLY* reports incorrectly if the user targets and damages its ally with Pain Split in a double battle,
+			// but that'll never come up, right??
+			
+			if (targetChangePercent > 0) {
+				// damage
+				if (this.funStats.damage[credit]) {
+					this.funStats.damage[credit] += targetChangePercent;
+				} else this.funStats.damage[credit] = targetChangePercent;
+				if (!this.funStats.damageMethod[credit]) this.funStats.damageMethod[credit] = [];
+				if (!this.funStats.damageMethod[credit].includes('Pain Split')) this.funStats.damageMethod[credit].push('Pain Split');
+			} else if (targetChangePercent < 0) {
+				// foeHeal
+				if (this.funStats.foeHeal[credit]) {
+					this.funStats.foeHeal[credit] -= targetChangePercent;
+				} else this.funStats.foeHeal[credit] = -1 * targetChangePercent;
+				if (!this.funStats.foeHealMethod[credit]) this.funStats.foeHealMethod[credit] = [];
+				if (!this.funStats.foeHealMethod[credit].includes('Pain Split')) this.funStats.foeHealMethod[credit].push('Pain Split');
 			}
 
 			// and (pokemon.hp - averagehp) should be an amount of damage if it's postive or an amount of healing if it's negative
