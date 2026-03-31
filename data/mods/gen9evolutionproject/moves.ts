@@ -988,57 +988,59 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 			
 			// MODDED PART STARTS HERE
 			let credit = [`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`];
+			let targetChangePercent = (targetChange / target.maxhp * 100);
+			let userChangePercent = ((pokemon.hp - averagehp) / pokemon.maxhp * 100);
 			
 			// okay, targetChange should be an amount of damage if it's postive or an amount of healing if it's negative
 			if (target.side === pokemon.side) {
-				if (targetChange > 0) {
+				if (targetChangePercent > 0) {
 					// allyDamage
-					if (this.funStats.allyDamage[credit]) {
-						this.funStats.allyDamage[credit] += targetChange;
-					} else this.funStats.allyDamage[credit] = targetChange;
-					if (!this.funStats.allyDamageMethod[credit]) this.funStats.allyDamageMethod[credit] = [];
-					this.funStats.allyDamageMethod[credit].push('Pain Split');
-				} else if (targetChange < 0) {
+					if (this.battle.funStats.allyDamage[credit]) {
+						this.battle.funStats.allyDamage[credit] += targetChangePercent;
+					} else this.battle.funStats.allyDamage[credit] = targetChangePercent;
+					if (!this.battle.funStats.allyDamageMethod[credit]) this.battle.funStats.allyDamageMethod[credit] = [];
+					this.battle.funStats.allyDamageMethod[credit].push('Pain Split');
+				} else if (targetChangePercent < 0) {
 					// heal
-					if (this.funStats.heal[credit]) {
-						this.funStats.heal[credit] -= targetChange;
-					} else this.funStats.heal[credit] = -1 * targetChange;
-					if (!this.funStats.healMethod[credit]) this.funStats.healMethod[credit] = [];
-					this.funStats.healMethod[credit].push('Pain Split');
+					if (this.battle.funStats.heal[credit]) {
+						this.battle.funStats.heal[credit] -= targetChangePercent;
+					} else this.battle.funStats.heal[credit] = -1 * targetChangePercent;
+					if (!this.battle.funStats.healMethod[credit]) this.battle.funStats.healMethod[credit] = [];
+					this.battle.funStats.healMethod[credit].push('Pain Split');
 				}
 			} else {
-				if (targetChange > 0) {
+				if (targetChangePercent > 0) {
 					// damage
-					if (this.funStats.damage[credit]) {
-						this.funStats.damage[credit] += targetChange;
-					} else this.funStats.damage[credit] = targetChange;
-					if (!this.funStats.damageMethod[credit]) this.funStats.damageMethod[credit] = [];
-					this.funStats.damageMethod[credit].push('Pain Split');
-				} else if (targetChange < 0) {
+					if (this.battle.funStats.damage[credit]) {
+						this.battle.funStats.damage[credit] += targetChangePercent;
+					} else this.battle.funStats.damage[credit] = targetChangePercent;
+					if (!this.battle.funStats.damageMethod[credit]) this.battle.funStats.damageMethod[credit] = [];
+					this.battle.funStats.damageMethod[credit].push('Pain Split');
+				} else if (targetChangePercent < 0) {
 					// foeHeal
-					if (this.funStats.foeHeal[credit]) {
-						this.funStats.foeHeal[credit] -= targetChange;
-					} else this.funStats.foeHeal[credit] = -1 * targetChange;
-					if (!this.funStats.foeHealMethod[credit]) this.funStats.foeHealMethod[credit] = [];
-					this.funStats.foeHealMethod[credit].push('Pain Split');
+					if (this.battle.funStats.foeHeal[credit]) {
+						this.battle.funStats.foeHeal[credit] -= targetChangePercent;
+					} else this.battle.funStats.foeHeal[credit] = -1 * targetChangePercent;
+					if (!this.battle.funStats.foeHealMethod[credit]) this.battle.funStats.foeHealMethod[credit] = [];
+					this.battle.funStats.foeHealMethod[credit].push('Pain Split');
 				}
 			}
 			
 			// and (pokemon.hp - averagehp) should be an amount of damage if it's postive or an amount of healing if it's negative
-			if ((pokemon.hp - averagehp) > 0) {
+			if (userChangePercent > 0) {
 				// allyDamage
-				if (this.funStats.allyDamage[credit]) {
-					this.funStats.allyDamage[credit] += pokemon.hp - averagehp;
-				} else this.funStats.allyDamage[credit] = pokemon.hp - averagehp;
-				if (!this.funStats.allyDamageMethod[credit]) this.funStats.allyDamageMethod[credit] = [];
-				this.funStats.allyDamageMethod[credit].push('Pain Split');
-			} else if ((pokemon.hp - averagehp) < 0) {
+				if (this.battle.funStats.allyDamage[credit]) {
+					this.battle.funStats.allyDamage[credit] += userChangePercent;
+				} else this.battle.funStats.allyDamage[credit] = userChangePercent;
+				if (!this.battle.funStats.allyDamageMethod[credit]) this.battle.funStats.allyDamageMethod[credit] = [];
+				this.battle.funStats.allyDamageMethod[credit].push('Pain Split');
+			} else if (userChangePercent < 0) {
 				// heal
-				if (this.funStats.heal[credit]) {
-					this.funStats.heal[credit] -= pokemon.hp - averagehp;
-				} else this.funStats.heal[credit] = -1 * pokemon.hp - averagehp;
-				if (!this.funStats.healMethod[credit]) this.funStats.healMethod[credit] = [];
-				this.funStats.healMethod[credit].push('Pain Split');
+				if (this.battle.funStats.heal[credit]) {
+					this.battle.funStats.heal[credit] -= userChangePercent;
+				} else this.battle.funStats.heal[credit] = -1 * userChangePercent;
+				if (!this.battle.funStats.healMethod[credit]) this.battle.funStats.healMethod[credit] = [];
+				this.battle.funStats.healMethod[credit].push('Pain Split');
 			}
 			
 			console.log(this.battle.funStats);
