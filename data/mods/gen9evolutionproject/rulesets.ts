@@ -56,7 +56,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 					// report Eviolite compatibility even for canon Pokémon
 					if (species && !species.copyData && species.evos) {
 						showFakemon = true;
-						hideBox += `<div class="hint">${species.name} <strong>can use Eviolite></strong> because it evolves into`;
+						hideBox += `<div class="hint">${species.name} <strong>can use Eviolite</strong> because it evolves into`;
 						let order = 0;
 						for (const evoname of species.evos) {
 							order++;
@@ -93,7 +93,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 
 						// report Eviolite compatibility even for canon Pokémon
 						if (species.evos) {
-							customGuide += `<br><div class="hint">It <strong>can use Eviolite></strong> because it evolves into`;
+							customGuide += `<br><div class="hint">It <strong>can use Eviolite</strong> because it evolves into`;
 							let order = 0;
 							for (const evoname of species.evos) {
 								order++;
@@ -106,7 +106,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 									customGuide += ` ${evoname}`;
 								}
 							}
-							hideBox += `!</div>`;
+							customGuide += `!</div>`;
 						}
 						
 						// movepool changes
