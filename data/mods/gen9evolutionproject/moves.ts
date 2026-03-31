@@ -990,7 +990,8 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 			let credit = [`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`];
 			let targetChangePercent = (targetChange / target.maxhp * 100);
 			let userChangePercent = ((pokemon.hp - averagehp) / pokemon.maxhp * 100);
-			let sameSide = (target.side === pokemon.side);
+			let sameSide = false;
+			if (target.side === pokemon.side) sameSide = true;
 			this.runEvent('PainSplit', credit, targetChangePercent, userChangePercent, sameSide);
 			// MODDED PART ENDS HERE
 			
