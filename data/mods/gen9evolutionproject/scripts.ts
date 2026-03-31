@@ -141,7 +141,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		// I'm keeping it around so I can run it the same way every time I add a new slate
 		// don't forget to comment it out!!!
 		for (const id in this.dataCache.Pokedex) {
-			comtinue; // just skipping this whole thing for now it's not useful yet
+			continue; // just skipping this whole thing for now it's not useful yet
 			if (!this.dataCache.Pokedex[id] || !(
 				(this.modData('FormatsData', id) && this.modData('FormatsData', id).tier && this.modData('FormatsData', id).tier === "Evo!") // only the "Evo!" tier matters - nothing is PotD yet and prevos shouldn't be included
 				|| ['porygon2', 'accelgor'].includes(id) // exceptions so far: Porygon2 and Accelgor
