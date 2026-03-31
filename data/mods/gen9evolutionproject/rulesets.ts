@@ -625,6 +625,10 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			console.log(this.funStats);
 		},
 		onPainSplit(credit, targetChangePercent, userChangePercent, sameSide) {
+			console.log(`credit: ` + credit);
+			console.log(`targetChangePercent: ` + targetChangePercent);
+			console.log(`userChangePercent: ` + userChangePercent);
+			console.log(`sameSide: ` + sameSide);
 			// okay, targetChange should be an amount of damage if it's postive or an amount of healing if it's negative
 			if (sameSide) {
 				if (targetChangePercent > 0) {
@@ -680,6 +684,8 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			console.log(this.funStats);
 		},
 		onRevivalBlessingData(pokemon, target) {
+			console.log(`pokemon: ` + pokemon.name);
+			console.log(`target: ` + target.name);
 			if (this.funStats.heal[`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`]) {
 				this.funStats.heal[`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`] += (target.getHealth / target.maxhp * 100);
 			} else this.funStats.heal[`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`] = target.getHealth (target.getHealth / target.maxhp * 100);
