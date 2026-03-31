@@ -671,7 +671,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 					}
 					else damageReport += ` and ${tiedRecordHolder}`;
 				}
-				damageReport += `,<br>who somehow tied by each dealing <strong>${Math.round(maxDamage*10)/10}</strong>% to the opposing team!<br>`;
+				damageReport += `,<br>who somehow tied by each dealing <strong>${Math.round(maxDamage*10)/10}</strong>% in total damage to the opposing team!<br>`;
 				statsReveal += damageReport;
 			} else {
 				if (maxDamage > 0 && damageRecordHolder) {
@@ -737,7 +737,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 					}
 					else allyDamageReport += ` and ${tiedRecordHolder}`;
 				}
-				allyDamageReport += `share the dubious honor of... damaging their own teams the most!<br>They tied by each doing <strong>${Math.round(maxAllyDamage*10)/10}</strong>% to their own side.<br>`;
+				allyDamageReport += `share the dubious honor of... damaging their own teams the most!<br>They tied by each doing <strong>${Math.round(maxAllyDamage*10)/10}</strong>% in total damage to their own side.<br>`;
 				statsReveal += allyDamageReport;
 			} else {
 				if (maxAllyDamage > 0 && allyDamageRecordHolder) {
@@ -761,7 +761,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 					} else allyDamageReport += `I`;
 					allyDamageReport += `t hurt its own team for <strong>${Math.round(maxAllyDamage*10)/10}</strong>% in total damage.<br>`;
 					if (this.funStats.damage[allyDamageRecordHolder] && maxAllyDamage > this.funStats.damage[allyDamageRecordHolder]) {
-						allyDamageReport += `Incidentally, it only hurt the opposing team for <strong>${Math.round(this.funStats.damage[allyDamageRecordHolder]*10)/10}</strong>%!<br>Darnit, ${allyDamageRecordHolder}! Whose side are you on?!<br>`;
+						allyDamageReport += `Incidentally, it only hurt the opposing team for <strong>${Math.round(this.funStats.damage[allyDamageRecordHolder]*10)/10}</strong>%...<br>Darnit, ${allyDamageRecordHolder}! Whose side are you on?!<br>`;
 					} else if (!this.funStats.damage[allyDamageRecordHolder]) {
 						allyDamageReport += `But it never hurt the opposing team at all...<br>`;
 					}
@@ -892,7 +892,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 								else foeHealReport += ` and ${healMethod}`;
 							}
 						} else {
-							foeHealReport += `With ${foeHealRecordMethod[0]}`;
+							foeHealReport += `Because of ${foeHealRecordMethod[0]}`;
 						}
 						foeHealReport += `, i`;
 					} else foeHealReport += `I`;
@@ -1034,7 +1034,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 							movesDodgedReport += ` ${movesDodgedInstance}`;
 							if (order + 1 < movesDodgedRecordHolderTie.length) movesDodgedReport += `,`;
 						}
-						else movesDodgedReport += ` and ${movesDodgedInstance},<br>which avoided <strong>${movesDodgedRecord}</strong> hits!<br>`;
+						else movesDodgedReport += ` and ${movesDodgedInstance},<br>which each avoided <strong>${movesDodgedRecord}</strong> hits!<br>`;
 					}
 				} else movesDodgedReport += `was ${movesDodgedRecordHolder},<br>which avoided <strong>${movesDodgedRecord}</strong> hits!<br>`;
 				statsReveal += movesDodgedReport;
