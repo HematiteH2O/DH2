@@ -754,26 +754,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		return false;
 	},
 	
-	// modded to count pokemon.faint() for this.field.pseudoWeather.datamod.funStats
-	pokemon: {
-		faint(source: Pokemon | null = null, effect: Effect | null = null) {
-			if (this.fainted || this.faintQueued) return 0;
-			const d = this.hp;
-			this.hp = 0;
-			this.switchFlag = false;
-			this.faintQueued = true;
-			this.battle.faintQueue.push({
-				target: this,
-				source,
-				effect,
-			});
-			// ONLY MODDED PART
-			this.battle.runEvent('ForceFaintData', source, effect, d);
-			// END MODDED PART
-			return d;
-		}
-	},
-
 
 	
 	// CUSTOM RANDOM TEAM GENERATOR
