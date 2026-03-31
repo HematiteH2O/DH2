@@ -1076,7 +1076,8 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 
 			if (statsReveal !== `raw|<div class="hint">`) {
 				statsReveal += `</div><hr>`;
-				this.add(statsReveal);
+				this.add(statsReveal.replace(`<div class="hint"><br>`,`<div class="hint">`));
+				// ^ just making sure it doesn't start with an extra <br> when damage isn't dealt
 			}
 		},
 	},
