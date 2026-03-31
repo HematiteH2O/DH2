@@ -638,11 +638,19 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			if (!this.funStats.healMethod[`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`].includes('Revival Blessing')) this.funStats.healMethod[`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`].push('Revival Blessing');
 		},
 		onPerishSongForceKO(target, source) {
-			if (this.funStats.damage[`${source.side.name}'s <strong>${source.name}</strong>`]) {
-				this.funStats.damage[`${source.side.name}'s <strong>${source.name}</strong>`] += (target.hp / target.maxhp * 100);
-			} else this.funStats.damage[`${source.side.name}'s <strong>${source.name}</strong>`] = (target.hp / target.maxhp * 100);
-			if (!this.funStats.damageMethod[`${source.side.name}'s <strong>${source.name}</strong>`]) this.funStats.damageMethod[`${source.side.name}'s <strong>${source.name}</strong>`] = [];
-			if (!this.funStats.damageMethod[`${source.side.name}'s <strong>${source.name}</strong>`].includes('Perish Song')) this.funStats.damageMethod[`${source.side.name}'s <strong>${source.name}</strong>`].push('Perish Song');
+			if (target.side === source.side) {
+				if (this.funStats.allyDamage[`${source.side.name}'s <strong>${source.name}</strong>`]) {
+					this.funStats.allyDamage[`${source.side.name}'s <strong>${source.name}</strong>`] += (target.hp / target.maxhp * 100);
+				} else this.funStats.allyDamage[`${source.side.name}'s <strong>${source.name}</strong>`] = (target.hp / target.maxhp * 100);
+				if (!this.funStats.allyDamageMethod[`${source.side.name}'s <strong>${source.name}</strong>`]) this.funStats.allyDamageMethod[`${source.side.name}'s <strong>${source.name}</strong>`] = [];
+				if (!this.funStats.allyDamageMethod[`${source.side.name}'s <strong>${source.name}</strong>`].includes('Perish Song')) this.funStats.allyDamageMethod[`${source.side.name}'s <strong>${source.name}</strong>`].push('Perish Song');
+			} else {
+				if (this.funStats.damage[`${source.side.name}'s <strong>${source.name}</strong>`]) {
+					this.funStats.damage[`${source.side.name}'s <strong>${source.name}</strong>`] += (target.hp / target.maxhp * 100);
+				} else this.funStats.damage[`${source.side.name}'s <strong>${source.name}</strong>`] = (target.hp / target.maxhp * 100);
+				if (!this.funStats.damageMethod[`${source.side.name}'s <strong>${source.name}</strong>`]) this.funStats.damageMethod[`${source.side.name}'s <strong>${source.name}</strong>`] = [];
+				if (!this.funStats.damageMethod[`${source.side.name}'s <strong>${source.name}</strong>`].includes('Perish Song')) this.funStats.damageMethod[`${source.side.name}'s <strong>${source.name}</strong>`].push('Perish Song');
+			}
 		},
 		onDestinyBondForceKO(target, source) {
 			if (this.funStats.damage[`${source.side.name}'s <strong>${source.name}</strong>`]) {
