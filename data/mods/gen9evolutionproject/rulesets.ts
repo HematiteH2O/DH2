@@ -599,14 +599,14 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						this.funStats.allyDamage[credit] += targetChangePercent;
 					} else this.funStats.allyDamage[credit] = targetChangePercent;
 					if (!this.funStats.allyDamageMethod[credit]) this.funStats.allyDamageMethod[credit] = [];
-					this.funStats.allyDamageMethod[credit].push('Pain Split');
+					if (!this.funStats.allyDamageMethod[credit].includes('Pain Split')) this.funStats.allyDamageMethod[credit].push('Pain Split');
 				} else if (targetChangePercent < 0) {
 					// heal
 					if (this.funStats.heal[credit]) {
 						this.funStats.heal[credit] -= targetChangePercent;
 					} else this.funStats.heal[credit] = -1 * targetChangePercent;
 					if (!this.funStats.healMethod[credit]) this.funStats.healMethod[credit] = [];
-					this.funStats.healMethod[credit].push('Pain Split');
+					if (!this.funStats.healMethod[credit].includes('Pain Split')) this.funStats.healMethod[credit].push('Pain Split');
 				}
 			} else {
 				if (targetChangePercent > 0) {
@@ -615,14 +615,14 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						this.funStats.damage[credit] += targetChangePercent;
 					} else this.funStats.damage[credit] = targetChangePercent;
 					if (!this.funStats.damageMethod[credit]) this.funStats.damageMethod[credit] = [];
-					this.funStats.damageMethod[credit].push('Pain Split');
+					if (!this.funStats.damageMethod[credit].includes('Pain Split')) this.funStats.damageMethod[credit].push('Pain Split');
 				} else if (targetChangePercent < 0) {
 					// foeHeal
 					if (this.funStats.foeHeal[credit]) {
 						this.funStats.foeHeal[credit] -= targetChangePercent;
 					} else this.funStats.foeHeal[credit] = -1 * targetChangePercent;
 					if (!this.funStats.foeHealMethod[credit]) this.funStats.foeHealMethod[credit] = [];
-					this.funStats.foeHealMethod[credit].push('Pain Split');
+					if (!this.funStats.foeHealMethod[credit].includes('Pain Split')) this.funStats.foeHealMethod[credit].push('Pain Split');
 				}
 			}
 
@@ -633,14 +633,14 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 					this.funStats.allyDamage[credit] += userChangePercent;
 				} else this.funStats.allyDamage[credit] = userChangePercent;
 				if (!this.funStats.allyDamageMethod[credit]) this.funStats.allyDamageMethod[credit] = [];
-				this.funStats.allyDamageMethod[credit].push('Pain Split');
+				if (!this.funStats.allyDamageMethod[credit].includes('Pain Split')) this.funStats.allyDamageMethod[credit].push('Pain Split');
 			} else */if (userChangePercent < 0) { // self-damage no longer counts as ally damage
 				// heal
 				if (this.funStats.heal[credit]) {
 					this.funStats.heal[credit] -= userChangePercent;
 				} else this.funStats.heal[credit] = -1 * userChangePercent;
 				if (!this.funStats.healMethod[credit]) this.funStats.healMethod[credit] = [];
-				this.funStats.healMethod[credit].push('Pain Split');
+				if (!this.funStats.healMethod[credit].includes('Pain Split')) this.funStats.healMethod[credit].push('Pain Split');
 			}
 		},
 		onRevivalBlessingData(pokemon, target) {
@@ -648,7 +648,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 				this.funStats.heal[`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`] += (target.hp / target.maxhp * 100);
 			} else this.funStats.heal[`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`] = (target.hp / target.maxhp * 100);
 			if (!this.funStats.healMethod[`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`]) this.funStats.healMethod[`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`] = [];
-			this.funStats.healMethod[`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`].push('Revival Blessing');
+			if (!this.funStats.damageMethod[`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`].includes('Revival Blessing')) this.funStats.healMethod[`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`].push('Revival Blessing');
 		},
 		
 		onBattleFinished() {
