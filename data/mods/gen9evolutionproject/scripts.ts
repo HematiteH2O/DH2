@@ -429,6 +429,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (pokemon.m.movesMissed) {
 						pokemon.m.movesMissed++;
 					} else pokemon.m.movesMissed = 1;
+					if (target.m.movesDodged) {
+						target.m.movesDodged++;
+					} else target.m.movesDodged = 1;
 					// modded section end
 					if (!move.ohko && pokemon.hasItem('blunderpolicy') && pokemon.useItem()) {
 						this.battle.boost({spe: 2}, pokemon);
