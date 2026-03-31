@@ -445,7 +445,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		}
 	},
 	
-	// modded for Revival Blessing to count in this.funStats
+	// modded for Revival Blessing to count in this.field.pseudoWeather.datamod.funStats
 	runAction(action: Action) {
 		const pokemonOriginalHP = action.pokemon?.hp;
 		let residualPokemon: (readonly [Pokemon, number])[] = [];
@@ -613,12 +613,14 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			this.add('-heal', action.target, action.target.getHealth, '[from] move: Revival Blessing');
 			action.pokemon.side.removeSlotCondition(action.pokemon, 'revivalblessing');
 			// ONLY MODDED PART
-			if (this.funStats.heal[`${action.pokemon.side.name}'s <strong>${action.pokemon.name}</strong>`]) {
-				this.funStats.heal[`${action.pokemon.side.name}'s <strong>${action.pokemon.name}</strong>`] += (action.target.getHealth / action.target.maxhp * 100);
-			} else this.funStats.heal[`${action.pokemon.side.name}'s <strong>${action.pokemon.name}</strong>`] = action.target.getHealth (action.target.getHealth / action.target.maxhp * 100);
-			if (!this.funStats.healMethod[`${action.pokemon.side.name}'s <strong>${action.pokemon.name}</strong>`]) this.funStats.healMethod[`${action.pokemon.side.name}'s <strong>${action.pokemon.name}</strong>`] = [];
-			this.funStats.healMethod[`${action.pokemon.side.name}'s <strong>${action.pokemon.name}</strong>`].push('Revival Blessing');
-			console.log(this.battle.funStats);
+			if (this.field.pseudoWeather.datamod) {
+				if (this.field.pseudoWeather.datamod.funStats.heal[`${action.pokemon.side.name}'s <strong>${action.pokemon.name}</strong>`]) {
+					this.field.pseudoWeather.datamod.funStats.heal[`${action.pokemon.side.name}'s <strong>${action.pokemon.name}</strong>`] += (action.target.getHealth / action.target.maxhp * 100);
+				} else this.field.pseudoWeather.datamod.funStats.heal[`${action.pokemon.side.name}'s <strong>${action.pokemon.name}</strong>`] = action.target.getHealth (action.target.getHealth / action.target.maxhp * 100);
+				if (!this.field.pseudoWeather.datamod.funStats.healMethod[`${action.pokemon.side.name}'s <strong>${action.pokemon.name}</strong>`]) this.field.pseudoWeather.datamod.funStats.healMethod[`${action.pokemon.side.name}'s <strong>${action.pokemon.name}</strong>`] = [];
+				this.field.pseudoWeather.datamod.funStats.healMethod[`${action.pokemon.side.name}'s <strong>${action.pokemon.name}</strong>`].push('Revival Blessing');
+				console.log(this.field.pseudoWeather.datamod.funStats);
+			}
 			// END MODDED PART
 			break;
 		case 'runUnnerve':
@@ -759,7 +761,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		return false;
 	},
 	
-	// modded to count pokemon.faint() for this.funStats
+	// modded to count pokemon.faint() for this.field.pseudoWeather.datamod.funStats
 	pokemon: {
 		faint(source: Pokemon | null = null, effect: Effect | null = null) {
 			if (this.fainted || this.faintQueued) return 0;
