@@ -28,6 +28,18 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 		// actual Data Mod feature
 		
 		onTeamPreview() {
+			// OKAY HEADS-UP:
+			// the below is for *my personal convenience* for randbats set generation - it should be *commented out* in any patch that actually gets loaded to DH
+			// I'm keeping it around so I can run it the same way every time I add a new slate
+			// don't forget to comment it out!!!
+			let randomizerData = `raw|<div class="infobox" open><details class ="details"><summary>Randomizer set summary exports</summary>`;
+			for (const id in this.dex.data.Pokedex) {
+				if (this.dex.data.Pokedex[id] && this.dex.data.Pokedex[id].randomizerInfo) randomizerData += this.dex.data.Pokedex[id].randomizerInfo;
+			}
+			randomizerData += `</details></div>`;
+			this.add(`${randomizerData}`);
+			// end commented-out section
+			
 			for (const side of this.sides) {
 				let showFakemon = false;
 				let extraLineBreak = false;
@@ -643,9 +655,28 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 		},
 		
 		onBattleFinished() {
+			this.add(`raw|<hr>`);
+			
+			// report randomizer teams
+			for (const side of this.sides) {
+				let randomized = 0;
+				for (const pokemon of side.pokemon) if (pokemon.set && pokemon.set.hasBeenRandomized) randomized++;
+				if (randomized === side.team.length) {
+					this.add(`raw|${side.name}'s team was randomly generated!<br>If you want to use it again, you can copy it from here:`);
+					this.add('showteam', side.id, Teams.pack(side.team));
+					this.add(`raw|<hr>`);
+				} else if (randomized > 0) {
+					this.add(`raw|Part of ${side.name}'s team was randomly generated!<br>If you want to use it again, you can copy it from here:`);
+					let partialTeam = [];
+					for (const set of side.team) if (set && set.hasBeenRandomized) partialTeam.push(set);
+					this.add('showteam', side.id, Teams.pack(partialTeam));
+					this.add(`raw|<hr>`);
+				}
+			}
+			
 			// report stats
 			if (!this.funStats) return; // just in case
-			let statsReveal = `raw|<hr><div class="hint">`;
+			let statsReveal = `raw|<div class="hint">`;
 
 			// max damage
 			let maxDamage = 0;
