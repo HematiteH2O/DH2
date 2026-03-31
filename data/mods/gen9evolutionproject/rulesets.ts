@@ -251,16 +251,6 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 		onHeal(damage, target, source, effect) {
 			if (!damage) return;
 
-			console.log(`HEAL NOTES`);
-			console.log(`target:`);
-			console.log(((target && target.fullname) ? target.fullname : target) + (target.hp ? ` with HP ` + target.hp : ` `));
-			console.log(`source:`);
-			console.log((source && source.fullname) ? source.fullname : source);
-			console.log(`effect:`);
-			console.log(((effect && effect.name) ? effect.name : effect) + (effect.effectType ? ` of type ` + effect.effectType : ` `));
-			console.log(`damage:`);
-			console.log(damage);
-
 			// attribute the source of the healing
 			let credit = null;
 			
@@ -348,16 +338,6 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 				let healPercent = (damage / target.maxhp * 100);
 				let foeHealPercent = 0;
 
-				// unlike with damage, healing is already calculated into HP by this point, so accounting for overheal is never correct
-				/*
-				if (damage > (target.maxhp - target.hp)) { // no overheal
-					console.log(`perceived overheal: ` + damage + ` damage is greater than ` + (target.maxhp - target.hp) + ` lost HP`);
-					console.log(`heal percent reduced from ` + healPercent);
-					healPercent = ((target.maxhp - target.hp) / target.maxhp * 100);
-					console.log(`to ` + healPercent);
-				}
-				*/
-
 				let method = null;
 				if (effect && effect.name) method = effect.name;
 				else if (effect && effect.id) method = effect.id;
@@ -426,22 +406,10 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 				} else this.funStats.foeHeal[credit] = foeHealPercent;
 				
 			}
-			
-			console.log(this.funStats);
 		},
 		onDamagePriority: -200,
 		onDamage(damage, target, source, effect) {
 			if (!damage) return;
-
-			console.log(`DAMAGE NOTES`);
-			console.log(`target:`);
-			console.log(((target && target.fullname) ? target.fullname : target) + (target.hp ? ` with HP ` + target.hp : ` `));
-			console.log(`source:`);
-			console.log((source && source.fullname) ? source.fullname : source);
-			console.log(`effect:`);
-			console.log(((effect && effect.name) ? effect.name : effect) + (effect.effectType ? ` of type ` + effect.effectType : ` `));
-			console.log(`damage:`);
-			console.log(damage);
 
 			// attribute the source of the damage
 			let credit = null;
@@ -621,14 +589,8 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 				} else this.funStats.allyDamage[credit] = allyDamage;
 				
 			}
-			
-			console.log(this.funStats);
 		},
 		onPainSplit(sameSide, credit, targetChangePercent, userChangePercent) {
-			console.log(`credit: ` + credit);
-			console.log(`targetChangePercent: ` + targetChangePercent);
-			console.log(`userChangePercent: ` + userChangePercent);
-			console.log(`sameSide: ` + sameSide);
 			// okay, targetChange should be an amount of damage if it's postive or an amount of healing if it's negative
 			if (!sameSide) {
 				if (targetChangePercent > 0) {
@@ -680,8 +642,6 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 				if (!this.funStats.healMethod[credit]) this.funStats.healMethod[credit] = [];
 				this.funStats.healMethod[credit].push('Pain Split');
 			}
-			
-			console.log(this.funStats);
 		},
 		onRevivalBlessingData(pokemon, target) {
 			if (this.funStats.heal[`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`]) {
@@ -689,13 +649,6 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			} else this.funStats.heal[`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`] = (target.hp / target.maxhp * 100);
 			if (!this.funStats.healMethod[`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`]) this.funStats.healMethod[`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`] = [];
 			this.funStats.healMethod[`${pokemon.side.name}'s <strong>${pokemon.name}</strong>`].push('Revival Blessing');
-			console.log(this.funStats);
-		},
-		onForceFaintData(d, source, effect) {
-			console.log(`source: ` + ((source && source.name) ? source.name : source));
-			console.log(((effect && effect.name) ? effect.name : effect) + (effect.effectType ? ` of type ` + effect.effectType : ` `));
-			console.log(`d: ` + ((d && d.name) ? d.name : d));
-			console.log(this.funStats);
 		},
 		
 		onBattleFinished() {
