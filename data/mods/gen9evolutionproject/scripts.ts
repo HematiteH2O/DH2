@@ -614,8 +614,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			action.pokemon.side.removeSlotCondition(action.pokemon, 'revivalblessing');
 			// ONLY MODDED PART
 			if (this.funStats.heal[`${action.pokemon.side.name}'s <strong>${action.pokemon.name}</strong>`]) {
-				this.funStats.heal[`${action.pokemon.side.name}'s <strong>${action.pokemon.name}</strong>`] += action.target.getHealth;
-			} else this.funStats.heal[`${action.pokemon.side.name}'s <strong>${action.pokemon.name}</strong>`] = action.target.getHealth;
+				this.funStats.heal[`${action.pokemon.side.name}'s <strong>${action.pokemon.name}</strong>`] += (action.target.getHealth / action.target.maxhp * 100);
+			} else this.funStats.heal[`${action.pokemon.side.name}'s <strong>${action.pokemon.name}</strong>`] = action.target.getHealth (action.target.getHealth / action.target.maxhp * 100);
 			if (!this.funStats.healMethod[`${action.pokemon.side.name}'s <strong>${action.pokemon.name}</strong>`]) this.funStats.healMethod[`${action.pokemon.side.name}'s <strong>${action.pokemon.name}</strong>`] = [];
 			this.funStats.healMethod[`${action.pokemon.side.name}'s <strong>${action.pokemon.name}</strong>`].push('Revival Blessing');
 			console.log(this.battle.funStats);
