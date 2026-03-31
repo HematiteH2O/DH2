@@ -10,20 +10,19 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			// messages can be displayed here, such as if we ever have a banner
 			
 			// initializing battle stats for fun
-			this.funStats = { // report the record-holder in each category only if conditions are met
-				damage: {}, // always report
+			this.funStats = {
+				damage: {},
 				damageMethod: {},
-				allyDamage: {}, // only report if more than any opponent damaged its team
+				allyDamage: {},
 				allyDamageMethod: {},
 				
-				heal: {}, // only report if more than 100%?
-				healMethod: {}, // only report if more than 100%?
-				foeHeal: {}, // only report if more than it healed its own team
-				foeHealMethod: {}, // only report if more than 100%?
+				heal: {},
+				healMethod: {},
+				foeHeal: {},
+				foeHealMethod: {},
 				
-				overkill: {}, // only report if more than 100%?
+				overkill: {},
 			};
-			// hits taken are already recorded (see Rage Fist)
 		},
 
 		// actual Data Mod feature
@@ -56,7 +55,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						let abilities = species.abilities[0];
 						if (species.abilities[1]) abilities += ` / ${species.abilities[1]}`;
 						if (species.abilities['H']) abilities += ` // ${species.abilities['H']}`;
-						if (species.abilities['S']) abilities += ` // <em>(${species.abilities['S']})</em>`;
+						if (species.abilities['S']) abilities += ` // <i>(${species.abilities['S']})</i>`;
 						const baseStats = species.baseStats;
 						hideBox += `<div class="message"><ul class="utilichart"><li class="result"><span class="col pokemonnamecol" style="white-space: nowrap">` + species.name + `</span> <span class="col typecol"><img src="http://play.pokemonshowdown.com/sprites/types/${species.types[0]}.png" alt="${species.types[0]}" height="14" width="32">`;
 						if (species.types[1]) hideBox += `<img src="http://play.pokemonshowdown.com/sprites/types/${species.types[1]}.png" alt="${species.types[1]}" height="14" width="32">`;
@@ -200,7 +199,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 				let abilities = species.abilities[0];
 				if (species.abilities[1]) abilities += ` / ${species.abilities[1]}`;
 				if (species.abilities['H']) abilities += ` // ${species.abilities['H']}`;
-				if (species.abilities['S']) abilities += ` // <em>${species.abilities['S']}</em>`;
+				if (species.abilities['S']) abilities += ` // <i>(${species.abilities['S']})</i>`;
 				const baseStats = species.baseStats;
 				const type = species.types[0];
 				if (species.types[1]) {
