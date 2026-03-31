@@ -209,9 +209,9 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 			},
 			onAfterMoveSecondarySelf(source, target, move) {
 				if (move.category === 'Physical' && source.isGrounded() && !source.hasType('Electric') && move.id !== 'rapidspin' && move.id !== 'mortalspin') {
-					if (source.setStatus('brn', source, move) && source.statusState && this.effectData.source) {
+					if (source.setStatus('brn', source, move) && source.statusState && this.effectState.source) {
 						// recording for this.funStats
-						source.statusState.realCredit = this.effectData.source;
+						source.statusState.realCredit = this.effectState.source;
 						source.statusState.realEffect = 'Blown Fuse';
 					}
 				}
@@ -966,13 +966,13 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 				} else if (this.effectState.layers >= 2) {
 					if (pokemon.trySetStatus('tox', pokemon.side.foe.active[0])) {
 						// recording for this.funStats
-						pokemon.statusState.realCredit = this.effectData.source;
+						pokemon.statusState.realCredit = this.effectState.source;
 						pokemon.statusState.realEffect = 'Toxic Spikes';
 					}
 				} else {
 					if (pokemon.trySetStatus('psn', pokemon.side.foe.active[0])) {
 						// recording for this.funStats
-						pokemon.statusState.realCredit = this.effectData.source;
+						pokemon.statusState.realCredit = this.effectState.source;
 						pokemon.statusState.realEffect = 'Toxic Spikes';
 					}
 				}
