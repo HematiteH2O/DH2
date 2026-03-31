@@ -661,7 +661,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			}
 			if (damageRecordTie && damageRecordHolderTie && damageRecordHolderTie.length && damageRecordHolderTie.length > 1 && maxDamage > 0) {
 				// absolute safety msjhdfg
-				let damageReport = `<br>The Pokémon that did the most damage were `;
+				let damageReport = `The Pokémon that did the most damage were `;
 				let order = 0;
 				for (const tiedRecordHolder of damageRecordHolderTie) {
 					order++;
