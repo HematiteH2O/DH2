@@ -241,11 +241,6 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 
 		// battle stats feature
 		
-		// HARD-CODING TO DO:
-		// Destiny Bond, Perish Body/Perish Song, self-KO moves (damage)
-		// Revival Blessing (heal) + *maybe* Power Construct, Tera Shift, special Terastallized states
-		// Pain Split (both)
-		
 		onHealPriority: -200,
 		onHeal(damage, target, source, effect) {
 			if (!damage) return;
