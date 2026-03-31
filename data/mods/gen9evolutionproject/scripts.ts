@@ -87,7 +87,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			}
 			
 			// randbats initialization
-			if (!(this.modData('FormatsData', id)) this.modData('FormatsData', id) = {};
+			if (!this.modData('FormatsData', id)) this.modData('FormatsData', id) = {};
 			this.modData('FormatsData', id).randbats = {
 				types: [],
 				abilities: [],
