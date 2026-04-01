@@ -136,10 +136,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 				// then I can start iterating over the movepool
 				const learnset = this.dataCache.Learnsets[id].learnset;
-				if (!learnset) {
-					console.log(`No learnset found for ${id}!`);
-					continue;
-				}
+				if (!learnset) continue;
+				
 				for (const moveid in learnset) {
 					if (!this.modData('Learnsets', id).learnset[moveid].length) continue;
 					// *rudimentary* LC set legality:
@@ -156,7 +154,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							let lcLevelLearned = false;
 							// parseInt(source.substr(2)) < parseInt(levelLearned)
 							for (const source of this.dataCache.Learnsets[id].learnset[moveid]) if (parseInt(source.substr(2)) < 5) lcLevelLearned = true;
-							if (!lcLevelLearned) console.log(`${id} can't learn ${moveid} by level 5 in Evolution Project`);
 							if (!lcLevelLearned) continue; // if you can only learn it by level, and only by a level after 5, continue
 						}
 					}
@@ -855,7 +852,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		if (team) {
 			for (const pokemon of team) {
 				if (pokemon && pokemon.species && this.dex.species.get(pokemon.species) && this.dex.species.get(pokemon.species).id) originalTeamSpecies.push(this.dex.species.get(pokemon.species).id);
-				if (pokemon && pokemon.level && pokemon.level > 5) stage = 'Evo'; // can't be LC if you're not level 5
+				if (pokemon && (!pokemon.level || pokemon.level > 5)) stage = 'Evo'; // can't be LC if you're not level 5
+				// !pokemon.level is for level 100s, which are missed otherwise
 			}
 		} else team = [];
 		console.log(originalTeamSpecies);
