@@ -186,7 +186,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						} else if (newMon.randbats.immunities['Water'].Ability) newMon.randbats.resistances['Water'].Ability.push(ability);
 					}
 				}
-				if (newMon.name === 'Eelektross-Variant') console.log(newMon.randbats);
+				if (newMon.name === 'Eelektross-Variant') console.log(newMon.randbats.weaknesses);
+				if (newMon.name === 'Eelektross-Variant') console.log(newMon.randbats.resistances);
+				if (newMon.name === 'Eelektross-Variant') console.log(newMon.randbats.immunities);
 
 				// then I can start iterating over the movepool
 				const learnset = this.dataCache.Learnsets[id].learnset;
