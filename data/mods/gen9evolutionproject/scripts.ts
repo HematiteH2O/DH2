@@ -848,7 +848,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		];
 		let eligibleMonotypes = [];
 		if (originalTeamSpecies.length) {
-			for (const type in types) {
+			for (const type of types) {
 				let eligible = true;
 				for (const id of originalTeamSpecies) if (this.dex.species.get(id).randbats.types.includes(type)) eligible = false;
 				if (eligible) eligibleMonotypes.push(type);
@@ -875,7 +875,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				!originalTeamSpecies.includes(id)
 			) eligiblePokemon.push(id);
 		}
-		if (!eligiblePokemon.length) return;
+		if (!eligiblePokemon.length) return team;
 		
 		let currentStep = [];
 		for (const id of eligiblePokemon) {
