@@ -47,6 +47,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (!newMon.baseStats && copyData.baseStats) newMon.baseStats = copyData.baseStats;
 				if (!newMon.abilities && copyData.abilities) newMon.abilities = copyData.abilities;
 				// if (!newMon.num && copyData.num) newMon.num = copyData.num * -1; // inverting the original's dex number
+				if (!newMon.gender && copyData.gender) newMon.gender = copyData.gender;
 				if (!newMon.genderRatio && copyData.genderRatio) newMon.genderRatio = copyData.genderRatio;
 				if (!newMon.heightm && copyData.heightm) newMon.heightm = copyData.heightm;
 				if (!newMon.weightkg && copyData.weightkg) newMon.weightkg = copyData.weightkg;
@@ -122,7 +123,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (newMon.randbats.singles.banned && newMon.randbats.vgc.banned) continue;
 				
 				if (this.modData('FormatsData', id).tier === "Evo!" || ['porygon2', 'accelgor'].includes(id)) newMon.randbats.stage = 'Evo';
-				else if (newMon.evos && newMon.evos.length && !newMon.prevo) newMon.randbats.stage = 'LC';
+				else if (newMon.evos && newMon.evos.length && !newMon.prevo && !['mareanie'].includes(id)) newMon.randbats.stage = 'LC';
 				if (!newMon.randbats.stage) continue;
 
 				// basic information
@@ -141,6 +142,19 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 				for (const moveid in learnset) {
 					if (!this.modData('Learnsets', id).learnset[moveid].length) continue;
+					if (newMon.randbats.stage === 'LC' && newMon.gender && ['M', 'N'].includes(newMon.gender)) { // *rudimentary* LC set legality
+						// for these, level matters, too
+						let lcLearnset = this.dataCache.Learnsets[id].learnset[moveid].filter(
+							(method) => (!method.includes('L'))
+						);
+						if (!lcLearnset.length) { // if you can learn it a way other than level-up, it's already fine
+							let lcLevelLearned = false;
+							// parseInt(source.substr(2)) < parseInt(levelLearned)
+							for (const source of this.dataCache.Learnsets[id].learnset[moveid]) if (parseInt(source.substr(2)) < 5) lcLevelLearned = true;
+							if (!lcLevelLearned) console.log(`${id} can't learn ${moveid} by level 5 in Evolution Project`);
+							if (!lcLevelLearned) continue; // if you can only learn it by level, and only by a level after 5, continue
+						}
+					}
 					switch (moveid) {
 						case 'knockoff':
 							if (
@@ -825,16 +839,21 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		
 		let originalTeamSpecies = [];
 		let selectedRandSpecies = [];
-
-		if (team) {
-			for (const pokemon of team) if (pokemon && pokemon.species && this.dex.species.get(pokemon.species) && this.dex.species.get(pokemon.species).id) originalTeamSpecies.push(this.dex.species.get(pokemon.species).id);
-		} else team = [];
-		console.log(originalTeamSpecies);
 		
 		let setLevel = 100;
-		let format = "VGC";
+		let format = "singles";
 		if (this.ruleTable.adjustLevel) setLevel = this.ruleTable.adjustLevel;
-		if (this.activePerHalf && this.activePerHalf === 1) format = "singles";
+		if (this.activePerHalf && this.activePerHalf !== 1) format = "vgc";
+		
+		let stage = 'LC'; // easier to default to LC and check to disprove it at every possible step than the other way around
+
+		if (team) {
+			for (const pokemon of team) {
+				if (pokemon && pokemon.species && this.dex.species.get(pokemon.species) && this.dex.species.get(pokemon.species).id) originalTeamSpecies.push(this.dex.species.get(pokemon.species).id);
+				if (pokemon && pokemon.level && pokemon.level > 5) stage = 'Evo'; // can't be LC if you're not level 5
+			}
+		} else team = [];
+		console.log(originalTeamSpecies);
 		
 		let shiny = false;
 		if (!team.length && this.randomChance(1, 100)) shiny = true; // the whole team will be Shiny 1% of the time
@@ -843,9 +862,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		if (format === "singles") targetRoles = ['knockoff', 'choiceband', 'hazardcontrol']; // filler test
 		if (format === "vgc") targetRoles = ['knockoff', 'priority', 'spread']; // filler test
 
-		// check for monotype
+		// check for monotype and LC
 		let monotype = null;
-		let stage = 'Evo';
 		let types = [
 			'Fire', 'Water', 'Electric', 'Grass', 'Ice', 'Fighting', 'Poison', 'Ground', 'Flying', 'Psychic', 'Bug', 'Rock', 'Ghost', 'Dragon', 'Dark',
 			'Steel', 'Fairy', 'Normal',
@@ -857,13 +875,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				for (const id of originalTeamSpecies) if (!this.dex.species.get(id).randbats.types.includes(type)) eligible = false;
 				if (eligible) eligibleMonotypes.push(type);
 			}
-			let lc = 0;
-			for (const id of originalTeamSpecies) if (this.dex.species.get(id).randbats.stage && this.dex.species.get(id).randbats.stage === 'LC') lc++;
-			if (lc === originalTeamSpecies.length) {
-				stage = 'LC';
-				if (setLevel === 100) setLevel = 5;
-			}
-		}
+			for (const id of originalTeamSpecies) if (!(this.dex.species.get(id).randbats.stage && this.dex.species.get(id).randbats.stage === 'LC')) stage = 'Evo';
+			// can't be LC if you have a single non-LC
+		} else stage = 'Evo'; // ... and obviously don't assume LC if the team is empty
 		if (originalTeamSpecies.length > 1) {
 			// if there's more than 1 Pokémon, and the team is monotype so far, stick with it
 			if (eligibleMonotypes.length) monotype = this.sample(eligibleMonotypes);
@@ -874,7 +888,13 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				monotype = this.sample(eligibleMonotypes);
 			}
 		}
-		console.log(monotype);
+		if (stage === 'LC') {
+			monotype = null; // not sure if every monotype is even possible in LC
+			setLevel = 5; // if your team still qualifies as LC, randomized sets should be level 5
+		}
+		// I don't *think* I have to worry about a separate LC banlist
+		// because it's not like I was gonna put Dragon Rage or Sonic Boom on any of the FE sets anyway
+		// but if Paul asks me to ban anything (like webs?), I'll figure it out ajkdfh
 		
 		let eligiblePokemon = [];
 		for (const id in this.dex.data.Pokedex) {
