@@ -151,15 +151,21 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						}
 					}
 				}
+				if (newMon.name === 'Eelektross-Variant') console.log(weaknesses);
+				if (newMon.name === 'Eelektross-Variant') console.log(resistances);
+				if (newMon.name === 'Eelektross-Variant') console.log(immunities);
 				// then let them cancel out
 				for (const type of weaknesses) {
+					if (newMon.name === 'Eelektross-Variant') console.log(type);
 					if (!resistances.includes(type) && !immunities.includes(type)) newMon.randbats.weaknesses[type] = "true";
 				}
 				for (const type of resistances) {
-					if (!weaknesses.includes(type) || immunities.includes(type)) newMon.randbats.weaknesses[type] = "true";
+					if (newMon.name === 'Eelektross-Variant') console.log(type);
+					if (!weaknesses.includes(type) || immunities.includes(type)) newMon.randbats.resistances[type] = "true";
 					// immunities are just better resistances, so they might as well still count
 				}
 				for (const type of immunities) {
+					if (newMon.name === 'Eelektross-Variant') console.log(type);
 					newMon.randbats.immunities[type] = "true";
 				}
 				// finally, account for Abilities
