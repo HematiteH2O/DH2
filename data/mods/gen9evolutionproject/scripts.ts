@@ -950,8 +950,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		
 		if (team.length) {
 			for (const pokemon of team) if (pokemon.requestedSupport.length) for (const requestedSupport of pokemon.requestedSupport) if (!teamRequestedSupport.includes(requestedSupport)) teamRequestedSupport.push(requestedSupport);
-			for (const pokemon of team) if (pokemon.offeredSupport.length) for (const offeredSupport of pokemon.offeredSupport) if (!teamofferedSupport.includes(offeredSupport)) teamofferedSupport.push(offeredSupport);
-			for (const pokemon of team) if (pokemon.acceptedSupport.length) for (const acceptedSupport of pokemon.acceptedSupport) if (!teamacceptedSupport.includes(acceptedSupport)) teamacceptedSupport.push(acceptedSupport);
+			for (const pokemon of team) if (pokemon.offeredSupport.length) for (const offeredSupport of pokemon.offeredSupport) if (!teamOfferedSupport.includes(offeredSupport)) teamOfferedSupport.push(offeredSupport);
+			for (const pokemon of team) if (pokemon.acceptedSupport.length) for (const acceptedSupport of pokemon.acceptedSupport) if (!teamAcceptedSupport.includes(acceptedSupport)) teamAcceptedSupport.push(acceptedSupport);
 		}
 		
 		console.log(teamRequestedSupport);
