@@ -139,9 +139,13 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				let weaknesses = [];
 				let resistances = [];
 				let immunities = [];
+				let types = [
+					'Fire', 'Water', 'Electric', 'Grass', 'Ice', 'Fighting', 'Poison', 'Ground', 'Flying', 'Psychic', 'Bug', 'Rock', 'Ghost', 'Dragon', 'Dark',
+					'Steel', 'Fairy', 'Normal',
+				];
 				for (const type1 of newMon.randbats.types) {
 					// fill in weaknesses and resistances by type first
-					for (const type in this.dataCache.TypeChart) {
+					for (const type of types) {
 						if (this.dataCache.TypeChart[type1.toLowerCase()].damageTaken[type] === 1 && !weaknesses.includes(type)) { // weakness
 							weaknesses.push(type);
 						} else if (this.dataCache.TypeChart[type1.toLowerCase()].damageTaken[type] === 2 && !resistances.includes(type)) { // resistance
@@ -156,16 +160,13 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (newMon.name === 'Eelektross-Variant') console.log(immunities);
 				// then let them cancel out
 				for (const type of weaknesses) {
-					if (newMon.name === 'Eelektross-Variant') console.log(type);
 					if (!resistances.includes(type) && !immunities.includes(type)) newMon.randbats.weaknesses[type] = "true";
 				}
 				for (const type of resistances) {
-					if (newMon.name === 'Eelektross-Variant') console.log(type);
 					if (!weaknesses.includes(type) || immunities.includes(type)) newMon.randbats.resistances[type] = "true";
 					// immunities are just better resistances, so they might as well still count
 				}
 				for (const type of immunities) {
-					if (newMon.name === 'Eelektross-Variant') console.log(type);
 					newMon.randbats.immunities[type] = "true";
 				}
 				// finally, account for Abilities
