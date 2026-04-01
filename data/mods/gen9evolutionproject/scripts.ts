@@ -973,7 +973,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// score them by how many roles they can fill, up to 3
 				let maxScore = 0;
 				for (const id of eligiblePokemon) {
-					score = 0;
+					let score = 0;
 					for (const role of requestedSupportThisStep) if (this.dex.data.Pokedex[id].randbats.offeredSupport[role]) score++;
 					if (score > 3) score = 3; // you need space for STABs and stuff too - let's not spread one Pokémon too thin (I might change the threshold or how I handle this later)
 					if (score > maxScore) { // reset
