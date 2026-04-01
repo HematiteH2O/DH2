@@ -137,11 +137,19 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					continue;
 				}
 				for (const moveid in learnset) {
-					if (moveid === 'hiddenpower' && this.modData('Learnsets', id).learnset[moveid].length) {
-						console.log(`${id} is getting Hidden Power listed - does that sound right?`);
+					if (!this.modData('Learnsets', id).learnset[moveid].length) continue;
+					switch (moveid) {
+						case 'knockoff':
+							if (this.modData('formatsData', id).randbats.singles.offeredSupport.knockoff.moves) this.modData('formatsData', id).randbats.singles.offeredSupport.knockoff.moves.push('Knock Off');
+							else {
+								this.modData('formatsData', id).randbats.singles.offeredSupport.knockoff = {
+									moves: ['Knock Off'],
+								}
+							}
+							break;
 					}
 				}
-				// console.log(this.modData('FormatsData', id).randbats);
+				console.log(this.modData('FormatsData', id).randbats);
 			}
 		}
 		
