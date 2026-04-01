@@ -945,6 +945,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 		let teamRequestedSupport = baseRequestedSupport;
 		let teamOfferedSupport = [];
+		let teamAcceptedSupport = [];
 		
 		if (team.length) {
 			for (const pokemon of team) if (pokemon.requestedSupport.length) for (const requestedSupport of pokemon.requestedSupport) if (!teamRequestedSupport.includes(requestedSupport)) teamRequestedSupport.push(requestedSupport);
