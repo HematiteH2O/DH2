@@ -115,12 +115,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					'toxapex', 'noivernvariant', 'chandelure', 'corviknight', 'darmanitan', 'darmanitangalar', 'excadrill', 'hawlucha', 'garchomp', 'velocinobi',
 					'dragonite', 'tapukoko', 'tapulele', 'tapubulu', 'tapufini', 'zacian', 'zaciancrowned', 'zamazenta', 'zamazentacrowned', 'deoxys',
 					'deoxysattack', 'deoxysdefense', 'deoxysspeed',
-				].includes(id)) newMon.randbats.singlesBanned = true;
+				].includes(id)) newMon.randbats.singles.banned = true;
 				if ([
 					'dragonite', 'tapukoko', 'tapulele', 'tapubulu', 'tapufini', 'zacian', 'zaciancrowned', 'zamazenta', 'zamazentacrowned', 'deoxys',
 					'deoxysattack', 'deoxysdefense', 'deoxysspeed',
-				].includes(id)) newMon.randbats.vgcBanned = true;
-				if (newMon.randbats.singlesBanned && newMon.randbats.vgcBanned) continue;
+				].includes(id)) newMon.randbats.vgc.banned = true;
+				if (newMon.randbats.singles.banned && newMon.randbats.vgc.banned) continue;
 
 				// basic information
 				newMon.randbats.types.push(newMon.types[0]);
@@ -167,18 +167,18 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			)) continue;
 			
 			// banlist
-			let singlesbanned = false;
-			let vgcbanned = false;
+			let singles.banned = false;
+			let vgc.banned = false;
 			if ([
 				'toxapex', 'noivernvariant', 'chandelure', 'corviknight', 'darmanitan', 'darmanitangalar', 'excadrill', 'hawlucha', 'garchomp', 'velocinobi',
 				'dragonite', 'tapukoko', 'tapulele', 'tapubulu', 'tapufini', 'zacian', 'zaciancrowned', 'zamazenta', 'zamazentacrowned', 'deoxys',
 				'deoxysattack', 'deoxysdefense', 'deoxysspeed',
-			].includes(id)) singlesbanned = true;
+			].includes(id)) singles.banned = true;
 			if ([
 				'dragonite', 'tapukoko', 'tapulele', 'tapubulu', 'tapufini', 'zacian', 'zaciancrowned', 'zamazenta', 'zamazentacrowned', 'deoxys',
 				'deoxysattack', 'deoxysdefense', 'deoxysspeed',
-			].includes(id)) vgcbanned = true;
-			if (singlesbanned && vgcbanned) continue;
+			].includes(id)) vgc.banned = true;
+			if (singles.banned && vgc.banned) continue;
 			
 			const monDex = this.dataCache.Pokedex[id];
 			const monLearnset = this.dataCache.Learnsets[id].learnset;
@@ -838,13 +838,13 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		if (typeof team === 'string') team = Teams.unpack(team);
 		if (team && team.length === 6) return team;
 		
-		if (!team) team = [];
-		let randSets = [];
-		let eligiblePokemon = [];
-		for (const id in this.dex.data.Pokedex) {
-			if (this.dex.data.Pokedex[id].randbats) eligiblePokemon.push(id);
-		}
-		console.log(eligiblePokemon);
+		let originalTeamSpecies = [];
+		let selectedRandSpecies = [];
+
+		if (team) {
+			for (const pokemon in team) if (pokemon && pokemon.species && this.dex.species.get(pokemon.species) && this.dex.species.get(pokemon.species).id) originalTeamSpecies.push(this.dex.species.get(pokemon.species).id);
+		} else team = [];
+		console.log(originalTeamSpecies);
 		
 		let setLevel = 100;
 		let format = "VGC";
@@ -852,18 +852,58 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		if (this.activePerHalf && this.activePerHalf === 1) format = "singles";
 		
 		let shiny = false;
-		if (!team.length && this.randomChance(1, 100)) shiny = true; // the whole team will be Shiny
+		if (!team.length && this.randomChance(1, 100)) shiny = true; // the whole team will be Shiny 1% of the time
 
-		if (format === "singles") {
-			let targetRoles = ['knockoff', 'choiceband', 'hazardcontrol']; // filler test
-			let currentStep = [];
-			for (const id of eligiblePokemon) {
-				for (const role of targetRoles) {
-					if (!currentStep.includes(id) && this.dex.data.Pokedex[id].randbats.singles.offeredSupport[role]) currentStep.push(id);
-				}
+		let targetRoles = [];
+		if (format === "singles") targetRoles = ['knockoff', 'choiceband', 'hazardcontrol']; // filler test
+		if (format === "vgc") targetRoles = ['knockoff', 'priority', 'spread']; // filler test
+
+		// check for monotype
+		let monotype = null;
+		let types = [
+			'Fire', 'Water', 'Electric', 'Grass', 'Ice', 'Fighting', 'Poison', 'Ground', 'Flying', 'Psychic', 'Bug', 'Rock', 'Ghost', 'Dragon', 'Dark',
+			'Steel', 'Fairy', 'Normal',
+		];
+		let eligibleMonotypes = [];
+		if (originalTeamSpecies.length) {
+			for (const type in types) {
+				let eligible = true;
+				for (const id in originalTeamSpecies) if (this.dex.species.get(id).randbats.types.includes(type)) eligible = false;
+				if (eligible) eligibleMonotypes.push(type);
 			}
-			console.log(currentStep);
-			console.log(this.dex.data.Pokedex[this.sample(currentStep)].randbats);
+		}
+		if (originalTeamSpecies.length > 1) {
+			// if there's more than 1 Pokémon, and the team is monotype so far, stick with it
+			if (eligibleMonotypes.length) monotype = this.sample(eligibleMonotypes);
+		} else {
+			// if there are 1 or 0 Pokémon, you can decide at random whether or not to be monotype
+			if (this.randomChance(1,2)) { // should be more like (1,10) in the final draft but I'm just testing for now
+				if (!eligibleMonotypes.length) eligibleMonotypes = types;
+				monotype = this.sample(eligibleMonotypes);
+			}
+		}
+		console.log(monotype);
+		
+		let eligiblePokemon = [];
+		for (const id in this.dex.data.Pokedex) {
+			if (
+				this.dex.data.Pokedex[id].randbats &&
+				!(this.dex.data.Pokedex[id].randbats[format] && this.dex.data.Pokedex[id].randbats[format].banned) &&
+				(!monotype || this.dex.data.Pokedex[id].randbats.types.includes(monotype)) &&
+				!originalTeamSpecies.includes(id)
+			) eligiblePokemon.push(id);
+		}
+		if (!eligiblePokemon.length) return;
+		
+		let currentStep = [];
+		for (const id of eligiblePokemon) {
+			for (const role of targetRoles) {
+				if (!currentStep.includes(id) && this.dex.data.Pokedex[id].randbats[format].offeredSupport[role]) currentStep.push(id);
+			}
+		}
+		if (!currentStep.length) currentStep = eligiblePokemon;
+		console.log(currentStep);
+		console.log(this.dex.data.Pokedex[this.sample(currentStep)].randbats);
 			
 			// first step: assign an up-front list of roles for the team
 			
@@ -874,7 +914,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 			// step 2.5: if there are no team members at all, introduce a random Evo sub as a starting point
 			
-			// third step: a "for" loop until there are as many team members as empty slots - randomize and push Pokémon one at a time to "randSets" (not to "team!")
+			// third step: a "for" loop until there are as many team members as empty slots - randomize and push Pokémon one at a time to "selectedRandSpecies" (not to "team!")
 			// // - each added Pokémon should log its own "roles" and "requested/accepted support" - in case it gets replaced later, it shouldn't be mixed in with the team!
 			// // - each category should be a binary yes/no for whether the Pokémon can do the listed job effectively
 			// // - then, score the available Pokémon based on satisfying "accepted support," other roles that haven't been filled yet, and type balance before picking a winner
@@ -906,11 +946,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			// // - and if not, no nickname
 			
 			// finally, push every remaining set to the actual team!
-		}
-		
-		// VGC is a placeholder for now
-		// the process should be mostly the same as above, but the roles that count will obviously be different; I want to figure out one teambuilder first
-		// remember: VGC also has item clause!
 
 		if (!team || !team.length || team.length < 2) { // so it doesn't crash when it's not done aksdjfh
 			let set = {
