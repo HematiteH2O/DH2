@@ -140,7 +140,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (!this.modData('Learnsets', id).learnset[moveid].length) continue;
 					switch (moveid) {
 						case 'knockoff':
-							if (this.modData('formatsData', id).randbats.singles.offeredSupport.knockoff.moves) this.modData('formatsData', id).randbats.singles.offeredSupport.knockoff.moves.push('Knock Off');
+							if (
+								this.modData('formatsData', id).randbats.singles.offeredSupport.knockoff &&
+								this.modData('formatsData', id).randbats.singles.offeredSupport.knockoff.moves
+							) this.modData('formatsData', id).randbats.singles.offeredSupport.knockoff.moves.push('Knock Off');
 							else {
 								this.modData('formatsData', id).randbats.singles.offeredSupport.knockoff = {
 									moves: ['Knock Off'],
