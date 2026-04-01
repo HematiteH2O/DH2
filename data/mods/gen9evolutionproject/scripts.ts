@@ -137,7 +137,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					continue;
 				}
 				for (const moveid in learnset) {
-					if (moveid === 'hiddenpower' && this.modData('Learnsets', id).learnset[moveid] !== []) {
+					if (moveid === 'hiddenpower' && this.modData('Learnsets', id).learnset[moveid].length && this.modData('Learnsets', id).learnset[moveid].length !== 0) {
 						console.log(`${id} is getting Hidden Power listed - does that sound right?`);
 					}
 				}
