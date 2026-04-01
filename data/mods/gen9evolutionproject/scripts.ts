@@ -94,7 +94,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			) {
 				
 				// basic structure
-				this.modData('FormatsData', id).randbats = {
+				newMon.randbats = {
 					types: [],
 					abilities: [],
 					singles: {
@@ -115,20 +115,20 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					'toxapex', 'noivernvariant', 'chandelure', 'corviknight', 'darmanitan', 'darmanitangalar', 'excadrill', 'hawlucha', 'garchomp', 'velocinobi',
 					'dragonite', 'tapukoko', 'tapulele', 'tapubulu', 'tapufini', 'zacian', 'zaciancrowned', 'zamazenta', 'zamazentacrowned', 'deoxys',
 					'deoxysattack', 'deoxysdefense', 'deoxysspeed',
-				].includes(id)) this.modData('FormatsData', id).randbats.singlesBanned = true;
+				].includes(id)) newMon.randbats.singlesBanned = true;
 				if ([
 					'dragonite', 'tapukoko', 'tapulele', 'tapubulu', 'tapufini', 'zacian', 'zaciancrowned', 'zamazenta', 'zamazentacrowned', 'deoxys',
 					'deoxysattack', 'deoxysdefense', 'deoxysspeed',
-				].includes(id)) this.modData('FormatsData', id).randbats.vgcBanned = true;
-				if (this.modData('FormatsData', id).randbats.singlesBanned && this.modData('FormatsData', id).randbats.vgcBanned) continue;
+				].includes(id)) newMon.randbats.vgcBanned = true;
+				if (newMon.randbats.singlesBanned && newMon.randbats.vgcBanned) continue;
 
 				// basic information
-				this.modData('FormatsData', id).randbats.types.push(newMon.types[0]);
-				if (newMon.types[1]) this.modData('FormatsData', id).randbats.types.push(newMon.types[1]);
-				this.modData('FormatsData', id).randbats.abilities.push(newMon.abilities[0]);
-				if (newMon.abilities[1]) this.modData('FormatsData', id).randbats.abilities.push(newMon.abilities[1]);
-				if (newMon.abilities['H']) this.modData('FormatsData', id).randbats.abilities.push(newMon.abilities['H']);
-				if (newMon.abilities['S']) this.modData('FormatsData', id).randbats.abilities.push(newMon.abilities['S']);
+				newMon.randbats.types.push(newMon.types[0]);
+				if (newMon.types[1]) newMon.randbats.types.push(newMon.types[1]);
+				newMon.randbats.abilities.push(newMon.abilities[0]);
+				if (newMon.abilities[1]) newMon.randbats.abilities.push(newMon.abilities[1]);
+				if (newMon.abilities['H']) newMon.randbats.abilities.push(newMon.abilities['H']);
+				if (newMon.abilities['S']) newMon.randbats.abilities.push(newMon.abilities['S']);
 
 				// then I can start iterating over the movepool
 				const learnset = this.dataCache.Learnsets[id].learnset;
@@ -141,11 +141,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					switch (moveid) {
 						case 'knockoff':
 							if (
-								this.modData('FormatsData', id).randbats.singles.offeredSupport.knockoff &&
-								this.modData('FormatsData', id).randbats.singles.offeredSupport.knockoff.moves
-							) this.modData('FormatsData', id).randbats.singles.offeredSupport.knockoff.moves.push('Knock Off');
+								newMon.randbats.singles.offeredSupport.knockoff &&
+								newMon.randbats.singles.offeredSupport.knockoff.moves
+							) newMon.randbats.singles.offeredSupport.knockoff.moves.push('Knock Off');
 							else {
-								this.modData('FormatsData', id).randbats.singles.offeredSupport.knockoff = {
+								newMon.randbats.singles.offeredSupport.knockoff = {
 									moves: ['Knock Off'],
 								}
 							}
@@ -842,7 +842,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		let randSets = [];
 		let eligiblePokemon = {};
 		for (const id in this.dex.Pokedex) {
-			if (this.dex.data.FormatsData[id] && this.dex.data.FormatsData[id].randbats) eligiblePokemon.push(this.dex.data.FormatsData[id].randbats);
+			if (this.dex.Pokedex[id].randbats) eligiblePokemon.push(this.dex.Pokedex[id].randbats);
 		}
 		console.log(eligiblePokemon);
 		
@@ -859,11 +859,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			let currentStep = [];
 			for (const id in eligiblePokemon) {
 				for (const role in targetRoles) {
-					if (!currentStep.includes(id) && this.dex.data.FormatsData[id].randbats.singles.offeredSupport[role]) currentStep.push[id];
+					if (!currentStep.includes(id) && this.dex.Pokedex[id].randbats.singles.offeredSupport[role]) currentStep.push[id];
 				}
 			}
 			console.log(currentStep);
-			console.log(this.dex.data.FormatsData[this.sample(currentStep)].randbats);
+			console.log(this.dex.Pokedex[this.sample(currentStep)].randbats);
 			
 			// first step: assign an up-front list of roles for the team
 			
