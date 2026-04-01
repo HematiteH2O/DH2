@@ -841,7 +841,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		if (!team) team = [];
 		let randSets = [];
 		let eligiblePokemon = {};
-		for (const id in this.dataCache.Pokedex) {
+		for (const id in this.dex.Pokedex) {
 			if (this.modData('FormatsData', id) && this.modData('FormatsData', id).randbats) eligiblePokemon.push(this.modData('FormatsData', id).randbats);
 		}
 		console.log(eligiblePokemon);
