@@ -850,7 +850,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		if (originalTeamSpecies.length) {
 			for (const type in types) {
 				let eligible = true;
-				for (const id in originalTeamSpecies) if (this.dex.species.get(id).randbats.types.includes(type)) eligible = false;
+				for (const id of originalTeamSpecies) if (this.dex.species.get(id).randbats.types.includes(type)) eligible = false;
 				if (eligible) eligibleMonotypes.push(type);
 			}
 		}
