@@ -183,7 +183,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (['Dry Skin', 'Water Absorb', 'Storm Drain'].includes(ability)) {
 						if (!newMon.randbats.immunities['Water']) {
 							newMon.randbats.immunities['Water'] = {Ability: [ability]};
-						} else if (newMon.randbats.immunities['Water'].Ability) newMon.randbats.resistances['Water'].Ability.push(ability);
+						} else if (newMon.randbats.immunities['Water'].Ability) newMon.randbats.immunities['Water'].Ability.push(ability);
 					}
 				}
 				if (newMon.name === 'Eelektross-Variant') console.log(newMon.randbats.weaknesses);
