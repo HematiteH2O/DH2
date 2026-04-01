@@ -48,13 +48,13 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 					let species = this.dex.species.get(pokemon.species.name);
 					
 					// add one more line between each Fakemon
-					if (species && (species.copyData || species.evos)) {
+					if (species && (species.copyData || (species.evos && species.evos.length))) {
 						if (extraLineBreak) hideBox += `<br>`;
 						else extraLineBreak = true;
 					}
 
 					// report Eviolite compatibility even for canon Pokémon
-					if (species && !species.copyData && species.evos) {
+					if (species && !species.copyData && (species.evos && species.evos.length)) {
 						showFakemon = true;
 						hideBox += `<br><div class="hint">${species.name} <strong>can use Eviolite</strong> because it evolves into`;
 						let order = 0;
@@ -91,8 +91,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 							customGuide += `<div class="hint"><br>${species.name} was created by ${species.creator}!</div>`;
 						}
 
-						// report Eviolite compatibility even for canon Pokémon
-						if (species.evos) {
+						if (species.evos && species.evos.length) {
 							customGuide += `<br><div class="hint">It <strong>can use Eviolite</strong> because it evolves into`;
 							let order = 0;
 							for (const evoname of species.evos) {
