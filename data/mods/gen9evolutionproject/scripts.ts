@@ -856,15 +856,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// !pokemon.level is for level 100s, which are missed otherwise
 			}
 		} else team = [];
-		console.log(originalTeamSpecies);
 		
 		let shiny = false;
 		if (!team.length && this.randomChance(1, 100)) shiny = true; // the whole team will be Shiny 1% of the time
 
-		let targetRoles = [];
-		if (format === "singles") targetRoles = ['knockoff', 'choiceband', 'hazardcontrol']; // filler test
-		if (format === "vgc") targetRoles = ['knockoff', 'priority', 'spread']; // filler test
 
+		
 		// check for monotype and LC
 		let monotype = null;
 		let types = [
@@ -879,26 +876,29 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (eligible) eligibleMonotypes.push(type);
 			}
 			for (const id of originalTeamSpecies) if (!(this.dex.species.get(id).randbats.stage && this.dex.species.get(id).randbats.stage === 'LC')) stage = 'Evo';
-			// can't be LC if you have a single non-LC
-		} else stage = 'Evo'; // ... and obviously don't assume LC if the team is empty
+			// it must not be LC if you have a non-LC
+		} else stage = 'Evo'; // ... and obviously don't assume LC if the team is empty!
 		if (originalTeamSpecies.length > 1) {
-			// if there's more than 1 Pokémon, and the team is monotype so far, stick with it
+			// if there's more than 1 Pokémon, the player has already decided if it's monotype
 			if (eligibleMonotypes.length) monotype = this.sample(eligibleMonotypes);
 		} else {
-			// if there are 1 or 0 Pokémon, you can decide at random whether or not to be monotype
-			if (this.randomChance(1,2)) { // should be more like (1,10) in the final draft but I'm just testing for now
+			// but if not, the randomizer can decide if it should be monotype or not!
+			if (this.randomChance(1,10)) { // the chance can be anything I want, but 10% should be good for now
 				if (!eligibleMonotypes.length) eligibleMonotypes = types;
 				monotype = this.sample(eligibleMonotypes);
 			}
 		}
 		if (stage === 'LC') {
 			monotype = null; // not sure if every monotype is even possible in LC
-			setLevel = 5; // if your team still qualifies as LC, randomized sets should be level 5
+			setLevel = 5; // if your team still qualifies as LC after all of these checks, randomized sets should be level 5
 		}
 		// I don't *think* I have to worry about a separate LC banlist
 		// because it's not like I was gonna put Dragon Rage or Sonic Boom on any of the FE sets anyway
 		// but if Paul asks me to ban anything (like webs?), I'll figure it out ajkdfh
+
+
 		
+		// now let's gather a list of eligible Pokémon to use for the rest of the process
 		let eligiblePokemon = [];
 		for (const id in this.dex.data.Pokedex) {
 			if (
@@ -909,11 +909,60 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				(this.dex.data.Pokedex[id].randbats.stage && this.dex.data.Pokedex[id].randbats.stage === stage)
 			) eligiblePokemon.push(id);
 		}
-		if (!eligiblePokemon.length) return team;
+		if (!eligiblePokemon.length || 6 > (team.length + eligiblePokemon.length)) { // shouldn't be an issue but just in case
+			monotype = null;
+			for (const id in this.dex.data.Pokedex) {
+				if (
+					!originalTeamSpecies.includes(id) &&
+					this.dex.data.Pokedex[id].randbats &&
+					!(this.dex.data.Pokedex[id].randbats[format] && this.dex.data.Pokedex[id].randbats[format].banned) &&
+					(this.dex.data.Pokedex[id].randbats.stage && this.dex.data.Pokedex[id].randbats.stage === stage)
+				) eligiblePokemon.push(id);
+			}
+		}
+		if (!eligiblePokemon.length) return team; // I don't think this can even happen
+
+
+		
+		// Okay, now we know our format, whether or not we're playing LC, a list of originalTeamSpecies, and the entire pool of eligiblePokemon and their randbats data,
+		// so it's time to start evaluating what we have so far and building a team!
+
+		let baseRequestedSupport = [];
+		// These are a kind of default checklist for each format, but there will be more specific requests as team members are evaluated
+		if (format === "vgc") baseRequestedSupport = ['fakeout', 'priority', 'spread', 'speedcontrol', 'damagereduction'];
+		else baseRequestedSupport = ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff', 'contactpunish', 'electricimmune', 'groundimmune'];
+		
+		// I also definitely need to evaluate the base team members for their requestedSupport, offeredSupport and acceptedSupport, but...
+		// I'm not ready to do that just yet, so I'll leave them blank for now.
+		// I'll come back to this after I've gone over the main support list!
+		
+		if (team.length) {
+			for (const pokemon of team) {
+				pokemon.requestedSupport = ['fakeout']; // some filler just to see if it gets read correctly
+				pokemon.offeredSupport = [];
+				pokemon.acceptedSupport = ['grassysurge'];
+			}
+		}
+
+		let teamRequestedSupport = baseRequestedSupport;
+		let teamOfferedSupport = [];
+		let teamAcceptedSupport = [];
+		
+		if (team.length) {
+			for (const pokemon of team) if (pokemon.requestedSupport.length) for (const requestedSupport of pokemon.requestedSupport) if (!teamRequestedSupport.includes(requestedSupport)) teamRequestedSupport.push(requestedSupport);
+			for (const pokemon of team) if (pokemon.offeredSupport.length) for (const offeredSupport of pokemon.offeredSupport) if (!teamofferedSupport.includes(offeredSupport)) teamofferedSupport.push(offeredSupport);
+			for (const pokemon of team) if (pokemon.acceptedSupport.length) for (const acceptedSupport of pokemon.acceptedSupport) if (!teamacceptedSupport.includes(acceptedSupport)) teamacceptedSupport.push(acceptedSupport);
+		}
+		
+		console.log(teamRequestedSupport);
+		console.log(teamOfferedSupport);
+		console.log(teamAcceptedSupport);
+
+		// For now, when we decide something, we should push it to selectedRandSpecies, not to the team just yet; we'll build sets later
 		
 		let currentStep = [];
 		for (const id of eligiblePokemon) {
-			for (const role of targetRoles) {
+			for (const role of requestedSupport) {
 				if (!currentStep.includes(id) && this.dex.data.Pokedex[id].randbats[format].offeredSupport[role]) currentStep.push(id);
 			}
 		}
