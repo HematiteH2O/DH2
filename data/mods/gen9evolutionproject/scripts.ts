@@ -152,7 +152,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							break;
 					}
 				}
-				console.log(this.modData('FormatsData', id).randbats);
 			}
 		}
 		
@@ -841,6 +840,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		
 		if (!team) team = [];
 		let randSets = [];
+		let eligiblePokemon = {};
+		for (const id in this.dataCache.Pokedex) {
+			if (this.modData('FormatsData', id) && this.modData('FormatsData', id).randbats) eligiblePokemon.push(this.modData('FormatsData', id).randbats);
+		}
+		console.log(eligiblePokemon);
 		
 		let setLevel = 100;
 		let format = "VGC";
@@ -851,6 +855,15 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		if (!team.length && this.randomChance(1, 100)) shiny = true; // the whole team will be Shiny
 
 		if (format === "singles") {
+			let targetRoles = ['knockoff', 'choiceband', 'hazardcontrol']; // filler test
+			let currentStep = [];
+			for (const id in eligiblePokemon) {
+				for (const role in targetRoles) {
+					if (!currentStep.includes(id) && this.modData('FormatsData', id).randbats.singles.offeredSupport[role]) currentStep.push[id];
+				}
+			}
+			console.log(currentStep);
+			
 			// first step: assign an up-front list of roles for the team
 			
 			// second step: iterate over existing team members
