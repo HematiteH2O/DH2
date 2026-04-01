@@ -131,8 +131,17 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (newMon.abilities['S']) this.modData('FormatsData', id).randbats.abilities.push(newMon.abilities['S']);
 
 				// then I can start iterating over the movepool
-				
-				console.log(this.modData('FormatsData', id).randbats);
+				const learnset = this.dataCache.Learnsets[id].learnset;
+				if (!learnset) {
+					console.log(`No learnset found for ${id}!`);
+					continue;
+				}
+				for (const moveid in learnset) {
+					if (moveid === 'hiddenpower' && this.modData('Learnsets', id).learnset[moveid]) {
+						console.log(`${id} is getting Hidden Power listed - does that sound right?`);
+					}
+				}
+				// console.log(this.modData('FormatsData', id).randbats);
 			}
 		}
 		
