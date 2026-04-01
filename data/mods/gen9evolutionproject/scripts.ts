@@ -842,7 +842,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		let randSets = [];
 		let eligiblePokemon = {};
 		for (const id in this.dex.Pokedex) {
-			if (this.modData('FormatsData', id) && this.modData('FormatsData', id).randbats) eligiblePokemon.push(this.modData('FormatsData', id).randbats);
+			if (this.dex.FormatsData[id] && this.dex.FormatsData[id].randbats) eligiblePokemon.push(this.dex.FormatsData[id].randbats);
 		}
 		console.log(eligiblePokemon);
 		
@@ -859,10 +859,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			let currentStep = [];
 			for (const id in eligiblePokemon) {
 				for (const role in targetRoles) {
-					if (!currentStep.includes(id) && this.modData('FormatsData', id).randbats.singles.offeredSupport[role]) currentStep.push[id];
+					if (!currentStep.includes(id) && this.dex.FormatsData[id].randbats.singles.offeredSupport[role]) currentStep.push[id];
 				}
 			}
 			console.log(currentStep);
+			console.log(this.dex.FormatsData[this.sample(currentStep)].randbats);
 			
 			// first step: assign an up-front list of roles for the team
 			
