@@ -1008,7 +1008,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			// I haven't assigned those yet, though
 
 			// and... now we get to choose a Pokémon!
-			chosenRandomPokemon = this.sample(currentStep);
+			let chosenRandomPokemon = this.sample(currentStep);
 			for (const role in this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].requestedSupport) if (!firstDraftTeamRequestedSupport.includes(role)) firstDraftTeamRequestedSupport.push(role);
 			for (const role in this.dex.data.Pokedex[chosenRandomPokemon].randbats.offeredSupport) if (!firstDraftTeamOfferedSupport.includes(role)) firstDraftTeamOfferedSupport.push(role);
 			for (const role in this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].acceptedSupport) if (!firstDraftTeamAcceptedSupport.includes(role)) firstDraftTeamAcceptedSupport.push(role);
