@@ -140,6 +140,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				let resistances = [];
 				let immunities = [];
 				for (const type1 of newMon.randbats.types) {
+					console.log(type1);
 					// fill in weaknesses and resistances by type first
 					for (const type in this.dataCache.TypeChart) {
 						if (this.dataCache.TypeChart[type1].damageTaken[type] === 1 && !weaknesses.includes(type)) { // weakness
