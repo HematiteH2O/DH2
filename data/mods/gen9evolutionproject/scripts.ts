@@ -165,13 +165,13 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// finally, account for Abilities
 				for (const ability of newMon.randbats.abilities) {
 					if (['Heatproof', 'Thick Fat'].includes(ability)) {
-						if (!newMon.randbats.resistances['Fire']) newMon.randbats.resistances['Fire'] = {
-							Ability: [ability],
+						if (!newMon.randbats.resistances['Fire']) {
+							newMon.randbats.resistances['Fire'] = {Ability: [ability]};
 						} else if (newMon.randbats.resistances['Fire'].Ability) newMon.randbats.resistances['Fire'].Ability.push(ability);
 					}
 					if (['Dry Skin', 'Water Absorb', 'Storm Drain'].includes(ability)) {
-						if (!newMon.randbats.resistances['Water']) newMon.randbats.resistances['Water'] = {
-							Ability: [ability],
+						if (!newMon.randbats.resistances['Water']) {
+							newMon.randbats.resistances['Water'] = {Ability: [ability]};
 						} else if (newMon.randbats.immunities['Water'].Ability) newMon.randbats.resistances['Water'].Ability.push(ability);
 					}
 				}
