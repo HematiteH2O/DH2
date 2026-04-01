@@ -88,9 +88,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			
 			// randbats initialization
 			if (
-				this.modData('FormatsData', id) &&
-				(this.modData('FormatsData', id).tier && this.modData('FormatsData', id).tier === "Evo!") // only fully evolved Evo guys
-				|| ['porygon2', 'accelgor'].includes(id) // ... and some pre-evolutions
+				this.modData('FormatsData', id) && this.modData('FormatsData', id).tier &&
+				(this.modData('FormatsData', id).tier === "Evo!" || this.modData('FormatsData', id).tier === "(Prevo)")
 			) {
 				
 				// basic structure
@@ -121,6 +120,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					'deoxysattack', 'deoxysdefense', 'deoxysspeed',
 				].includes(id)) newMon.randbats.vgc.banned = true;
 				if (newMon.randbats.singles.banned && newMon.randbats.vgc.banned) continue;
+				
+				if (this.modData('FormatsData', id).tier === "Evo!" || ['porygon2', 'accelgor'].includes(id)) newMon.randbats.stage = 'Evo';
+				else if (newMon.evos && newMon.evos.length && !newMon.prevo) newMon.randbats.stage = 'LC';
+				if (!newMon.randbats.stage) continue;
 
 				// basic information
 				newMon.randbats.types.push(newMon.types[0]);
@@ -842,6 +845,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 		// check for monotype
 		let monotype = null;
+		let stage = 'Evo';
 		let types = [
 			'Fire', 'Water', 'Electric', 'Grass', 'Ice', 'Fighting', 'Poison', 'Ground', 'Flying', 'Psychic', 'Bug', 'Rock', 'Ghost', 'Dragon', 'Dark',
 			'Steel', 'Fairy', 'Normal',
@@ -850,9 +854,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		if (originalTeamSpecies.length) {
 			for (const type of types) {
 				let eligible = true;
-				for (const id of originalTeamSpecies) if (this.dex.species.get(id).randbats.types.includes(type)) eligible = false;
+				for (const id of originalTeamSpecies) if (!this.dex.species.get(id).randbats.types.includes(type)) eligible = false;
 				if (eligible) eligibleMonotypes.push(type);
 			}
+			let lc = 0;
+			for (const id of originalTeamSpecies) if (this.dex.species.get(id).randbats.stage && this.dex.species.get(id).randbats.stage === lc) lc++;
+			if (lc === originalTeamSpecies.length) stage = 'LC';
 		}
 		if (originalTeamSpecies.length > 1) {
 			// if there's more than 1 Pokémon, and the team is monotype so far, stick with it
@@ -869,10 +876,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		let eligiblePokemon = [];
 		for (const id in this.dex.data.Pokedex) {
 			if (
+				!originalTeamSpecies.includes(id) &&
 				this.dex.data.Pokedex[id].randbats &&
 				!(this.dex.data.Pokedex[id].randbats[format] && this.dex.data.Pokedex[id].randbats[format].banned) &&
 				(!monotype || this.dex.data.Pokedex[id].randbats.types.includes(monotype)) &&
-				!originalTeamSpecies.includes(id)
+				(this.dex.data.Pokedex[id].randbats.stage && this.dex.data.Pokedex[id].randbats.stage === stage)
 			) eligiblePokemon.push(id);
 		}
 		if (!eligiblePokemon.length) return team;
