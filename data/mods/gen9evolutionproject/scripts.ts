@@ -160,14 +160,14 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (newMon.name === 'Eelektross-Variant') console.log(immunities);
 				// then let them cancel out
 				for (const type of weaknesses) {
-					if (!resistances.includes(type) && !immunities.includes(type)) newMon.randbats.weaknesses[type] = "true";
+					if (!resistances.includes(type) && !immunities.includes(type)) newMon.randbats.weaknesses[type] = true;
 				}
 				for (const type of resistances) {
-					if (!weaknesses.includes(type) || immunities.includes(type)) newMon.randbats.resistances[type] = "true";
+					if (!weaknesses.includes(type) || immunities.includes(type)) newMon.randbats.resistances[type] = true;
 					// immunities are just better resistances, so they might as well still count
 				}
 				for (const type of immunities) {
-					newMon.randbats.immunities[type] = "true";
+					newMon.randbats.immunities[type] = true;
 				}
 				// finally, account for Abilities
 				for (const ability of newMon.randbats.abilities) {
@@ -176,7 +176,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							newMon.randbats.resistances['Fire'] = {Ability: [ability]};
 						} else if (newMon.randbats.resistances['Fire'].Ability) newMon.randbats.resistances['Fire'].Ability.push(ability);
 					}
-					if (['Storm Chaser'].includes(ability)) {
+					if (['Storm Chaser', 'Wind Rider'].includes(ability)) {
 						if (!newMon.randbats.resistances['Water']) {
 							newMon.randbats.resistances['Water'] = {Ability: [ability]};
 						} else if (newMon.randbats.resistances['Water'].Ability) newMon.randbats.resistances['Water'].Ability.push(ability);
