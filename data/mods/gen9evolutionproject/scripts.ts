@@ -824,7 +824,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		let selectedRandSpecies = [];
 
 		if (team) {
-			for (const pokemon in team) if (pokemon && pokemon.species && this.dex.species.get(pokemon.species) && this.dex.species.get(pokemon.species).id) originalTeamSpecies.push(this.dex.species.get(pokemon.species).id);
+			for (const pokemon in team) if (pokemon && pokemon.species.id) originalTeamSpecies.push(pokemon.species.id);
 		} else team = [];
 		console.log(originalTeamSpecies);
 		
