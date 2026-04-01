@@ -106,6 +106,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						requestedSupport: {},
 						acceptedSupport: {},
 					},
+					weaknesses: {},
 					resistances: {},
 				};
 				
@@ -962,7 +963,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 		
 		// Now, we can start picking a first pass of team members
-		// For now, when we decide something, we should push it to selectedRandSpecies, not to the team just yet; we'll build sets later!
+		// For now, when we decide something, we should push it to selectedRandSpecies, not to the team just yet; we'll get to build sets later!
 		// That said...
 		let firstDraftTeamRequestedSupport = teamRequestedSupport;
 		let firstDraftTeamOfferedSupport = teamOfferedSupport;
@@ -980,6 +981,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 			// "accepted support" is *almost never* accounted for at this step - but just in case we have absolutely nothing to go on...
 			if (!requestedSupportThisStep.length) for (const role of firstDraftTeamAcceptedSupport) if (!firstDraftTeamOfferedSupport.includes(role) && !requestedSupportThisStep.includes(role)) requestedSupportThisStep.push(role);
+			// (NOTE: I may replace this backup plan with something else later)
 			
 			// first, we want to find offeredSupport that matches our requestedSupport
 			if (requestedSupportThisStep.length) {
@@ -1020,7 +1022,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			// next, we might narrow it down further by looking for type resistances we're missing
 			// I haven't assigned those yet, though, so there's no point yet!
 			// // IMPORTANT:
-			// // if we're doing requestedSupport for a specific Pokémon on the team (not a default), I want to prioritize defensive synergies with that Pokémon, not the whole team!
+			// // if we're doing requestedSupport for a specific Pokémon on the team (not a default), I'll want to prioritize defensive synergies with that Pokémon, not the whole team!
+			// // probably total up the weaknesses, then use that as a multiplier
+			// // (ex. if 2 Pokémon that requestedSupport Intimidate are both weak to Water, and 0 are weak to Fire,
+			// // then the Intimidators are scored with 2 points for a Water resist and 0 for a Fire resist)
+			// // it should go both ways I think - it's cooler for the Intimidator to have a weakness if several of the teammates it supports resist it, isn't it?
 
 			// before I forget:
 			// if a team started completely empty, I want the first Pokémon selected to be a completely random Evo 2 sub - never a canon Pokémon and not weighted in any way
@@ -1042,6 +1048,16 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			console.log(selectedRandSpecies);
 			console.log(this.dex.data.Pokedex[chosenRandomPokemon].randbats);
 		}
+
+		// okay, now it gets the tiniest bit more complicated
+		// we're gonna do the same loop, iterating over however many species we just randomly selected, in the same order we selected them
+		// but this time, we have 5 other Pokémon for context - the idea is to treat each individual slot as if it's the last one being picked
+		// this gives us a chance to maximize synergy, but also to recognize which roles came up more than we expected -
+		// maybe we chose a Pokémon for having Intimidate at the time, but now we have two other Intimidators, so it doesn't offer anything we need as much
+		// the steps should be *pretty much* an exact copy of the above loop!
+		// the main difference is that we reset firstDraftTeamRequestedSupport, firstDraftTeamOfferedSupport, firstDraftTeamAcceptedSupport and firstDraftTeamNumbers *inside* the loop
+		// so we can base it on every Pokémon in the most current draft, except the one slot we're iterating over
+		// as a bonus, we'll also check each of the rerolled Pokémon's "offeredSupport" options - if a teammate has it as "acceptedSupport," that makes it important to keep!
 			
 			// first step: assign an up-front list of roles for the team
 			
@@ -1085,7 +1101,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			
 			// finally, push every remaining set to the actual team!
 
-		if (!team || !team.length || team.length < 2) { // so it doesn't crash when it's not done aksdjfh
+		if (!team || !team.length || team.length < 2) { // just so it doesn't crash when it's not done aksdjfh
 			let set = {
 					name: 'Default Rootsnoot',
 					species: 'Rootsnoot',
