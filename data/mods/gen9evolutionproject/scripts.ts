@@ -1003,6 +1003,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 				if (desiredSupport.length) currentStep = desiredSupport;
 			}
+			// safety nets
+			if (!currentStep.length) currentStep = eligiblePokemon;
+			if (!currentStep.length) continue;
 
 			// finally, we might narrow it down based on covering resistances we're missing
 			// I haven't assigned those yet, though
