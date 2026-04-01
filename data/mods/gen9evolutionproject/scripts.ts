@@ -837,9 +837,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		let team = options.team;
 		if (typeof team === 'string') team = Teams.unpack(team);
 		if (team && team.length === 6) return team;
-		
+
 		let originalTeamSpecies = [];
 		let selectedRandSpecies = [];
+		
+		// and for species clause
+		let originalTeamNumbers = [];
 		
 		let setLevel = 100;
 		let format = "singles";
@@ -850,7 +853,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 		if (team) {
 			for (const pokemon of team) {
-				if (pokemon && pokemon.species && this.dex.species.get(pokemon.species) && this.dex.species.get(pokemon.species).id) originalTeamSpecies.push(this.dex.species.get(pokemon.species).id);
+				if (pokemon && pokemon.species && this.dex.species.get(pokemon.species)) {
+					if (this.dex.species.get(pokemon.species).id) originalTeamSpecies.push(this.dex.species.get(pokemon.species).id);
+					if (this.dex.species.get(pokemon.species).num) originalTeamNumbers.push(this.dex.species.get(pokemon.species).num);
+				}
 				if (pokemon && (!pokemon.level || pokemon.level > 5)) stage = 'Evo'; // can't be LC if you're not level 5
 				// !pokemon.level is for level 100s, which are missed otherwise
 			}
@@ -901,21 +907,21 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		let eligiblePokemon = [];
 		for (const id in this.dex.data.Pokedex) {
 			if (
-				!originalTeamSpecies.includes(id) &&
-				this.dex.data.Pokedex[id].randbats &&
-				!(this.dex.data.Pokedex[id].randbats[format] && this.dex.data.Pokedex[id].randbats[format].banned) &&
-				(!monotype || this.dex.data.Pokedex[id].randbats.types.includes(monotype)) &&
-				(this.dex.data.Pokedex[id].randbats.stage && this.dex.data.Pokedex[id].randbats.stage === stage)
+				this.dex.data.Pokedex[id].randbats && // in the format/has randbats data
+				!originalTeamSpecies.includes(id) && !originalTeamNumbers.includes(this.dex.data.Pokedex[id].num) && // species clause
+				!(this.dex.data.Pokedex[id].randbats[format] && this.dex.data.Pokedex[id].randbats[format].banned) && // not banned
+				(!monotype || this.dex.data.Pokedex[id].randbats.types.includes(monotype)) && // account for monotype
+				(this.dex.data.Pokedex[id].randbats.stage && this.dex.data.Pokedex[id].randbats.stage === stage) // account for LC
 			) eligiblePokemon.push(id);
 		}
 		if (!eligiblePokemon.length || 6 > (team.length + eligiblePokemon.length)) { // shouldn't be an issue but just in case
 			monotype = null;
 			for (const id in this.dex.data.Pokedex) {
 				if (
-					!originalTeamSpecies.includes(id) &&
-					this.dex.data.Pokedex[id].randbats &&
-					!(this.dex.data.Pokedex[id].randbats[format] && this.dex.data.Pokedex[id].randbats[format].banned) &&
-					(this.dex.data.Pokedex[id].randbats.stage && this.dex.data.Pokedex[id].randbats.stage === stage)
+					this.dex.data.Pokedex[id].randbats && // in the format/has randbats data
+					!originalTeamSpecies.includes(id) && !originalTeamNumbers.includes(this.dex.data.Pokedex[id].num) && // species clause
+					!(this.dex.data.Pokedex[id].randbats[format] && this.dex.data.Pokedex[id].randbats[format].banned) && // not banned
+					(this.dex.data.Pokedex[id].randbats.stage && this.dex.data.Pokedex[id].randbats.stage === stage) // account for LC
 				) eligiblePokemon.push(id);
 			}
 		}
@@ -961,6 +967,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		let firstDraftTeamRequestedSupport = teamRequestedSupport;
 		let firstDraftTeamOfferedSupport = teamOfferedSupport;
 		let firstDraftTeamAcceptedSupport = teamAcceptedSupport;
+		let firstDraftTeamNumbers = originalTeamNumbers;
 		// ... it's definitely good to start tracking these right away!
 
 		for (let i = 0; i < (6 - team.length); ++i) {
@@ -979,6 +986,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// score them by how many roles they can fill, up to 3
 				let maxScore = 0;
 				for (const id of eligiblePokemon) {
+					// species clause
+					if (firstDraftTeamNumbers.includes(this.dex.data.Pokedex[id].num)) continue;
+					
 					let score = 0;
 					for (const role of requestedSupportThisStep) if (this.dex.data.Pokedex[id].randbats.offeredSupport[role]) score++;
 					if (score > 3) score = 3; // you need space for STABs and stuff too - let's not spread one Pokémon too thin (I might change the threshold or how I handle this later)
@@ -989,13 +999,16 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (score === maxScore) currentStep.push(id);
 				}
 			}
-			if (!currentStep.length) currentStep = eligiblePokemon;
+			if (!currentStep.length) currentStep = eligiblePokemon.filter(id => !firstDraftTeamNumbers.includes(this.dex.data.Pokedex[id].num));
 
 			// then, we'll try to look for anything with acceptedSupport that matches our offeredSupport
 			if (offeredSupportThisStep.length) {
 				// score them by how many roles they can fill, up to 3
 				let desiredSupport = [];
 				for (const id of currentStep) {
+					// species clause
+					if (firstDraftTeamNumbers.includes(this.dex.data.Pokedex[id].num)) continue;
+					
 					// for now, I think just a yes or a no is fine
 					let accepted = false;
 					for (const role of offeredSupportThisStep) if (this.dex.data.Pokedex[id].randbats[format].acceptedSupport[role]) accepted = true;
@@ -1003,20 +1016,23 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 				if (desiredSupport.length) currentStep = desiredSupport;
 			}
+
+			// finally, we might narrow it down further by looking for type resistances we're missing
+			// I haven't assigned those yet, though, so there's no point yet!
+
 			// safety nets
-			if (!currentStep.length) currentStep = eligiblePokemon;
+			if (!currentStep.length) currentStep = eligiblePokemon.filter(id => !firstDraftTeamNumbers.includes(this.dex.data.Pokedex[id].num));
 			if (!currentStep.length) continue;
-
-			// finally, we might narrow it down based on covering resistances we're missing
-			// I haven't assigned those yet, though
-
+			
 			// and... now we get to choose a Pokémon!
 			let chosenRandomPokemon = this.sample(currentStep);
 			for (const role in this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].requestedSupport) if (!firstDraftTeamRequestedSupport.includes(role)) firstDraftTeamRequestedSupport.push(role);
 			for (const role in this.dex.data.Pokedex[chosenRandomPokemon].randbats.offeredSupport) if (!firstDraftTeamOfferedSupport.includes(role)) firstDraftTeamOfferedSupport.push(role);
 			for (const role in this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].acceptedSupport) if (!firstDraftTeamAcceptedSupport.includes(role)) firstDraftTeamAcceptedSupport.push(role);
+			firstDraftTeamNumbers.push(this.dex.data.Pokedex[chosenRandomPokemon].num);
+			selectedRandSpecies.push(chosenRandomPokemon);
 			
-			console.log(chosenRandomPokemon);
+			console.log(selectedRandSpecies);
 			console.log(this.dex.data.Pokedex[chosenRandomPokemon].randbats);
 		}
 			
