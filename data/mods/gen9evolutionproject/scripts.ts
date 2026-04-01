@@ -155,9 +155,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						}
 					}
 				}
-				if (newMon.name === 'Eelektross-Variant') console.log(weaknesses);
-				if (newMon.name === 'Eelektross-Variant') console.log(resistances);
-				if (newMon.name === 'Eelektross-Variant') console.log(immunities);
 				// then let them cancel out
 				for (const type of weaknesses) {
 					if (!resistances.includes(type) && !immunities.includes(type)) newMon.randbats.weaknesses[type] = true;
@@ -171,15 +168,27 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 				// finally, account for Abilities
 				for (const ability of newMon.randbats.abilities) {
-					if (['Heatproof', 'Thick Fat'].includes(ability)) {
+					
+					// weaknesses
+					if (['Dry Skin', 'Fluffy'].includes(ability)) {
+						// *technically* Dry Skin isn't a full weakness, but I want to count it as such here
+						if (!newMon.randbats.weaknesses['Fire']) {
+							newMon.randbats.weaknesses['Fire'] = {Ability: [ability]};
+						} else if (newMon.randbats.weaknesses['Fire'].Ability) newMon.randbats.weaknesses['Fire'].Ability.push(ability);
+					}
+					
+					// resistances
+					if (['Drizzle', 'Heatproof', 'Thick Fat', 'Water Bubble'].includes(ability)) {
 						if (!newMon.randbats.resistances['Fire']) {
 							newMon.randbats.resistances['Fire'] = {Ability: [ability]};
 						} else if (newMon.randbats.resistances['Fire'].Ability) newMon.randbats.resistances['Fire'].Ability.push(ability);
 					}
-					if (['Storm Chaser', 'Wind Rider'].includes(ability)) {
+					if (['Drought', 'Storm Chaser'].includes(ability)) {
 						if (!newMon.randbats.resistances['Water']) {
 							newMon.randbats.resistances['Water'] = {Ability: [ability]};
 						} else if (newMon.randbats.resistances['Water'].Ability) newMon.randbats.resistances['Water'].Ability.push(ability);
+					}
+					if (['Storm Chaser'].includes(ability)) {
 						if (!newMon.randbats.resistances['Electric']) {
 							newMon.randbats.resistances['Electric'] = {Ability: [ability]};
 						} else if (newMon.randbats.resistances['Electric'].Ability) newMon.randbats.resistances['Electric'].Ability.push(ability);
@@ -187,15 +196,109 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							newMon.randbats.resistances['Flying'] = {Ability: [ability]};
 						} else if (newMon.randbats.resistances['Flying'].Ability) newMon.randbats.resistances['Flying'].Ability.push(ability);
 					}
-					if (['Dry Skin', 'Water Absorb', 'Storm Drain'].includes(ability)) {
+					if (['Thick Fat'].includes(ability)) {
+						if (!newMon.randbats.resistances['Ice']) {
+							newMon.randbats.resistances['Ice'] = {Ability: [ability]};
+						} else if (newMon.randbats.resistances['Ice'].Ability) newMon.randbats.resistances['Ice'].Ability.push(ability);
+					}
+					if (['Martial Master'].includes(ability)) {
+						if (!newMon.randbats.resistances['Fighting']) {
+							newMon.randbats.resistances['Fighting'] = {Ability: [ability]};
+						} else if (newMon.randbats.resistances['Fighting'].Ability) newMon.randbats.resistances['Fighting'].Ability.push(ability);
+					}
+					if (['Rust Control'].includes(ability)) {
+						if (!newMon.randbats.resistances['Poison']) {
+							newMon.randbats.resistances['Poison'] = {Ability: [ability]};
+						} else if (newMon.randbats.resistances['Poison'].Ability) newMon.randbats.resistances['Poison'].Ability.push(ability);
+						if (!newMon.randbats.resistances['Ground']) {
+							newMon.randbats.resistances['Ground'] = {Ability: [ability]};
+						} else if (newMon.randbats.resistances['Ground'].Ability) newMon.randbats.resistances['Ground'].Ability.push(ability);
+					}
+					if (['Pollen Basket'].includes(ability)) {
+						if (!newMon.randbats.resistances['Bug']) {
+							newMon.randbats.resistances['Bug'] = {Ability: [ability]};
+						} else if (newMon.randbats.resistances['Bug'].Ability) newMon.randbats.resistances['Bug'].Ability.push(ability);
+					}
+					if (['High Climber'].includes(ability)) {
+						if (!newMon.randbats.resistances['Rock']) {
+							newMon.randbats.resistances['Rock'] = {Ability: [ability]};
+						} else if (newMon.randbats.resistances['Rock'].Ability) newMon.randbats.resistances['Rock'].Ability.push(ability);
+					}
+					if (['Purifying Salt', 'Spiritual'].includes(ability)) {
+						if (!newMon.randbats.resistances['Ghost']) {
+							newMon.randbats.resistances['Ghost'] = {Ability: [ability]};
+						} else if (newMon.randbats.resistances['Ghost'].Ability) newMon.randbats.resistances['Ghost'].Ability.push(ability);
+					}
+					if (['Misty Surge'].includes(ability) && !newMon.randbats.types.includes('Flying')) {
+						if (!newMon.randbats.resistances['Dragon']) {
+							newMon.randbats.resistances['Dragon'] = {Ability: [ability]};
+						} else if (newMon.randbats.resistances['Dragon'].Ability) newMon.randbats.resistances['Dragon'].Ability.push(ability);
+					}
+					if (['Cheap Tricks'].includes(ability)) {
+						if (!newMon.randbats.resistances['Dark']) {
+							newMon.randbats.resistances['Dark'] = {Ability: [ability]};
+						} else if (newMon.randbats.resistances['Dark'].Ability) newMon.randbats.resistances['Dark'].Ability.push(ability);
+					}
+					if (['Directing Traffic'].includes(ability)) {
+						if (!newMon.randbats.resistances['Normal']) {
+							newMon.randbats.resistances['Normal'] = {Ability: [ability]};
+						} else if (newMon.randbats.resistances['Normal'].Ability) newMon.randbats.resistances['Normal'].Ability.push(ability);
+					}
+					if (['Patch Note'].includes(ability)) {
+						for (const type of types) {
+							if (this.dataCache.TypeChart(type).damageTaken[newMon.types[0]] === 1) {
+								if (!newMon.randbats.resistances[type]) {
+									newMon.randbats.resistances[type] = {Ability: [ability]};
+								} else if (newMon.randbats.resistances[type].Ability) newMon.randbats.resistances[type].Ability.push(ability);
+							}
+						}
+					}
+					
+					// immunities
+					if (['Flash Fire', 'Primordial Sea', 'Well-Baked Body'].includes(ability)) {
+						if (!newMon.randbats.immunities['Fire']) {
+							newMon.randbats.immunities['Fire'] = {Ability: [ability]};
+						} else if (newMon.randbats.immunities['Fire'].Ability) newMon.randbats.immunities['Fire'].Ability.push(ability);
+					}
+					if (['Desolate Land', 'Dry Skin', 'Storm Drain', 'Water Absorb'].includes(ability)) {
 						if (!newMon.randbats.immunities['Water']) {
 							newMon.randbats.immunities['Water'] = {Ability: [ability]};
 						} else if (newMon.randbats.immunities['Water'].Ability) newMon.randbats.immunities['Water'].Ability.push(ability);
 					}
+					if (['Lightning Rod', 'Motor Drive', 'Volt Absorb'].includes(ability)) {
+						if (!newMon.randbats.immunities['Electric']) {
+							newMon.randbats.immunities['Electric'] = {Ability: [ability]};
+						} else if (newMon.randbats.immunities['Electric'].Ability) newMon.randbats.immunities['Electric'].Ability.push(ability);
+					}
+					if (['Sap Sipper'].includes(ability)) {
+						if (!newMon.randbats.immunities['Grass']) {
+							newMon.randbats.immunities['Grass'] = {Ability: [ability]};
+						} else if (newMon.randbats.immunities['Grass'].Ability) newMon.randbats.immunities['Grass'].Ability.push(ability);
+					}
+					if (['Centrifuge', 'Earth Eater', 'Levitate'].includes(ability)) {
+						if (!newMon.randbats.immunities['Ground']) {
+							newMon.randbats.immunities['Ground'] = {Ability: [ability]};
+						} else if (newMon.randbats.immunities['Ground'].Ability) newMon.randbats.immunities['Ground'].Ability.push(ability);
+					}
+					if (['Divinated Protection'].includes(ability)) {
+						if (!newMon.randbats.immunities['Ghost']) {
+							newMon.randbats.immunities['Ghost'] = {Ability: [ability]};
+						} else if (newMon.randbats.immunities['Ghost'].Ability) newMon.randbats.immunities['Ghost'].Ability.push(ability);
+					}
+					if (['Wonder Guard'].includes(ability)) { // nothing has it but just for completion
+						for (const type of types) {
+							if (!newMon.randbats.weaknesses[type] || newMon.randbats.resistances[type] || newMon.randbats.immunities[type]) {
+								if (!newMon.randbats.immunities[type]) {
+									newMon.randbats.immunities[type] = {Ability: [ability]};
+								} else if (newMon.randbats.immunities[type].Ability) newMon.randbats.immunities[type].Ability.push(ability);
+							}
+						}
+					}
+					
 				}
-				if (newMon.name === 'Eelektross-Variant') console.log(newMon.randbats.weaknesses);
-				if (newMon.name === 'Eelektross-Variant') console.log(newMon.randbats.resistances);
-				if (newMon.name === 'Eelektross-Variant') console.log(newMon.randbats.immunities);
+				if (newMon.name === 'Datagon2') console.log(newMon.randbats.weaknesses);
+				if (newMon.name === 'Datagon2') console.log(newMon.randbats.resistances);
+				if (newMon.name === 'Datagon2') console.log(newMon.randbats.immunities);
 
 				// then I can start iterating over the movepool
 				const learnset = this.dataCache.Learnsets[id].learnset;
