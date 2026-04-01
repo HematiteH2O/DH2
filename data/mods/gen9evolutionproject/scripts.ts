@@ -169,9 +169,20 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							newMon.randbats.resistances['Fire'] = {Ability: [ability]};
 						} else if (newMon.randbats.resistances['Fire'].Ability) newMon.randbats.resistances['Fire'].Ability.push(ability);
 					}
-					if (['Dry Skin', 'Water Absorb', 'Storm Drain'].includes(ability)) {
+					if (['Storm Chaser'].includes(ability)) {
 						if (!newMon.randbats.resistances['Water']) {
 							newMon.randbats.resistances['Water'] = {Ability: [ability]};
+						} else if (newMon.randbats.resistances['Water'].Ability) newMon.randbats.resistances['Water'].Ability.push(ability);
+						if (!newMon.randbats.resistances['Electric']) {
+							newMon.randbats.resistances['Electric'] = {Ability: [ability]};
+						} else if (newMon.randbats.resistances['Electric'].Ability) newMon.randbats.resistances['Electric'].Ability.push(ability);
+						if (!newMon.randbats.resistances['Flying']) {
+							newMon.randbats.resistances['Flying'] = {Ability: [ability]};
+						} else if (newMon.randbats.resistances['Flying'].Ability) newMon.randbats.resistances['Flying'].Ability.push(ability);
+					}
+					if (['Dry Skin', 'Water Absorb', 'Storm Drain'].includes(ability)) {
+						if (!newMon.randbats.immunities['Water']) {
+							newMon.randbats.immunities['Water'] = {Ability: [ability]};
 						} else if (newMon.randbats.immunities['Water'].Ability) newMon.randbats.resistances['Water'].Ability.push(ability);
 					}
 				}
