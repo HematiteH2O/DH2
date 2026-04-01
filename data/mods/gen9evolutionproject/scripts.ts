@@ -857,8 +857,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		if (format === "singles") {
 			let targetRoles = ['knockoff', 'choiceband', 'hazardcontrol']; // filler test
 			let currentStep = [];
-			for (const id in eligiblePokemon) {
-				for (const role in targetRoles) {
+			for (const id of eligiblePokemon) {
+				for (const role of targetRoles) {
 					if (!currentStep.includes(id) && this.dex.data.Pokedex[id].randbats.singles.offeredSupport[role]) currentStep.push[id];
 				}
 			}
