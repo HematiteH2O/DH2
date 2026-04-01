@@ -246,7 +246,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					}
 					if (['Patch Note'].includes(ability)) {
 						for (const type of types) {
-							if (this.dataCache.TypeChart[type].damageTaken[newMon.types[0]] === 1) {
+							if (this.dataCache.TypeChart[type.toLowerCase()].damageTaken[newMon.types[0]] === 1) {
 								if (!newMon.randbats.resistances[type]) {
 									newMon.randbats.resistances[type] = {Ability: [ability]};
 								} else if (newMon.randbats.resistances[type].Ability) newMon.randbats.resistances[type].Ability.push(ability);
