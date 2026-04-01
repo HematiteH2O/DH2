@@ -924,8 +924,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 
 		
-		// Okay, now we know our format, whether or not we're playing LC, a list of originalTeamSpecies, and the entire pool of eligiblePokemon and their randbats data,
-		// so it's time to start evaluating what we have so far and building a team!
+		// Okay, now we know our format, whether or not we're playing LC, a list of originalTeamSpecies, and the entire pool of eligiblePokemon and their randbats data
+		// Next, we should start evaluating what we have so far and what we need for a team
 
 		let baseRequestedSupport = [];
 		// These are a kind of default checklist for each format, but there will be more specific requests as team members are evaluated
@@ -938,37 +938,62 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		
 		if (team.length) {
 			for (const pokemon of team) {
-				pokemon.requestedSupport = ['fakeout']; // some filler just to see if it gets read correctly
+				pokemon.requestedSupport = [];
 				pokemon.offeredSupport = [];
-				pokemon.acceptedSupport = ['grassysurge'];
+				pokemon.acceptedSupport = [];
 			}
 		}
 
 		let teamRequestedSupport = baseRequestedSupport;
 		let teamOfferedSupport = [];
-		let teamAcceptedSupport = [];
 		
 		if (team.length) {
 			for (const pokemon of team) if (pokemon.requestedSupport.length) for (const requestedSupport of pokemon.requestedSupport) if (!teamRequestedSupport.includes(requestedSupport)) teamRequestedSupport.push(requestedSupport);
 			for (const pokemon of team) if (pokemon.offeredSupport.length) for (const offeredSupport of pokemon.offeredSupport) if (!teamOfferedSupport.includes(offeredSupport)) teamOfferedSupport.push(offeredSupport);
-			for (const pokemon of team) if (pokemon.acceptedSupport.length) for (const acceptedSupport of pokemon.acceptedSupport) if (!teamAcceptedSupport.includes(acceptedSupport)) teamAcceptedSupport.push(acceptedSupport);
 		}
-		
-		console.log(teamRequestedSupport);
-		console.log(teamOfferedSupport);
-		console.log(teamAcceptedSupport);
 
-		// For now, when we decide something, we should push it to selectedRandSpecies, not to the team just yet; we'll build sets later
+
 		
-		let currentStep = [];
-		for (const id of eligiblePokemon) {
-			for (const role of requestedSupport) {
-				if (!currentStep.includes(id) && this.dex.data.Pokedex[id].randbats[format].offeredSupport[role]) currentStep.push(id);
+		// Now, we can start picking a first pass of team members
+		// For now, when we decide something, we should push it to selectedRandSpecies, not to the team just yet; we'll build sets later!
+		// That said...
+		let firstDraftTeamRequestedSupport = teamRequestedSupport;
+		let firstDraftTeamOfferedSupport = teamOfferedSupport;
+		// ... it's definitely good to start tracking these right away!
+
+		while (++i < (6 - team.length)) {
+			let requestedSupportThisStep = [];
+			if (firstDraftTeamRequestedSupport.length) for (const role of firstDraftTeamRequestedSupport) if (!firstDraftTeamOfferedSupport.includes(role)) requestedSupportThisStep.push(role);
+
+			// first, we want to find offeredSupport that matches our requestedSupport
+			let currentStep = [];
+			if (requestedSupportThisStep.length) {
+				// score them by how many roles they can fill, up to 3
+				maxScore = 0;
+				for (const id of eligiblePokemon) {
+					score = 0;
+					for (const role of requestedSupportThisStep) if (this.dex.data.Pokedex[id].randbats[format].offeredSupport[role]) score++;
+					if (score > maxScore) { // reset
+						currentStep = [];
+						maxScore = score;
+					}
+					if (score === maxScore) currentStep.push(id);
+				}
 			}
+			if (!currentStep.length) currentStep = eligiblePokemon;
+
+			// then, we'll try to look for acceptedSupport that matches our offeredSupport
+
+			// finally, we might narrow it down based on covering resistances we're missing
+
+			// and now we get to choose a Pokémon!
+			chosenRandomPokemon = this.sample(currentStep);
+			for (const role in this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].requestedSupport) if (!firstDraftTeamRequestedSupport.includes(role)) firstDraftTeamRequestedSupport.push(role);
+			for (const role in this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].offeredSupport) if (!firstDraftTeamOfferedSupport.includes(role)) firstDraftTeamOfferedSupport.push(role);
+			
+			console.log(chosenRandomPokemon);
+			console.log(this.dex.data.Pokedex[chosenRandomPokemon].randbats);
 		}
-		if (!currentStep.length) currentStep = eligiblePokemon;
-		console.log(currentStep);
-		console.log(this.dex.data.Pokedex[this.sample(currentStep)].randbats);
 			
 			// first step: assign an up-front list of roles for the team
 			
