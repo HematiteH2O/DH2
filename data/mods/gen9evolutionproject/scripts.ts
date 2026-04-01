@@ -108,6 +108,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					},
 					weaknesses: {},
 					resistances: {},
+					immunities: {},
 				};
 				
 				// banlists
@@ -133,6 +134,48 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (newMon.abilities[1]) newMon.randbats.abilities.push(newMon.abilities[1]);
 				if (newMon.abilities['H']) newMon.randbats.abilities.push(newMon.abilities['H']);
 				if (newMon.abilities['S']) newMon.randbats.abilities.push(newMon.abilities['S']);
+
+				// type matchups
+				let weaknesses = [];
+				let resistances = [];
+				let immunities = [];
+				for (const type1 of newMon.randbats.types) {
+					// fill in weaknesses and resistances by type first
+					for (const type in this.dataCache.TypeChart) {
+						if (this.dataCache.TypeChart[type1].damageTaken[type] === 1 && !weaknesses.includes(type)) { // weakness
+							weaknesses.push(type);
+						} else if (this.dataCache.TypeChart[type1].damageTaken[type] === 2 && !resistances.includes(type)) { // resistance
+							resistances.push(type);
+						} else if (this.dataCache.TypeChart[type1].damageTaken[type] === 3 && !immunities.includes(type)) { // immunity
+							immunities.push(type);
+						}
+					}
+				}
+				// then let them cancel out
+				for (const type of weaknesses) {
+					if (!resistances.includes(type) && !immunities.includes(type)) newMon.randbats.weaknesses[type] = true;
+				}
+				for (const type of resistances) {
+					if (!weaknesses.includes(type)) newMon.randbats.weaknesses[type] = true;
+					// immunities are just better resistances, so they might as well still count
+				}
+				for (const type of immunities) {
+					newMon.randbats.immunities[type] = true;
+				}
+				// finally, account for Abilities
+				for (const ability of newMon.randbats.abilities) {
+					if (['Heatproof', 'Thick Fat'].includes(ability)) {
+						if (!newMon.randbats.resistances['Fire']) newMon.randbats.resistances['Fire'] = {
+							Ability: [ability],
+						} else if (newMon.randbats.resistances['Fire'].Ability) newMon.randbats.resistances['Fire'].Ability.push(ability);
+					}
+					if (['Dry Skin', 'Water Absorb', 'Storm Drain'].includes(ability)) {
+						if (!newMon.randbats.resistances['Water']) newMon.randbats.resistances['Water'] = {
+							Ability: [ability],
+						} else if (newMon.randbats.immunities['Water'].Ability) newMon.randbats.resistances['Water'].Ability.push(ability);
+					}
+				}
+				if (newMon.name === 'Eelektross-Variant') console.log(newMon.randbats);
 
 				// then I can start iterating over the movepool
 				const learnset = this.dataCache.Learnsets[id].learnset;
