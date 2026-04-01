@@ -143,11 +143,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					console.log(type1);
 					// fill in weaknesses and resistances by type first
 					for (const type in this.dataCache.TypeChart) {
-						if (this.dataCache.TypeChart[type1].damageTaken[type] === 1 && !weaknesses.includes(type)) { // weakness
+						if (this.dataCache.TypeChart[type1.toLowerCase()].damageTaken[type] === 1 && !weaknesses.includes(type)) { // weakness
 							weaknesses.push(type);
-						} else if (this.dataCache.TypeChart[type1].damageTaken[type] === 2 && !resistances.includes(type)) { // resistance
+						} else if (this.dataCache.TypeChart[type1.toLowerCase()].damageTaken[type] === 2 && !resistances.includes(type)) { // resistance
 							resistances.push(type);
-						} else if (this.dataCache.TypeChart[type1].damageTaken[type] === 3 && !immunities.includes(type)) { // immunity
+						} else if (this.dataCache.TypeChart[type1.toLowerCase()].damageTaken[type] === 3 && !immunities.includes(type)) { // immunity
 							immunities.push(type);
 						}
 					}
@@ -157,7 +157,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (!resistances.includes(type) && !immunities.includes(type)) newMon.randbats.weaknesses[type] = true;
 				}
 				for (const type of resistances) {
-					if (!weaknesses.includes(type)) newMon.randbats.weaknesses[type] = true;
+					if (!weaknesses.includes(type) || immunities.includes(type)) newMon.randbats.weaknesses[type] = true;
 					// immunities are just better resistances, so they might as well still count
 				}
 				for (const type of immunities) {
