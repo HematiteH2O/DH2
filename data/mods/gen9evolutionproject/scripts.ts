@@ -859,7 +859,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			let currentStep = [];
 			for (const id of eligiblePokemon) {
 				for (const role of targetRoles) {
-					if (!currentStep.includes(id) && this.dex.data.Pokedex[id].randbats.singles.offeredSupport[role]) currentStep.push[id];
+					if (!currentStep.includes(id) && this.dex.data.Pokedex[id].randbats.singles.offeredSupport[role]) currentStep.push(id);
 				}
 			}
 			console.log(currentStep);
