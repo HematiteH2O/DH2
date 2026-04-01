@@ -142,8 +142,13 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 				for (const moveid in learnset) {
 					if (!this.modData('Learnsets', id).learnset[moveid].length) continue;
-					if (newMon.randbats.stage === 'LC' && newMon.gender && ['M', 'N'].includes(newMon.gender)) { // *rudimentary* LC set legality
-						// for these, level matters, too
+					// *rudimentary* LC set legality:
+					if (newMon.randbats.stage === 'LC' && newMon.gender && ['M', 'N'].includes(newMon.gender) && !['golett', 'bronzor'].includes(id)) {
+						// A handful of Pokémon need to worry about levels in LC
+						// For Bronzor, this affects Extrasensory, Feint Attack, Heal Block and Psywave; for Golett, it affects Dynamic Punch, Hammer Arm, Magnitude and Shadow Punch...
+						// ... but they learned all of those moves in Gen VII, so they get them anyway by Heart Scale! I checked and these are legal sets
+						// That means that as of now, this is actually only for the four Riboxys babies
+						// but I'll try to keep it future-proof just in case!
 						let lcLearnset = this.dataCache.Learnsets[id].learnset[moveid].filter(
 							(method) => (!method.includes('L'))
 						);
