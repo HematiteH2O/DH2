@@ -1000,8 +1000,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					for (const role of offeredSupportThisStep) if (this.dex.data.Pokedex[id].randbats[format].acceptedSupport[role]) accepted = true;
 					if (accepted === true) desiredSupport.push(id);
 				}
+				if (!desiredSupport.length) currentStep = desiredSupport;
 			}
-			if (!desiredSupport.length) currentStep = desiredSupport;
 
 			// finally, we might narrow it down based on covering resistances we're missing
 			// I haven't assigned those yet, though
