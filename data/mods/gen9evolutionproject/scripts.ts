@@ -858,8 +858,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (eligible) eligibleMonotypes.push(type);
 			}
 			let lc = 0;
-			for (const id of originalTeamSpecies) if (this.dex.species.get(id).randbats.stage && this.dex.species.get(id).randbats.stage === lc) lc++;
-			if (lc === originalTeamSpecies.length) stage = 'LC';
+			for (const id of originalTeamSpecies) if (this.dex.species.get(id).randbats.stage && this.dex.species.get(id).randbats.stage === 'LC') lc++;
+			if (lc === originalTeamSpecies.length) {
+				stage = 'LC';
+				if (setLevel === 100) setLevel = 5;
+			}
 		}
 		if (originalTeamSpecies.length > 1) {
 			// if there's more than 1 Pokémon, and the team is monotype so far, stick with it
