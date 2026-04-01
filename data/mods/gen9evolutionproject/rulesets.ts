@@ -222,7 +222,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						}
 
 						// other info
-						if (species.description) customGuide += `<br><div class="hint"><br>${species.description}</div>`;
+						if (species.description) customGuide += `<br><div class="hint">${species.description}</div>`;
 						
 						customGuide += `<br></details></div>`;
 						hideBox += customGuide;
