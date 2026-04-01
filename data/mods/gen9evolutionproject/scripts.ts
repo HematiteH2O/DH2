@@ -949,6 +949,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		if (team.length) {
 			for (const pokemon of team) if (pokemon.requestedSupport.length) for (const requestedSupport of pokemon.requestedSupport) if (!teamRequestedSupport.includes(requestedSupport)) teamRequestedSupport.push(requestedSupport);
 			for (const pokemon of team) if (pokemon.offeredSupport.length) for (const offeredSupport of pokemon.offeredSupport) if (!teamOfferedSupport.includes(offeredSupport)) teamOfferedSupport.push(offeredSupport);
+			for (const pokemon of team) if (pokemon.acceptedSupport.length) for (const acceptedSupport of pokemon.acceptedSupport) if (!teamAcceptedSupport.includes(acceptedSupport)) teamAcceptedSupport.push(acceptedSupport);
 		}
 
 
@@ -958,6 +959,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		// That said...
 		let firstDraftTeamRequestedSupport = teamRequestedSupport;
 		let firstDraftTeamOfferedSupport = teamOfferedSupport;
+		let firstDraftTeamAcceptedSupport = teamAcceptedSupport;
 		// ... it's definitely good to start tracking these right away!
 
 		for (let i = 0; i < (6 - team.length); ++i) {
@@ -967,6 +969,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			if (firstDraftTeamOfferedSupport.length) for (const role of firstDraftTeamOfferedSupport) if (!offeredSupportThisStep.includes(role)) offeredSupportThisStep.push(role);
 
 			let currentStep = [];
+
+			// "accepted support" is *almost never* accounted for at this step - but just in case we have absolutely nothing to go on...
+			if (!requestedSupportThisStep.length) for (const role of firstDraftTeamAcceptedSupport) if (!firstDraftTeamOfferedSupport.includes(role) && !requestedSupportThisStep.includes(role)) requestedSupportThisStep.push(role);
 			
 			// first, we want to find offeredSupport that matches our requestedSupport
 			if (requestedSupportThisStep.length) {
@@ -1005,6 +1010,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			chosenRandomPokemon = this.sample(currentStep);
 			for (const role in this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].requestedSupport) if (!firstDraftTeamRequestedSupport.includes(role)) firstDraftTeamRequestedSupport.push(role);
 			for (const role in this.dex.data.Pokedex[chosenRandomPokemon].randbats.offeredSupport) if (!firstDraftTeamOfferedSupport.includes(role)) firstDraftTeamOfferedSupport.push(role);
+			for (const role in this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].acceptedSupport) if (!firstDraftTeamAcceptedSupport.includes(role)) firstDraftTeamAcceptedSupport.push(role);
 			
 			console.log(chosenRandomPokemon);
 			console.log(this.dex.data.Pokedex[chosenRandomPokemon].randbats);
