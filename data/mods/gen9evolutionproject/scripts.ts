@@ -155,6 +155,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			}
 		}
 		
+/*
 		// OKAY HEADS-UP:
 		// the below is for *my personal convenience* for randbats set generation - it should be *commented out* in any patch that actually gets loaded to DH
 		// I'm keeping it around so I can run it the same way every time I add a new slate
@@ -165,20 +166,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				(this.modData('FormatsData', id) && this.modData('FormatsData', id).tier && this.modData('FormatsData', id).tier === "Evo!") // only the "Evo!" tier matters - nothing is PotD yet and prevos shouldn't be included
 				|| ['porygon2', 'accelgor'].includes(id) // exceptions so far: Porygon2 and Accelgor
 			)) continue;
-			
-			// banlist
-			let singles.banned = false;
-			let vgc.banned = false;
-			if ([
-				'toxapex', 'noivernvariant', 'chandelure', 'corviknight', 'darmanitan', 'darmanitangalar', 'excadrill', 'hawlucha', 'garchomp', 'velocinobi',
-				'dragonite', 'tapukoko', 'tapulele', 'tapubulu', 'tapufini', 'zacian', 'zaciancrowned', 'zamazenta', 'zamazentacrowned', 'deoxys',
-				'deoxysattack', 'deoxysdefense', 'deoxysspeed',
-			].includes(id)) singles.banned = true;
-			if ([
-				'dragonite', 'tapukoko', 'tapulele', 'tapubulu', 'tapufini', 'zacian', 'zaciancrowned', 'zamazenta', 'zamazentacrowned', 'deoxys',
-				'deoxysattack', 'deoxysdefense', 'deoxysspeed',
-			].includes(id)) vgc.banned = true;
-			if (singles.banned && vgc.banned) continue;
 			
 			const monDex = this.dataCache.Pokedex[id];
 			const monLearnset = this.dataCache.Learnsets[id].learnset;
@@ -237,7 +224,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 			// other noteworthy features
 
-/*
 		- responses to specific setup sweepers and bulky attackers identified so far
 
 		- consider Choice Scarf users
@@ -250,9 +236,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		- stallbreaking tools
 		- cleric moves
 		- recovery moves
-*/
-			
-			
+		
 			// // // VGC goals
 
 			// priority
@@ -270,8 +254,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 			// field effects / other themes
 			// other noteworthy features
-			
-/*
+		
 	- priority attacks (for Prankster users, include status moves that call attacks)
 	- spread
 	- Speed control (Tailwind, Trick Room, paralysis, Speed-lowering moves, After You)
@@ -287,13 +270,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		- pivoting
 		- viable boosting moves
 		- other specific strategies (ex. Skill Swap, Entrainment, Soak, Rototiller, et cetera)
-*/
 
 
 			
 			monDex.randomizerInfo = randomizerInfo;
 		}
-		// end commented-out section
+*/
 
 		let random1 = Math.floor(Math.random() * customList.length);
 		let random2 = Math.floor(Math.random() * (customList.length - 1));
