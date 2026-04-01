@@ -842,7 +842,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		let randSets = [];
 		let eligiblePokemon = [];
 		for (const id in this.dex.data.Pokedex) {
-			if (this.dex.data.Pokedex[id].randbats) eligiblePokemon.push(this.dex.data.Pokedex[id].randbats);
+			if (this.dex.data.Pokedex[id].randbats) eligiblePokemon.push(id);
 		}
 		console.log(eligiblePokemon);
 		
