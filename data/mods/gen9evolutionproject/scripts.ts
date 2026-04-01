@@ -97,14 +97,13 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				newMon.randbats = {
 					types: [],
 					abilities: [],
+					offeredSupport: {},
 					singles: {
 						requestedSupport: {},
-						offeredSupport: {},
 						acceptedSupport: {},
 					},
 					vgc: {
 						requestedSupport: {},
-						offeredSupport: {},
 						acceptedSupport: {},
 					},
 					resistances: {},
@@ -159,12 +158,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					}
 					switch (moveid) {
 						case 'knockoff':
-							if (
-								newMon.randbats.singles.offeredSupport.knockoff &&
-								newMon.randbats.singles.offeredSupport.knockoff.moves
-							) newMon.randbats.singles.offeredSupport.knockoff.moves.push('Knock Off');
-							else {
-								newMon.randbats.singles.offeredSupport.knockoff = {
+							if (newMon.randbats.offeredSupport.knockoff) {
+								if (newMon.randbats.offeredSupport.knockoff.moves) {
+									newMon.randbats.offeredSupport.knockoff.moves.push('Knock Off');
+								} else newMon.randbats.offeredSupport.knockoff.moves = ['Knock Off'];
+							} else {
+								newMon.randbats.offeredSupport.knockoff = {
 									moves: ['Knock Off'],
 								}
 							}
@@ -963,17 +962,20 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 		for (let i = 0; i < (6 - team.length); ++i) {
 			let requestedSupportThisStep = [];
-			if (firstDraftTeamRequestedSupport.length) for (const role of firstDraftTeamRequestedSupport) if (!firstDraftTeamOfferedSupport.includes(role)) requestedSupportThisStep.push(role);
+			let offeredSupportThisStep = [];
+			if (firstDraftTeamRequestedSupport.length) for (const role of firstDraftTeamRequestedSupport) if (!firstDraftTeamOfferedSupport.includes(role) && !requestedSupportThisStep.includes(role)) requestedSupportThisStep.push(role);
+			if (firstDraftTeamOfferedSupport.length) for (const role of firstDraftTeamOfferedSupport) if (!offeredSupportThisStep.includes(role)) offeredSupportThisStep.push(role);
 
-			// first, we want to find offeredSupport that matches our requestedSupport
 			let currentStep = [];
+			
+			// first, we want to find offeredSupport that matches our requestedSupport
 			if (requestedSupportThisStep.length) {
 				// score them by how many roles they can fill, up to 3
-				maxScore = 0;
+				let maxScore = 0;
 				for (const id of eligiblePokemon) {
 					score = 0;
-					for (const role of requestedSupportThisStep) if (this.dex.data.Pokedex[id].randbats[format].offeredSupport[role]) score++;
-					if (score > 3) score = 3; // you need space for STABs and stuff too - let's not spread one Pokémon too thin (I might even switch this to 2 if results are okay)
+					for (const role of requestedSupportThisStep) if (this.dex.data.Pokedex[id].randbats.offeredSupport[role]) score++;
+					if (score > 3) score = 3; // you need space for STABs and stuff too - let's not spread one Pokémon too thin (I might change the threshold or how I handle this later)
 					if (score > maxScore) { // reset
 						currentStep = [];
 						maxScore = score;
@@ -983,14 +985,26 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			}
 			if (!currentStep.length) currentStep = eligiblePokemon;
 
-			// then, we'll try to look for acceptedSupport that matches our offeredSupport
+			// then, we'll try to look for anything with acceptedSupport that matches our offeredSupport
+			if (offeredSupportThisStep.length) {
+				// score them by how many roles they can fill, up to 3
+				let desiredSupport = [];
+				for (const id of currentStep) {
+					// for now, I think just a yes or a no is fine
+					let accepted = false;
+					for (const role of offeredSupportThisStep) if (this.dex.data.Pokedex[id].randbats[format].acceptedSupport[role]) accepted = true;
+					if (accepted === true) desiredSupport.push(id);
+				}
+			}
+			if (!desiredSupport.length) currentStep = desiredSupport;
 
 			// finally, we might narrow it down based on covering resistances we're missing
+			// I haven't assigned those yet, though
 
-			// and now we get to choose a Pokémon!
+			// and... now we get to choose a Pokémon!
 			chosenRandomPokemon = this.sample(currentStep);
 			for (const role in this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].requestedSupport) if (!firstDraftTeamRequestedSupport.includes(role)) firstDraftTeamRequestedSupport.push(role);
-			for (const role in this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].offeredSupport) if (!firstDraftTeamOfferedSupport.includes(role)) firstDraftTeamOfferedSupport.push(role);
+			for (const role in this.dex.data.Pokedex[chosenRandomPokemon].randbats.offeredSupport) if (!firstDraftTeamOfferedSupport.includes(role)) firstDraftTeamOfferedSupport.push(role);
 			
 			console.log(chosenRandomPokemon);
 			console.log(this.dex.data.Pokedex[chosenRandomPokemon].randbats);
