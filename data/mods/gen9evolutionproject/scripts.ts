@@ -961,7 +961,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		let firstDraftTeamOfferedSupport = teamOfferedSupport;
 		// ... it's definitely good to start tracking these right away!
 
-		while (++i < (6 - team.length)) {
+		for (let i = 0; i < (6 - team.length); ++i) {
 			let requestedSupportThisStep = [];
 			if (firstDraftTeamRequestedSupport.length) for (const role of firstDraftTeamRequestedSupport) if (!firstDraftTeamOfferedSupport.includes(role)) requestedSupportThisStep.push(role);
 
@@ -973,6 +973,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				for (const id of eligiblePokemon) {
 					score = 0;
 					for (const role of requestedSupportThisStep) if (this.dex.data.Pokedex[id].randbats[format].offeredSupport[role]) score++;
+					if (score > 3) score = 3; // you need space for STABs and stuff too - let's not spread one Pokémon too thin (I might even switch this to 2 if results are okay)
 					if (score > maxScore) { // reset
 						currentStep = [];
 						maxScore = score;
