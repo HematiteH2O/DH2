@@ -1017,9 +1017,16 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (desiredSupport.length) currentStep = desiredSupport;
 			}
 
-			// finally, we might narrow it down further by looking for type resistances we're missing
+			// next, we might narrow it down further by looking for type resistances we're missing
 			// I haven't assigned those yet, though, so there's no point yet!
+			// // IMPORTANT:
+			// // if we're doing requestedSupport for a specific Pokémon on the team (not a default), I want to prioritize defensive synergies with that Pokémon, not the whole team!
 
+			// before I forget:
+			// if a team started completely empty, I want the first Pokémon selected to be a completely random Evo 2 sub - never a canon Pokémon and not weighted in any way
+			if (i === 0 && !team.length) currentStep = eligiblePokemon.filter(id => (!firstDraftTeamNumbers.includes(this.dex.data.Pokedex[id].num) && this.dex.data.Pokedex[id].copyData));
+			// so there we go! replace all previous steps with that
+			
 			// safety nets
 			if (!currentStep.length) currentStep = eligiblePokemon.filter(id => !firstDraftTeamNumbers.includes(this.dex.data.Pokedex[id].num));
 			if (!currentStep.length) continue;
