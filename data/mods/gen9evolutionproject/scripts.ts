@@ -1142,15 +1142,16 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		// ... it's still useful to have a copy that can track everything we need right away!
 
 		for (let i = 0; i < (6 - team.length); ++i) {
+			let requestedSupportInGeneral = [];
 			let requestedSupportThisStep = [];
 			let offeredSupportThisStep = [];
 			let acceptedSupportThisStep = [];
 			let teamNumbersThisStep = [];
 			let resistancesThisStep = [];
 			if (firstDraftTeam.length) {
-				for (const request of baseRequestedSupport) if (!requestedSupportThisStep.includes(request)) requestedSupportThisStep.push(request);
+				for (const request of baseRequestedSupport) if (!requestedSupportInGeneral.includes(request)) requestedSupportInGeneral.push(request);
 				for (const pokemon of firstDraftTeam) {
-					if (pokemon.requestedSupport.length) for (const requestedSupport of pokemon.requestedSupport) if (!requestedSupportThisStep.includes(requestedSupport)) requestedSupportThisStep.push(requestedSupport);
+					if (pokemon.requestedSupport.length) for (const requestedSupport of pokemon.requestedSupport) if (!requestedSupportInGeneral.includes(requestedSupport)) requestedSupportInGeneral.push(requestedSupport);
 					if (pokemon.offeredSupport.length) for (const offeredSupport of pokemon.offeredSupport) if (!offeredSupportThisStep.includes(offeredSupport)) offeredSupportThisStep.push(offeredSupport);
 					if (pokemon.acceptedSupport.length) for (const acceptedSupport of pokemon.acceptedSupport) if (!acceptedSupportThisStep.includes(acceptedSupport)) acceptedSupportThisStep.push(acceptedSupport);
 					if (this.dex.species.get(pokemon.species)) {
@@ -1158,7 +1159,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						for (const type of types) if (!resistancesThisStep.includes(type) && (this.dex.species.get(pokemon.species).randbats.immunities[type] || (this.dex.species.get(pokemon.species).randbats.resistances[type] && !this.dex.species.get(pokemon.species).randbats.weaknesses[type]))) resistancesThisStep.push(type);
 					}
 				}
-				requestedSupportThisStep = requestedSupportThisStep.filter(request => !offeredSupportThisStep.includes(request));
+				requestedSupportThisStep = requestedSupportInGeneral.filter(request => !offeredSupportThisStep.includes(request));
 				console.log(teamNumbersThisStep);
 				console.log(resistancesThisStep);
 			}
@@ -1233,11 +1234,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			let teamResistMaxScore = 0;
 			for (const id of currentStep) {
 				let teamResistScore = 0;
-				
-				if (this.dex.data.Pokedex[id].randbats.resistances.length) for (const type of this.dex.data.Pokedex[id].randbats.resistances) if (!resistancesThisStep.includes(type) && !this.dex.data.Pokedex[id].randbats.weaknesses[type] && !this.dex.data.Pokedex[id].randbats.immunities[type]) teamResistScore++;
-				if (this.dex.data.Pokedex[id].randbats.immunities.length) for (const type of this.dex.data.Pokedex[id].randbats.immunities) if (!resistancesThisStep.includes(type)) teamResistScore++;
-				
+				for (const type of types) if (!resistancesThisStep.includes(type) && (this.dex.data.Pokedex[id].randbats.immunities[type] || (this.dex.data.Pokedex[id].randbats.resistances[type] && !this.dex.data.Pokedex[id].randbats.weaknesses[type]))) teamResistScore++;
 				if (teamResistScore > 5) teamResistScore = 5; // you don't need to cover *that* many every step
+				
 				if (teamResistScore > teamResistMaxScore) { // reset
 					teamResists = [];
 					teamResistMaxScore = teamResistScore;
