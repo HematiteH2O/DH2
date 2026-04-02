@@ -1231,7 +1231,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 	
 						if (membersRequestingSupport.length) {
 							for (const type in types) {
-								if (this.dex.data.Pokedex[id].randbats.immunities[type] || (this.dex.data.Pokedex[id].randbats.resistances[type] && !this.dex.data.Pokedex[id].randbats.weaknesses[type]) {
+								if (this.dex.data.Pokedex[id].randbats.immunities[type] || (this.dex.data.Pokedex[id].randbats.resistances[type] && !this.dex.data.Pokedex[id].randbats.weaknesses[type])) {
 									// the Pokémon we're checking has a resistance, so give it points for each memberRequestingSupport that's weak to that type
 									for (const member in membersRequestingSupport) if (this.dex.species.get(member.species).randbats.weaknesses[type] && !this.dex.species.get(member.species).randbats.resistances[type]) synergyResistScore++;
 								} else if (this.dex.data.Pokedex[id].randbats.weaknesses[type] && !this.dex.data.Pokedex[id].randbats.resistances[type]) {
