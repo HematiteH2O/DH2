@@ -1148,7 +1148,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			let teamNumbersThisStep = [];
 			let resistancesThisStep = [];
 			if (firstDraftTeam.length) {
-				for (const request of baseRequestedSupport) if (!requestedSupportThisStep.includes(requestedSupport)) requestedSupportThisStep.push(request);
+				for (const request of baseRequestedSupport) if (!requestedSupportThisStep.includes(request)) requestedSupportThisStep.push(request);
 				for (const pokemon of firstDraftTeam) {
 					if (pokemon.requestedSupport.length) for (const requestedSupport of pokemon.requestedSupport) if (!requestedSupportThisStep.includes(requestedSupport)) requestedSupportThisStep.push(requestedSupport);
 					if (pokemon.offeredSupport.length) for (const offeredSupport of pokemon.offeredSupport) if (!offeredSupportThisStep.includes(offeredSupport)) offeredSupportThisStep.push(offeredSupport);
