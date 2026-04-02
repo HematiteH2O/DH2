@@ -1151,16 +1151,18 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			if (firstDraftTeam.length) {
 				for (const request of baseRequestedSupport) if (!requestedSupportInGeneral.includes(request)) requestedSupportInGeneral.push(request);
 				for (const pokemon of firstDraftTeam) {
-					if (pokemon.requestedSupport.length) for (const requestedSupport of pokemon.requestedSupport) if (!requestedSupportInGeneral.includes(requestedSupport)) requestedSupportInGeneral.push(requestedSupport);
-					if (pokemon.offeredSupport.length) for (const offeredSupport of pokemon.offeredSupport) if (!offeredSupportThisStep.includes(offeredSupport)) offeredSupportThisStep.push(offeredSupport);
-					if (pokemon.acceptedSupport.length) for (const acceptedSupport of pokemon.acceptedSupport) if (!acceptedSupportThisStep.includes(acceptedSupport)) acceptedSupportThisStep.push(acceptedSupport);
+					for (const requestedSupport of pokemon.requestedSupport) if (!requestedSupportInGeneral.includes(requestedSupport)) requestedSupportInGeneral.push(requestedSupport);
+					for (const offeredSupport of pokemon.offeredSupport) if (!offeredSupportThisStep.includes(offeredSupport)) offeredSupportThisStep.push(offeredSupport);
+					for (const acceptedSupport of pokemon.acceptedSupport) if (!acceptedSupportThisStep.includes(acceptedSupport)) acceptedSupportThisStep.push(acceptedSupport);
 					if (this.dex.species.get(pokemon.species)) {
 						if (this.dex.species.get(pokemon.species).num) teamNumbersThisStep.push(this.dex.species.get(pokemon.species).num);
 						for (const type of types) if (!resistancesThisStep.includes(type) && (this.dex.species.get(pokemon.species).randbats.immunities[type] || (this.dex.species.get(pokemon.species).randbats.resistances[type] && !this.dex.species.get(pokemon.species).randbats.weaknesses[type]))) resistancesThisStep.push(type);
 					}
 				}
 				requestedSupportThisStep = requestedSupportInGeneral.filter(request => !offeredSupportThisStep.includes(request));
-				console.log(teamNumbersThisStep);
+				console.log(`requested in general: ` + requestedSupportInGeneral);
+				console.log(`offered this step: ` + offeredSupportThisStep);
+				console.log(`requested this step: ` + requestedSupportThisStep);
 				console.log(resistancesThisStep);
 			}
 			
