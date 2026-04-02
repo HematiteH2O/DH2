@@ -361,7 +361,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 				console.log(newMon.randbats);
 			}
-		if (this.format) console.log(this.format.name);
+		if (this.modData.format) console.log(this.modData.format.name);
 		}
 		
 /*
