@@ -1027,9 +1027,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		if (team && team.length === 6) return team;
 
 		let originalTeamSpecies = [];
-		let selectedRandSpecies = [];
-		
-		// and for species clause
 		let originalTeamNumbers = [];
 		
 		let setLevel = 100;
@@ -1268,7 +1265,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				acceptedSupport: this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].acceptedSupport,
 			};
 			
-			console.log(selectedRandSpecies);
 			console.log(this.dex.data.Pokedex[chosenRandomPokemon].randbats);
 		}
 
@@ -1289,7 +1285,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 			// step 2.5: if there are no team members at all, introduce a random Evo sub as a starting point
 			
-			// third step: a "for" loop until there are as many team members as empty slots - randomize and push Pokémon one at a time to "selectedRandSpecies" (not to "team!")
+			// third step: a "for" loop until there are as many team members as empty slots - randomize and push Pokémon one at a time to "firstDraftTeam" (not to "team!")
 			// // - each added Pokémon should log its own "roles" and "requested/accepted support" - in case it gets replaced later, it shouldn't be mixed in with the team!
 			// // - each category should be a binary yes/no for whether the Pokémon can do the listed job effectively
 			// // - then, score the available Pokémon based on satisfying "accepted support," other roles that haven't been filled yet, and type balance before picking a winner
