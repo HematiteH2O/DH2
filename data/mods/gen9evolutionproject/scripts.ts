@@ -95,6 +95,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				
 				// basic structure
 				newMon.randbats = {
+					name: newMon.name, // for console.logging convenience
 					types: [],
 					abilities: [],
 					offeredSupport: {},
@@ -358,6 +359,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							break;
 					}
 				}
+				console.log(newMon.randbats);
 			}
 		}
 		
@@ -1146,7 +1148,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			// before I forget:
 			// if a team started completely empty, I want the first Pokémon selected to be a completely random Evo 2 sub - never a canon Pokémon and not weighted in any way
 			if (i === 0 && !team.length) {
-				console.log(`This is the first Pokémon being selected for an empty team, so it should be an Evo 2 sub and skip the other considerations.`);
 				currentStep = eligiblePokemon.filter(id => this.dex.data.Pokedex[id].copyData);
 			} else {
 				let requestedSupportInGeneral = [];
@@ -1170,7 +1171,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					console.log(`requested in general: ` + requestedSupportInGeneral);
 					console.log(`offered this step: ` + offeredSupportThisStep);
 					console.log(`requested this step: ` + requestedSupportThisStep);
-					console.log(resistancesThisStep);
 				}
 	
 				// "accepted support" is *almost never* accounted for at this step - but just in case we have absolutely nothing to go on...
@@ -1213,7 +1213,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (desiredSupport.length) currentStep = desiredSupport;
 				}
 	
-				console.log(`Current step: synergy resistances`);
 				// narrowing down: type synergy for requestedSupport
 				// // if we're doing requestedSupport for a specific Pokémon on the team (not a default), I'll want to prioritize defensive synergies with that Pokémon, not the whole team!
 				// // probably total up the weaknesses, then use that as a multiplier
@@ -1221,6 +1220,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// // then the Intimidators are scored with 2 points for a Water resist and 0 for a Fire resist)
 				// // it should go both ways I think - it's cooler for the Intimidator to have a weakness if several of the teammates it supports resist it, isn't it?
 				if (firstDraftTeam.length) {
+					console.log(`Current step: synergy resistances`);
 					let synergyResists = [];
 					let synergyResistMaxScore = 0;
 					for (const id of currentStep) {
@@ -1251,7 +1251,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (synergyResists.length) currentStep = synergyResists;
 				}
 	
-				console.log(`Current step: team resistances`);
 				// narrowing down: offering resistances for the team as a whole
 				// // possible: replace with super effective STAB coverage for VGC?
 				let teamResists = [];
@@ -1264,11 +1263,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (teamResistScore > teamResistMaxScore) { // reset
 						teamResists = [];
 						teamResistMaxScore = teamResistScore;
-						console.log(teamResistMaxScore);
 					}
 					if (teamResistScore === teamResistMaxScore) teamResists.push(id);
 				}
-				console.log(teamResists);
 				if (teamResists.length) currentStep = teamResists;
 			}
 			
@@ -1295,48 +1292,29 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		// maybe we chose a Pokémon for having Intimidate at the time, but now we have two other Intimidators, so it doesn't offer anything we need as much
 		// the steps should be *pretty much* an exact copy of the above loop!
 		// as a bonus, we'll also check each of the rerolled Pokémon's "offeredSupport" options - if a teammate has it as "acceptedSupport," that makes it important to keep!
-			
-			// first step: assign an up-front list of roles for the team
-			
-			// second step: iterate over existing team members
-			// // - identify which roles they already cover
-			// // - identify "requested support" (top-priority: something like Grassy Surge is mandatory if a Pokémon has a Grassy Seed)
-			// // - identify "accepted support" (gives bonus points when deciding between candidates for another role, but it's not its own step - something like any terrain for Aleon)
 
-			// step 2.5: if there are no team members at all, introduce a random Evo sub as a starting point
+
+
+
+
+		// TODO: fill in randbats data per species based on learnsets (the fun part!)
+		
+		// TODO: iterate over existing team members based on the same criteria
+		// // - identify which roles they already cover
+		// // - identify "requested support" (top-priority: something like Grassy Surge is mandatory if a Pokémon has a Grassy Seed)
+		// // - identify "accepted support" (gives bonus points when deciding between candidates for another role, but it's not its own step - something like any terrain for Aleon)
+
+		// TODO: second-pass "for" loop (almost just a copy-paste of the original at this point - just saving it for the end so I don't have to make a bunch of changes twice)
+
+		// TODO: set constructor
+
+		// TODO: nickname check???
+		// // - if all 6 sets are random, check the list of teamwide naming schemes; if there are any where all 6 Pokémon have an entry, there's a chance to pull from them!
+		// // - check the list of small group naming schemes; if there are any groups that the random sets completely encompass, go for it!
+		// // - otherwise, if the Pokémon has a set of random names defined in pokedex.ts, sample one of them
+		// // - and if not, no nickname
 			
-			// third step: a "for" loop until there are as many team members as empty slots - randomize and push Pokémon one at a time to "firstDraftTeam" (not to "team!")
-			// // - each added Pokémon should log its own "roles" and "requested/accepted support" - in case it gets replaced later, it shouldn't be mixed in with the team!
-			// // - each category should be a binary yes/no for whether the Pokémon can do the listed job effectively
-			// // - then, score the available Pokémon based on satisfying "accepted support," other roles that haven't been filled yet, and type balance before picking a winner
-			// // - #1 priority: any "requested support" that isn't covered
-			// // // - score based on defensive synergy with the specific Pokémon requesting the support
-			// // - #2 priority: roles that aren't present
-			// // - #3 priority: answers (defensive *or* offensive) to threats that aren't covered
-			// // - #4 priority: type balance
-			// this only keeps going until you run out of space for team members
-
-			// fourth step: a "for" loop over each of the already-chosen random team members; a second pass in the order they were chosen
-			// // - check which roles and offered support *only* they fill (no other team members do)
-			// // - check if any other Pokémon not on the team happen to fill all of those roles and offered support
-			// // - if any alternates exist, score the new pool of Pokémon and pick a winner:
-			// // // - #1 priority: the alternate Pokémon also provides any requested support or role that isn't present
-			// // // - #2 priority: the alternate Pokémon also requests support that's already on the team
-			// // // - #3 priority: if offering support, which has the best defensive synergy with the Pokémon requesting support?
-			// // // - #4 priority: which has the best defensive synergy with the team as a whole?
-			// // - pick randomly from the remaining pool!
-
-			// fifth step: start filling in set details (moves, items, Abilities)
-			// // - #1 pass: (teamwide, by role) checking off the already-assigned roles
-			// // - #2 pass: (by individual) choosing STAB(s), which may have conditions attached, and then any leftover details (Tera Types, items, EVs, Abilities) if not established
-
-			// sixth step: nickname check???
-			// // - if all 6 sets are random, check the list of teamwide naming schemes; if there are any where all 6 Pokémon have an entry, there's a chance to pull from them!
-			// // - check the list of small group naming schemes; if there are any groups that the random sets completely encompass, go for it!
-			// // - otherwise, if the Pokémon has a set of random names defined in pokedex.ts, sample one of them
-			// // - and if not, no nickname
-			
-			// finally, push every remaining set to the actual team!
+		// finally, push every remaining set to the actual team!
 
 		if (!team || !team.length || team.length < 2) { // just so it doesn't crash when it's not done aksdjfh
 			let set = {
