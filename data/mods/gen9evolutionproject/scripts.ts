@@ -1148,6 +1148,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			let teamNumbersThisStep = [];
 			let resistancesThisStep = [];
 			if (firstDraftTeam.length) {
+				for (const request of baseRequestedSupport) if (!requestedSupportThisStep.includes(requestedSupport)) requestedSupportThisStep.push(request);
 				for (const pokemon of firstDraftTeam) {
 					if (pokemon.requestedSupport.length) for (const requestedSupport of pokemon.requestedSupport) if (!requestedSupportThisStep.includes(requestedSupport)) requestedSupportThisStep.push(requestedSupport);
 					if (pokemon.offeredSupport.length) for (const offeredSupport of pokemon.offeredSupport) if (!offeredSupportThisStep.includes(offeredSupport)) offeredSupportThisStep.push(offeredSupport);
@@ -1157,6 +1158,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						for (const type of types) if (!resistancesThisStep.includes(type) && (this.dex.species.get(pokemon.species).randbats.immunities[type] || (this.dex.species.get(pokemon.species).randbats.resistances[type] && !this.dex.species.get(pokemon.species).randbats.weaknesses[type]))) resistancesThisStep.push(type);
 					}
 				}
+				requestedSupportThisStep = requestedSupportThisStep.filter(request => !offeredSupportThisStep.includes(request));
 				console.log(teamNumbersThisStep);
 				console.log(resistancesThisStep);
 			}
@@ -1232,8 +1234,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			for (const id of currentStep) {
 				let teamResistScore = 0;
 				
-				if (this.dex.species.get(id).randbats.resistances.length) for (const type of this.dex.species.get(id).randbats.resistances) if (!resistancesThisStep.includes(type) && !this.dex.species.get(id).randbats.weaknesses[type] && !this.dex.species.get(id).randbats.immunities[type]) teamResistScore++;
-				if (this.dex.species.get(id).randbats.immunities.length) for (const type of this.dex.species.get(id).randbats.immunities) if (!resistancesThisStep.includes(type)) teamResistScore++;
+				if (this.dex.data.Pokedex[id].randbats.resistances.length) for (const type of this.dex.data.Pokedex[id].randbats.resistances) if (!resistancesThisStep.includes(type) && !this.dex.data.Pokedex[id].randbats.weaknesses[type] && !this.dex.data.Pokedex[id].randbats.immunities[type]) teamResistScore++;
+				if (this.dex.data.Pokedex[id].randbats.immunities.length) for (const type of this.dex.data.Pokedex[id].randbats.immunities) if (!resistancesThisStep.includes(type)) teamResistScore++;
 				
 				if (teamResistScore > 5) teamResistScore = 5; // you don't need to cover *that* many every step
 				if (teamResistScore > teamResistMaxScore) { // reset
