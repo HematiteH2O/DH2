@@ -125,7 +125,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				
 				if (this.modData('FormatsData', id).tier === "Evo!" || ['porygon2', 'accelgor'].includes(id)) newMon.randbats.stage = 'Evo';
 				else if (newMon.evos && newMon.evos.length && !newMon.prevo && !['mareanie'].includes(id)) newMon.randbats.stage = 'LC';
-				if (!newMon.randbats.stage) continue;
 
 				// basic information
 				newMon.randbats.types.push(newMon.types[0]);
@@ -318,7 +317,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					
 				}
 
-				// then I can start iterating over the movepool
+				// then I can start iterating over the movepool!
+				// but first...
+				if (!newMon.randbats.stage || (newMon.randbats.singles.banned && newMon.randbats.vgc.banned)) continue;
+				// ... don't bother with any more randbats data if it's not eligible to be chosen anyway!
+				
 				const learnset = this.dataCache.Learnsets[id].learnset;
 				if (!learnset) continue;
 				
@@ -1133,39 +1136,42 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				pokemon.acceptedSupport = [];
 			}
 		}
-
-		let teamRequestedSupport = baseRequestedSupport;
-		let teamOfferedSupport = [];
-		let teamAcceptedSupport = [];
-		
-		if (team.length) {
-			for (const pokemon of team) if (pokemon.requestedSupport.length) for (const requestedSupport of pokemon.requestedSupport) if (!teamRequestedSupport.includes(requestedSupport)) teamRequestedSupport.push(requestedSupport);
-			for (const pokemon of team) if (pokemon.offeredSupport.length) for (const offeredSupport of pokemon.offeredSupport) if (!teamOfferedSupport.includes(offeredSupport)) teamOfferedSupport.push(offeredSupport);
-			for (const pokemon of team) if (pokemon.acceptedSupport.length) for (const acceptedSupport of pokemon.acceptedSupport) if (!teamAcceptedSupport.includes(acceptedSupport)) teamAcceptedSupport.push(acceptedSupport);
-		}
-
-
 		
 		// Now, we can start picking a first pass of team members
 		// For now, when we decide something, we should push it to selectedRandSpecies, not to the team just yet; we'll get to build sets later!
 		// That said...
-		let firstDraftTeamRequestedSupport = teamRequestedSupport;
-		let firstDraftTeamOfferedSupport = teamOfferedSupport;
-		let firstDraftTeamAcceptedSupport = teamAcceptedSupport;
-		let firstDraftTeamNumbers = originalTeamNumbers;
-		// ... it's definitely good to start tracking these right away!
+		let firstDraftTeam = team;
+		// ... it's still useful to have a copy that can track everything we need right away!
 
 		for (let i = 0; i < (6 - team.length); ++i) {
 			let requestedSupportThisStep = [];
 			let offeredSupportThisStep = [];
-			if (firstDraftTeamRequestedSupport.length) for (const role of firstDraftTeamRequestedSupport) if (!firstDraftTeamOfferedSupport.includes(role) && !requestedSupportThisStep.includes(role)) requestedSupportThisStep.push(role);
-			if (firstDraftTeamOfferedSupport.length) for (const role of firstDraftTeamOfferedSupport) if (!offeredSupportThisStep.includes(role)) offeredSupportThisStep.push(role);
-
+			let acceptedSupportThisStep = [];
+			let teamNumbersThisStep = [];
+			let resistancesThisStep = [];
+			if (firstDraftTeam.length) {
+				for (const pokemon of firstDraftTeam) {
+					if (pokemon.requestedSupport.length) for (const requestedSupport of pokemon.requestedSupport) if (!requestedSupportThisStep.includes(requestedSupport)) requestedSupportThisStep.push(requestedSupport);
+					if (pokemon.offeredSupport.length) for (const offeredSupport of pokemon.offeredSupport) if (!offeredSupportThisStep.includes(offeredSupport)) offeredSupportThisStep.push(offeredSupport);
+					if (pokemon.acceptedSupport.length) for (const acceptedSupport of pokemon.acceptedSupport) if (!acceptedSupportThisStep.includes(acceptedSupport)) acceptedSupportThisStep.push(acceptedSupport);
+					if (this.dex.species.get(pokemon.species)) {
+						if (this.dex.species.get(pokemon.species).num) teamNumbersThisStep.push(this.dex.species.get(pokemon.species).num);
+						if (this.dex.species.get(pokemon.species).randbats.resistances.length) {
+							for (const type of this.dex.species.get(pokemon.species).randbats.resistances) if (!resistancesThisStep.includes(type) && !this.dex.species.get(pokemon.species).randbats.weaknesses[type]) resistancesThisStep.push(type);
+						}
+						if (this.dex.species.get(pokemon.species).randbats.immunities.length) {
+							for (const type of this.dex.species.get(pokemon.species).randbats.immunities) if (!resistancesThisStep.includes(type)) resistancesThisStep.push(type);
+						}
+					}
+				}
+			}
+			console.log (resistancesThisStep);
+			
 			let currentStep = [];
 
 			// "accepted support" is *almost never* accounted for at this step - but just in case we have absolutely nothing to go on...
-			if (!requestedSupportThisStep.length) for (const role of firstDraftTeamAcceptedSupport) if (!firstDraftTeamOfferedSupport.includes(role) && !requestedSupportThisStep.includes(role)) requestedSupportThisStep.push(role);
-			// (NOTE: I may replace this backup plan with something else later)
+			if (!requestedSupportThisStep.length) for (const role of acceptedSupportThisStep) if (!offeredSupportThisStep.includes(role) && !requestedSupportThisStep.includes(role)) requestedSupportThisStep.push(role);
+			// (NOTE: I may replace this backup plan with something else later, or even just remove it to focus on type balance)
 			
 			// first, we want to find offeredSupport that matches our requestedSupport
 			if (requestedSupportThisStep.length) {
@@ -1173,7 +1179,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				let maxScore = 0;
 				for (const id of eligiblePokemon) {
 					// species clause
-					if (firstDraftTeamNumbers.includes(this.dex.data.Pokedex[id].num)) continue;
+					if (teamNumbersThisStep.includes(this.dex.data.Pokedex[id].num)) continue;
 					
 					let score = 0;
 					for (const role of requestedSupportThisStep) if (this.dex.data.Pokedex[id].randbats.offeredSupport[role]) score++;
@@ -1185,7 +1191,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (score === maxScore) currentStep.push(id);
 				}
 			}
-			if (!currentStep.length) currentStep = eligiblePokemon.filter(id => !firstDraftTeamNumbers.includes(this.dex.data.Pokedex[id].num));
+			if (!currentStep.length) currentStep = eligiblePokemon.filter(id => !teamNumbersThisStep.includes(this.dex.data.Pokedex[id].num));
 
 			// then, we'll try to look for anything with acceptedSupport that matches our offeredSupport
 			if (offeredSupportThisStep.length) {
@@ -1193,7 +1199,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				let desiredSupport = [];
 				for (const id of currentStep) {
 					// species clause
-					if (firstDraftTeamNumbers.includes(this.dex.data.Pokedex[id].num)) continue;
+					if (teamNumbersThisStep.includes(this.dex.data.Pokedex[id].num)) continue;
 					
 					// for now, I think just a yes or a no is fine
 					let accepted = false;
@@ -1203,31 +1209,64 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (desiredSupport.length) currentStep = desiredSupport;
 			}
 
-			// next, we might narrow it down further by looking for type resistances we're missing
-			// I haven't assigned those yet, though, so there's no point yet!
-			// // IMPORTANT:
+			// narrowing down: type synergy for requestedSupport
 			// // if we're doing requestedSupport for a specific Pokémon on the team (not a default), I'll want to prioritize defensive synergies with that Pokémon, not the whole team!
 			// // probably total up the weaknesses, then use that as a multiplier
 			// // (ex. if 2 Pokémon that requestedSupport Intimidate are both weak to Water, and 0 are weak to Fire,
 			// // then the Intimidators are scored with 2 points for a Water resist and 0 for a Fire resist)
 			// // it should go both ways I think - it's cooler for the Intimidator to have a weakness if several of the teammates it supports resist it, isn't it?
+			let synergyResists = [];
+			let synergyResistMaxScore = 0;
+			for (const id of currentStep) {
+				let synergyResistScore = 0;
+				let membersRequestingSupport = [];
+				if (this.dex.data.Pokedex[id].randbats.resistances) {
+					//
+				}
+				if (synergyResistScore > synergyResistMaxScore) { // reset
+					synergyResists = [];
+					synergyResistMaxScore = synergyResistScore;
+				}
+				if (synergyResistScore === synergyResistMaxScore) synergyResists.push(id);
+			}
+			if (synergyResists.length) currentStep = synergyResists;
+
+			// narrowing down: offering resistances for the team as a whole
+			// // possible: replace with super effective STAB coverage for VGC?
+			let teamResists = [];
+			let teamResistMaxScore = 0;
+			for (const id of currentStep) {
+				let teamResistScore = 0;
+				
+				if (this.dex.species.get(pokemon.species).randbats.resistances.length) for (const type of this.dex.species.get(pokemon.species).randbats.resistances) if (!resistancesThisStep.includes(type) && !this.dex.species.get(pokemon.species).randbats.weaknesses[type] && !this.dex.species.get(pokemon.species).randbats.immunities[type]) teamResistScore++;
+				if (this.dex.species.get(pokemon.species).randbats.immunities.length) for (const type of this.dex.species.get(pokemon.species).randbats.immunities) if (!resistancesThisStep.includes(type)) teamResistScore++;
+				
+				if (teamResistScore > 5) teamResistScore = 5; // you don't need to cover *that* many every step
+				if (teamResistScore > teamResistMaxScore) { // reset
+					teamResists = [];
+					teamResistMaxScore = teamResistScore;
+				}
+				if (teamResistScore === teamResistMaxScore) teamResists.push(id);
+			}
+			if (teamResists.length) currentStep = teamResists;
 
 			// before I forget:
 			// if a team started completely empty, I want the first Pokémon selected to be a completely random Evo 2 sub - never a canon Pokémon and not weighted in any way
-			if (i === 0 && !team.length) currentStep = eligiblePokemon.filter(id => (!firstDraftTeamNumbers.includes(this.dex.data.Pokedex[id].num) && this.dex.data.Pokedex[id].copyData));
+			if (i === 0 && !team.length) currentStep = eligiblePokemon.filter(id => (!teamNumbersThisStep.includes(this.dex.data.Pokedex[id].num) && this.dex.data.Pokedex[id].copyData));
 			// so there we go! replace all previous steps with that
 			
 			// safety nets
-			if (!currentStep.length) currentStep = eligiblePokemon.filter(id => !firstDraftTeamNumbers.includes(this.dex.data.Pokedex[id].num));
+			if (!currentStep.length) currentStep = eligiblePokemon.filter(id => !teamNumbersThisStep.includes(this.dex.data.Pokedex[id].num));
 			if (!currentStep.length) continue;
 			
 			// and... now we get to choose a Pokémon!
 			let chosenRandomPokemon = this.sample(currentStep);
-			for (const role in this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].requestedSupport) if (!firstDraftTeamRequestedSupport.includes(role)) firstDraftTeamRequestedSupport.push(role);
-			for (const role in this.dex.data.Pokedex[chosenRandomPokemon].randbats.offeredSupport) if (!firstDraftTeamOfferedSupport.includes(role)) firstDraftTeamOfferedSupport.push(role);
-			for (const role in this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].acceptedSupport) if (!firstDraftTeamAcceptedSupport.includes(role)) firstDraftTeamAcceptedSupport.push(role);
-			firstDraftTeamNumbers.push(this.dex.data.Pokedex[chosenRandomPokemon].num);
-			selectedRandSpecies.push(chosenRandomPokemon);
+			firstDraftTeam.chosenRandomPokemon = {
+				species: this.dex.data.Pokedex[chosenRandomPokemon].name,
+				offeredSupport: this.dex.data.Pokedex[chosenRandomPokemon].randbats.offeredSupport,
+				requestedSupport: this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].requestedSupport,
+				acceptedSupport: this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].acceptedSupport,
+			};
 			
 			console.log(selectedRandSpecies);
 			console.log(this.dex.data.Pokedex[chosenRandomPokemon].randbats);
@@ -1239,8 +1278,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		// this gives us a chance to maximize synergy, but also to recognize which roles came up more than we expected -
 		// maybe we chose a Pokémon for having Intimidate at the time, but now we have two other Intimidators, so it doesn't offer anything we need as much
 		// the steps should be *pretty much* an exact copy of the above loop!
-		// the main difference is that we reset firstDraftTeamRequestedSupport, firstDraftTeamOfferedSupport, firstDraftTeamAcceptedSupport and firstDraftTeamNumbers *inside* the loop
-		// so we can base it on every Pokémon in the most current draft, except the one slot we're iterating over
 		// as a bonus, we'll also check each of the rerolled Pokémon's "offeredSupport" options - if a teammate has it as "acceptedSupport," that makes it important to keep!
 			
 			// first step: assign an up-front list of roles for the team
