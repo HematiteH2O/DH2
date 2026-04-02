@@ -1235,8 +1235,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			for (const id of currentStep) {
 				let teamResistScore = 0;
 				
-				if (this.dex.species.get(pokemon.species).randbats.resistances.length) for (const type of this.dex.species.get(pokemon.species).randbats.resistances) if (!resistancesThisStep.includes(type) && !this.dex.species.get(pokemon.species).randbats.weaknesses[type] && !this.dex.species.get(pokemon.species).randbats.immunities[type]) teamResistScore++;
-				if (this.dex.species.get(pokemon.species).randbats.immunities.length) for (const type of this.dex.species.get(pokemon.species).randbats.immunities) if (!resistancesThisStep.includes(type)) teamResistScore++;
+				if (this.dex.species.get(id).randbats.resistances.length) for (const type of this.dex.species.get(id).randbats.resistances) if (!resistancesThisStep.includes(type) && !this.dex.species.get(id).randbats.weaknesses[type] && !this.dex.species.get(id).randbats.immunities[type]) teamResistScore++;
+				if (this.dex.species.get(id).randbats.immunities.length) for (const type of this.dex.species.get(id).randbats.immunities) if (!resistancesThisStep.includes(type)) teamResistScore++;
 				
 				if (teamResistScore > 5) teamResistScore = 5; // you don't need to cover *that* many every step
 				if (teamResistScore > teamResistMaxScore) { // reset
