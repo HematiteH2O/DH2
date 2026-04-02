@@ -1137,7 +1137,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		// Now, we can start picking a first pass of team members
 		// For now, when we decide something, we should push it to selectedRandSpecies, not to the team just yet; we'll get to build sets later!
 		// That said...
-		const firstDraftTeam = team;
+		const firstDraftTeam = [];
+		if (team.length) for (const pokemon of team) firstDraftTeam.push(pokemon);
 		// ... it's still useful to have a copy that can track everything we need right away!
 
 		for (let i = 0; i < (6 - team.length); ++i) {
@@ -1147,14 +1148,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			let teamNumbersThisStep = [];
 			let resistancesThisStep = [];
 			if (firstDraftTeam.length) {
-				console.log("firstDraftTeam.length");
 				for (const pokemon of firstDraftTeam) {
-					console.log(`there's a Pokémon: ${pokemon}`);
 					if (pokemon.requestedSupport.length) for (const requestedSupport of pokemon.requestedSupport) if (!requestedSupportThisStep.includes(requestedSupport)) requestedSupportThisStep.push(requestedSupport);
 					if (pokemon.offeredSupport.length) for (const offeredSupport of pokemon.offeredSupport) if (!offeredSupportThisStep.includes(offeredSupport)) offeredSupportThisStep.push(offeredSupport);
 					if (pokemon.acceptedSupport.length) for (const acceptedSupport of pokemon.acceptedSupport) if (!acceptedSupportThisStep.includes(acceptedSupport)) acceptedSupportThisStep.push(acceptedSupport);
 					if (this.dex.species.get(pokemon.species)) {
-						console.log(this.dex.species.get(pokemon.species));
 						if (this.dex.species.get(pokemon.species).num) teamNumbersThisStep.push(this.dex.species.get(pokemon.species).num);
 						for (const type of types) if (!resistancesThisStep.includes(type) && this.dex.species.get(pokemon.species).randbats.immunities[type] || (this.dex.species.get(pokemon.species).randbats.resistances[type] && !this.dex.species.get(pokemon.species).randbats.weaknesses[type])) resistancesThisStep.push(type);
 					}
