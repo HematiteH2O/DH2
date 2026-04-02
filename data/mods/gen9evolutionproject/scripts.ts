@@ -1151,15 +1151,15 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			if (firstDraftTeam.length) {
 				for (const request of baseRequestedSupport) if (!requestedSupportInGeneral.includes(request)) requestedSupportInGeneral.push(request);
 				for (const pokemon of firstDraftTeam) {
-					if (pokemon.requestedSupport.length) {
+					if (pokemon.requestedSupport !== null) {
 						console.log(pokemon.name);
 						for (const requestedSupport of pokemon.requestedSupport) if (!requestedSupportInGeneral.includes(requestedSupport)) requestedSupportInGeneral.push(requestedSupport);
 					}
-					if (pokemon.offeredSupport.length) {
+					if (pokemon.offeredSupport !== null) {
 						console.log(pokemon.name);
 						for (const offeredSupport of pokemon.offeredSupport) if (!offeredSupportThisStep.includes(offeredSupport)) offeredSupportThisStep.push(offeredSupport);
 					}
-					if (pokemon.acceptedSupport.length) {
+					if (pokemon.acceptedSupport !== null) {
 						console.log(pokemon.name);
 						for (const acceptedSupport of pokemon.acceptedSupport) if (!acceptedSupportThisStep.includes(acceptedSupport)) acceptedSupportThisStep.push(acceptedSupport);
 					}
