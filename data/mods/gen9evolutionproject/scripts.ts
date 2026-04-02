@@ -1153,15 +1153,15 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				for (const pokemon of firstDraftTeam) {
 					if (pokemon.requestedSupport !== null) {
 						console.log(pokemon.name);
-						for (const requestedSupport of pokemon.requestedSupport) if (!requestedSupportInGeneral.includes(requestedSupport)) requestedSupportInGeneral.push(requestedSupport);
+						for (const requestedSupport in pokemon.requestedSupport) if (!requestedSupportInGeneral.includes(requestedSupport)) requestedSupportInGeneral.push(requestedSupport);
 					}
 					if (pokemon.offeredSupport !== null) {
 						console.log(pokemon.name);
-						for (const offeredSupport of pokemon.offeredSupport) if (!offeredSupportThisStep.includes(offeredSupport)) offeredSupportThisStep.push(offeredSupport);
+						for (const offeredSupport in pokemon.offeredSupport) if (!offeredSupportThisStep.includes(offeredSupport)) offeredSupportThisStep.push(offeredSupport);
 					}
 					if (pokemon.acceptedSupport !== null) {
 						console.log(pokemon.name);
-						for (const acceptedSupport of pokemon.acceptedSupport) if (!acceptedSupportThisStep.includes(acceptedSupport)) acceptedSupportThisStep.push(acceptedSupport);
+						for (const acceptedSupport in pokemon.acceptedSupport) if (!acceptedSupportThisStep.includes(acceptedSupport)) acceptedSupportThisStep.push(acceptedSupport);
 					}
 					if (this.dex.species.get(pokemon.species)) {
 						if (this.dex.species.get(pokemon.species).num) teamNumbersThisStep.push(this.dex.species.get(pokemon.species).num);
