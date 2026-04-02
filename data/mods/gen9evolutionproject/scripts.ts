@@ -1258,15 +1258,14 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			
 			// and... now we get to choose a Pokémon!
 			let chosenRandomPokemon = this.sample(currentStep);
-			firstDraftTeam.chosenRandomPokemon = {
+			firstDraftTeam.push({
 				species: this.dex.data.Pokedex[chosenRandomPokemon].name,
 				offeredSupport: this.dex.data.Pokedex[chosenRandomPokemon].randbats.offeredSupport,
 				requestedSupport: this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].requestedSupport,
 				acceptedSupport: this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].acceptedSupport,
-			};
-			
-			console.log(this.dex.data.Pokedex[chosenRandomPokemon].randbats);
+			});
 		}
+		console.log(firstDraftTeam);
 
 		// okay, now it gets the tiniest bit more complicated
 		// we're gonna do the same loop, iterating over however many species we just randomly selected, in the same order we selected them
