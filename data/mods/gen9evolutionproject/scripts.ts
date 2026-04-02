@@ -1154,7 +1154,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (pokemon.acceptedSupport.length) for (const acceptedSupport of pokemon.acceptedSupport) if (!acceptedSupportThisStep.includes(acceptedSupport)) acceptedSupportThisStep.push(acceptedSupport);
 					if (this.dex.species.get(pokemon.species)) {
 						if (this.dex.species.get(pokemon.species).num) teamNumbersThisStep.push(this.dex.species.get(pokemon.species).num);
-						for (const type of types) if (!resistancesThisStep.includes(type) && this.dex.species.get(pokemon.species).randbats.immunities[type] || (this.dex.species.get(pokemon.species).randbats.resistances[type] && !this.dex.species.get(pokemon.species).randbats.weaknesses[type])) resistancesThisStep.push(type);
+						for (const type of types) if (!resistancesThisStep.includes(type) && (this.dex.species.get(pokemon.species).randbats.immunities[type] || (this.dex.species.get(pokemon.species).randbats.resistances[type] && !this.dex.species.get(pokemon.species).randbats.weaknesses[type]))) resistancesThisStep.push(type);
 					}
 				}
 				console.log(teamNumbersThisStep);
@@ -1239,9 +1239,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (teamResistScore > teamResistMaxScore) { // reset
 					teamResists = [];
 					teamResistMaxScore = teamResistScore;
+					console.log(teamResistMaxScore);
 				}
 				if (teamResistScore === teamResistMaxScore) teamResists.push(id);
 			}
+			console.log(teamResists);
 			if (teamResists.length) currentStep = teamResists;
 
 			// before I forget:
