@@ -256,31 +256,49 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					
 					// immunities
 					if (['Flash Fire', 'Primordial Sea', 'Well-Baked Body'].includes(ability)) {
+						if (!newMon.randbats.resistances['Fire']) {
+							newMon.randbats.resistances['Fire'] = {Ability: [ability]};
+						} else if (newMon.randbats.resistances['Fire'].Ability) newMon.randbats.resistances['Fire'].Ability.push(ability);
 						if (!newMon.randbats.immunities['Fire']) {
 							newMon.randbats.immunities['Fire'] = {Ability: [ability]};
 						} else if (newMon.randbats.immunities['Fire'].Ability) newMon.randbats.immunities['Fire'].Ability.push(ability);
 					}
 					if (['Desolate Land', 'Dry Skin', 'Storm Drain', 'Water Absorb'].includes(ability)) {
+						if (!newMon.randbats.resistances['Water']) {
+							newMon.randbats.resistances['Water'] = {Ability: [ability]};
+						} else if (newMon.randbats.resistances['Water'].Ability) newMon.randbats.resistances['Water'].Ability.push(ability);
 						if (!newMon.randbats.immunities['Water']) {
 							newMon.randbats.immunities['Water'] = {Ability: [ability]};
 						} else if (newMon.randbats.immunities['Water'].Ability) newMon.randbats.immunities['Water'].Ability.push(ability);
 					}
 					if (['Lightning Rod', 'Motor Drive', 'Volt Absorb'].includes(ability)) {
+						if (!newMon.randbats.resistances['Electric']) {
+							newMon.randbats.resistances['Electric'] = {Ability: [ability]};
+						} else if (newMon.randbats.resistances['Electric'].Ability) newMon.randbats.resistances['Electric'].Ability.push(ability);
 						if (!newMon.randbats.immunities['Electric']) {
 							newMon.randbats.immunities['Electric'] = {Ability: [ability]};
 						} else if (newMon.randbats.immunities['Electric'].Ability) newMon.randbats.immunities['Electric'].Ability.push(ability);
 					}
 					if (['Sap Sipper'].includes(ability)) {
+						if (!newMon.randbats.resistances['Grass']) {
+							newMon.randbats.resistances['Grass'] = {Ability: [ability]};
+						} else if (newMon.randbats.resistances['Grass'].Ability) newMon.randbats.resistances['Grass'].Ability.push(ability);
 						if (!newMon.randbats.immunities['Grass']) {
 							newMon.randbats.immunities['Grass'] = {Ability: [ability]};
 						} else if (newMon.randbats.immunities['Grass'].Ability) newMon.randbats.immunities['Grass'].Ability.push(ability);
 					}
 					if (['Centrifuge', 'Earth Eater', 'Levitate'].includes(ability)) {
+						if (!newMon.randbats.resistances['Ground']) {
+							newMon.randbats.resistances['Ground'] = {Ability: [ability]};
+						} else if (newMon.randbats.resistances['Ground'].Ability) newMon.randbats.resistances['Ground'].Ability.push(ability);
 						if (!newMon.randbats.immunities['Ground']) {
 							newMon.randbats.immunities['Ground'] = {Ability: [ability]};
 						} else if (newMon.randbats.immunities['Ground'].Ability) newMon.randbats.immunities['Ground'].Ability.push(ability);
 					}
 					if (['Divinated Protection'].includes(ability)) {
+						if (!newMon.randbats.resistances['Ghost']) {
+							newMon.randbats.resistances['Ghost'] = {Ability: [ability]};
+						} else if (newMon.randbats.resistances['Ghost'].Ability) newMon.randbats.resistances['Ghost'].Ability.push(ability);
 						if (!newMon.randbats.immunities['Ghost']) {
 							newMon.randbats.immunities['Ghost'] = {Ability: [ability]};
 						} else if (newMon.randbats.immunities['Ghost'].Ability) newMon.randbats.immunities['Ghost'].Ability.push(ability);
@@ -288,6 +306,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (['Wonder Guard'].includes(ability)) { // nothing has it but just for completion
 						for (const type of types) {
 							if (!newMon.randbats.weaknesses[type] || newMon.randbats.resistances[type] || newMon.randbats.immunities[type]) {
+								if (!newMon.randbats.resistances[type]) {
+									newMon.randbats.resistances[type] = {Ability: [ability]};
+								} else if (newMon.randbats.resistances[type].Ability) newMon.randbats.resistances[type].Ability.push(ability);
 								if (!newMon.randbats.immunities[type]) {
 									newMon.randbats.immunities[type] = {Ability: [ability]};
 								} else if (newMon.randbats.immunities[type].Ability) newMon.randbats.immunities[type].Ability.push(ability);
@@ -296,9 +317,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					}
 					
 				}
-				if (newMon.name === 'Datagon2') console.log(newMon.randbats.weaknesses);
-				if (newMon.name === 'Datagon2') console.log(newMon.randbats.resistances);
-				if (newMon.name === 'Datagon2') console.log(newMon.randbats.immunities);
 
 				// then I can start iterating over the movepool
 				const learnset = this.dataCache.Learnsets[id].learnset;
