@@ -417,17 +417,17 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					// VGC:
 						// Fake Out
 						if (fragment.moves.includes('Fake Out') || fragment.moves.includes('Mat Block')) {
-							if !(newMon.randbats.offeredSupport.fakeout) newMon.randbats.offeredSupport.fakeout = [];
+							if (!newMon.randbats.offeredSupport.fakeout) newMon.randbats.offeredSupport.fakeout = [];
 							newMon.randbats.offeredSupport.fakeout.push(fragment);
 						}
 						// priority
 						if (fragment.priority > 0 && (fragment.basePower > 40 || ['assist', 'copycat', 'mefirst', 'metronome', 'mirrormove', 'naturepower'].includes(moveid))) {
-							if !(newMon.randbats.offeredSupport.priority) newMon.randbats.offeredSupport.priority = [];
+							if (!newMon.randbats.offeredSupport.priority) newMon.randbats.offeredSupport.priority = [];
 							newMon.randbats.offeredSupport.priority.push(fragment);
 						}
 						// spread
 						if (move.target === 'allAdjacentFoes' && fragment.basePower > 60) {
-							if !(newMon.randbats.offeredSupport.spread) newMon.randbats.offeredSupport.spread = [];
+							if (!newMon.randbats.offeredSupport.spread) newMon.randbats.offeredSupport.spread = [];
 							newMon.randbats.offeredSupport.spread.push(fragment);
 						}
 						if ([
@@ -442,7 +442,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							 ].includes(moveid) && fragment.basePower > 80) ||
 							 (moveid === 'scaryface' && fragment.priority > 0)
 							) {
-							if !(newMon.randbats.offeredSupport.speedcontrol) newMon.randbats.offeredSupport.speedcontrol = [];
+							if (!newMon.randbats.offeredSupport.speedcontrol) newMon.randbats.offeredSupport.speedcontrol = [];
 							newMon.randbats.offeredSupport.speedcontrol.push(fragment);
 						}
 						if ([ // okay I'll revise this one in a bit but let's just see how it's going for now
@@ -454,7 +454,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							'memento', 'nobleroar', 'partingshot',
 							'grasswhistle', 'hypnosis', 'lovelykiss', 'sing', 'sleeppowder', 'spore', 'yawn'
 						].includes(moveid) && !(move.accuracy && move.accuracy < 70)) {
-							if !(newMon.randbats.offeredSupport.damagereduction) newMon.randbats.offeredSupport.damagereduction = [];
+							if (!newMon.randbats.offeredSupport.damagereduction) newMon.randbats.offeredSupport.damagereduction = [];
 							newMon.randbats.offeredSupport.damagereduction.push(fragment);
 						}
 						
@@ -464,7 +464,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					// singles:
 						// Knock Off
 						if (fragment.moves.includes('Knock Off')) {
-							if !(newMon.randbats.offeredSupport.knockoff) newMon.randbats.offeredSupport.knockoff = [];
+							if (!newMon.randbats.offeredSupport.knockoff) newMon.randbats.offeredSupport.knockoff = [];
 							newMon.randbats.offeredSupport.knockoff.push({moves: [moveName]);
 						}
 					}
