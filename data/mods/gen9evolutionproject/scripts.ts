@@ -461,7 +461,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								// this will be a good threshold for choice item sets... I think
 								if (!newMon.randbats.offeredSupport.choicebreaker) newMon.randbats.offeredSupport.choicebreaker = [];
 								modFragment.item = (fragment.moveCategory === 'Physical' ? 'Choice Band' : 'Choice Specs');
-								newMon.randbats.spicy.push(modFragment);
+								newMon.randbats.offeredSupport.choicebreaker.push(modFragment);
 							}
 						}
 						
