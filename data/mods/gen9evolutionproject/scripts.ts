@@ -465,7 +465,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 						// Knock Off
 						if (fragment.moves.includes('Knock Off')) {
 							if (!newMon.randbats.offeredSupport.knockoff) newMon.randbats.offeredSupport.knockoff = [];
-							newMon.randbats.offeredSupport.knockoff.push({moves: [moveName]);
+							newMon.randbats.offeredSupport.knockoff.push(fragment);
 						}
 					}
 						
