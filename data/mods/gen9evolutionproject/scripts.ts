@@ -472,12 +472,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							newMon.randbats.offeredSupport.fakeout.push(fragment);
 						}
 						// priority
-						if (fragment.movePriority > 0 && moveid !== 'upperhand') {
-							// Upper Hand is cool and all but it does *not* count as being a team's priority user jsdfngh
+						if (fragment.movePriority > 0 && !['upperhand', 'feint'].includes(moveid)) {
+							// those two are cool and all, but they do *not* count as being a team's priority user jsdfngh
 							if (fragment.moveBasePower > 40 || ['assist', 'copycat', 'mefirst', 'metronome', 'mirrormove', 'naturepower'].includes(moveid)) {
 								if (!newMon.randbats.offeredSupport.priority) newMon.randbats.offeredSupport.priority = [];
 								newMon.randbats.offeredSupport.priority.push(fragment);
-							} else if (fragment.moveBasePower && !fragment.stab && !fragment.teraType) {
+							} else if (fragment.moveBasePower && !fragment.stab && !fragment.teraType && fragment.moveType !== 'Normal') {
 								// push to "spicy" for some last-pick set filler
 								if (!newMon.randbats.spicy) newMon.randbats.spicy = [];
 								let modFragment = Utils.deepClone(fragment);
