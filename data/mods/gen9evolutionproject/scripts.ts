@@ -1429,7 +1429,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					
 					if (!requestedSupportThisStep.length) { // ... or if all of them are represented, but this one is one of the least represented
 						let minOffer = 6;
-						for (const offer in offeredSupportInGeneral) if (requestedSupportInGeneral.contains(offer) && minOffer > offeredSupportInGeneral[offer]) minOffer = offeredSupportInGeneral[offer];
+						for (const offer in offeredSupportInGeneral) if (requestedSupportInGeneral.includes(offer) && minOffer > offeredSupportInGeneral[offer]) minOffer = offeredSupportInGeneral[offer];
 						requestedSupportThisStep = requestedSupportInGeneral.filter(
 							request => (offeredSupportInGeneral[request] === minOffer)
 						);
