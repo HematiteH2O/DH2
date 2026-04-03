@@ -113,8 +113,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					resistances: {},
 					immunities: {},
 				};
-				newMon.randbats.viableStabs[newMon.types[0]] = {};
-				if (newMon.types[1]) newMon.randbats.viableStabs[newMon.types[1]] = {};
 				
 				// banlists
 				if ([
@@ -450,17 +448,22 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							'firepunch', 'flamethrower', 'flareblitz', 'fireblast', 'overheat',
 							'scald', 'liquidation', 'hydropump',
 						];
-						if (fragment.stab && viableStabs.includes(fragment.baseMove) && newMon.randbats.viableStabs[fragment.moveType]) {
-							if (fragment.moveBasePower >= 80) newMon.randbats.viableStabs[fragment.moveType].push(fragment);
+						if (viableStabs.includes(fragment.baseMove)) {
+							// this allows for non-STAB moves if they're as strong as a STAB anyway, but I set the bar a little higher for now
+							// this will sometimes be the case for moves like Shiftry's Double-Edge or Repehk's Weather Ball!
+							// later on, I should be ready to check for how many unique types of "STABs" are covered;
+							// if there are at least 2 types in viableStabs, then the set should try to have viableStabs of any 2 types
+							
+							let modFragment = Utils.deepClone(fragment);
+							if (!fragment.stab && !fragment.teraType) modFragment.teraType = fragment.moveType;
+							if (fragment.moveBasePower >= 90 || (fragment.stab && fragment.moveBasePower >= 80)) newMon.randbats.viableStabs.push(modFragment);
 							if (fragment.moveBasePower >= 120 && !fragment.item) {
 								// this will be a good threshold for choice item sets... I think
 								if (!newMon.randbats.offeredSupport.choicebreaker) newMon.randbats.offeredSupport.choicebreaker = [];
-								let modFragment = Utils.deepClone(fragment);
 								modFragment.item = {fragment.moveCategory === 'Physical' ? 'Choice Band' : 'Choice Specs');
 								newMon.randbats.spicy.push(modFragment);
 							}
 						}
-						// lowkey tempted to allow non-STAB ones, like Shiftry's Aerilate Double-Edge being probably its strongest singles move, but one thing at a time
 						
 					// VGC:
 						// Fake Out
