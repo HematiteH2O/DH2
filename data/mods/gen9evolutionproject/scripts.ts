@@ -604,9 +604,8 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 						} else accepted = true;
 					}
 					if (!accepted) delete newMon.randbats.offeredSupport[offeredSupport];
-					
-					console.log(newMon.randbats); // or for (const fragment in newMon.randbats.offeredSupport) console.log(newMon.randbats.offeredSupport[fragment]);
 				}
+				console.log(newMon.randbats); // or for (const fragment in newMon.randbats.offeredSupport) console.log(newMon.randbats.offeredSupport[fragment]);
 			}
 		}
 		
@@ -1428,7 +1427,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					
 					if (!requestedSupportThisStep.length) { // ... or if all of them are represented, but this one is one of the least represented
 						let minOffer = 6;
-						for (const offer in offeredSupportInGeneral) if (offeredSupportInGeneral[offer] < minOffer) minOffer = offeredSupportInGeneral[offer]
+						for (const offer in offeredSupportInGeneral) if (minOffer > offeredSupportInGeneral[offer]) minOffer = offeredSupportInGeneral[offer];
 						requestedSupportThisStep = requestedSupportInGeneral.filter(
 							request => (offeredSupportInGeneral[request] === minOffer)
 						);
