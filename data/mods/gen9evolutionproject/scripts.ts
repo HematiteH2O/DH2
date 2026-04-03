@@ -159,14 +159,14 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 				// then let them cancel out
 				for (const type of weaknesses) {
-					if (!resistances.includes(type) && !immunities.includes(type)) newMon.randbats.weaknesses[type] = true;
+					if (!resistances.includes(type) && !immunities.includes(type)) newMon.randbats.weaknesses[type] = "true";
 				}
 				for (const type of resistances) {
-					if (!weaknesses.includes(type) || immunities.includes(type)) newMon.randbats.resistances[type] = true;
+					if (!weaknesses.includes(type) || immunities.includes(type)) newMon.randbats.resistances[type] = "true";
 					// immunities are just better resistances, so they might as well still count
 				}
 				for (const type of immunities) {
-					newMon.randbats.immunities[type] = true;
+					newMon.randbats.immunities[type] = "true";
 				}
 				// finally, account for Abilities
 				for (const ability of newMon.randbats.abilities) {
@@ -569,6 +569,44 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				// from there, the individual fragments' requestedSupports only need to be checked again during set construction, after the whole team is done
 				// and obviously ones with support available are favored, but ones with requestedSupport missing are completely ignored
 				
+				for (const fragment in newMon.randbats.viableStabs) {
+					if (newMon.randbats.viableStabs[fragment].singles.requestedSupport.length) {
+						for (const request of newMon.randbats.viableStabs[fragment].singles.requestedSupport) {
+							if (!newMon.randbats.singles.acceptedSupport[request]) newMon.randbats.singles.acceptedSupport[request] = [];
+							newMon.randbats.singles.acceptedSupport[request].push(fragment);
+						}
+					}
+					if (newMon.randbats.viableStabs[fragment].vgc.requestedSupport.length) {
+						for (const request of newMon.randbats.viableStabs[fragment].vgc.requestedSupport) {
+							if (!newMon.randbats.vgc.acceptedSupport[request]) newMon.randbats.vgc.acceptedSupport[request] = [];
+							newMon.randbats.vgc.acceptedSupport[request].push(fragment);
+						}
+					}
+				}
+				
+				for (const offeredSupport in newMon.randbats.offeredSupport) {
+					let accepted = false;
+					for (const fragment in newMon.randbats.offeredSupport[offeredSupport]) {
+						if (newMon.randbats.offeredSupport[offeredSupport][fragment] === "true") {
+							accepted = true;
+						} else {
+							if (newMon.randbats.offeredSupport[offeredSupport][fragment].singles.requestedSupport.length) {
+								for (const request of newMon.randbats.offeredSupport[offeredSupport][fragment].singles.requestedSupport) {
+									if (!newMon.randbats.singles.acceptedSupport[request]) newMon.randbats.singles.acceptedSupport[request] = [];
+									newMon.randbats.singles.acceptedSupport[request].push(fragment);
+								}
+							}
+							if (newMon.randbats.offeredSupport[offeredSupport][fragment].vgc.requestedSupport.length) {
+								for (const request of newMon.randbats.offeredSupport[offeredSupport][fragment].vgc.requestedSupport) {
+									if (!newMon.randbats.vgc.acceptedSupport[request]) newMon.randbats.vgc.acceptedSupport[request] = [];
+									newMon.randbats.vgc.acceptedSupport[request].push(fragment);
+								}
+							}
+							if (!newMon.randbats.offeredSupport[offeredSupport][fragment].singles.requestedSupport.length && !newMon.randbats.offeredSupport[offeredSupport][fragment].vgc.requestedSupport.length) accepted = true;
+						}
+					}
+					if (!accepted) delete newMon.randbats.offeredSupport[offeredSupport];
+				}
 			}
 		}
 		
