@@ -1428,12 +1428,8 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					); // if it's not at all represented
 					
 					if (!requestedSupportThisStep.length) { // ... or if all of them are represented, but this one is one of the least represented
-						console.log(`We're trying to find the least-represented support now`);
 						let minOffer = 6;
-						for (const offer in offeredSupportInGeneral) if (minOffer > offeredSupportInGeneral[offer]) minOffer = offeredSupportInGeneral[offer];
-						console.log(`Here's the offeredSupportInGeneral tally:`);
-						console.log(offeredSupportInGeneral);
-						console.log(`I think the least-represented support is ${minOffer}`);
+						for (const offer in offeredSupportInGeneral) if (requestedSupportInGeneral.contains(offer) && minOffer > offeredSupportInGeneral[offer]) minOffer = offeredSupportInGeneral[offer];
 						requestedSupportThisStep = requestedSupportInGeneral.filter(
 							request => (offeredSupportInGeneral[request] === minOffer)
 						);
