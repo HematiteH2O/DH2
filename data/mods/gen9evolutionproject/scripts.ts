@@ -1,5 +1,6 @@
 import { Pokemon, EffectState } from '../../../sim/pokemon';
 import { Teams } from '../../../sim/teams';
+import { Utils } from '../../../lib/utils';
 
 export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 	teambuilderConfig: {
@@ -371,9 +372,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					for (const ability of newMon.randbats.abilities) {
 						switch (ability) {
 							case 'Aerilate':
-								if (move.type === 'Normal' && !noModifyType.includes(moveid)) {
+								if (move.type === 'Normal' && basePower && !noModifyType.includes(moveid)) {
 									let modFragment = {
-										ability: ['Aerilate'],
+										ability: 'Aerilate',
 										moveType: 'Flying',
 										moveBasePower: basePower * 1.2,
 									};
@@ -388,21 +389,23 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						if (!fragment.baseMove) fragment.baseMove = move.name;
 						if (!fragment.moves) fragment.moves = [move.name];
 						
-						if (!fragment.ability) fragment.ability = [];
-						if (!fragment.item) fragment.item = [];
-						if (!fragment.evs) fragment.evs = [];
-						if (!fragment.teraType) fragment.teraType = [];
+						if (!fragment.ability) fragment.ability = null;
+						if (!fragment.item) fragment.item = null;
+						if (!fragment.evs) fragment.evs = {};
+						if (!fragment.teraType) fragment.teraType = null;
 						
 						if (!fragment.offeredSupport) fragment.offeredSupport = [];
-						if (!fragment.requestedSupport) fragment.requestedSupport = [];
-						if (!fragment.acceptedSupport) fragment.acceptedSupport = [];
+						if (!fragment.singles.requestedSupport) fragment.singles.requestedSupport = [];
+						if (!fragment.singles.acceptedSupport) fragment.singles.acceptedSupport = [];
+						if (!fragment.vgc.requestedSupport) fragment.vgc.requestedSupport = [];
+						if (!fragment.vgc.acceptedSupport) fragment.vgc.acceptedSupport = [];
 						
-						if (!fragment.moveType) fragment.moveType = [move.type];
-						if (!fragment.moveBasePower) fragment.moveBasePower = [basePower];
-						if (!fragment.moveCategory) fragment.moveCategory = [move.category];
-						if (!fragment.movePriority) fragment.movePriority = [move.priority];
+						if (!fragment.moveType) fragment.moveType = move.type;
+						if (!fragment.moveBasePower) fragment.moveBasePower = basePower;
+						if (!fragment.moveCategory) fragment.moveCategory = move.category;
+						if (!fragment.movePriority) fragment.movePriority = move.priority;
 						
-						if (newMon.randbats.types.includes(fragment.moveType)) fragment.stab = true;
+						if (newMon.randbats.types.includes(fragment.moveType) && fragment.moveBasePower) fragment.stab = true;
 						if (!fragment.stab) fragment.moveBasePower /= 1.5;
 					}
 					// I usually think in terms of regular base powers,
@@ -421,14 +424,33 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							newMon.randbats.offeredSupport.fakeout.push(fragment);
 						}
 						// priority
-						if (fragment.priority > 0 && (fragment.basePower > 40 || ['assist', 'copycat', 'mefirst', 'metronome', 'mirrormove', 'naturepower'].includes(moveid))) {
-							if (!newMon.randbats.offeredSupport.priority) newMon.randbats.offeredSupport.priority = [];
-							newMon.randbats.offeredSupport.priority.push(fragment);
+						if (fragment.priority > 0) {
+							if (fragment.basePower > 40 || ['assist', 'copycat', 'mefirst', 'metronome', 'mirrormove', 'naturepower'].includes(moveid)) {
+								if (!newMon.randbats.offeredSupport.priority) newMon.randbats.offeredSupport.priority = [];
+								newMon.randbats.offeredSupport.priority.push(fragment);
+							} else if (fragment.basePower && !fragment.stab && !fragment.teraType) {
+								let modFragment = Utils.deepClone(fragment);
+								modFragment.teraType = fragment.moveType;
+								// push to "spicy" for some last-pick set filler
+								if (!newMon.randbats.spicy) newMon.randbats.spicy = [];
+								newMon.randbats.spicy.push(fragment);
+							}
 						}
 						// spread
 						if (move.target === 'allAdjacentFoes' && fragment.basePower > 60) {
 							if (!newMon.randbats.offeredSupport.spread) newMon.randbats.offeredSupport.spread = [];
 							newMon.randbats.offeredSupport.spread.push(fragment);
+						}
+						if (move.target === 'allAdjacent' && fragment.basePower > 60) {
+							let modFragment = Utils.deepClone(fragment);
+							modFragment.vgc.requestedSupport.push([`${(fragment.moveType).toLowerCase()}immune`]); // ex. "electricimmune"
+							modFragment.vgc.offeredSupport.push([`side${(fragment.moveType).toLowerCase()}`]); // ex. "sideelectric"
+							
+							if (!newMon.randbats.offeredSupport.spread) newMon.randbats.offeredSupport.spread = [];
+							newMon.randbats.offeredSupport.spread.push(fragment);
+							
+							if (!newMon.randbats.offeredSupport[`side${(fragment.moveType).toLowerCase()}`]) newMon.randbats.offeredSupport[`side${(fragment.moveType).toLowerCase()}`] = [];
+							newMon.randbats.offeredSupport[`side${(fragment.moveType).toLowerCase()}`].push(fragment);
 						}
 						if ([
 							'tailwind', 'trickroom', 'stickyweb', 'silktrap',
@@ -471,7 +493,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 						
 						// Upper Hand and team-supported Grassy Glide need their own cases and were *not* included in priority
 				}
-				if (newMon.name === 'Shiftry-Johto') {
+				if (newMon.name === 'Noivern-Paldea') {
 					for (const fragment in newMon.randbats.offeredSupport) console.log(newMon.randbats.offeredSupport[fragment]);
 				}
 			}
