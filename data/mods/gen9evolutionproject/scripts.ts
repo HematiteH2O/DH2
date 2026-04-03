@@ -353,7 +353,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					// TODO: list and override them here
 					// at a glance, ctrl + F basePowerCallback is a good way to do this
 					switch (moveid) {
-						case: 'Grass Knot':
+						case 'Grass Knot':
 							basePower = 60; // some of these are gonna be arbitrary :'D
 							break;
 					}
@@ -370,7 +370,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					];
 					for (const ability of newMon.randbats.abilities) {
 						switch (ability) {
-							case: 'Aerilate':
+							case 'Aerilate':
 								if (moveType === 'Normal' && !noModifyType.includes(moveid)) {
 									let modFragment = {
 										ability: ['Aerilate'],
