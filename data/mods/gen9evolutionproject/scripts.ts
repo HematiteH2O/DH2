@@ -490,7 +490,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							if (!newMon.randbats.offeredSupport.spread) newMon.randbats.offeredSupport.spread = [];
 							newMon.randbats.offeredSupport.spread.push(fragment);
 						}
-						if (move.target === 'allAdjacent' && fragment.moveBasePower > 60) {
+						if (move.target === 'allAdjacent' && fragment.moveBasePower > 60 && !move.selfdestruct) {
 							let modFragment = Utils.deepClone(fragment);
 							modFragment.vgc.requestedSupport.push([`${(fragment.moveType).toLowerCase()}immune`]); // ex. "electricimmune"
 							
@@ -1420,6 +1420,8 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 							for (const type of types) if (!resistancesThisStep.includes(type) && (this.dex.species.get(pokemon.species).randbats.immunities[type] || (this.dex.species.get(pokemon.species).randbats.resistances[type] && !this.dex.species.get(pokemon.species).randbats.weaknesses[type]))) resistancesThisStep.push(type);
 						}
 					}
+
+					// TODO: filter requestedSupportInGeneral - make sure at least one thing in the eligible pool is offering it, and just skip it if not?
 					
 					requestedSupportThisStep = requestedSupportInGeneral.filter(
 						request => (!offeredSupportInGeneral[request])
