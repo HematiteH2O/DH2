@@ -321,7 +321,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 
 				// ex. newMon.randbats.offeredSupport.groundimmune
-				for (const immunity in newMon.randbats.immunities) newMon.randbats.offeredSupport[`${immunity}immune`] = newMon.randbats.immunities[immunity];
+				for (const immunity in newMon.randbats.immunities) newMon.randbats.offeredSupport[`${(immunity).toLowerCase()}immune`] = newMon.randbats.immunities[immunity];
 
 				// then I can start iterating over the movepool!
 				// but first...
@@ -448,7 +448,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							'firepunch', 'flamethrower', 'flareblitz', 'fireblast', 'overheat',
 							'scald', 'liquidation', 'hydropump',
 						];
-						if (viableStabs.includes(fragment.baseMove)) {
+						if (viableStabs.includes(moveid)) {
 							// this allows for non-STAB moves if they're as strong as a STAB anyway, but I set the bar a little higher for now
 							// this will sometimes be the case for moves like Shiftry's Double-Edge or Repehk's Weather Ball!
 							// later on, I should be ready to check for how many unique types of "STABs" are covered;
@@ -472,7 +472,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							newMon.randbats.offeredSupport.fakeout.push(fragment);
 						}
 						// priority
-						if (fragment.priority > 0) {
+						if (fragment.movePriority > 0) {
 							if (moveid === 'upperhand') return; // this is cool and all but it does *not* count as being a team's priority user jsdfngh
 							if (fragment.moveBasePower > 40 || ['assist', 'copycat', 'mefirst', 'metronome', 'mirrormove', 'naturepower'].includes(moveid)) {
 								if (!newMon.randbats.offeredSupport.priority) newMon.randbats.offeredSupport.priority = [];
@@ -511,7 +511,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							 ([
 								 'lowsweep', 'mudshot', 'drumbeating', 'pounce',
 							 ].includes(moveid) && fragment.moveBasePower > 80) ||
-							 (moveid === 'scaryface' && fragment.priority > 0)
+							 (moveid === 'scaryface' && fragment.movePriority > 0)
 							) {
 							if (!newMon.randbats.offeredSupport.speedcontrol) newMon.randbats.offeredSupport.speedcontrol = [];
 							newMon.randbats.offeredSupport.speedcontrol.push(fragment);
@@ -520,9 +520,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							'reflect', 'lightscreen', 'auroraveil',
 							// 'quickguard', 'wideguard', // should really be elsewhere
 							'followme', 'ragepowder',
-							'growl', 'babydolleyes', 'charm', 'tickle', 'featherdance', 'kingsshield',
+							'growl', 'babydolleyes', 'charm', 'tickle', 'featherdance', 'kingsshield', 'bittermalice', 'breakingswipe', 'chillingwater', 'lunge', 'strengthsap', 'tropkick',
 							'captivate', 'snarl', 'strugglebug', 'mysticalfire', 'eerieimpulse',
-							'memento', 'nobleroar', 'partingshot',
+							'memento', 'nobleroar', 'tearfullook', 'partingshot',
 							'grasswhistle', 'hypnosis', 'lovelykiss', 'sing', 'sleeppowder', 'spore', 'yawn'
 						].includes(moveid) && !(move.accuracy && move.accuracy < 70)) {
 							if (!newMon.randbats.offeredSupport.damagereduction) newMon.randbats.offeredSupport.damagereduction = [];
@@ -551,6 +551,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					}
 						
 						// Upper Hand and team-supported Grassy Glide need their own cases and were *not* included in priority
+						// Venom Drench is also neat
 				}
 				console.log(newMon.randbats); // or for (const fragment in newMon.randbats.offeredSupport) console.log(newMon.randbats.offeredSupport[fragment]);
 
@@ -1376,8 +1377,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 						}
 					}
 					requestedSupportThisStep = requestedSupportInGeneral.filter(request => !offeredSupportThisStep.includes(request));
-					console.log(`requested in general: ` + requestedSupportInGeneral);
-					console.log(`offered this step: ` + offeredSupportThisStep);
+					console.log(resistancesThisStep);
 					console.log(`requested this step: ` + requestedSupportThisStep);
 				}
 	
