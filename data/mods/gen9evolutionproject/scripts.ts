@@ -346,7 +346,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						}
 					}
 					
-					let move = this.dataCache.Moves[id];
+					let move = this.dataCache.Moves[moveid];
 					let basePower = move.basePower;
 
 					// some moves like Grass Knot have misleading base powers to begin with, so
