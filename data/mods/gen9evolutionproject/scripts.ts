@@ -450,7 +450,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							'firepunch', 'flamethrower', 'flareblitz', 'fireblast', 'overheat',
 							'scald', 'liquidation', 'hydropump',
 						];
-						if (fragment.stab && viableStabs.includes(fragment.baseMove) && newMon.randbats.viableStabs[fragment.moveType])) {
+						if (fragment.stab && viableStabs.includes(fragment.baseMove) && newMon.randbats.viableStabs[fragment.moveType]) {
 							if (fragment.moveBasePower >= 80) newMon.randbats.viableStabs[fragment.moveType].push(fragment);
 							if (fragment.moveBasePower >= 120 && !fragment.item) {
 								// this will be a good threshold for choice item sets... I think
