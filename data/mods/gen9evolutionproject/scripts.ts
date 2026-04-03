@@ -472,8 +472,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							newMon.randbats.offeredSupport.fakeout.push(fragment);
 						}
 						// priority
-						if (fragment.movePriority > 0) {
-							if (moveid === 'upperhand') return; // this is cool and all but it does *not* count as being a team's priority user jsdfngh
+						if (fragment.movePriority > 0 && moveid !== 'upperhand') {
+							// Upper Hand is cool and all but it does *not* count as being a team's priority user jsdfngh
 							if (fragment.moveBasePower > 40 || ['assist', 'copycat', 'mefirst', 'metronome', 'mirrormove', 'naturepower'].includes(moveid)) {
 								if (!newMon.randbats.offeredSupport.priority) newMon.randbats.offeredSupport.priority = [];
 								newMon.randbats.offeredSupport.priority.push(fragment);
