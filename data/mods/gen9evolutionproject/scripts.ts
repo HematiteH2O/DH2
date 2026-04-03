@@ -415,8 +415,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						// interested in accounting for base stats (as modifiers to base power) before continuing
 						// let's say the following steps' base powers are standardized around ~100 base Attack/SpA with 252 EVs
 						// so if the actual stat is more or less than that, the base power should be scaled accoridngly
-						if (fragment.moveCategory === 'Physical') fragment.moveBasePower *= (newMon.baseStats.atk/299);
-						if (fragment.moveCategory === 'Special') fragment.moveBasePower *= (newMon.baseStats.spa/299);
+						if (fragment.moveCategory === 'Physical') fragment.moveBasePower *= ((newMon.baseStats.atk*2+99)/299);
+						if (fragment.moveCategory === 'Special') fragment.moveBasePower *= ((newMon.baseStats.spa*2+99)/299);
 					}
 
 					for (const fragment of fragments) {
