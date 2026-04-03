@@ -345,23 +345,136 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							if (!lcLevelLearned) continue; // if you can only learn it by level, and only by a level after 5, continue
 						}
 					}
+					
+					let move = this.dataCache.Moves[id];
+					let basePower = move.basePower;
+
+					// some moves like Grass Knot have misleading base powers to begin with, so
+					// TODO: list and override them here
+					// at a glance, ctrl + F basePowerCallback is a good way to do this
 					switch (moveid) {
-						case 'knockoff':
-							if (newMon.randbats.offeredSupport.knockoff) {
-								if (newMon.randbats.offeredSupport.knockoff.moves) {
-									newMon.randbats.offeredSupport.knockoff.moves.push('Knock Off');
-								} else newMon.randbats.offeredSupport.knockoff.moves = ['Knock Off'];
-							} else {
-								newMon.randbats.offeredSupport.knockoff = {
-									moves: ['Knock Off'],
-								}
-							}
+						case: 'Grass Knot':
+							basePower = 60; // some of these are gonna be arbitrary :'D
 							break;
 					}
+					// I notice the Acrobatics fragment is gonna take some special attention, but one thing at a time
+
+					let fragments = [];
+					let baseFragment = {
+					};
+					fragments.push(baseFragment);
+
+					// some moves need copies in case of multiple Abilities
+					const noModifyType = [
+						'hiddenpower', 'judgment', 'multiattack', 'naturalgift', 'revelationdance', 'struggle', 'technoblast', 'terrainpulse', 'weatherball',
+					];
+					for (const ability of newMon.randbats.abilities) {
+						switch (ability) {
+							case: 'Aerilate':
+								if (moveType === 'Normal' && !noModifyType.includes(moveid)) {
+									let modFragment = {
+										ability: ['Aerilate'],
+										moveType: 'Flying',
+										moveBasePower: basePower * 1.2,
+									};
+									fragments.push(modFragment);
+								}
+								break;
+						}
+					}
+					
+					// fill in default information
+					for (const fragment in fragments) {
+						if (!fragment.baseMove) fragment.baseMove = move.name;
+						if (!fragment.moves) fragment.moves = [move.name];
+						
+						if (!fragment.ability) fragment.ability = [];
+						if (!fragment.item) fragment.item = [];
+						if (!fragment.evs) fragment.evs = [];
+						if (!fragment.teraType) fragment.teraType = [];
+						
+						if (!fragment.offeredSupport) fragment.offeredSupport = [];
+						if (!fragment.requestedSupport) fragment.requestedSupport = [];
+						if (!fragment.acceptedSupport) fragment.acceptedSupport = [];
+						
+						if (!fragment.moveType) fragment.moveType = [move.type];
+						if (!fragment.moveBasePower) fragment.moveBasePower = [basePower];
+						if (!fragment.moveCategory) fragment.moveCategory = [move.category];
+						if (!fragment.movePriority) fragment.movePriority = [move.priority];
+						
+						if (newMon.randbats.types.includes(fragment.moveType)) fragment.stab = true;
+						if (!fragment.stab) fragment.moveBasePower /= 1.5;
+					}
+					// I usually think in terms of regular base powers,
+					// so it's more intuitive for me to divide for lack of STAB than to multiply for STAB
+					
+					// TODO: consider accounting for base stats (as modifiers to base power) before continuing
+					// let's say the following steps' base powers are standardized around ~100 base Attack/SpA with 252 EVs
+					// so if the actual stat is more or less than that, the base power should be scaled accoridngly
+
+					for (const fragment in fragments) {
+						
+					// VGC:
+						// Fake Out
+						if (fragment.moves.includes('Fake Out') || fragment.moves.includes('Mat Block')) {
+							if !(newMon.randbats.offeredSupport.fakeout) newMon.randbats.offeredSupport.fakeout = [];
+							newMon.randbats.offeredSupport.fakeout.push(fragment);
+						}
+						// priority
+						if (fragment.priority > 0 && (fragment.basePower > 40 || ['assist', 'copycat', 'mefirst', 'metronome', 'mirrormove', 'naturepower'].includes(moveid))) {
+							if !(newMon.randbats.offeredSupport.priority) newMon.randbats.offeredSupport.priority = [];
+							newMon.randbats.offeredSupport.priority.push(fragment);
+						}
+						// spread
+						if (move.target === 'allAdjacentFoes' && fragment.basePower > 60) {
+							if !(newMon.randbats.offeredSupport.spread) newMon.randbats.offeredSupport.spread = [];
+							newMon.randbats.offeredSupport.spread.push(fragment);
+						}
+						if ([
+							'tailwind', 'trickroom', 'stickyweb', 'silktrap',
+							'bulldoze', 'cottonspore', 'stringshot',
+							'electroweb', 'icywind', 'glaciate',
+							'thunderwave', 'nuzzle',
+							'syrupbomb', 'tarshot',
+						].includes(moveid) ||
+							 ([
+								 'lowsweep', 'mudshot', 'drumbeating', 'pounce',
+							 ].includes(moveid) && fragment.basePower > 80) ||
+							 (moveid === 'scaryface' && fragment.priority > 0)
+							) {
+							if !(newMon.randbats.offeredSupport.speedcontrol) newMon.randbats.offeredSupport.speedcontrol = [];
+							newMon.randbats.offeredSupport.speedcontrol.push(fragment);
+						}
+						if ([ // okay I'll revise this one in a bit but let's just see how it's going for now
+							'reflect', 'lightscreen', 'auroraveil',
+							// 'quickguard', 'wideguard', // should really be elsewhere
+							'followme', 'ragepowder',
+							'growl', 'babydolleyes', 'charm', 'tickle', 'featherdance', 'kingsshield',
+							'captivate', 'snarl', 'strugglebug', 'mysticalfire', 'eerieimpulse',
+							'memento', 'nobleroar', 'partingshot',
+							'grasswhistle', 'hypnosis', 'lovelykiss', 'sing', 'sleeppowder', 'spore', 'yawn'
+						].includes(moveid) && !(move.accuracy && move.accuracy < 70)) {
+							if !(newMon.randbats.offeredSupport.damagereduction) newMon.randbats.offeredSupport.damagereduction = [];
+							newMon.randbats.offeredSupport.damagereduction.push(fragment);
+						}
+						
+/*
+singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff', 'contactpunish', 'electricimmune', 'groundimmune'];
+*/
+					// singles:
+						// Knock Off
+						if (fragment.moves.includes('Knock Off')) {
+							if !(newMon.randbats.offeredSupport.knockoff) newMon.randbats.offeredSupport.knockoff = [];
+							newMon.randbats.offeredSupport.knockoff.push({moves: [moveName]);
+						}
+					}
+						
+						// Upper Hand and team-supported Grassy Glide need their own cases and were *not* included in priority
 				}
-				console.log(newMon.randbats);
+				if (newMon.name === 'Shiftry-Johto') {
+					for (const fragment in newMon.randbats.offeredSupport) console.log(fragment);
+				}
 			}
-		if (this.modData.format) console.log(this.modData.format.name);
 		}
 		
 /*
