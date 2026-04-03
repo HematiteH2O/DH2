@@ -371,7 +371,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					for (const ability of newMon.randbats.abilities) {
 						switch (ability) {
 							case 'Aerilate':
-								if (moveType === 'Normal' && !noModifyType.includes(moveid)) {
+								if (move.type === 'Normal' && !noModifyType.includes(moveid)) {
 									let modFragment = {
 										ability: ['Aerilate'],
 										moveType: 'Flying',
