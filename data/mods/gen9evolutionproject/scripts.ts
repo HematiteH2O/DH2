@@ -395,8 +395,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						if (!fragment.teraType) fragment.teraType = null;
 						
 						if (!fragment.offeredSupport) fragment.offeredSupport = [];
+						if (!fragment.singles) fragment.singles = {};
 						if (!fragment.singles.requestedSupport) fragment.singles.requestedSupport = [];
 						if (!fragment.singles.acceptedSupport) fragment.singles.acceptedSupport = [];
+						if (!fragment.vgc) fragment.vgc = {};
 						if (!fragment.vgc.requestedSupport) fragment.vgc.requestedSupport = [];
 						if (!fragment.vgc.acceptedSupport) fragment.vgc.acceptedSupport = [];
 						
