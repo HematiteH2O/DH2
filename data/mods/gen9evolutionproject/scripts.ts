@@ -472,7 +472,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 						// Upper Hand and team-supported Grassy Glide need their own cases and were *not* included in priority
 				}
 				if (newMon.name === 'Shiftry-Johto') {
-					for (const fragment of newMon.randbats.offeredSupport) console.log(fragment);
+					for (const fragment in newMon.randbats.offeredSupport) console.log(fragment);
 				}
 			}
 		}
