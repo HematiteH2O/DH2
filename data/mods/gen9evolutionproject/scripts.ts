@@ -99,6 +99,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					name: newMon.name, // for console.logging convenience
 					types: [],
 					abilities: [],
+					viableStabs: {},
 					offeredSupport: {},
 					singles: {
 						requestedSupport: {},
@@ -112,6 +113,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					resistances: {},
 					immunities: {},
 				};
+				newMon.randbats.viableStabs[newMon.types[0]] = {},
+				if (newMon.types[1]) newMon.randbats.viableStabs[newMon.types[1]] = {},
 				
 				// banlists
 				if ([
@@ -421,6 +424,31 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 					for (const fragment of fragments) {
 						
+					// support requirements before any context
+						if (moveid === 'risingvoltage' && fragment.ability !== 'Electric Surge') {
+							fragment.moveBasePower *= 2;
+							fragment.singles.requestedSupport.push('electricterrain');
+							fragment.vgc.requestedSupport.push('electricterrain');
+						}
+						if (moveid === 'expandingforce' && fragment.ability !== 'Psychic Surge') {
+							fragment.moveBasePower *= 1.5;
+							fragment.singles.requestedSupport.push('psychicterrain');
+							fragment.vgc.requestedSupport.push('psychicterrain');
+						}
+						if (moveid === 'grassyglide' && fragment.ability !== 'Grassy Surge') {
+							fragment.movePriority += 1;
+							fragment.singles.requestedSupport.push('grassyterrain');
+							fragment.vgc.requestedSupport.push('grassyterrain');
+						}
+						// Misty Explosion doesn't actually want Misty Terrain support
+
+					// general / STAB
+						if (
+							fragment.stab && [
+								'flamethrower',
+							].includes(fragment.baseMove) && fragment.moveBasePower >= 80 && newMon.randbats.viableStabs[fragment.moveType]
+						) newMon.randbats.viableStabs[fragment.moveType].push(fragment);
+							
 					// VGC:
 						// Fake Out
 						if (fragment.moves.includes('Fake Out') || fragment.moves.includes('Mat Block')) {
@@ -429,6 +457,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						}
 						// priority
 						if (fragment.priority > 0) {
+							if (moveid === 'upperhand') return; // this is cool and all but it does *not* count as being a team's priority user jsdfngh
 							if (fragment.moveBasePower > 40 || ['assist', 'copycat', 'mefirst', 'metronome', 'mirrormove', 'naturepower'].includes(moveid)) {
 								if (!newMon.randbats.offeredSupport.priority) newMon.randbats.offeredSupport.priority = [];
 								newMon.randbats.offeredSupport.priority.push(fragment);
@@ -441,7 +470,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							}
 						}
 						// spread
-						if (move.target === 'allAdjacentFoes' && fragment.moveBasePower > 60) {
+						if ((move.target === 'allAdjacentFoes' || moveid === 'expandingforce') && fragment.moveBasePower > 60) {
 							if (!newMon.randbats.offeredSupport.spread) newMon.randbats.offeredSupport.spread = [];
 							newMon.randbats.offeredSupport.spread.push(fragment);
 						}
@@ -500,6 +529,21 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				if (newMon.name === 'Noivern-Paldea') {
 					for (const fragment in newMon.randbats.offeredSupport) console.log(newMon.randbats.offeredSupport[fragment]);
 				}
+
+				// okay I'm gonna have to figure out exactly how an individual fragment's support requests count
+				
+				// I think after I get through the whole movepool, and there's an *entire category* of offeredSupport where *every* fragment is requesting support,
+				// the Pokémon loses that offeredSupport category, and every fragment gets pushed into acceptedSupport instead
+				// (a common example might be Grass-types where Grassy Glide is the only priority they're offering)
+				
+				// but if we have an offeredSupport category where some options are always available while others have requestedSupport,
+				// then the category continues to exist,
+				// and all of the fragments requesting support additionally get pushed to the acceptedSupport for the species to make it more likely to come up
+				// but - obviously - if the support just never comes up during species selection, there are still contingencies in the category
+
+				// from there, the individual fragments' requestedSupports only need to be checked again during set construction, after the whole team is done
+				// and obviously ones with support available are favored, but ones with requestedSupport missing are completely ignored
+				
 			}
 		}
 		
