@@ -448,11 +448,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						if (move.target === 'allAdjacent' && fragment.moveBasePower > 60) {
 							let modFragment = Utils.deepClone(fragment);
 							modFragment.vgc.requestedSupport.push([`${(fragment.moveType).toLowerCase()}immune`]); // ex. "electricimmune"
-							modFragment.vgc.offeredSupport.push([`side${(fragment.moveType).toLowerCase()}`]); // ex. "sideelectric"
 							
 							if (!newMon.randbats.offeredSupport.spread) newMon.randbats.offeredSupport.spread = [];
 							newMon.randbats.offeredSupport.spread.push(fragment);
-							
+
+							// ex. "sideelectric"
 							if (!newMon.randbats.offeredSupport[`side${(fragment.moveType).toLowerCase()}`]) newMon.randbats.offeredSupport[`side${(fragment.moveType).toLowerCase()}`] = [];
 							newMon.randbats.offeredSupport[`side${(fragment.moveType).toLowerCase()}`].push(fragment);
 						}
