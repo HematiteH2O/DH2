@@ -99,7 +99,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					name: newMon.name, // for console.logging convenience
 					types: [],
 					abilities: [],
-					viableStabs: {},
+					viableStabs: [],
 					offeredSupport: {},
 					singles: {
 						requestedSupport: {},
