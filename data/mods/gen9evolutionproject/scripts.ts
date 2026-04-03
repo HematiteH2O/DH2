@@ -437,7 +437,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								modFragment.teraType = fragment.moveType;
 								// push to "spicy" for some last-pick set filler
 								if (!newMon.randbats.spicy) newMon.randbats.spicy = [];
-								newMon.randbats.spicy.push(fragment);
+								newMon.randbats.spicy.push(modFragment);
 							}
 						}
 						// spread
@@ -450,11 +450,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							modFragment.vgc.requestedSupport.push([`${(fragment.moveType).toLowerCase()}immune`]); // ex. "electricimmune"
 							
 							if (!newMon.randbats.offeredSupport.spread) newMon.randbats.offeredSupport.spread = [];
-							newMon.randbats.offeredSupport.spread.push(fragment);
+							newMon.randbats.offeredSupport.spread.push(modFragment);
 
 							// ex. "sideelectric"
 							if (!newMon.randbats.offeredSupport[`side${(fragment.moveType).toLowerCase()}`]) newMon.randbats.offeredSupport[`side${(fragment.moveType).toLowerCase()}`] = [];
-							newMon.randbats.offeredSupport[`side${(fragment.moveType).toLowerCase()}`].push(fragment);
+							newMon.randbats.offeredSupport[`side${(fragment.moveType).toLowerCase()}`].push(modFragment);
 						}
 						if ([
 							'tailwind', 'trickroom', 'stickyweb', 'silktrap',
