@@ -113,8 +113,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					resistances: {},
 					immunities: {},
 				};
-				newMon.randbats.viableStabs[newMon.types[0]] = {},
-				if (newMon.types[1]) newMon.randbats.viableStabs[newMon.types[1]] = {},
+				newMon.randbats.viableStabs[newMon.types[0]] = {};
+				if (newMon.types[1]) newMon.randbats.viableStabs[newMon.types[1]] = {};
 				
 				// banlists
 				if ([
@@ -460,6 +460,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								newMon.randbats.spicy.push(modFragment);
 							}
 						}
+						// lowkey tempted to allow non-STAB ones, like Shiftry's Aerilate Double-Edge being probably its strongest singles move, but one thing at a time
 						
 					// VGC:
 						// Fake Out
