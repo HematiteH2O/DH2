@@ -406,14 +406,16 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						if (!fragment.movePriority) fragment.movePriority = move.priority;
 						
 						if (newMon.randbats.types.includes(fragment.moveType) && fragment.moveBasePower) fragment.stab = true;
+						// I usually think in terms of regular base powers,
+						// so it's more intuitive for me to divide for lack of STAB than to multiply for STAB:
 						if (!fragment.stab) fragment.moveBasePower /= 1.5;
+						
+						// interested in accounting for base stats (as modifiers to base power) before continuing
+						// let's say the following steps' base powers are standardized around ~100 base Attack/SpA with 252 EVs
+						// so if the actual stat is more or less than that, the base power should be scaled accoridngly
+						if (fragment.moveCategory === 'Physical') fragment.moveBasePower *= (newMon.baseStats.atk/299);
+						if (fragment.moveCategory === 'Special') fragment.moveBasePower *= (newMon.baseStats.spa/299);
 					}
-					// I usually think in terms of regular base powers,
-					// so it's more intuitive for me to divide for lack of STAB than to multiply for STAB
-					
-					// TODO: consider accounting for base stats (as modifiers to base power) before continuing
-					// let's say the following steps' base powers are standardized around ~100 base Attack/SpA with 252 EVs
-					// so if the actual stat is more or less than that, the base power should be scaled accoridngly
 
 					for (const fragment of fragments) {
 						
