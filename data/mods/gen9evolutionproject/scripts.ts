@@ -429,10 +429,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						}
 						// priority
 						if (fragment.priority > 0) {
-							if (fragment.basePower > 40 || ['assist', 'copycat', 'mefirst', 'metronome', 'mirrormove', 'naturepower'].includes(moveid)) {
+							if (fragment.moveBasePower > 40 || ['assist', 'copycat', 'mefirst', 'metronome', 'mirrormove', 'naturepower'].includes(moveid)) {
 								if (!newMon.randbats.offeredSupport.priority) newMon.randbats.offeredSupport.priority = [];
 								newMon.randbats.offeredSupport.priority.push(fragment);
-							} else if (fragment.basePower && !fragment.stab && !fragment.teraType) {
+							} else if (fragment.moveBasePower && !fragment.stab && !fragment.teraType) {
 								let modFragment = Utils.deepClone(fragment);
 								modFragment.teraType = fragment.moveType;
 								// push to "spicy" for some last-pick set filler
@@ -441,11 +441,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							}
 						}
 						// spread
-						if (move.target === 'allAdjacentFoes' && fragment.basePower > 60) {
+						if (move.target === 'allAdjacentFoes' && fragment.moveBasePower > 60) {
 							if (!newMon.randbats.offeredSupport.spread) newMon.randbats.offeredSupport.spread = [];
 							newMon.randbats.offeredSupport.spread.push(fragment);
 						}
-						if (move.target === 'allAdjacent' && fragment.basePower > 60) {
+						if (move.target === 'allAdjacent' && fragment.moveBasePower > 60) {
 							let modFragment = Utils.deepClone(fragment);
 							modFragment.vgc.requestedSupport.push([`${(fragment.moveType).toLowerCase()}immune`]); // ex. "electricimmune"
 							modFragment.vgc.offeredSupport.push([`side${(fragment.moveType).toLowerCase()}`]); // ex. "sideelectric"
@@ -465,7 +465,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						].includes(moveid) ||
 							 ([
 								 'lowsweep', 'mudshot', 'drumbeating', 'pounce',
-							 ].includes(moveid) && fragment.basePower > 80) ||
+							 ].includes(moveid) && fragment.moveBasePower > 80) ||
 							 (moveid === 'scaryface' && fragment.priority > 0)
 							) {
 							if (!newMon.randbats.offeredSupport.speedcontrol) newMon.randbats.offeredSupport.speedcontrol = [];
