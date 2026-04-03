@@ -490,7 +490,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							if (!newMon.randbats.offeredSupport.spread) newMon.randbats.offeredSupport.spread = [];
 							newMon.randbats.offeredSupport.spread.push(fragment);
 						}
-						if (move.target === 'allAdjacent' && fragment.moveBasePower > 60 && !move.selfdestruct && moveid !== 'synchronoise') {
+						if (move.target === 'allAdjacent' && fragment.moveBasePower >= 80 && !move.selfdestruct && moveid !== 'synchronoise') {
 							let modFragment = Utils.deepClone(fragment);
 							modFragment.vgc.requestedSupport.push([`${(fragment.moveType).toLowerCase()}immune`]); // ex. "electricimmune"
 							
@@ -1428,10 +1428,13 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					); // if it's not at all represented
 					
 					if (!requestedSupportThisStep.length) { // ... or if all of them are represented, but this one is one of the least represented
+						/*
 						let minOffer = 6;
 						for (const offer in offeredSupportInGeneral) if (requestedSupportInGeneral.includes(offer) && minOffer > offeredSupportInGeneral[offer]) minOffer = offeredSupportInGeneral[offer];
+						*/
+						// actually, we don't need *that* many alternates - I'm just gonna say "secure 1 backup plan for each role" before other things become more important
 						requestedSupportThisStep = requestedSupportInGeneral.filter(
-							request => (offeredSupportInGeneral[request] === minOffer)
+							request => (offeredSupportInGeneral[request] === 1)
 						);
 					}
 					
@@ -1549,11 +1552,11 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 
 		// okay, now it gets the tiniest bit more complicated
 		// we're gonna do the same loop, iterating over however many species we just randomly selected, in the same order we selected them
-		// but this time, we have 5 other Pokémon for context - the idea is to treat each individual slot as if it's the last one being picked
+		// but this time, we have 5 other Pokémon for context - the idea is to revisit each individual slot as if it's the last one being picked
 		// this gives us a chance to maximize synergy, but also to recognize which roles came up more than we expected -
-		// maybe we chose a Pokémon for having Intimidate at the time, but now we have two other Intimidators, so it doesn't offer anything we need as much
+		// maybe we chose a Pokémon for having Intimidate at the time, but now we have two other Intimidators, so we can look for other roles we need more
 		// the steps should be *pretty much* an exact copy of the above loop!
-		// as a bonus, we'll also check each of the rerolled Pokémon's "offeredSupport" options - if a teammate has it as "acceptedSupport," that makes it important to keep!
+		// one thing: this time, we need to pay more attention to offeredSupport/acceptedSupport pairings that are already being fulfilled; those should be considered urgent to keep!
 
 
 
