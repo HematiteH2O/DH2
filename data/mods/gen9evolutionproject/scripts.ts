@@ -320,8 +320,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					
 				}
 
-				// ex. pokemon.randbats.offeredSupport.groundimmune
-				for (const immunity of pokemon.randbats.immunities) pokemon.randbats.offeredSupport[`${immunity}immune`] = pokemon.randbats.immunities[immunity];
+				// ex. newMon.randbats.offeredSupport.groundimmune
+				for (const immunity of newMon.randbats.immunities) newMon.randbats.offeredSupport[`${immunity}immune`] = newMon.randbats.immunities[immunity];
 
 				// then I can start iterating over the movepool!
 				// but first...
