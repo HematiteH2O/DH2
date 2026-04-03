@@ -384,7 +384,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					}
 					
 					// fill in default information
-					for (const fragment in fragments) {
+					for (const fragment of fragments) {
 						if (!fragment.baseMove) fragment.baseMove = move.name;
 						if (!fragment.moves) fragment.moves = [move.name];
 						
@@ -412,7 +412,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					// let's say the following steps' base powers are standardized around ~100 base Attack/SpA with 252 EVs
 					// so if the actual stat is more or less than that, the base power should be scaled accoridngly
 
-					for (const fragment in fragments) {
+					for (const fragment of fragments) {
 						
 					// VGC:
 						// Fake Out
@@ -472,7 +472,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 						// Upper Hand and team-supported Grassy Glide need their own cases and were *not* included in priority
 				}
 				if (newMon.name === 'Shiftry-Johto') {
-					for (const fragment in newMon.randbats.offeredSupport) console.log(fragment);
+					for (const fragment of newMon.randbats.offeredSupport) console.log(fragment);
 				}
 			}
 		}
