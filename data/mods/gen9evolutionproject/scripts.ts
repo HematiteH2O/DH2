@@ -322,6 +322,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					
 				}
 
+				// ex. pokemon.randbats.offeredSupport.groundimmune
+				for (const immunity of pokemon.randbats.immunities) pokemon.randbats.offeredSupport[`${immunity}immune`] = pokemon.randbats.immunities[immunity];
+
 				// then I can start iterating over the movepool!
 				// but first...
 				if (!newMon.randbats.stage || (newMon.randbats.singles.banned && newMon.randbats.vgc.banned)) continue;
@@ -443,12 +446,21 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						// Misty Explosion doesn't actually want Misty Terrain support
 
 					// general / STAB
-						if (
-							fragment.stab && [
-								'flamethrower',
-							].includes(fragment.baseMove) && fragment.moveBasePower >= 80 && newMon.randbats.viableStabs[fragment.moveType]
-						) newMon.randbats.viableStabs[fragment.moveType].push(fragment);
-							
+						const viableStabs = [
+							'firepunch', 'flamethrower', 'flareblitz', 'fireblast', 'overheat',
+							'scald', 'liquidation', 'hydropump',
+						];
+						if (fragment.stab && viableStabs.includes(fragment.baseMove) && newMon.randbats.viableStabs[fragment.moveType])) {
+							if (fragment.moveBasePower >= 80) newMon.randbats.viableStabs[fragment.moveType].push(fragment);
+							if (fragment.moveBasePower >= 120 && !fragment.item) {
+								// this will be a good threshold for choice item sets... I think
+								if (!newMon.randbats.offeredSupport.choicebreaker) newMon.randbats.offeredSupport.choicebreaker = [];
+								let modFragment = Utils.deepClone(fragment);
+								modFragment.item = {fragment.moveCategory === 'Physical' ? 'Choice Band' : 'Choice Specs');
+								newMon.randbats.spicy.push(modFragment);
+							}
+						}
+						
 					// VGC:
 						// Fake Out
 						if (fragment.moves.includes('Fake Out') || fragment.moves.includes('Mat Block')) {
@@ -462,10 +474,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								if (!newMon.randbats.offeredSupport.priority) newMon.randbats.offeredSupport.priority = [];
 								newMon.randbats.offeredSupport.priority.push(fragment);
 							} else if (fragment.moveBasePower && !fragment.stab && !fragment.teraType) {
-								let modFragment = Utils.deepClone(fragment);
-								modFragment.teraType = fragment.moveType;
 								// push to "spicy" for some last-pick set filler
 								if (!newMon.randbats.spicy) newMon.randbats.spicy = [];
+								let modFragment = Utils.deepClone(fragment);
+								modFragment.teraType = fragment.moveType;
 								newMon.randbats.spicy.push(modFragment);
 							}
 						}
@@ -522,13 +534,21 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 							if (!newMon.randbats.offeredSupport.knockoff) newMon.randbats.offeredSupport.knockoff = [];
 							newMon.randbats.offeredSupport.knockoff.push(fragment);
 						}
+						// damaging entry hazards - Sticky Web and Toxic Spikes will probably be handled differently
+						if (['ceaselessedge', 'spikes', 'stealthrock', 'stoneaxe'].includes(moveid)) {
+							if (!newMon.randbats.offeredSupport.entryhazard) newMon.randbats.offeredSupport.entryhazard = [];
+							newMon.randbats.offeredSupport.entryhazard.push(fragment);
+						}
+						// hazard control
+						if (['defog', 'mortalspin', 'rapidspin', 'tidyup'].includes(moveid)) {
+							if (!newMon.randbats.offeredSupport.hazardcontrol) newMon.randbats.offeredSupport.hazardcontrol = [];
+							newMon.randbats.offeredSupport.hazardcontrol.push(fragment);
+						}
 					}
 						
 						// Upper Hand and team-supported Grassy Glide need their own cases and were *not* included in priority
 				}
-				if (newMon.name === 'Noivern-Paldea') {
-					for (const fragment in newMon.randbats.offeredSupport) console.log(newMon.randbats.offeredSupport[fragment]);
-				}
+				console.log(newMon.randbats); // or for (const fragment in newMon.randbats.offeredSupport) console.log(newMon.randbats.offeredSupport[fragment]);
 
 				// okay I'm gonna have to figure out exactly how an individual fragment's support requests count
 				
