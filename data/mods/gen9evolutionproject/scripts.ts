@@ -590,19 +590,22 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 						if (newMon.randbats.offeredSupport[offeredSupport][fragment] === "true") {
 							accepted = true;
 						} else {
-							if (newMon.randbats.offeredSupport[offeredSupport][fragment].singles.requestedSupport.length) {
-								for (const request of newMon.randbats.offeredSupport[offeredSupport][fragment].singles.requestedSupport) {
-									if (!newMon.randbats.singles.acceptedSupport[request]) newMon.randbats.singles.acceptedSupport[request] = [];
-									newMon.randbats.singles.acceptedSupport[request].push(fragment);
+							if (newMon.randbats.offeredSupport[offeredSupport][fragment].singles) {
+								// Abilities that came up during type effectiveness don't have this yet; I'll deal with reformatting them later
+								if (newMon.randbats.offeredSupport[offeredSupport][fragment].singles.requestedSupport.length) {
+									for (const request of newMon.randbats.offeredSupport[offeredSupport][fragment].singles.requestedSupport) {
+										if (!newMon.randbats.singles.acceptedSupport[request]) newMon.randbats.singles.acceptedSupport[request] = [];
+										newMon.randbats.singles.acceptedSupport[request].push(fragment);
+									}
 								}
-							}
-							if (newMon.randbats.offeredSupport[offeredSupport][fragment].vgc.requestedSupport.length) {
-								for (const request of newMon.randbats.offeredSupport[offeredSupport][fragment].vgc.requestedSupport) {
-									if (!newMon.randbats.vgc.acceptedSupport[request]) newMon.randbats.vgc.acceptedSupport[request] = [];
-									newMon.randbats.vgc.acceptedSupport[request].push(fragment);
+								if (newMon.randbats.offeredSupport[offeredSupport][fragment].vgc.requestedSupport.length) {
+									for (const request of newMon.randbats.offeredSupport[offeredSupport][fragment].vgc.requestedSupport) {
+										if (!newMon.randbats.vgc.acceptedSupport[request]) newMon.randbats.vgc.acceptedSupport[request] = [];
+										newMon.randbats.vgc.acceptedSupport[request].push(fragment);
+									}
 								}
-							}
-							if (!newMon.randbats.offeredSupport[offeredSupport][fragment].singles.requestedSupport.length && !newMon.randbats.offeredSupport[offeredSupport][fragment].vgc.requestedSupport.length) accepted = true;
+								if (!newMon.randbats.offeredSupport[offeredSupport][fragment].singles.requestedSupport.length && !newMon.randbats.offeredSupport[offeredSupport][fragment].vgc.requestedSupport.length) accepted = true;
+							} else accepted = true;
 						}
 					}
 					if (!accepted) delete newMon.randbats.offeredSupport[offeredSupport];
@@ -1398,30 +1401,45 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				currentStep = eligiblePokemon.filter(id => this.dex.data.Pokedex[id].copyData);
 			} else {
 				let requestedSupportInGeneral = [];
+				let offeredSupportInGeneral = {}; // this one is not just a list, but how many of each
+				
 				let requestedSupportThisStep = [];
 				let offeredSupportThisStep = [];
 				let acceptedSupportThisStep = [];
+				
 				let teamNumbersThisStep = [];
 				let resistancesThisStep = [];
 				if (firstDraftTeam.length) {
 					for (const request of baseRequestedSupport) if (!requestedSupportInGeneral.includes(request)) requestedSupportInGeneral.push(request);
 					for (const pokemon of firstDraftTeam) {
 						for (const requestedSupport in pokemon.requestedSupport) if (!requestedSupportInGeneral.includes(requestedSupport)) requestedSupportInGeneral.push(requestedSupport);
-						for (const offeredSupport in pokemon.offeredSupport) if (!offeredSupportThisStep.includes(offeredSupport)) offeredSupportThisStep.push(offeredSupport);
+						for (const offeredSupport in pokemon.offeredSupport) {
+							if (!offeredSupportThisStep.includes(offeredSupport)) offeredSupportThisStep.push(offeredSupport);
+							if (!offeredSupportInGeneral[offeredSupport]) offeredSupportInGeneral[offeredSupport] = 0;
+							offeredSupportInGeneral[offeredSupport]++;
+						}
 						for (const acceptedSupport in pokemon.acceptedSupport) if (!acceptedSupportThisStep.includes(acceptedSupport)) acceptedSupportThisStep.push(acceptedSupport);
 						if (this.dex.species.get(pokemon.species)) {
 							if (this.dex.species.get(pokemon.species).num) teamNumbersThisStep.push(this.dex.species.get(pokemon.species).num);
 							for (const type of types) if (!resistancesThisStep.includes(type) && (this.dex.species.get(pokemon.species).randbats.immunities[type] || (this.dex.species.get(pokemon.species).randbats.resistances[type] && !this.dex.species.get(pokemon.species).randbats.weaknesses[type]))) resistancesThisStep.push(type);
 						}
 					}
-					requestedSupportThisStep = requestedSupportInGeneral.filter(request => !offeredSupportThisStep.includes(request));
+					
+					requestedSupportThisStep = requestedSupportInGeneral.filter(
+						request => (!offeredSupportInGeneral[request] || (offeredSupportInGeneral[request] === minOffer))
+					); // if it's not at all represented
+					
+					if (!requestedSupportThisStep.length) { // ... or if all of them are represented, but this one is one of the least represented
+						let minOffer = 6;
+						for (const offer in offeredSupportInGeneral) if (offeredSupportInGeneral[offer] < minOffer) minOffer = offeredSupportInGeneral[offer]
+						requestedSupportThisStep = requestedSupportInGeneral.filter(
+							request => (offeredSupportInGeneral[request] === minOffer)
+						);
+					}
+					
 					console.log(resistancesThisStep);
 					console.log(`requested this step: ` + requestedSupportThisStep);
 				}
-	
-				// "accepted support" is *almost never* accounted for at this step - but just in case we have absolutely nothing to go on...
-				if (!requestedSupportThisStep.length) for (const role of acceptedSupportThisStep) if (!offeredSupportThisStep.includes(role) && !requestedSupportThisStep.includes(role)) requestedSupportThisStep.push(role);
-				// (NOTE: I may replace this backup plan with something else later, or even just remove it to focus on type balance)
 				
 				// first, we want to find offeredSupport that matches our requestedSupport
 				if (requestedSupportThisStep.length) {
