@@ -356,6 +356,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 
 				for (const resistance in newMon.randbats.resistances) { // if I don't end up needing this, I'll just delete it
+					if (newMon.randbats.weaknesses[resistance]) continue;
 					if (newMon.randbats.resistances[resistance].Ability && newMon.randbats.resistances[resistance].Ability.length) {
 						newMon.randbats.offeredSupport[`${(resistance).toLowerCase()}resist`] = [];
 						for (const ability of newMon.randbats.resistances[resistance].Ability) {
