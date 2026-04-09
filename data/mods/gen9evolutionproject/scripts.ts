@@ -1648,7 +1648,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 						if (pokemon.species === set.species) randomized = false;
 					}
 				}
-				if (randomized) sets.push(pokemon);
+				if (randomized) sets.push(set);
 			}
 		}
 		let eligibleFragments = true;
