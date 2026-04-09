@@ -319,7 +319,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					}
 					
 				}
-
+				
 				// ex. newMon.randbats.offeredSupport.groundimmune
 				for (const immunity in newMon.randbats.immunities) {
 					if (newMon.randbats.immunities[immunity].Ability && newMon.randbats.immunities[immunity].Ability.length) {
@@ -353,6 +353,40 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							newMon.randbats.offeredSupport[`${(immunity).toLowerCase()}immune`].push(fragment);
 						}
 					} else newMon.randbats.offeredSupport[`${(immunity).toLowerCase()}immune`] = newMon.randbats.immunities[immunity];
+				}
+
+				for (const resistance in newMon.randbats.resistances) { // if I don't end up needing this, I'll just delete it
+					if (newMon.randbats.resistances[resistance].Ability && newMon.randbats.resistances[resistance].Ability.length) {
+						newMon.randbats.offeredSupport[`${(resistance).toLowerCase()}resist`] = [];
+						for (const ability of newMon.randbats.resistances[resistance].Ability) {
+							// push fragments
+							let fragment = {
+								baseMove: null,
+								moves: null,
+								
+								ability: 'ability',
+								item: null,
+								evs: {},
+								teraType: null,
+
+								offeredSupport: [],
+								singles: {
+									requestedSupport: [],
+									acceptedSupport: [],
+								},
+								vgc: {
+									requestedSupport: [],
+									acceptedSupport: [],
+								},
+
+								moveType: null,
+								moveBasePower: null,
+								moveCategory: null,
+								movePriority: null,
+							};
+							newMon.randbats.offeredSupport[`${(resistance).toLowerCase()}resist`].push(fragment);
+						}
+					} else newMon.randbats.offeredSupport[`${(resistance).toLowerCase()}resist`] = newMon.randbats.resistances[resistance];
 				}
 
 				// then I can start iterating over the movepool!
