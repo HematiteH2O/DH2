@@ -1634,17 +1634,49 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 		// // - identify which roles they already cover
 		// // - identify "requested support" (top-priority: something like Grassy Surge is mandatory if a Pokémon has a Grassy Seed)
 		// // - identify "accepted support" (gives bonus points when deciding between candidates for another role, but it's not its own step - something like any terrain for Aleon)
+		// this should be easy, but I want to do as much of the randbats data first because there's so much overlap
 
 		// TODO: second-pass "for" loop (almost just a copy-paste of the original at this point - just saving it for the end so I don't have to make a bunch of changes twice)
 
 		// TODO: set constructor
+		let sets = [];
+		if (firstDraftTeam.length) {
+			for (const set of firstDraftTeam) {
+				let randomized = true;
+				if (team.length) {
+					for (const pokemon of team) {
+						if (pokemon.species === set.species) randomized = false;
+					}
+				}
+				if (randomized) sets.push(pokemon);
+			}
+		}
+		let eligibleFragments = true;
+		while (eligibleFragments) {
+			// if there are no eligible fragments, set eligibleFragments to false
+			eligibleFragments = false;
+		}
+		for (const set of sets) {
+			if (!set.item) set.item = 'Leftovers';
+			if (!set.ability) set.ability = this.dex.species.get(set.species).abilities[0];
+			if (!set.moves) set.moves = ["Protect"];
+			if (!set.nature) set.nature = '';
+			if (!set.evs) set.evs = { hp: 4, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
+			if (!set.happiness) set.happiness = 255;
+			if (!set.teraType) set.teraType = this.dex.species.get(set.species).types[0];
+			set.hasBeenRandomized = true;
+		}
+		while (sets.filter((set) => (!team.includes(set))).length) {
+			// once sets are ready, push them to the team in a random order
+			team.push(this.sample(sets.filter((set) => (!team.includes(set)))));
+		}
 
 		// TODO: nickname check???
 		// // - if all 6 sets are random, check the list of teamwide naming schemes; if there are any where all 6 Pokémon have an entry, there's a chance to pull from them!
 		// // - check the list of small group naming schemes; if there are any groups that the random sets completely encompass, go for it!
 		// // - otherwise, if the Pokémon has a set of random names defined in pokedex.ts, sample one of them
 		// // - and if not, no nickname
-			
+		
 		// finally, push every remaining set to the actual team!
 
 		if (!team || !team.length || team.length < 2) { // just so it doesn't crash when it's not done aksdjfh
