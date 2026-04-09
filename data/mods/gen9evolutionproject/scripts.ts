@@ -321,7 +321,39 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 
 				// ex. newMon.randbats.offeredSupport.groundimmune
-				for (const immunity in newMon.randbats.immunities) newMon.randbats.offeredSupport[`${(immunity).toLowerCase()}immune`] = newMon.randbats.immunities[immunity];
+				for (const immunity in newMon.randbats.immunities) {
+					if (newMon.randbats.immunities[immunity].Ability && newMon.randbats.immunities[immunity].Ability.length) {
+						newMon.randbats.offeredSupport[`${(immunity).toLowerCase()}immune`] = [];
+						for (const ability of newMon.randbats.immunities[immunity].Ability) {
+							// push fragments
+							let fragment = {
+								baseMove: null,
+								moves: null,
+								
+								ability: 'ability',
+								item: null,
+								evs: {},
+								teraType: null,
+
+								offeredSupport: [],
+								singles: {
+									requestedSupport: [],
+									acceptedSupport: [],
+								},
+								vgc: {
+									requestedSupport: [],
+									acceptedSupport: [],
+								},
+
+								moveType: null,
+								moveBasePower: null,
+								moveCategory: null,
+								movePriority: null,
+							};
+							newMon.randbats.offeredSupport[`${(immunity).toLowerCase()}immune`].push(fragment);
+						}
+					} else newMon.randbats.offeredSupport[`${(immunity).toLowerCase()}immune`] = newMon.randbats.immunities[immunity];
+				}
 
 				// then I can start iterating over the movepool!
 				// but first...
@@ -586,8 +618,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				for (const offeredSupport in newMon.randbats.offeredSupport) {
 					let accepted = false;
 					for (const fragment in newMon.randbats.offeredSupport[offeredSupport]) {
-						if (newMon.randbats.offeredSupport[offeredSupport][fragment].singles) {
-							// Abilities that came up during type effectiveness don't have this yet; I'll deal with reformatting them later
+						if (newMon.randbats.offeredSupport[offeredSupport][fragment].baseMove) { // if it was just an Ability, this is unnecessary
 							if (newMon.randbats.offeredSupport[offeredSupport][fragment].singles.requestedSupport.length) {
 								for (const request of newMon.randbats.offeredSupport[offeredSupport][fragment].singles.requestedSupport) {
 									if (!newMon.randbats.singles.acceptedSupport[request]) newMon.randbats.singles.acceptedSupport[request] = [];
