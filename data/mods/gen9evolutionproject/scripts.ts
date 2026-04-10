@@ -1833,7 +1833,14 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					if (!chosenFragment.pokemon.moves) chosenFragment.pokemon.moves = [];
 					for (const move of chosenFragment.moves) chosenFragment.pokemon.moves.push(move);
 				}
-				// TODO: EVs
+				if (chosenFragment.evs) {
+					if (chosenFragment.evs['hp'] > chosenFragment.pokemon.evs['hp']) chosenFragment.pokemon.evs['hp'] = chosenFragment.evs['hp'];
+					if (chosenFragment.evs['atk'] > chosenFragment.pokemon.evs['atk']) chosenFragment.pokemon.evs['atk'] = chosenFragment.evs['atk'];
+					if (chosenFragment.evs['def'] > chosenFragment.pokemon.evs['def']) chosenFragment.pokemon.evs['def'] = chosenFragment.evs['def'];
+					if (chosenFragment.evs['spa'] > chosenFragment.pokemon.evs['spa']) chosenFragment.pokemon.evs['spa'] = chosenFragment.evs['spa'];
+					if (chosenFragment.evs['spd'] > chosenFragment.pokemon.evs['spd']) chosenFragment.pokemon.evs['spd'] = chosenFragment.evs['spd'];
+					if (chosenFragment.evs['spe'] > chosenFragment.pokemon.evs['spe']) chosenFragment.pokemon.evs['spe'] = chosenFragment.evs['spe'];
+				}
 			}
 		}
 
@@ -1848,7 +1855,11 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			if (!set.ability) set.ability = this.dex.species.get(set.species).abilities[0];
 			if (!set.moves) set.moves = ["Protect"];
 			if (!set.nature) set.nature = '';
-			if (!set.evs || (set.evs === { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 })) set.evs = { hp: 4, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
+			if (
+				!set.evs || (
+					set.evs['hp'] === 0 && set.evs['atk'] === 0  && set.evs['def'] === 0 && set.evs['spa'] === 0 && set.evs['spd'] === 0 && set.evs['spe'] === 0
+				)
+			) set.evs = { hp: 4, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
 			if (!set.happiness) set.happiness = 255;
 			if (!set.teraType) set.teraType = this.dex.species.get(set.species).types[0];
 			set.level = setLevel;
