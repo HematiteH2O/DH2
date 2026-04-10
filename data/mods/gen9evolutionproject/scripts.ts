@@ -1686,30 +1686,30 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					set.fragmented = true;
 					// push everything in viableStabs, offeredSupport, [format].requestedSupport and [format].acceptedSupport
 					// note that viableStabs is intentionally not sorted by type - for instance viableStabs.flying doesn't exist; all of the fragments are in viableStabs right now
-					for (const fragment in this.dex.species.get(set.species).randbats.viableStabs) {
+					for (const fragment of this.dex.species.get(set.species).randbats.viableStabs) {
 						if (fragment === "true") continue;
 						fragment.pokemon = set;
 						fragment.role = 'mainStab${fragment.type}';
 						fragmentsList.push(fragment);
 					}
-					for (const offeredSupport in this.dex.species.get(set.species).randbats.offeredSupport) {
-						for (const fragment in this.dex.species.get(set.species).randbats.offeredSupport[offeredSupport]) {
+					for (const offeredSupport of this.dex.species.get(set.species).randbats.offeredSupport) {
+						for (const fragment of this.dex.species.get(set.species).randbats.offeredSupport[offeredSupport]) {
 							if (fragment === "true") continue;
 							fragment.pokemon = set;
 							fragment.role = offeredSupport;
 							fragmentsList.push(fragment);
 						}
 					}
-					for (const requestedSupport in this.dex.species.get(set.species).randbats[format].requestedSupport) {
-						for (const fragment in this.dex.species.get(set.species).randbats[format].requestedSupport[requestedSupport]) {
+					for (const requestedSupport of this.dex.species.get(set.species).randbats[format].requestedSupport) {
+						for (const fragment of this.dex.species.get(set.species).randbats[format].requestedSupport[requestedSupport]) {
 							if (fragment === "true") continue;
 							fragment.pokemon = set;
 							fragment.role = requestedSupport;
 							fragmentsList.push(fragment);
 						}
 					}
-					for (const acceptedSupport in this.dex.species.get(set.species).randbats[format].acceptedSupport) {
-						for (const fragment in this.dex.species.get(set.species).randbats[format].acceptedSupport[acceptedSupport]) {
+					for (const acceptedSupport of this.dex.species.get(set.species).randbats[format].acceptedSupport) {
+						for (const fragment of this.dex.species.get(set.species).randbats[format].acceptedSupport[acceptedSupport]) {
 							if (fragment === "true") continue;
 							fragment.pokemon = set;
 							fragment.role = acceptedSupport;
