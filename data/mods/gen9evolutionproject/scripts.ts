@@ -1704,8 +1704,10 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 		
 		while (eligibleFragments) {
 			// if there are already no fragments left on any Pokémon, immediately set eligibleFragments to false and then "continue;" to end the loop
-			// also, I'm not ready for it to loop yet, so I'm doing this now
-			eligibleFragments = false;
+			if (!fragmentsList.length) {
+				eligibleFragments = false;
+				continue;
+			}
 
 
 			// STEP 1: counting space
