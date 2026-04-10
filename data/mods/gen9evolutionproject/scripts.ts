@@ -1745,7 +1745,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				// TODO: EVs later
 				// TODO: item clause later
 				
-				if (!fragment.ability && !fragment.item && !fragment.teraType && !fragment.moves && !fragment.evs) {
+				if (!fragment.ability && !fragment.item && !fragment.teraType && !(fragment.moves && fragment.moves.length) && !fragment.evs) {
 					// the fragment is already complete, so I should also check it off of the role tally and then delete it from the fragments list
 					// but I don't have a role tally yet aksdjh
 					fragment.eligible = false;
