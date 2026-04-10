@@ -1805,15 +1805,17 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			
 			// STEP 5: applying fragments
 			// finally, pick a random fragment from the narrowed-down pool, apply it to the set, and loop
-			chosenFragment = this.sample(fragmentsList);
-			if (chosenFragment.ability) chosenFragment.pokemon.ability = chosenFragment.ability;
-			if (chosenFragment.item) chosenFragment.pokemon.item = chosenFragment.item;
-			if (chosenFragment.teraType) chosenFragment.pokemon.teraType = chosenFragment.teraType;
-			if (chosenFragment.moves) {
-				if (!chosenFragment.pokemon.moves) chosenFragment.pokemon.moves = [];
-				for (const move of chosenFragment.moves) chosenFragment.pokemon.moves.push(move);
+			let chosenFragment = this.sample(fragmentsList);
+			if (chosenFragment) {
+				if (chosenFragment.ability) chosenFragment.pokemon.ability = chosenFragment.ability;
+				if (chosenFragment.item) chosenFragment.pokemon.item = chosenFragment.item;
+				if (chosenFragment.teraType) chosenFragment.pokemon.teraType = chosenFragment.teraType;
+				if (chosenFragment.moves) {
+					if (!chosenFragment.pokemon.moves) chosenFragment.pokemon.moves = [];
+					for (const move of chosenFragment.moves) chosenFragment.pokemon.moves.push(move);
+				}
+				// TODO: EVs
 			}
-			// TODO: EVs
 		}
 
 		// TODO: filling empty space in sets after fragments and STABs are done
