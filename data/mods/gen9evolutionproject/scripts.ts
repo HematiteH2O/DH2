@@ -330,7 +330,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								baseMove: null,
 								moves: null,
 								
-								ability: 'ability',
+								ability: ability,
 								item: null,
 								evs: {},
 								teraType: null,
@@ -365,7 +365,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								baseMove: null,
 								moves: null,
 								
-								ability: 'ability',
+								ability: ability,
 								item: null,
 								evs: {},
 								teraType: null,
