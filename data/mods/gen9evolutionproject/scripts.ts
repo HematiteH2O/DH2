@@ -462,7 +462,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						
 						if (!fragment.ability) fragment.ability = null;
 						if (!fragment.item) fragment.item = null;
-						if (!fragment.evs) fragment.evs = {};
+						if (!fragment.evs) fragment.evs = { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
 						if (!fragment.teraType) fragment.teraType = null;
 						
 						if (!fragment.offeredSupport) fragment.offeredSupport = [];
@@ -1742,10 +1742,28 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					fragment.moves = fragment.moves.filter((move) => (!fragment.pokemon.moves.includes(move)));
 					if (fragment.moves.length + fragment.pokemon.moveCount > 4) fragment.eligible = false;
 				}
-				// TODO: EVs later
+				if (fragment.evs && fragment.pokemon.evs) {
+					if (fragment.evs === fragment.pokemon.evs) fragment.evs = null;
+					else {
+						let evCount = 0;
+						if (fragment.evs['hp'] > fragment.pokemon.evs['hp']) evCount += fragment.evs['hp'] - fragment.pokemon.evs['hp'];
+						if (fragment.evs['atk'] > fragment.pokemon.evs['atk']) evCount += fragment.evs['atk'] - fragment.pokemon.evs['atk'];
+						if (fragment.evs['def'] > fragment.pokemon.evs['def']) evCount += fragment.evs['def'] - fragment.pokemon.evs['def'];
+						if (fragment.evs['spa'] > fragment.pokemon.evs['spa']) evCount += fragment.evs['spa'] - fragment.pokemon.evs['spa'];
+						if (fragment.evs['spd'] > fragment.pokemon.evs['spd']) evCount += fragment.evs['spd'] - fragment.pokemon.evs['spd'];
+						if (fragment.evs['spe'] > fragment.pokemon.evs['spe']) evCount += fragment.evs['spe'] - fragment.pokemon.evs['spe'];
+						
+						if (evCount === 0) fragment.evs = null;
+						else if (evCount + fragment.pokemon.evCount > 508) fragment.eligible = false;
+					}
+				}
 				// TODO: item clause later
+				// TODO:
 				
-				if (!fragment.ability && !fragment.item && !fragment.teraType && !(fragment.moves && fragment.moves.length)) {
+				if (!fragment.ability && !fragment.item && !fragment.teraType && !(fragment.moves && fragment.moves.length) && !(
+					fragment.evs && (fragment.evs['hp'] > 0 || fragment.evs['atk'] > 0 || fragment.evs['def'] > 0 || fragment.evs['spa'] > 0 || fragment.evs['spd'] > 0 || fragment.evs['spe'] > 0)
+				)
+					) {
 					// the fragment is already complete, so I should also check it off of the role tally and then delete it from the fragments list
 					// but I don't have a role tally yet aksdjh
 					fragment.eligible = false;
@@ -1830,7 +1848,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			if (!set.ability) set.ability = this.dex.species.get(set.species).abilities[0];
 			if (!set.moves) set.moves = ["Protect"];
 			if (!set.nature) set.nature = '';
-			if (!set.evs) set.evs = { hp: 4, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
+			if (!set.evs || (set.evs === { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 })) set.evs = { hp: 4, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
 			if (!set.happiness) set.happiness = 255;
 			if (!set.teraType) set.teraType = this.dex.species.get(set.species).types[0];
 			set.level = setLevel;
