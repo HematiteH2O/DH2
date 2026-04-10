@@ -1692,7 +1692,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 						fragment.role = 'mainStab${fragment.type}';
 						fragmentsList.push(fragment);
 					}
-					for (const offeredSupport of this.dex.species.get(set.species).randbats.offeredSupport) {
+					for (const offeredSupport in this.dex.species.get(set.species).randbats.offeredSupport) {
 						for (const fragment of this.dex.species.get(set.species).randbats.offeredSupport[offeredSupport]) {
 							if (fragment === "true") continue;
 							fragment.pokemon = set;
@@ -1700,7 +1700,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 							fragmentsList.push(fragment);
 						}
 					}
-					for (const requestedSupport of this.dex.species.get(set.species).randbats[format].requestedSupport) {
+					for (const requestedSupport in this.dex.species.get(set.species).randbats[format].requestedSupport) {
 						for (const fragment of this.dex.species.get(set.species).randbats[format].requestedSupport[requestedSupport]) {
 							if (fragment === "true") continue;
 							fragment.pokemon = set;
@@ -1708,7 +1708,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 							fragmentsList.push(fragment);
 						}
 					}
-					for (const acceptedSupport of this.dex.species.get(set.species).randbats[format].acceptedSupport) {
+					for (const acceptedSupport in this.dex.species.get(set.species).randbats[format].acceptedSupport) {
 						for (const fragment of this.dex.species.get(set.species).randbats[format].acceptedSupport[acceptedSupport]) {
 							if (fragment === "true") continue;
 							fragment.pokemon = set;
