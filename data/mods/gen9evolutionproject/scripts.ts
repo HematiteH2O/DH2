@@ -1664,6 +1664,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 		let fragmentsList = [];
 		
 		for (const set of sets) {
+			if (!set.evs) set.evs = { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
 			// push everything in viableStabs, offeredSupport, [format].requestedSupport and [format].acceptedSupport
 			// note that viableStabs is intentionally not sorted by type - for instance viableStabs.flying doesn't exist; all of the fragments are in viableStabs right now
 			for (const fragment of this.dex.species.get(set.species).randbats.viableStabs) {
