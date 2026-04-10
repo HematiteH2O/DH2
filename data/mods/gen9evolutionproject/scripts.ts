@@ -402,7 +402,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (!learnset) continue;
 				
 				for (const moveid in learnset) {
-					if (!this.modData('Learnsets', id).learnset[moveid].length) continue;
+					if (!learnset[moveid].length) continue;
 					// *rudimentary* LC set legality:
 					if (newMon.randbats.stage === 'LC' && newMon.gender && ['M', 'N'].includes(newMon.gender) && !['golett', 'bronzor'].includes(id)) {
 						// A handful of Pokémon need to worry about levels in LC
@@ -410,13 +410,13 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						// ... but they learned all of those moves in Gen VII, so they get them anyway by Heart Scale! I checked and these are legal sets
 						// That means that as of now, this is actually only for the four Riboxys babies
 						// but I'll try to keep it future-proof just in case!
-						let lcLearnset = this.dataCache.Learnsets[id].learnset[moveid].filter(
+						let lcLearnset = learnset[moveid].filter(
 							(method) => (!method.includes('L'))
 						);
 						if (!lcLearnset.length) { // if you can learn it a way other than level-up, it's already fine
 							let lcLevelLearned = false;
 							// parseInt(source.substr(2)) < parseInt(levelLearned)
-							for (const source of this.dataCache.Learnsets[id].learnset[moveid]) if (parseInt(source.substr(2)) < 5) lcLevelLearned = true;
+							for (const source of learnset[moveid]) if (parseInt(source.substr(2)) < 5) lcLevelLearned = true;
 							if (!lcLevelLearned) continue; // if you can only learn it by level, and only by a level after 5, continue
 						}
 					}
