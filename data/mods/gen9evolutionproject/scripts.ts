@@ -1644,7 +1644,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 
 		// TODO: second-pass "for" loop (almost just a copy-paste of the original at this point - just saving it for the end so I don't have to make a bunch of changes twice)
 
-		// TODO: set constructor
+		// WIP: set constructor
 		let sets = [];
 		if (firstDraftTeam.length) {
 			for (const set of firstDraftTeam) {
@@ -1657,6 +1657,8 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				if (randomized) sets.push(set);
 			}
 		}
+
+		// TODO: enforce anything mandatory, including both format-specific mandatory moves and Abilities from the randbats data and. like. *actual* mandatory stuff like form items, battleOnly or required Tera Types
 
 		// TEAMWIDE SET CONSTRUCTION: FRAGMENTS
 		let eligibleFragments = true;
@@ -1682,8 +1684,9 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			// // if any of its criteria are already met (like it has an Ability but the set also already has that Ability), clear that requirement to simplify the fragment
 			// // if (after the above) all of its criteria are filled, replace the fragment with "true" to check it off as complete
 			// // if (after the above) any of its criteria are impossible to meet (like it has an Ability but the set already has a different Ability, or it takes more moves than there are open slots), delete the fragment
-			// // // IMPORTANT: filter out any fragment that's "just" a main STABs if another main STAB of the *same type* is already in;
-			// // // if I don't, I risk letting two fragments in for compressing with different STABs of the same type
+			// // // IMPORTANT: delete any fragment that's "just" a main STAB if another main STAB of the *same type* is already in!
+			// // // if I don't, I risk letting two fragments in for "compressing" with conflicting STABs of the same type, and then you can't actually fit them both anyway
+			// // // ALSO IMPORTANT: for VGC, item clause starts here!!!
 
 
 
@@ -1711,7 +1714,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			// // // if there are only "low-priority" fragments, run with them; if not, filter them out of the current step and keep going
 			
 			// // only if the current step *isn't* low-priority, filter fragments for the current step so only the most unique *right now* are counted, then keep going (if the current step is low-priority, uniqueness doesn't matter!)
-			// // if possible, prioritize fragments based on whether a move they include is a) also a viable STAB or b) on a different eligible, not-low-priority fragment on the same Pokémon
+			// // if possible, prioritize fragments based on whether a move, Ability or item they include is a) also a viable STAB or b) on a different eligible, not-low-priority fragment on the same Pokémon
 			// // // (provisionally: the more compression, the better?)
 			// // if possible, prioritize fragments based on the Pokémon's next-most-unique fragment (the *less* unique, the better - and perfect if there just are no other fragments competing!)
 			
@@ -1725,6 +1728,9 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 		}
 
 		// TODO: filling empty space in sets after fragments and STABs are done
+		// // double-checking if any resistance Abilities were important for resistances that aren't covered so far
+		// // reasonable amount of Protect in VGC, "spicy" moves, fun items, et cetera
+		// // obeying item clause was already mandatory for VGC; it's optional for singles, so the previous section doesn't enforce it... but by the time you're at this step, you should follow it anyway to get more fun sets!
 		
 		for (const set of sets) {
 			if (!set.item) set.item = 'Leftovers';
@@ -1734,11 +1740,8 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			if (!set.evs) set.evs = { hp: 4, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
 			if (!set.happiness) set.happiness = 255;
 			if (!set.teraType) set.teraType = this.dex.species.get(set.species).types[0];
+			set.level = setLevel;
 			set.hasBeenRandomized = true;
-		}
-		while (sets.filter((set) => (!team.includes(set))).length) {
-			// once sets are ready, push them to the team in a random order
-			team.push(this.sample(sets.filter((set) => (!team.includes(set)))));
 		}
 
 		// TODO: nickname check???
@@ -1748,6 +1751,10 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 		// // - and if not, no nickname
 		
 		// finally, push every remaining set to the actual team!
+		while (sets.filter((set) => (!team.includes(set))).length) {
+			// this is done in to randomize the order of the sets
+			team.push(this.sample(sets.filter((set) => (!team.includes(set)))));
+		}
 
 		if (!team || !team.length || team.length < 2) {
 			// update: fare thee well Default Rootsnoot
