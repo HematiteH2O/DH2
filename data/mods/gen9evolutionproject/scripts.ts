@@ -1663,6 +1663,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 		// TEAMWIDE SET CONSTRUCTION: FRAGMENTS
 		let eligibleFragments = true;
 		let fragmentsList = [];
+		let requestingFragmentsList = [];
 		while (eligibleFragments) {
 			// if there are already no fragments left on any Pokémon, immediately set eligibleFragments to false and then "continue;" to end the loop
 			// also, I'm not ready for it to loop yet, so I'm doing this now
@@ -1687,14 +1688,14 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					// push everything in viableStabs, offeredSupport, [format].requestedSupport and [format].acceptedSupport
 					// note that viableStabs is intentionally not sorted by type - for instance viableStabs.flying doesn't exist; all of the fragments are in viableStabs right now
 					for (const fragment of this.dex.species.get(set.species).randbats.viableStabs) {
-						if (fragment === "true") continue;
+						if (typeof fragment === 'string') continue;
 						fragment.pokemon = set;
 						fragment.role = 'mainStab${fragment.type}';
 						fragmentsList.push(fragment);
 					}
 					for (const offeredSupport in this.dex.species.get(set.species).randbats.offeredSupport) {
 						for (const fragment of this.dex.species.get(set.species).randbats.offeredSupport[offeredSupport]) {
-							if (fragment === "true") continue;
+							if (typeof fragment === 'string') continue;
 							fragment.pokemon = set;
 							fragment.role = offeredSupport;
 							fragmentsList.push(fragment);
@@ -1702,23 +1703,24 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					}
 					for (const requestedSupport in this.dex.species.get(set.species).randbats[format].requestedSupport) {
 						for (const fragment of this.dex.species.get(set.species).randbats[format].requestedSupport[requestedSupport]) {
-							if (fragment === "true") continue;
+							if (typeof fragment === 'string') continue;
 							fragment.pokemon = set;
 							fragment.role = requestedSupport;
-							fragmentsList.push(fragment);
+							requestingFragmentsList.push(fragment);
 						}
 					}
 					for (const acceptedSupport in this.dex.species.get(set.species).randbats[format].acceptedSupport) {
 						for (const fragment of this.dex.species.get(set.species).randbats[format].acceptedSupport[acceptedSupport]) {
-							if (fragment === "true") continue;
+							if (typeof fragment === 'string') continue;
 							fragment.pokemon = set;
 							fragment.role = acceptedSupport;
-							fragmentsList.push(fragment);
+							requestingFragmentsList.push(fragment);
 						}
 					}
 				}
 			}
 			console.log(fragmentsList);
+			console.log(requestingFragmentsList);
 
 			// STEP 2: fragment eligibility
 			
