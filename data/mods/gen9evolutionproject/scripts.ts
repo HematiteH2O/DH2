@@ -1696,6 +1696,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					for (const offeredSupport in this.dex.species.get(set.species).randbats.offeredSupport) {
 						for (const fragment of this.dex.species.get(set.species).randbats.offeredSupport[offeredSupport]) {
 							if (typeof fragment === 'string') continue;
+							console.log(fragment);
 							fragment.pokemon = set;
 							fragment.role = offeredSupport;
 							fragmentsList.push(fragment);
