@@ -1710,20 +1710,50 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 
 			// STEP 1: counting space
 			
-			// identify how much space each Pokémon has left for fragments (count empty moveslots, check item slots/Ability slots/Tera Type slots, leftover EVs)
-			// I thhhink it works in my favor to pick STABs last, but that also means I want to leave room for them - that means I should count how many types of viable STABs are already on the set and compare it to my target
-			// if the target isn't met, I should subtract it from the amount of space I have left for moves
-			// // I do think I need to recalculate the target each step
-			// // for instance, Aerilate Flying moves may be the closest Shiftry-Johto gets to a "viable STAB" in some formats, but they stop being an option at all if it commits to another Ability first
-
+			// identify how much space each Pokémon has left for fragments (specifically moveslots and leftover EVs, since there's only one item, Ability and Tera Type anyway)
 			for (const set of sets) {
 				if (set.moves) set.moveCount = set.moves.length;
 				if (set.evs) set.evCount = set.evs['hp'] + set.evs['atk'] + set.evs['def'] + set.evs['spa'] + set.evs['spd'] + set.evs['spe'];
-				set.name = 'Does this get updated';
 			}
-			console.log(fragmentsList);
+			// TODO: leave room for STABs
+			// // I thhhink it works in my favor to pick STABs last, but that also means I want to leave room for them - that means I should count how many types of viable STABs are already on the set and compare it to my target
+			// // if the target isn't met, I should subtract it from the amount of space I have left for moves
+			// // I do think I need to recalculate the target each step
+			// // for instance, Aerilate Flying moves may be the closest Shiftry-Johto gets to a "viable STAB" in some formats, but they stop being an option at all if it commits to another Ability first
 
 			// STEP 2: fragment eligibility
+			for (const fragment of fragmentsList) {
+				fragment.eligible = true;
+				if (fragment.ability && fragment.pokemon.ability) {
+					if (fragment.ability === fragment.pokemon.ability) fragment.ability = null;
+					else fragment.eligible = false;
+				}
+				if (fragment.item && fragment.pokemon.item) {
+					if (fragment.item === fragment.pokemon.item) fragment.item = null;
+					else fragment.eligible = false;
+				}
+				if (fragment.teraType && fragment.pokemon.teraType) {
+					if (fragment.teraType === fragment.pokemon.teraType) fragment.teraType = null;
+					else fragment.eligible = false;
+				}
+				if (fragment.moves && fragment.pokemon.moves) {
+					fragment.moves = fragment.moves.filter((move) => (!fragment.pokemon.moves.includes(move)));
+					if (fragment.moves.length + fragment.pokemon.moveCount > 4) fragment.eligible = false;
+				}
+				// TODO: EVs later
+				// TODO: item clause later
+				
+				if (!fragment.ability && !fragment.item && !fragment.teraType && !fragment.moves && !fragment.evs) {
+					// the fragment is already complete, so I should also check it off of the role tally and then delete it from the fragments list
+					// but I don't have a role tally yet aksdjh
+				}
+			}
+			fragmentsList = fragmentsList.filter((fragment) => (fragment.eligible));
+			
+			if (!fragmentsList.length) {
+				eligibleFragments = false;
+				continue;
+			}
 			
 			// for each fragment:
 			// // if any of its criteria are already met (like it has an Ability but the set also already has that Ability), clear that requirement to simplify the fragment
@@ -1773,6 +1803,15 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			
 			// STEP 5: applying fragments
 			// finally, pick a random fragment from the narrowed-down pool, apply it to the set, and loop
+			chosenFragment = this.sample(fragmentsList);
+			if (chosenFragment.ability) chosenFragment.pokemon.ability = chosenFragment.ability;
+			if (chosenFragment.item) chosenFragment.pokemon.item = chosenFragment.item;
+			if (chosenFragment.teraType) chosenFragment.pokemon.teraType = chosenFragment.teraType;
+			if (chosenFragment.moves) {
+				if (!chosenFragment.pokemon.moves) chosenFragment.pokemon.moves = [];
+				for (const move of chosenFragment.moves) chosenFragment.pokemon.moves.push(move);
+			}
+			// TODO: EVs
 		}
 
 		// TODO: filling empty space in sets after fragments and STABs are done
