@@ -1662,6 +1662,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 
 		// TEAMWIDE SET CONSTRUCTION: FRAGMENTS
 		let eligibleFragments = true;
+		let fragmentsList = [];
 		while (eligibleFragments) {
 			// if there are already no fragments left on any Pokémon, immediately set eligibleFragments to false and then "continue;" to end the loop
 			// also, I'm not ready for it to loop yet, so I'm doing this now
@@ -1676,8 +1677,45 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			// // I do think I need to recalculate the target each step
 			// // for instance, Aerilate Flying moves may be the closest Shiftry-Johto gets to a "viable STAB" in some formats, but they stop being an option at all if it commits to another Ability first
 
+			for (const set of sets) {
+				if (set.moves) set.moveCount = set.moves.length;
+				if (set.evs) set.evCount = set.evs['hp'] + set.evs['atk'] + set.evs['def'] + set.evs['spa'] + set.evs['spd'] + set.evs['spe'];
+				
+				// push all of the fragments into fragmentsList, but only once
+				if (!set.fragmented) {
+					set.fragmented = true;
+					// push everything in viableStabs, offeredSupport, [format].requestedSupport and [format].acceptedSupport
+					// note that viableStabs is intentionally not sorted by type - for instance viableStabs.flying doesn't exist; all of the fragments are in viableStabs right now
+					for (const fragment in this.dex.species.get(set.species).randbats.viableStabs) {
+						fragment.pokemon = set;
+						fragment.role = 'mainStab${fragment.type}';
+						fragmentsList.push(fragment);
+					}
+					for (const offeredSupport in this.dex.species.get(set.species).randbats.offeredSupport) {
+						for (const fragment in this.dex.species.get(set.species).randbats.offeredSupport[offeredSupport]) {
+							fragment.pokemon = set;
+							fragment.role = offeredSupport;
+							fragmentsList.push(fragment);
+						}
+					}
+					for (const requestedSupport in this.dex.species.get(set.species).randbats[format].requestedSupport) {
+						for (const fragment in this.dex.species.get(set.species).randbats[format].requestedSupport[requestedSupport]) {
+							fragment.pokemon = set;
+							fragment.role = requestedSupport;
+							fragmentsList.push(fragment);
+						}
+					}
+					for (const acceptedSupport in this.dex.species.get(set.species).randbats[format].acceptedSupport) {
+						for (const fragment in this.dex.species.get(set.species).randbats[format].acceptedSupport[acceptedSupport]) {
+							fragment.pokemon = set;
+							fragment.role = acceptedSupport;
+							fragmentsList.push(fragment);
+						}
+					}
+				}
+			}
+			console.log(fragmentsList);
 
-			
 			// STEP 2: fragment eligibility
 			
 			// for each fragment:
@@ -1687,7 +1725,10 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			// // // IMPORTANT: delete any fragment that's "just" a main STAB if another main STAB of the *same type* is already in!
 			// // // if I don't, I risk letting two fragments in for "compressing" with conflicting STABs of the same type, and then you can't actually fit them both anyway
 			// // // ALSO IMPORTANT: for VGC, item clause starts here!!!
-
+			
+			for (const fragment of fragmentsList) {
+				// nothing yet
+			}
 
 
 			// STEP 3: fragment matchmaking
