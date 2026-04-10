@@ -1657,11 +1657,75 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				if (randomized) sets.push(set);
 			}
 		}
+
+		// TEAMWIDE SET CONSTRUCTION: FRAGMENTS
 		let eligibleFragments = true;
 		while (eligibleFragments) {
-			// if there are no eligible fragments, set eligibleFragments to false
+			// if there are already no fragments left on any Pokémon, immediately set eligibleFragments to false and then "continue;" to end the loop
+			// also, I'm not ready for it to loop yet, so I'm doing this now
 			eligibleFragments = false;
+
+
+			// STEP 1: counting space
+			
+			// identify how much space each Pokémon has left for fragments (count empty moveslots, check item slots/Ability slots/Tera Type slots, leftover EVs)
+			// I thhhink it works in my favor to pick STABs last, but that also means I want to leave room for them - that means I should count how many types of viable STABs are already on the set and compare it to my target
+			// if the target isn't met, I should subtract it from the amount of space I have left for moves
+			// // I do think I need to recalculate the target each step
+			// // for instance, Aerilate Flying moves may be the closest Shiftry-Johto gets to a "viable STAB" in some formats, but they stop being an option at all if it commits to another Ability first
+
+
+			
+			// STEP 2: fragment eligibility
+			
+			// for each fragment:
+			// // if any of its criteria are already met (like it has an Ability but the set also already has that Ability), clear that requirement to simplify the fragment
+			// // if (after the above) all of its criteria are filled, replace the fragment with "true" to check it off as complete
+			// // if (after the above) any of its criteria are impossible to meet (like it has an Ability but the set already has a different Ability, or it takes more moves than there are open slots), delete the fragment
+			// // // IMPORTANT: filter out any fragment that's "just" a main STABs if another main STAB of the *same type* is already in;
+			// // // if I don't, I risk letting two fragments in for compressing with different STABs of the same type
+
+
+
+			// STEP 3: fragment matchmaking
+			
+			// list acceptedSupportThisStep based on remaining fragments
+			// list relevant roles (mix of requestedSupportThisStep and acceptedSupportThisStep, except roles that are already filled)
+
+			// for each fragment:
+			// // if it's an acceptedSupport, but the corresponding offeredSupport isn't offered by any Pokémon and isn't already on the team, delete the fragment
+			// // if it's an offeredSupport, but there is no corresponding requestedSupport or acceptedSupport, delete the fragment
+			// // // DO NOT delete the fragment if there *is* a requestedSupport or acceptedSupport but it's already covered - that will just lower its priority later!
+			// // if it's an offeredSupport and it's still here, add it to a tally of how many Pokémon are offering that support (ones with fewer options will be prioritized later)
+
+
+			
+			// STEP 4: fragment priorities
+			// okay, we're done deleting fragments this step - if there are any left, we want to pick one! now we're just narrowing down a favorite
+
+			// if there are any eligible fragments except STABs (which also means there's *room* for something else before STABs, as established earlier), filter out fragments that are "just" main STABs
+			// // if not, STABs are the only thing left for this loop, so keep going!
+			
+			// if we're not focusing on STABs yet:
+			// // if it's an offeredSupport, but it's already covered by the team, flag it as "low-priority" (but don't delete it! these are still handy when we have nothing better to do)
+			// // // if there are only "low-priority" fragments, run with them; if not, filter them out of the current step and keep going
+			
+			// // only if the current step *isn't* low-priority, filter fragments for the current step so only the most unique *right now* are counted, then keep going (if the current step is low-priority, uniqueness doesn't matter!)
+			// // if possible, prioritize fragments based on whether a move they include is a) also a viable STAB or b) on a different eligible, not-low-priority fragment on the same Pokémon
+			// // // (provisionally: the more compression, the better?)
+			// // if possible, prioritize fragments based on the Pokémon's next-most-unique fragment (the *less* unique, the better - and perfect if there just are no other fragments competing!)
+			
+			// if there are multiple remaining candidates for the same role (or STAB type), and any of them have a score defined, filter out all competition for that role except the highest-scoring
+			// // the "score" is on a per-role basis and not standardized, so only compare fragments with the same role!!!
+
+
+			
+			// STEP 5: applying fragments
+			// finally, pick a random fragment from the narrowed-down pool, apply it to the set, and loop
 		}
+
+		// TODO: filling empty space in sets after fragments and STABs are done
+		
 		for (const set of sets) {
 			if (!set.item) set.item = 'Leftovers';
 			if (!set.ability) set.ability = this.dex.species.get(set.species).abilities[0];
@@ -1685,7 +1749,9 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 		
 		// finally, push every remaining set to the actual team!
 
-		if (!team || !team.length || team.length < 2) { // just so it doesn't crash when it's not done aksdjfh
+		if (!team || !team.length || team.length < 2) {
+			// update: fare thee well Default Rootsnoot
+			// I don't think you will ever be called again
 			let set = {
 					name: 'Default Rootsnoot',
 					species: 'Rootsnoot',
@@ -1705,8 +1771,6 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			team.push(set);
 			if (team.length < 2) team.push(set);
 		}
-		// first step: assign roles
-		// second step:
 		return team;
 	},
 };
