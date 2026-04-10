@@ -395,13 +395,14 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (!newMon.randbats.stage || (newMon.randbats.singles.banned && newMon.randbats.vgc.banned)) continue;
 				// ... don't bother with any more randbats data if it's not eligible to be chosen anyway!
 				
-				const learnset = this.dataCache.Learnsets[id].learnset;
+				let learnset = this.dataCache.Learnsets[id].learnset;
+				if (newMon.baseSpecies === 'Rotom') learnset = this.dataCache.Learnsets.rotom.learnset;
+				// going to handle their form-specific moves separately; this is fine for here!
+				if (!learnset && newMon.baseSpecies) console.log(newMon.baseSpecies);
 				if (!learnset) continue;
-				let consoleLogLearnsetLength = 0;
 				
 				for (const moveid in learnset) {
 					if (!this.modData('Learnsets', id).learnset[moveid].length) continue;
-					consoleLogLearnsetLength++;
 					// *rudimentary* LC set legality:
 					if (newMon.randbats.stage === 'LC' && newMon.gender && ['M', 'N'].includes(newMon.gender) && !['golett', 'bronzor'].includes(id)) {
 						// A handful of Pokémon need to worry about levels in LC
@@ -679,7 +680,6 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					}
 					if (!accepted) delete newMon.randbats.offeredSupport[offeredSupport];
 				}
-				console.log(`${newMon.name}: ${consoleLogLearnsetLength}`);
 			}
 		}
 		
