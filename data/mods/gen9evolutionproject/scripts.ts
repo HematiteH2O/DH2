@@ -1731,6 +1731,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 		// // double-checking if any resistance Abilities were important for resistances that aren't covered so far
 		// // reasonable amount of Protect in VGC, "spicy" moves, fun items, et cetera
 		// // obeying item clause was already mandatory for VGC; it's optional for singles, so the previous section doesn't enforce it... but by the time you're at this step, you should follow it anyway to get more fun sets!
+		// // (EXCEPTION: not gonna push item clause on LC - if something wants Eviolite or Berry Juice or something, it can have it)
 		
 		for (const set of sets) {
 			if (!set.item) set.item = 'Leftovers';
