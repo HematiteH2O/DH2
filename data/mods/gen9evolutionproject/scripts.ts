@@ -396,7 +396,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// ... don't bother with any more randbats data if it's not eligible to be chosen anyway!
 				
 				let learnset = this.dataCache.Learnsets[id].learnset;
-				if (newMon.baseSpecies === 'Rotom') learnset = this.dataCache.Learnsets.rotom.learnset;
+				if (newMon.baseSpecies && newMon.baseSpecies === 'Rotom') learnset = this.dataCache.Learnsets.rotom.learnset;
 				// going to handle their form-specific moves separately; this is fine for here!
 				if (!learnset && newMon.baseSpecies) console.log(newMon.baseSpecies);
 				if (!learnset) continue;
@@ -1667,7 +1667,6 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 		let fragmentsList = [];
 		
 		for (const set of sets) {
-			if (!set.evs) set.evs = { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
 			// push everything in viableStabs, offeredSupport, [format].requestedSupport and [format].acceptedSupport
 			// note that viableStabs is intentionally not sorted by type - for instance viableStabs.flying doesn't exist; all of the fragments are in viableStabs right now
 			for (const fragment of this.dex.species.get(set.species).randbats.viableStabs) {
@@ -1837,6 +1836,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					for (const move of chosenFragment.moves) chosenFragment.pokemon.moves.push(move);
 				}
 				if (chosenFragment.evs) {
+					if (!chosenFragment.pokemon.evs) chosenFragment.pokemon.evs = { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
 					if (chosenFragment.evs['hp'] > chosenFragment.pokemon.evs['hp']) chosenFragment.pokemon.evs['hp'] = chosenFragment.evs['hp'];
 					if (chosenFragment.evs['atk'] > chosenFragment.pokemon.evs['atk']) chosenFragment.pokemon.evs['atk'] = chosenFragment.evs['atk'];
 					if (chosenFragment.evs['def'] > chosenFragment.pokemon.evs['def']) chosenFragment.pokemon.evs['def'] = chosenFragment.evs['def'];
