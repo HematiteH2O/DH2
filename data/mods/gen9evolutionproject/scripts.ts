@@ -677,7 +677,6 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					}
 					if (!accepted) delete newMon.randbats.offeredSupport[offeredSupport];
 				}
-				console.log(newMon.randbats); // or for (const fragment in newMon.randbats.offeredSupport) console.log(newMon.randbats.offeredSupport[fragment]);
 			}
 		}
 		
