@@ -1658,10 +1658,50 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 		}
 
 		// TODO: enforce anything mandatory, including both format-specific mandatory moves and Abilities from the randbats data and. like. *actual* mandatory stuff like form items, battleOnly or required Tera Types
-
+		
 		// TEAMWIDE SET CONSTRUCTION: FRAGMENTS
 		let eligibleFragments = true;
 		let fragmentsList = [];
+		
+		for (const set of sets) {
+			// push everything in viableStabs, offeredSupport, [format].requestedSupport and [format].acceptedSupport
+			// note that viableStabs is intentionally not sorted by type - for instance viableStabs.flying doesn't exist; all of the fragments are in viableStabs right now
+			for (const fragment of this.dex.species.get(set.species).randbats.viableStabs) {
+				if (typeof fragment === 'string') continue;
+				let modFragment = Utils.deepClone(fragment);
+				modFragment.pokemon = set;
+				modFragment.role = 'mainstab'; // actually I don't want this to specify a type either
+				fragmentsList.push(modFragment);
+			}
+			for (const offeredSupport in this.dex.species.get(set.species).randbats.offeredSupport) {
+				for (const fragment of this.dex.species.get(set.species).randbats.offeredSupport[offeredSupport]) {
+					if (typeof fragment === 'string') continue;
+					let modFragment = Utils.deepClone(fragment);
+					modFragment.pokemon = set;
+					modFragment.role = offeredSupport;
+					fragmentsList.push(modFragment);
+				}
+			}
+			for (const requestedSupport in this.dex.species.get(set.species).randbats[format].requestedSupport) {
+				for (const fragment of this.dex.species.get(set.species).randbats[format].requestedSupport[requestedSupport]) {
+					if (typeof fragment === 'string') continue;
+					let modFragment = Utils.deepClone(fragment);
+					modFragment.pokemon = set;
+					modFragment.request = requestedSupport;
+					fragmentsList.push(modFragment);
+				}
+			}
+			for (const acceptedSupport in this.dex.species.get(set.species).randbats[format].acceptedSupport) {
+				for (const fragment of this.dex.species.get(set.species).randbats[format].acceptedSupport[acceptedSupport]) {
+					if (typeof fragment === 'string') continue;
+					let modFragment = Utils.deepClone(fragment);
+					modFragment.pokemon = set;
+					modFragment.request = acceptedSupport;
+					fragmentsList.push(modFragment);
+				}
+			}
+		}
+		
 		while (eligibleFragments) {
 			// if there are already no fragments left on any Pokémon, immediately set eligibleFragments to false and then "continue;" to end the loop
 			// also, I'm not ready for it to loop yet, so I'm doing this now
@@ -1679,47 +1719,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			for (const set of sets) {
 				if (set.moves) set.moveCount = set.moves.length;
 				if (set.evs) set.evCount = set.evs['hp'] + set.evs['atk'] + set.evs['def'] + set.evs['spa'] + set.evs['spd'] + set.evs['spe'];
-				
-				// push all of the fragments into fragmentsList, but only once
-				if (!set.fragmented) {
-					set.fragmented = true;
-					// push everything in viableStabs, offeredSupport, [format].requestedSupport and [format].acceptedSupport
-					// note that viableStabs is intentionally not sorted by type - for instance viableStabs.flying doesn't exist; all of the fragments are in viableStabs right now
-					for (const fragment of this.dex.species.get(set.species).randbats.viableStabs) {
-						if (typeof fragment === 'string') continue;
-						let modFragment = Utils.deepClone(fragment);
-						modFragment.pokemon = set;
-						modFragment.role = 'mainStab${fragment.type}';
-						fragmentsList.push(modFragment);
-					}
-					for (const offeredSupport in this.dex.species.get(set.species).randbats.offeredSupport) {
-						for (const fragment of this.dex.species.get(set.species).randbats.offeredSupport[offeredSupport]) {
-							if (typeof fragment === 'string') continue;
-							let modFragment = Utils.deepClone(fragment);
-							modFragment.pokemon = set;
-							modFragment.role = offeredSupport;
-							fragmentsList.push(modFragment);
-						}
-					}
-					for (const requestedSupport in this.dex.species.get(set.species).randbats[format].requestedSupport) {
-						for (const fragment of this.dex.species.get(set.species).randbats[format].requestedSupport[requestedSupport]) {
-							if (typeof fragment === 'string') continue;
-							let modFragment = Utils.deepClone(fragment);
-							modFragment.pokemon = set;
-							modFragment.request = requestedSupport;
-							fragmentsList.push(modFragment);
-						}
-					}
-					for (const acceptedSupport in this.dex.species.get(set.species).randbats[format].acceptedSupport) {
-						for (const fragment of this.dex.species.get(set.species).randbats[format].acceptedSupport[acceptedSupport]) {
-							if (typeof fragment === 'string') continue;
-							let modFragment = Utils.deepClone(fragment);
-							modFragment.pokemon = set;
-							modFragment.request = acceptedSupport;
-							fragmentsList.push(modFragment);
-						}
-					}
-				}
+				set.name = 'Does this get updated';
 			}
 			console.log(fragmentsList);
 
