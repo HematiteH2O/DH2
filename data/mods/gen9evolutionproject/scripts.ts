@@ -397,9 +397,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				
 				const learnset = this.dataCache.Learnsets[id].learnset;
 				if (!learnset) continue;
+				let consoleLogLearnsetLength = 0;
 				
 				for (const moveid in learnset) {
 					if (!this.modData('Learnsets', id).learnset[moveid].length) continue;
+					consoleLogLearnsetLength++;
 					// *rudimentary* LC set legality:
 					if (newMon.randbats.stage === 'LC' && newMon.gender && ['M', 'N'].includes(newMon.gender) && !['golett', 'bronzor'].includes(id)) {
 						// A handful of Pokémon need to worry about levels in LC
@@ -677,7 +679,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					}
 					if (!accepted) delete newMon.randbats.offeredSupport[offeredSupport];
 				}
-				console.log(`${newMon.name}: ${learnset.length}`);
+				console.log(`${newMon.name}: ${consoleLogLearnsetLength}`);
 			}
 		}
 		
