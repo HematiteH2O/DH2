@@ -1678,33 +1678,38 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			}
 			for (const offeredSupport in this.dex.species.get(set.species).randbats.offeredSupport) {
 				for (const fragment of this.dex.species.get(set.species).randbats.offeredSupport[offeredSupport]) {
-					if (typeof fragment === 'string') continue;
-					let modFragment = Utils.deepClone(fragment);
-					modFragment.pokemon = set;
-					modFragment.role = offeredSupport;
-					fragmentsList.push(modFragment);
+					if (typeof fragment !== 'string') {
+						let modFragment = Utils.deepClone(fragment);
+						modFragment.pokemon = set;
+						modFragment.role = offeredSupport;
+						fragmentsList.push(modFragment);
+					}
 				}
 			}
 			for (const requestedSupport in this.dex.species.get(set.species).randbats[format].requestedSupport) {
 				console.log(requestedSupport);
 				for (const fragment of this.dex.species.get(set.species).randbats[format].requestedSupport[requestedSupport]) {
 					console.log(fragment);
-					if (typeof fragment === 'string') continue;
-					let modFragment = Utils.deepClone(fragment);
-					modFragment.pokemon = set;
-					modFragment.request = requestedSupport;
-					console.log(`${modFragment.pokemon.name} requested support ${requestedSupport}`);
-					fragmentsList.push(modFragment);
+					if (typeof fragment !== 'string') {
+						let modFragment = Utils.deepClone(fragment);
+						modFragment.pokemon = set;
+						modFragment.request = requestedSupport;
+						console.log(`${modFragment.pokemon.name} requested support ${requestedSupport}`);
+						fragmentsList.push(modFragment);
+					}
 				}
 			}
 			for (const acceptedSupport in this.dex.species.get(set.species).randbats[format].acceptedSupport) {
+				console.log(acceptedSupport);
 				for (const fragment of this.dex.species.get(set.species).randbats[format].acceptedSupport[acceptedSupport]) {
-					if (typeof fragment === 'string') continue;
-					let modFragment = Utils.deepClone(fragment);
-					modFragment.pokemon = set;
-					modFragment.request = acceptedSupport;
-					console.log(`${modFragment.pokemon.name} requested support ${acceptedSupport}`);
-					fragmentsList.push(modFragment);
+					console.log(fragment);
+					if (typeof fragment !== 'string') {
+						let modFragment = Utils.deepClone(fragment);
+						modFragment.pokemon = set;
+						modFragment.request = acceptedSupport;
+						console.log(`${modFragment.pokemon.name} requested support ${acceptedSupport}`);
+						fragmentsList.push(modFragment);
+					}
 				}
 			}
 		}
