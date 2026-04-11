@@ -530,7 +530,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							// if there are at least 2 types in viableStabs, then the set should try to have viableStabs of any 2 types
 							
 							let modFragment = Utils.deepClone(fragment);
-							modFragment.score = 500 - fragment.moveBasePower; // TESTING SCORE FEATURE
 							if (!fragment.stab && !fragment.teraType) modFragment.teraType = fragment.moveType;
 							if (fragment.moveBasePower >= 90 || (fragment.stab && fragment.moveBasePower >= 80)) newMon.randbats.viableStabs.push(modFragment);
 							if (fragment.moveBasePower >= 120 && !fragment.item) {
@@ -552,7 +551,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							// those two are cool and all, but they do *not* count as being a team's priority user jsdfngh
 							if (fragment.moveBasePower > 40 || ['assist', 'copycat', 'mefirst', 'metronome', 'mirrormove', 'naturepower'].includes(moveid)) {
 								if (!newMon.randbats.offeredSupport.priority) newMon.randbats.offeredSupport.priority = [];
-								newMon.randbats.offeredSupport.priority.push(fragment);
+								// TESTING SCORE FEATURE
+								let modFragment = Utils.deepClone(fragment);
+								modFragment.score = fragment.moveBasePower;
+								newMon.randbats.offeredSupport.priority.push(modFragment);
 							} else if (fragment.moveBasePower && !fragment.stab && !fragment.teraType && fragment.moveType !== 'Normal') {
 								// push to "spicy" for some last-pick set filler
 								if (!newMon.randbats.spicy) newMon.randbats.spicy = [];
@@ -1942,10 +1944,11 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				if (fragment.role && fragment.role !== 'mainstab') {
 					if (roleScores[fragment.role] && roleScores[fragment.role] > 0 && (!fragment.score || (roleScores[fragment.role] > fragment.score))) safeToPush = false;
 				}
-				else if (fragment.role && fragment.role !== 'mainstab') {
+				else if (fragment.role && fragment.role === 'mainstab') {
 					if (roleScores[fragment.pokemon] && roleScores[fragment.pokemon] > 0 && (!fragment.score || (roleScores[fragment.pokemon] > fragment.score))) safeToPush = false;
 				}
 				if (safeToPush) reducedFragmentsListThisStep.push(fragment);
+				if (!safeToPush) console.log(`${fragment.pokemon.name}'s fragment with base move ${fragment.baseMove} was passed by with a score of ${fragment.score} because it was compared to another fragment with the same role.`);
 			}
 			if (reducedFragmentsListThisStep.length) fragmentsListThisStep = reducedFragmentsListThisStep;
 			
