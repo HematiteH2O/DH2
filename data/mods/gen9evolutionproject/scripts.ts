@@ -1885,10 +1885,14 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			// if we're not focusing on STABs yet:
 			// // if it's an offeredSupport, but it's already covered by the team, flag it as "low-priority" (but don't delete it! these are still handy when we have nothing better to do)
 			// // // if there are only "low-priority" fragments, run with them; if not, filter them out of the current step and keep going
-			
+
+			let prioritizeRoles = true;
 			let fragmentsListThisStep = fragmentsList.filter((fragment) => (fragment.highpriority));
 			if (!fragmentsListThisStep.length) fragmentsListThisStep = fragmentsList.filter((fragment) => (!fragment.lowpriority && !(fragment.role && fragment.role === 'mainstab')));
-			if (!fragmentsListThisStep.length) fragmentsListThisStep = fragmentsList.filter((fragment) => (!fragment.lowpriority));
+			if (!fragmentsListThisStep.length) {
+				prioritizeRoles = false;
+				fragmentsListThisStep = fragmentsList.filter((fragment) => (!fragment.lowpriority));
+			}
 			if (!fragmentsListThisStep.length) fragmentsListThisStep = fragmentsList;
 			if (!fragmentsListThisStep.length) {
 				eligibleFragments = false;
@@ -1899,6 +1903,29 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			// // if possible, prioritize fragments based on whether a move, Ability or item they include is a) also a viable STAB or b) on a different eligible, not-low-priority fragment on the same Pokémon
 			// // // (provisionally: the more compression, the better?)
 			// // if possible, prioritize fragments based on the Pokémon's next-most-unique fragment (the *less* unique, the better - and perfect if there just are no other fragments competing!)
+
+			if (prioritizeRoles) {
+				let reducedFragmentsThisStep = [];
+				let roleCount = {};
+				for (const fragment of fragmentsThisStep) {
+					if (fragment.role && fragment.role !== 'mainstab') {
+						if (!roleCount[fragment.role]) roleCount[fragment.role] = [];
+						if (!roleCount[fragment.role].includes(fragment.pokemon.name)) roleCount[fragment.role].push(fragment.pokemon.name);
+					}
+				}
+				let minRoleCount = 6;
+				for (const role of roleCount) {
+					if (minRoleCount > role.length) minRoleCount = role.length;
+				}
+				for (const fragment of fragmentsThisStep) {
+					if (fragment.role && fragment.role !== 'mainstab' && roleCount[fragment.role].length <= minRoleCount) reducedFragmentsThisStep.push(fragment);
+				}
+				if (reducedFragmentsThisStep.length) fragmentsListThisStep = reducedFragmentsThisStep;
+				if (reducedFragmentsThisStep.length) {
+					console.log(`Reduced to fragments with ${minRoleCount} candidates, which include these roles:`);
+					for (const role of roleCount) if (role.length <= minRoleCount) console.log(role);
+				}
+			}
 			
 			// if there are multiple remaining candidates for the same role (or STAB type), and any of them have a score defined, filter out all competition for that role except the highest-scoring
 			// // the "score" is on a per-role basis and not standardized, so only compare fragments with the same role!!!
