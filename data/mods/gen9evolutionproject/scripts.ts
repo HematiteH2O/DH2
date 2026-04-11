@@ -1545,7 +1545,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 						
 						// for now, I think just a yes or a no is fine
 						let accepted = false;
-						for (const role of offeredSupportThisStep) if (this.dex.data.Pokedex[id].randbats[format].acceptedSupport[role]) accepted = true;
+						for (const role of offeredSupportThisStep) if (this.dex.data.Pokedex[id].randbats[format].acceptedSupport[role] && !acceptedSuppportThisStep.includes(role)) accepted = true;
 						if (accepted === true) desiredSupport.push(id);
 					}
 					if (desiredSupport.length) currentStep = desiredSupport;
@@ -1605,6 +1605,23 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					if (teamResistScore === teamResistMaxScore) teamResists.push(id);
 				}
 				if (teamResists.length) currentStep = teamResists;
+				
+				// previously, if we had already covered an acceptedSupport, we didn't make it a priority to get it again - it's more important to narrow down by the other criteria
+				// if it's still an option now, though, let's definitely take it!
+				if (offeredSupportThisStep.length) {
+					// score them by how many roles they can fill, up to 3
+					let desiredSupport = [];
+					for (const id of currentStep) {
+						// species clause
+						if (teamNumbersThisStep.includes(this.dex.data.Pokedex[id].num)) continue;
+						
+						// for now, I think just a yes or a no is fine
+						let accepted = false;
+						for (const role of offeredSupportThisStep) if (this.dex.data.Pokedex[id].randbats[format].acceptedSupport[role]) accepted = true;
+						if (accepted === true) desiredSupport.push(id);
+					}
+					if (desiredSupport.length) currentStep = desiredSupport;
+				}
 			}
 			
 			// safety nets
