@@ -643,7 +643,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				// from there, the individual fragments' requestedSupports only need to be checked again during set construction, after the whole team is done
 				// and obviously ones with support available are favored, but ones with requestedSupport missing are completely ignored
 				
-				for (const fragment in newMon.randbats.viableStabs) {
+				for (const fragment of newMon.randbats.viableStabs) {
 					if (newMon.randbats.viableStabs[fragment].singles.requestedSupport.length) {
 						for (const request of newMon.randbats.viableStabs[fragment].singles.requestedSupport) {
 							if (!newMon.randbats.singles.acceptedSupport[request]) newMon.randbats.singles.acceptedSupport[request] = [];
@@ -660,7 +660,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				
 				for (const offeredSupport in newMon.randbats.offeredSupport) {
 					let accepted = false;
-					for (const fragment in newMon.randbats.offeredSupport[offeredSupport]) {
+					for (const fragment of newMon.randbats.offeredSupport[offeredSupport]) {
 						if (newMon.randbats.offeredSupport[offeredSupport][fragment].baseMove) { // if it was just an Ability, this is unnecessary
 							if (newMon.randbats.offeredSupport[offeredSupport][fragment].singles.requestedSupport.length) {
 								for (const request of newMon.randbats.offeredSupport[offeredSupport][fragment].singles.requestedSupport) {
