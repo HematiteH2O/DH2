@@ -1913,8 +1913,8 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					}
 				}
 				let minRoleCount = 6;
-				for (const role of roleCount) {
-					if (minRoleCount > role.length) minRoleCount = role.length;
+				for (const role in roleCount) {
+					if (minRoleCount > roleCount[role].length) minRoleCount = roleCount[role].length;
 				}
 				for (const fragment of fragmentsListThisStep) {
 					if (fragment.role && fragment.role !== 'mainstab' && roleCount[fragment.role].length <= minRoleCount) reducedFragmentsListThisStep.push(fragment);
@@ -1922,7 +1922,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				if (reducedFragmentsListThisStep.length) fragmentsListThisStep = reducedFragmentsListThisStep;
 				if (reducedFragmentsListThisStep.length) {
 					console.log(`Reduced to fragments with ${minRoleCount} candidates, which include these roles:`);
-					for (const role of roleCount) if (role.length <= minRoleCount) console.log(role);
+					for (const role in roleCount) if (roleCount[role].length <= minRoleCount) console.log(role);
 				}
 			}
 			
