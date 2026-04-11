@@ -1692,7 +1692,6 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 						let modFragment = Utils.deepClone(fragment);
 						modFragment.pokemon = set;
 						modFragment.request = requestedSupport;
-						console.log(`${modFragment.pokemon.name} requested support ${requestedSupport}`);
 						fragmentsList.push(modFragment);
 					}
 				}
@@ -1703,7 +1702,6 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 						let modFragment = Utils.deepClone(fragment);
 						modFragment.pokemon = set;
 						modFragment.request = acceptedSupport;
-						console.log(`${modFragment.pokemon.name} requested support ${acceptedSupport}`);
 						fragmentsList.push(modFragment);
 					}
 				}
@@ -1807,12 +1805,6 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			for (const requester of fragmentsList) {
 				if (requester.request && !teamRequestedSupport.includes(requester.request)) teamRequestedSupport.push(requester.request);
 			}
-			console.log(`Offered support this step:`);
-			console.log(teamOfferedSupport);
-			console.log(`High-priority requested support this step:`);
-			console.log(teamHighPrioRequestedSupport);
-			console.log(`Requested support this step:`);
-			console.log(teamRequestedSupport);
 			
 			for (const fragment of fragmentsList) {
 				if (fragment.role) {
