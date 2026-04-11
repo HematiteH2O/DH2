@@ -1545,7 +1545,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 						
 						// for now, I think just a yes or a no is fine
 						let accepted = false;
-						for (const role of offeredSupportThisStep) if (this.dex.data.Pokedex[id].randbats[format].acceptedSupport[role] && !acceptedSuppportThisStep.includes(role)) accepted = true;
+						for (const role of offeredSupportThisStep) if (this.dex.data.Pokedex[id].randbats[format].acceptedSupport[role] && !acceptedSupportThisStep.includes(role)) accepted = true;
 						if (accepted === true) desiredSupport.push(id);
 					}
 					if (desiredSupport.length) currentStep = desiredSupport;
