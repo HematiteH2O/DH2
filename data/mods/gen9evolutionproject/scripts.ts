@@ -1905,9 +1905,9 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			// // if possible, prioritize fragments based on the Pokémon's next-most-unique fragment (the *less* unique, the better - and perfect if there just are no other fragments competing!)
 
 			if (prioritizeRoles) {
-				let reducedFragmentsThisStep = [];
+				let reducedFragmentsListThisStep = [];
 				let roleCount = {};
-				for (const fragment of fragmentsThisStep) {
+				for (const fragment of fragmentsListThisStep) {
 					if (fragment.role && fragment.role !== 'mainstab') {
 						if (!roleCount[fragment.role]) roleCount[fragment.role] = [];
 						if (!roleCount[fragment.role].includes(fragment.pokemon.name)) roleCount[fragment.role].push(fragment.pokemon.name);
@@ -1917,11 +1917,11 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				for (const role of roleCount) {
 					if (minRoleCount > role.length) minRoleCount = role.length;
 				}
-				for (const fragment of fragmentsThisStep) {
-					if (fragment.role && fragment.role !== 'mainstab' && roleCount[fragment.role].length <= minRoleCount) reducedFragmentsThisStep.push(fragment);
+				for (const fragment of fragmentsListThisStep) {
+					if (fragment.role && fragment.role !== 'mainstab' && roleCount[fragment.role].length <= minRoleCount) reducedFragmentsListThisStep.push(fragment);
 				}
-				if (reducedFragmentsThisStep.length) fragmentsListThisStep = reducedFragmentsThisStep;
-				if (reducedFragmentsThisStep.length) {
+				if (reducedFragmentsListThisStep.length) fragmentsListThisStep = reducedFragmentsListThisStep;
+				if (reducedFragmentsListThisStep.length) {
 					console.log(`Reduced to fragments with ${minRoleCount} candidates, which include these roles:`);
 					for (const role of roleCount) if (role.length <= minRoleCount) console.log(role);
 				}
