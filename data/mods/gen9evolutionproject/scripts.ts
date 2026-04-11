@@ -1779,7 +1779,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 						if (fragment.role !== 'mainstab' && !teamOfferedSupport.includes(fragment.role)) teamOfferedSupport.push(fragment.role);
 						else if (fragment.role === 'mainstab' && fragment.moveType && !fragment.pokemon.coveredStabs.includes(fragment.moveType)) fragment.pokemon.coveredStabs.push(fragment.moveType);
 					}
-					if (fragment.requestedSupport) for (const request of fragment.requestedSupport) if (!teamHighPrioRequestedSupport.includes(request)) teamHighPrioRequestedSupport.push(request);
+					if (fragment[format].requestedSupport) for (const request of fragment[format].requestedSupport) if (!teamHighPrioRequestedSupport.includes(request)) teamHighPrioRequestedSupport.push(request);
 					fragment.eligible = false;
 				}
 			}
@@ -1801,7 +1801,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			// inside the loop
 			let teamRequestedSupport = [];
 			for (const request of baseRequestedSupport) if (!teamRequestedSupport.includes(request)) teamRequestedSupport.push(request);
-			for (const fragment of fragmentsList) if (fragment.requestedSupport) for (const request of fragment.requestedSupport) if (!teamRequestedSupport.includes(request)) teamRequestedSupport.push(request);
+			for (const fragment of fragmentsList) if (fragment[format].requestedSupport) for (const request of fragment[format].requestedSupport) if (!teamRequestedSupport.includes(request)) teamRequestedSupport.push(request);
 			
 			let possibleSupport = [];
 			for (const support of teamOfferedSupport) if (!possibleSupport.includes(support)) possibleSupport.push(support);
@@ -1828,8 +1828,8 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			}
 			
 			for (const fragment of fragmentsList) {
-				if (fragment.requestedSupport) {
-					for (const request of fragment.requestedSupport) {
+				if (fragment[format].requestedSupport) {
+					for (const request of fragment[format].requestedSupport) {
 						// if one half of a synergy exists, prioritize the other half
 						if (teamOfferedSupport.includes(request)) fragment.highpriority = true;
 						// but filter out impossible requests
@@ -1909,7 +1909,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					if (chosenFragment.role !== 'mainstab' && !teamOfferedSupport.includes(chosenFragment.role)) teamOfferedSupport.push(chosenFragment.role);
 					else if (chosenFragment.role === 'mainstab' && chosenFragment.moveType && !chosenFragment.pokemon.coveredStabs.includes(chosenFragment.moveType)) chosenFragment.pokemon.coveredStabs.push(chosenFragment.moveType);
 				}
-				if (chosenFragment.requestedSupport) for (const request of chosenFragment.requestedSupport) if (!teamHighPrioRequestedSupport.includes(request)) teamHighPrioRequestedSupport.push(request);
+				if (chosenFragment[format].requestedSupport) for (const request of chosenFragment[format].requestedSupport) if (!teamHighPrioRequestedSupport.includes(request)) teamHighPrioRequestedSupport.push(request);
 			}
 		}
 
