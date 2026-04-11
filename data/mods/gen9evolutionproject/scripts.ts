@@ -1801,14 +1801,12 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			
 			for (const fragment of fragmentsList) {
 				if (fragment.role) {
-					let allow = true;
 					if (teamOfferedSupport.includes(fragment.role)) fragment.lowpriority = true;
 					if (fragment.role === 'mainstab') {
-						if (fragment.pokemon.coveredStabs.includes(fragment.moveType)) allow = false;
+						if (fragment.pokemon.coveredStabs.includes(fragment.moveType)) fragment.eligible = false;
 						else if (fragment.pokemon.coveredStabs.length > 1) fragment.lowpriority = true;
 					}
-					if (!teamRequestedSupport.includes(fragment.role)) allow = false;
-					if (!allow) fragment.eligible = false;
+					if (!teamRequestedSupport.includes(fragment.role)) fragment.eligible = false;
 				}
 			}
 			fragmentsList = fragmentsList.filter((fragment) => (fragment.eligible === true));
