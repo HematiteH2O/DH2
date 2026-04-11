@@ -1669,10 +1669,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 		for (const set of sets) {
 			// push everything in viableStabs, offeredSupport, [format].requestedSupport and [format].acceptedSupport
 			// note that viableStabs is intentionally not sorted by type - for instance viableStabs.flying doesn't exist; all of the fragments are in viableStabs right now
-			console.log(`Set: ${set.species}`);
 			for (const fragment of this.dex.species.get(set.species).randbats.viableStabs) {
-				console.log(`Viable STABs`);
-				console.log(fragment);
 				if (typeof fragment === 'string') continue;
 				let modFragment = Utils.deepClone(fragment);
 				modFragment.pokemon = set;
@@ -1680,11 +1677,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				fragmentsList.push(modFragment);
 			}
 			for (const offeredSupport in this.dex.species.get(set.species).randbats.offeredSupport) {
-				console.log(`Offered support:`);
-				console.log(offeredSupport);
 				for (const fragment of this.dex.species.get(set.species).randbats.offeredSupport[offeredSupport]) {
-					console.log(`Fragment:`);
-					console.log(fragment);
 					if (typeof fragment !== 'string') {
 						let modFragment = Utils.deepClone(fragment);
 						modFragment.pokemon = set;
@@ -1694,11 +1687,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				}
 			}
 			for (const requestedSupport in this.dex.species.get(set.species).randbats[format].requestedSupport) {
-				console.log(`Requested support:`);
-				console.log(requestedSupport);
 				for (const fragment of this.dex.species.get(set.species).randbats[format].requestedSupport[requestedSupport]) {
-					console.log(`Fragment:`);
-					console.log(fragment);
 					if (typeof fragment !== 'string') {
 						let modFragment = Utils.deepClone(fragment);
 						modFragment.pokemon = set;
@@ -1709,11 +1698,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				}
 			}
 			for (const acceptedSupport in this.dex.species.get(set.species).randbats[format].acceptedSupport) {
-				console.log(`Accepted support:`);
-				console.log(acceptedSupport);
 				for (const fragment of this.dex.species.get(set.species).randbats[format].acceptedSupport[acceptedSupport]) {
-					console.log(`Fragment:`);
-					console.log(fragment);
 					if (typeof fragment !== 'string') {
 						let modFragment = Utils.deepClone(fragment);
 						modFragment.pokemon = set;
@@ -1820,7 +1805,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			let teamRequestedSupport = [];
 			for (const request of baseRequestedSupport) if (!teamRequestedSupport.includes(request)) teamRequestedSupport.push(request);
 			for (const requester of fragmentsList) {
-				if (requester.request && !teamRequestedSupport.includes(requester.request)) teamRequestedSupport.push(requestedSupport);
+				if (requester.request && !teamRequestedSupport.includes(requester.request)) teamRequestedSupport.push(requester.request);
 			}
 			console.log(`Offered support this step:`);
 			console.log(teamOfferedSupport);
