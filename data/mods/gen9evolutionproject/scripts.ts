@@ -567,7 +567,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						}
 						if (move.target === 'allAdjacent' && fragment.moveBasePower >= 80 && !move.selfdestruct && moveid !== 'synchronoise') {
 							let modFragment = Utils.deepClone(fragment);
-							modFragment.vgc.requestedSupport.push([`${(fragment.moveType).toLowerCase()}immune`]); // ex. "electricimmune"
+							modFragment.vgc.requestedSupport.push(`${(fragment.moveType).toLowerCase()}immune`); // ex. "electricimmune"
 							
 							if (!newMon.randbats.offeredSupport.spread) newMon.randbats.offeredSupport.spread = [];
 							newMon.randbats.offeredSupport.spread.push(modFragment);
