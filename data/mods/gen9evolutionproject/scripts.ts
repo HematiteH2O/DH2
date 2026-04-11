@@ -530,6 +530,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							// if there are at least 2 types in viableStabs, then the set should try to have viableStabs of any 2 types
 							
 							let modFragment = Utils.deepClone(fragment);
+							modFragment.score = 500 - fragment.moveBasePower; // TESTING SCORE FEATURE
 							if (!fragment.stab && !fragment.teraType) modFragment.teraType = fragment.moveType;
 							if (fragment.moveBasePower >= 90 || (fragment.stab && fragment.moveBasePower >= 80)) newMon.randbats.viableStabs.push(modFragment);
 							if (fragment.moveBasePower >= 120 && !fragment.item) {
@@ -1924,6 +1925,29 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			
 			// if there are multiple remaining candidates for the same role (or STAB type), and any of them have a score defined, filter out all competition for that role except the highest-scoring
 			// // the "score" is on a per-role basis and not standardized, so only compare fragments with the same role!!!
+			let reducedFragmentsListThisStep = [];
+			let roleScores = {};
+			for (const fragment of fragmentsListThisStep) {
+				if (fragment.role && fragment.role !== 'mainstab') {
+					if (!roleScores[fragment.role]) roleScores[fragment.role] = 0;
+					if (fragment.score && fragment.score > roleScores[fragment.role]) roleScores[fragment.role] = fragment.score;
+				}
+				else if (fragment.role && fragment.role === 'mainstab') {
+					if (!roleScores[fragment.pokemon]) roleScores[fragment.pokemon] = 0;
+					if (fragment.score && fragment.score > roleScores[fragment.pokemon]) roleScores[fragment.pokemon] = fragment.score;
+				}
+			}
+			for (const fragment of fragmentsListThisStep) {
+				let safeToPush = true;
+				if (fragment.role && fragment.role !== 'mainstab') {
+					if (roleScores[fragment.role] && roleScores[fragment.role] > 0 && (!fragment.score || (roleScores[fragment.role] > fragment.score))) safeToPush = false;
+				}
+				else if (fragment.role && fragment.role !== 'mainstab') {
+					if (roleScores[fragment.pokemon] && roleScores[fragment.pokemon] > 0 && (!fragment.score || (roleScores[fragment.pokemon] > fragment.score))) safeToPush = false;
+				}
+				if (safeToPush) reducedFragmentsListThisStep.push(fragment);
+			}
+			if (reducedFragmentsListThisStep.length) fragmentsListThisStep = reducedFragmentsListThisStep;
 			
 			// STEP 5: applying fragments
 			// finally, pick a random fragment from the narrowed-down pool, apply it to the set, and loop
