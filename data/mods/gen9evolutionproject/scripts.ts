@@ -1735,6 +1735,9 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			// STEP 2: fragment eligibility
 			for (const fragment of fragmentsList) {
 				fragment.eligible = true;
+				fragment.lowpriority = false;
+				fragment.highpriority = false;
+				
 				if (fragment.ability && fragment.pokemon.ability) {
 					if (fragment.ability === fragment.pokemon.ability) fragment.ability = null;
 					else fragment.eligible = false;
@@ -1771,7 +1774,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				if (
 					!fragment.ability && !fragment.item && !fragment.teraType && !(fragment.moves && fragment.moves.length) && !(
 						fragment.evs && (fragment.evs['hp'] > 0 || fragment.evs['atk'] > 0 || fragment.evs['def'] > 0 || fragment.evs['spa'] > 0 || fragment.evs['spd'] > 0 || fragment.evs['spe'] > 0)
-					) && (!fragment.request || teamOfferedSupport.includes(fragment.request))
+					)
 				) {
 					// the fragment is already complete, so I should also check it off of the role tally and then delete it from the fragments list
 					if (fragment.role) {
