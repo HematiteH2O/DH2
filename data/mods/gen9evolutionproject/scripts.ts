@@ -1846,7 +1846,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			// // if it's an offeredSupport, but it's already covered by the team, flag it as "low-priority" (but don't delete it! these are still handy when we have nothing better to do)
 			// // // if there are only "low-priority" fragments, run with them; if not, filter them out of the current step and keep going
 			
-			let fragmentsListThisStep = fragmentsList.filter((fragment) => (fragment.highpriority);
+			let fragmentsListThisStep = fragmentsList.filter((fragment) => (fragment.highpriority));
 			if (!fragmentsListThisStep.length) fragmentsListThisStep = fragmentsList.filter((fragment) => (!fragment.lowpriority && !(fragment.role && fragment.role === 'mainstab')));
 			if (!fragmentsListThisStep.length) fragmentsListThisStep = fragmentsList.filter((fragment) => (!fragment.lowpriority));
 			if (!fragmentsListThisStep.length) fragmentsListThisStep = fragmentsList;
