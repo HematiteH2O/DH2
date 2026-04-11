@@ -1847,8 +1847,8 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			for (const fragment of fragmentsList) {
 				if (fragment[format].requestedSupport) {
 					for (const request of fragment[format].requestedSupport) {
-						// if one half of a synergy exists, prioritize the other half
-						if (teamOfferedSupport.includes(request)) fragment.highpriority = true;
+						// if one half of a synergy exists, prioritize getting at least one of the other half
+						if (teamOfferedSupport.includes(request) && !teamHighPrioRequestedSupport.includes(request)) fragment.highpriority = true;
 						// but filter out impossible requests
 						if (!possibleSupport.includes(request)) fragment.eligible = false;
 					}
