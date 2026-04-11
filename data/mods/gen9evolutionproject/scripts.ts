@@ -551,7 +551,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							// those two are cool and all, but they do *not* count as being a team's priority user jsdfngh
 							if (fragment.moveBasePower > 40 || ['assist', 'copycat', 'mefirst', 'metronome', 'mirrormove', 'naturepower'].includes(moveid)) {
 								if (!newMon.randbats.offeredSupport.priority) newMon.randbats.offeredSupport.priority = [];
-								// TESTING SCORE FEATURE
+								// this was initially a sample to test the score feature, but I think it's a good idea to keep it this way:
+								// if you have multiple candidates for priority users, the strongest one is picked first
 								let modFragment = Utils.deepClone(fragment);
 								modFragment.score = fragment.moveBasePower;
 								newMon.randbats.offeredSupport.priority.push(modFragment);
@@ -1668,9 +1669,11 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 
 		// WIP: set constructor
 		let sets = [];
+		let teamItemsSoFar = []; // for item clause
 		if (firstDraftTeam.length) {
 			for (const set of firstDraftTeam) {
 				let randomized = true;
+				if (set.item && !teamItemsSoFar.includes(set.item)) teamItemsSoFar.push(set.item);
 				if (team.length) {
 					for (const pokemon of team) {
 						if (pokemon.species === set.species) randomized = false;
@@ -1744,12 +1747,13 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				if (set.moves) set.moveCount = set.moves.length;
 				if (set.evs) set.evCount = set.evs['hp'] + set.evs['atk'] + set.evs['def'] + set.evs['spa'] + set.evs['spd'] + set.evs['spe'];
 			}
+			
 			// TODO: leave room for STABs
 			// // I thhhink it works in my favor to pick STABs last, but that also means I want to leave room for them - that means I should count how many types of viable STABs are already on the set and compare it to my target
 			// // if the target isn't met, I should subtract it from the amount of space I have left for moves
 			// // I do think I need to recalculate the target each step
 			// // for instance, Aerilate Flying moves may be the closest Shiftry-Johto gets to a "viable STAB" in some formats, but they stop being an option at all if it commits to another Ability first
-
+			
 			// STEP 2: fragment eligibility
 			for (const fragment of fragmentsList) {
 				fragment.eligible = true;
@@ -1764,6 +1768,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					if (fragment.item === fragment.pokemon.item) fragment.item = null;
 					else fragment.eligible = false;
 				}
+				if (fragment.item && format === 'vgc' && teamItemsSoFar.includes(fragment.item)) fragment.eligible = false; // item clause
 				if (fragment.teraType && fragment.pokemon.teraType) {
 					if (fragment.teraType === fragment.pokemon.teraType) fragment.teraType = null;
 					else fragment.eligible = false;
@@ -1787,7 +1792,6 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 						else if (evCount + fragment.pokemon.evCount > 508) fragment.eligible = false;
 					}
 				}
-				// TODO: item clause later
 				
 				if (
 					!fragment.ability && !fragment.item && !fragment.teraType && !(fragment.moves && fragment.moves.length) && !(
@@ -1816,7 +1820,6 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			// // if (after the above) any of its criteria are impossible to meet (like it has an Ability but the set already has a different Ability, or it takes more moves than there are open slots), delete the fragment
 			// // // IMPORTANT: delete any fragment that's "just" a main STAB if another main STAB of the *same type* is already in!
 			// // // if I don't, I risk letting two fragments in for "compressing" with conflicting STABs of the same type, and then you can't actually fit them both anyway
-			// // // ALSO IMPORTANT: for VGC, item clause starts here!!!
 
 			// inside the loop
 			let teamRequestedSupport = [];
@@ -1948,7 +1951,6 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					if (roleScores[fragment.pokemon] && roleScores[fragment.pokemon] > 0 && (!fragment.score || (roleScores[fragment.pokemon] > fragment.score))) safeToPush = false;
 				}
 				if (safeToPush) reducedFragmentsListThisStep.push(fragment);
-				if (!safeToPush) console.log(`${fragment.pokemon.name}'s fragment with base move ${fragment.baseMove} was passed by with a score of ${fragment.score} because it was compared to another fragment with the same role.`);
 			}
 			if (reducedFragmentsListThisStep.length) fragmentsListThisStep = reducedFragmentsListThisStep;
 			
@@ -1957,7 +1959,10 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			let chosenFragment = this.sample(fragmentsListThisStep);
 			if (chosenFragment) {
 				if (chosenFragment.ability) chosenFragment.pokemon.ability = chosenFragment.ability;
-				if (chosenFragment.item) chosenFragment.pokemon.item = chosenFragment.item;
+				if (chosenFragment.item) {
+					chosenFragment.pokemon.item = chosenFragment.item;
+					if (!teamItemsSoFar.includes(set.item)) teamItemsSoFar.push(fragment.item);
+				}
 				if (chosenFragment.teraType) chosenFragment.pokemon.teraType = chosenFragment.teraType;
 				if (chosenFragment.moves) {
 					if (!chosenFragment.pokemon.moves) chosenFragment.pokemon.moves = [];
