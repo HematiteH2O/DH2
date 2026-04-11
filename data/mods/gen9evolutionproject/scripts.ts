@@ -644,14 +644,14 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				// and obviously ones with support available are favored, but ones with requestedSupport missing are completely ignored
 				
 				for (const fragment of newMon.randbats.viableStabs) {
-					if (newMon.randbats.viableStabs[fragment].singles.requestedSupport.length) {
-						for (const request of newMon.randbats.viableStabs[fragment].singles.requestedSupport) {
+					if (fragment.singles.requestedSupport.length) {
+						for (const request of fragment.singles.requestedSupport) {
 							if (!newMon.randbats.singles.acceptedSupport[request]) newMon.randbats.singles.acceptedSupport[request] = [];
 							newMon.randbats.singles.acceptedSupport[request].push(fragment);
 						}
 					}
-					if (newMon.randbats.viableStabs[fragment].vgc.requestedSupport.length) {
-						for (const request of newMon.randbats.viableStabs[fragment].vgc.requestedSupport) {
+					if (fragment.vgc.requestedSupport.length) {
+						for (const request of fragment.vgc.requestedSupport) {
 							if (!newMon.randbats.vgc.acceptedSupport[request]) newMon.randbats.vgc.acceptedSupport[request] = [];
 							newMon.randbats.vgc.acceptedSupport[request].push(fragment);
 						}
@@ -661,20 +661,20 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				for (const offeredSupport in newMon.randbats.offeredSupport) {
 					let accepted = false;
 					for (const fragment of newMon.randbats.offeredSupport[offeredSupport]) {
-						if (newMon.randbats.offeredSupport[offeredSupport][fragment].baseMove) { // if it was just an Ability, this is unnecessary
-							if (newMon.randbats.offeredSupport[offeredSupport][fragment].singles.requestedSupport.length) {
-								for (const request of newMon.randbats.offeredSupport[offeredSupport][fragment].singles.requestedSupport) {
+						if (fragment.baseMove) { // if it was just an Ability, this is unnecessary
+							if (fragment.singles.requestedSupport.length) {
+								for (const request of fragment.singles.requestedSupport) {
 									if (!newMon.randbats.singles.acceptedSupport[request]) newMon.randbats.singles.acceptedSupport[request] = [];
 									newMon.randbats.singles.acceptedSupport[request].push(fragment);
 								}
 							}
-							if (newMon.randbats.offeredSupport[offeredSupport][fragment].vgc.requestedSupport.length) {
-								for (const request of newMon.randbats.offeredSupport[offeredSupport][fragment].vgc.requestedSupport) {
+							if (fragment.vgc.requestedSupport.length) {
+								for (const request of fragment.vgc.requestedSupport) {
 									if (!newMon.randbats.vgc.acceptedSupport[request]) newMon.randbats.vgc.acceptedSupport[request] = [];
 									newMon.randbats.vgc.acceptedSupport[request].push(fragment);
 								}
 							}
-							if (!newMon.randbats.offeredSupport[offeredSupport][fragment].singles.requestedSupport.length && !newMon.randbats.offeredSupport[offeredSupport][fragment].vgc.requestedSupport.length) accepted = true;
+							if (!fragment.singles.requestedSupport.length && !fragment.vgc.requestedSupport.length) accepted = true;
 						} else accepted = true;
 					}
 					if (!accepted) delete newMon.randbats.offeredSupport[offeredSupport];
