@@ -1801,6 +1801,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			
 			for (const fragment of fragmentsList) {
 				if (fragment.role) {
+					let allow = true;
 					if (teamOfferedSupport.includes(fragment.role)) fragment.lowpriority = true;
 					if (fragment.role === 'mainstab') {
 						if (fragment.pokemon.coveredStabs.includes(fragment.moveType)) allow = false;
