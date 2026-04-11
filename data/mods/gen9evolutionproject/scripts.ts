@@ -1920,10 +1920,6 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					if (fragment.role && fragment.role !== 'mainstab' && roleCount[fragment.role].length <= minRoleCount) reducedFragmentsListThisStep.push(fragment);
 				}
 				if (reducedFragmentsListThisStep.length) fragmentsListThisStep = reducedFragmentsListThisStep;
-				if (reducedFragmentsListThisStep.length) {
-					console.log(`Reduced to fragments with ${minRoleCount} candidates, which include these roles:`);
-					for (const role in roleCount) if (roleCount[role].length <= minRoleCount) console.log(role);
-				}
 			}
 			
 			// if there are multiple remaining candidates for the same role (or STAB type), and any of them have a score defined, filter out all competition for that role except the highest-scoring
