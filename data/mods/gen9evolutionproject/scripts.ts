@@ -398,7 +398,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				let learnset = this.dataCache.Learnsets[id].learnset;
 				if (newMon.baseSpecies && newMon.baseSpecies === 'Rotom') learnset = this.dataCache.Learnsets.rotom.learnset;
 				// going to handle their form-specific moves separately; this is fine for here!
-				if (!learnset && newMon.baseSpecies) console.log(newMon.baseSpecies);
 				if (!learnset) continue;
 				
 				for (const moveid in learnset) {
@@ -1620,6 +1619,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				offeredSupport: this.dex.data.Pokedex[chosenRandomPokemon].randbats.offeredSupport,
 				requestedSupport: this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].requestedSupport,
 				acceptedSupport: this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].acceptedSupport,
+				coveredStabs: [],
 			});
 		}
 		console.log(firstDraftTeam);
@@ -1704,6 +1704,9 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				}
 			}
 		}
+
+		// outside the loop
+		let teamOfferedSupport = [];
 		
 		while (eligibleFragments) {
 			// if there are already no fragments left on any Pokémon, immediately set eligibleFragments to false and then "continue;" to end the loop
@@ -1711,7 +1714,6 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				eligibleFragments = false;
 				continue;
 			}
-
 
 			// STEP 1: counting space
 			
@@ -1762,12 +1764,16 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				}
 				// TODO: item clause later
 				
-				if (!fragment.ability && !fragment.item && !fragment.teraType && !(fragment.moves && fragment.moves.length) && !(
-					fragment.evs && (fragment.evs['hp'] > 0 || fragment.evs['atk'] > 0 || fragment.evs['def'] > 0 || fragment.evs['spa'] > 0 || fragment.evs['spd'] > 0 || fragment.evs['spe'] > 0)
-				)
-					) {
+				if (
+					!fragment.ability && !fragment.item && !fragment.teraType && !(fragment.moves && fragment.moves.length) && !(
+						fragment.evs && (fragment.evs['hp'] > 0 || fragment.evs['atk'] > 0 || fragment.evs['def'] > 0 || fragment.evs['spa'] > 0 || fragment.evs['spd'] > 0 || fragment.evs['spe'] > 0)
+					) && (!fragment.request || teamOfferedSupport.includes(fragment.request))
+				) {
 					// the fragment is already complete, so I should also check it off of the role tally and then delete it from the fragments list
-					// but I don't have a role tally yet aksdjh
+					if (fragment.role) {
+						if (fragment.role !== 'mainstab' && !teamOfferedSupport.includes(fragment.role)) teamOfferedSupport.push(fragment.role);
+						else if (fragment.role === 'mainstab' && fragment.moveType && !fragment.pokemon.coveredStabs.includes(fragment.moveType)) fragment.pokemon.coveredStabs.push(fragment.moveType);
+					}
 					fragment.eligible = false;
 				}
 			}
@@ -1785,9 +1791,30 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			// // // IMPORTANT: delete any fragment that's "just" a main STAB if another main STAB of the *same type* is already in!
 			// // // if I don't, I risk letting two fragments in for "compressing" with conflicting STABs of the same type, and then you can't actually fit them both anyway
 			// // // ALSO IMPORTANT: for VGC, item clause starts here!!!
+
+			// inside the loop
+			let teamRequestedSupport = [];
+			for (const request of baseRequestedSupport) if (!teamRequestedSupport.includes(request)) teamRequestedSupport.push(request);
+			for (const requester of fragmentsList) {
+				if (requester.request && !teamRequestedSupport.includes(requester.request)) teamRequestedSupport.push(requestedSupport);
+			}
 			
 			for (const fragment of fragmentsList) {
-				// nothing yet
+				if (fragment.role) {
+					if (teamOfferedSupport.includes(fragment.role)) fragment.lowpriority = true;
+					if (fragment.role === 'mainstab') {
+						if (fragment.pokemon.coveredStabs.includes(fragment.moveType)) allow = false;
+						else if (fragment.pokemon.coveredStabs.length > 1) fragment.lowpriority = true;
+					}
+					if (!teamRequestedSupport.includes(fragment.role)) allow = false;
+					if (!allow) fragment.eligible = false;
+				}
+			}
+			fragmentsList = fragmentsList.filter((fragment) => (fragment.eligible === true));
+			
+			if (!fragmentsList.length) {
+				eligibleFragments = false;
+				continue;
 			}
 
 
@@ -1814,6 +1841,14 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			// // if it's an offeredSupport, but it's already covered by the team, flag it as "low-priority" (but don't delete it! these are still handy when we have nothing better to do)
 			// // // if there are only "low-priority" fragments, run with them; if not, filter them out of the current step and keep going
 			
+			let fragmentsListThisStep = fragmentsList.filter((fragment) => (!fragment.lowpriority && !(fragment.role && fragment.role === 'mainstab')));
+			if (!fragmentsListThisStep.length) fragmentsListThisStep = fragmentsList.filter((fragment) => (!fragment.lowpriority));
+			if (!fragmentsListThisStep.length) fragmentsListThisStep = fragmentsList;
+			if (!fragmentsListThisStep.length) {
+				eligibleFragments = false;
+				continue;
+			}
+			
 			// // only if the current step *isn't* low-priority, filter fragments for the current step so only the most unique *right now* are counted, then keep going (if the current step is low-priority, uniqueness doesn't matter!)
 			// // if possible, prioritize fragments based on whether a move, Ability or item they include is a) also a viable STAB or b) on a different eligible, not-low-priority fragment on the same Pokémon
 			// // // (provisionally: the more compression, the better?)
@@ -1821,12 +1856,10 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			
 			// if there are multiple remaining candidates for the same role (or STAB type), and any of them have a score defined, filter out all competition for that role except the highest-scoring
 			// // the "score" is on a per-role basis and not standardized, so only compare fragments with the same role!!!
-
-
 			
 			// STEP 5: applying fragments
 			// finally, pick a random fragment from the narrowed-down pool, apply it to the set, and loop
-			let chosenFragment = this.sample(fragmentsList);
+			let chosenFragment = this.sample(fragmentsListThisStep);
 			if (chosenFragment) {
 				if (chosenFragment.ability) chosenFragment.pokemon.ability = chosenFragment.ability;
 				if (chosenFragment.item) chosenFragment.pokemon.item = chosenFragment.item;
@@ -1843,6 +1876,10 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					if (chosenFragment.evs['spa'] > chosenFragment.pokemon.evs['spa']) chosenFragment.pokemon.evs['spa'] = chosenFragment.evs['spa'];
 					if (chosenFragment.evs['spd'] > chosenFragment.pokemon.evs['spd']) chosenFragment.pokemon.evs['spd'] = chosenFragment.evs['spd'];
 					if (chosenFragment.evs['spe'] > chosenFragment.pokemon.evs['spe']) chosenFragment.pokemon.evs['spe'] = chosenFragment.evs['spe'];
+				}
+				if (chosenFragment.role) {
+					if (chosenFragment.role !== 'mainstab' && !teamOfferedSupport.includes(chosenFragment.role)) teamOfferedSupport.push(chosenFragment.role);
+					else if (chosenFragment.role === 'mainstab' && chosenFragment.moveType && !chosenFragment.pokemon.coveredStabs.includes(chosenFragment.moveType)) chosenFragment.pokemon.coveredStabs.push(chosenFragment.moveType);
 				}
 			}
 		}
