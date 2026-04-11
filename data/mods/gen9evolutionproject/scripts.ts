@@ -1707,6 +1707,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 
 		// outside the loop
 		let teamOfferedSupport = [];
+		let teamHighPrioRequestedSupport = [];
 		
 		while (eligibleFragments) {
 			// if there are already no fragments left on any Pokémon, immediately set eligibleFragments to false and then "continue;" to end the loop
@@ -1774,6 +1775,9 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 						if (fragment.role !== 'mainstab' && !teamOfferedSupport.includes(fragment.role)) teamOfferedSupport.push(fragment.role);
 						else if (fragment.role === 'mainstab' && fragment.moveType && !fragment.pokemon.coveredStabs.includes(fragment.moveType)) fragment.pokemon.coveredStabs.push(fragment.moveType);
 					}
+					if (fragment.request) {
+						if (!teamHighPrioRequestedSupport.includes(fragment.request)) teamHighPrioRequestedSupport.push(fragment.request);
+					}
 					fragment.eligible = false;
 				}
 			}
@@ -1806,8 +1810,10 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 						if (fragment.pokemon.coveredStabs.includes(fragment.moveType)) fragment.eligible = false;
 						else if (fragment.pokemon.coveredStabs.length > 1) fragment.lowpriority = true;
 					}
-					if (!teamRequestedSupport.includes(fragment.role)) fragment.eligible = false;
+					if (!teamRequestedSupport.includes(fragment.role) && !teamHighPrioRequestedSupport.includes(fragment.role)) fragment.eligible = false;
+					if (teamHighPrioRequestedSupport.includes(fragment.role) && !teamOfferedSupport.includes(fragment.role)) fragment.highpriority = true;
 				}
+				if (fragment.request && teamOfferedSupport.includes(fragment.request)) fragment.highpriority = true;
 			}
 			fragmentsList = fragmentsList.filter((fragment) => (fragment.eligible === true));
 			
@@ -1840,7 +1846,8 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			// // if it's an offeredSupport, but it's already covered by the team, flag it as "low-priority" (but don't delete it! these are still handy when we have nothing better to do)
 			// // // if there are only "low-priority" fragments, run with them; if not, filter them out of the current step and keep going
 			
-			let fragmentsListThisStep = fragmentsList.filter((fragment) => (!fragment.lowpriority && !(fragment.role && fragment.role === 'mainstab')));
+			let fragmentsListThisStep = fragmentsList.filter((fragment) => (fragment.highpriority);
+			if (!fragmentsListThisStep.length) fragmentsListThisStep = fragmentsList.filter((fragment) => (!fragment.lowpriority && !(fragment.role && fragment.role === 'mainstab')));
 			if (!fragmentsListThisStep.length) fragmentsListThisStep = fragmentsList.filter((fragment) => (!fragment.lowpriority));
 			if (!fragmentsListThisStep.length) fragmentsListThisStep = fragmentsList;
 			if (!fragmentsListThisStep.length) {
@@ -1879,6 +1886,9 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				if (chosenFragment.role) {
 					if (chosenFragment.role !== 'mainstab' && !teamOfferedSupport.includes(chosenFragment.role)) teamOfferedSupport.push(chosenFragment.role);
 					else if (chosenFragment.role === 'mainstab' && chosenFragment.moveType && !chosenFragment.pokemon.coveredStabs.includes(chosenFragment.moveType)) chosenFragment.pokemon.coveredStabs.push(chosenFragment.moveType);
+				}
+				if (chosenFragment.request) {
+					if (!teamHighPrioRequestedSupport.includes(chosenFragment.request)) teamHighPrioRequestedSupport.push(chosenFragment.request);
 				}
 			}
 		}
