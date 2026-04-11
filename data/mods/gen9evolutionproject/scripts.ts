@@ -1686,7 +1686,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				}
 			}
 			for (const requestedSupport in this.dex.species.get(set.species).randbats[format].requestedSupport) {
-				for (const fragment of this.dex.species.get(set.species).randbats[format].requestedSupport[requestedSupport]) {
+				for (const fragment in this.dex.species.get(set.species).randbats[format].requestedSupport[requestedSupport]) {
 					if (typeof fragment === 'string') continue;
 					let modFragment = Utils.deepClone(fragment);
 					modFragment.pokemon = set;
@@ -1696,7 +1696,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				}
 			}
 			for (const acceptedSupport in this.dex.species.get(set.species).randbats[format].acceptedSupport) {
-				for (const fragment of this.dex.species.get(set.species).randbats[format].acceptedSupport[acceptedSupport]) {
+				for (const fragment in this.dex.species.get(set.species).randbats[format].acceptedSupport[acceptedSupport]) {
 					if (typeof fragment === 'string') continue;
 					let modFragment = Utils.deepClone(fragment);
 					modFragment.pokemon = set;
