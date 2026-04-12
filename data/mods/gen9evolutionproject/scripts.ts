@@ -112,7 +112,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			// but the rest of the information only needs to be set up for Pokémon they can bring to an Evo game
 			if (
 				this.modData('FormatsData', id) && this.modData('FormatsData', id).tier &&
-				(this.modData('FormatsData', id).tier === "Evo!" || this.modData('FormatsData', id).tier === "(Prevo)"
+				(this.modData('FormatsData', id).tier === "Evo!" || this.modData('FormatsData', id).tier === "(Prevo)")
 			) {
 				// banlists
 				if ([
