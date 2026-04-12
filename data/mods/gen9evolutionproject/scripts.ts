@@ -1407,7 +1407,8 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			if (eligibleMonotypes.length) monotype = this.sample(eligibleMonotypes);
 		} else {
 			// but if not, the randomizer can decide if it should be monotype or not!
-			if (this.randomChance(1,10)) { // the chance can be anything I want, but 10% should be good for now
+			if (this.randomChance(1,2)) { // the chance can be anything I want, but 10% should be good for now
+				// temporarily testing at 50/50 instead!
 				if (!eligibleMonotypes.length) eligibleMonotypes = types;
 				monotype = this.sample(eligibleMonotypes);
 			}
@@ -1429,7 +1430,9 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				this.dex.data.Pokedex[id].randbats && // in the format/has randbats data
 				!originalTeamSpecies.includes(id) && !originalTeamNumbers.includes(this.dex.data.Pokedex[id].num) && // species clause
 				!(this.dex.data.Pokedex[id].randbats[format] && this.dex.data.Pokedex[id].randbats[format].banned) && // not banned
-				(!monotype || this.dex.data.Pokedex[id].randbats.types.includes(monotype)) && // account for monotype
+				(!monotype || this.dex.data.Pokedex[id].randbats.types.includes(monotype) ||
+				 (this.dex.data.Pokedex[id].forceTeraType && this.dex.data.Pokedex[id].forceTeraType === monotype)
+				) && // account for monotype, but our special Terastallized states get some flexibility
 				(this.dex.data.Pokedex[id].randbats.stage && this.dex.data.Pokedex[id].randbats.stage === stage) // account for LC
 			) eligiblePokemon.push(id);
 		}
@@ -1527,12 +1530,33 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					console.log(resistancesThisStep);
 					console.log(`requested this step: ` + requestedSupportThisStep);
 				}
-				
+
+				// one more setup thing: the last Pokémon chosen for monotype can be any type!
+				// later, we'll force its Tera Type to match the team instead
+				let monotypeBypassEligiblePokemon = [];
+				if (monotype && (i === 5 - team.length)) {
+					// figure out the full list of eligible Pokémon
+					// we don't want to overwrite eligiblePokemon because we'll still use it in the for loop after this one!
+					// instead, we can make a temporary list for just this step
+					for (const id in this.dex.data.Pokedex) {
+						if (
+							this.dex.data.Pokedex[id].randbats && // in the format/has randbats data
+							!originalTeamSpecies.includes(id) && !originalTeamNumbers.includes(this.dex.data.Pokedex[id].num) && // species clause
+							!(this.dex.data.Pokedex[id].randbats[format] && this.dex.data.Pokedex[id].randbats[format].banned) && // not banned
+							(this.dex.data.Pokedex[id].randbats.stage && this.dex.data.Pokedex[id].randbats.stage === stage) && // account for LC
+							(!this.dex.data.Pokedex[id].forceTeraType || this.dex.data.Pokedex[id].forceTeraType === monotype) // we want to force a Tera Type later
+						) monotypeBypassEligiblePokemon.push(id);
+					}
+				}
+				let eligiblePokemonThisStep = eligiblePokemon;
+				if (monotypeBypassEligiblePokemon.length) eligiblePokemonThisStep = monotypeBypassEligiblePokemon;
+
+				// okay now we're starting for real P:
 				// first, we want to find offeredSupport that matches our requestedSupport
 				if (requestedSupportThisStep.length) {
 					// score them by how many roles they can fill, up to 3
 					let maxScore = 0;
-					for (const id of eligiblePokemon) {
+					for (const id of eligiblePokemonThisStep) {
 						// species clause
 						if (teamNumbersThisStep.includes(this.dex.data.Pokedex[id].num)) continue;
 						
@@ -1546,8 +1570,9 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 						if (score === maxScore) currentStep.push(id);
 					}
 				}
-				if (!currentStep.length) currentStep = eligiblePokemon.filter(id => !teamNumbersThisStep.includes(this.dex.data.Pokedex[id].num));
-	
+				
+				if (!currentStep.length) currentStep = eligiblePokemonThisStep.filter(id => !teamNumbersThisStep.includes(this.dex.data.Pokedex[id].num));
+				
 				// then, we'll try to look for anything with acceptedSupport that matches our offeredSupport
 				if (offeredSupportThisStep.length) {
 					// score them by how many roles they can fill, up to 3
@@ -1609,7 +1634,8 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				for (const id of currentStep) {
 					let teamResistScore = 0;
 					for (const type of types) if (!resistancesThisStep.includes(type) && (this.dex.data.Pokedex[id].randbats.immunities[type] || (this.dex.data.Pokedex[id].randbats.resistances[type] && !this.dex.data.Pokedex[id].randbats.weaknesses[type]))) teamResistScore++;
-					if (teamResistScore > 5) teamResistScore = 5; // you don't need to cover *that* many every step
+					if (teamResistScore > 5 && (i === 5 > team.length)) teamResistScore = 5;
+					// you don't need to cover *that* many every step, but the last step should try to cram in as many as possible
 					
 					if (teamResistScore > teamResistMaxScore) { // reset
 						teamResists = [];
@@ -1638,6 +1664,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			}
 			
 			// safety nets
+			if (!currentStep.length) currentStep = eligiblePokemonThisStep.filter(id => !teamNumbersThisStep.includes(this.dex.data.Pokedex[id].num));
 			if (!currentStep.length) currentStep = eligiblePokemon.filter(id => !teamNumbersThisStep.includes(this.dex.data.Pokedex[id].num));
 			if (!currentStep.length) continue;
 			
