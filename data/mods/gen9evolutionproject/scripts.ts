@@ -1577,7 +1577,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				}
 				
 				// Another thing: I need to filter which kinds of support are possible to ask for, now that I've established the pool of eligible Pokémon
-				for (const request in requestedSupportInGeneral) {
+				for (const request of requestedSupportInGeneral) {
 					let possible = false;
 					for (const id of eligiblePokemonThisStep) {
 						if (this.dex.data.Pokedex[id].randbats.offeredSupport[request]) possible = true;
