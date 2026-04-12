@@ -1716,6 +1716,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				if (species.battleOnly) {
 					if (typeof species.battleOnly === 'string') set.species = species.battleOnly;
 					else set.species = this.sample(species.battleOnly);
+					set.name = set.species;
 					
 					// for now, let's give it a random Ability from its base form
 					// we'll overwrite this later if there are better options
