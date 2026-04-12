@@ -1477,7 +1477,9 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			// before I forget:
 			// if a team started completely empty, I want the first Pokémon selected to be a completely random Evo 2 sub - never a canon Pokémon and not weighted in any way
 			if (i === 0 && !team.length) {
-				currentStep = eligiblePokemon.filter(id => this.dex.data.Pokedex[id].copyData);
+				// currentStep = eligiblePokemon.filter(id => this.dex.data.Pokedex[id].copyData);
+				// TESTING - I just wanna make sure battleOnly stuff is getting handled right jsdf
+				currentStep = ['overchillzen'];
 			} else {
 				let requestedSupportInGeneral = [];
 				let offeredSupportInGeneral = {}; // this one is not just a list, but how many of each
