@@ -700,7 +700,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 			// report randomizer teams
 			for (const side of this.sides) {
 				let randomized = 0;
-				for (const pokemon of side.pokemon) if (pokemon.set && pokemon.set.hasBeenRandomized) randomized++;
+				for (const const set of side.team) if (set && set.hasBeenRandomized) randomized++;
 				if (randomized === side.team.length) {
 					this.add(`raw|${side.name}'s team was randomly generated!<br>If you want to use it again, you can copy it from here:`);
 					this.add('showteam', side.id, Teams.pack(side.team));
