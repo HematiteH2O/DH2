@@ -2028,7 +2028,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				if (chosenFragment.ability) chosenFragment.pokemon.ability = chosenFragment.ability;
 				if (chosenFragment.item) {
 					chosenFragment.pokemon.item = chosenFragment.item;
-					if (!teamItemsSoFar.includes(set.item)) teamItemsSoFar.push(fragment.item);
+					if (!teamItemsSoFar.includes(chosenFragment.item)) teamItemsSoFar.push(chosenFragment.item);
 				}
 				if (chosenFragment.teraType) chosenFragment.pokemon.teraType = chosenFragment.teraType;
 				if (chosenFragment.moves) {
