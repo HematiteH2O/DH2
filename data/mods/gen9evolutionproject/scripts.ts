@@ -1718,7 +1718,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				
 				if (species.battleOnly) {
 					if (typeof species.battleOnly === 'string') set.species = species.battleOnly;
-					else set.species = this.sample(species.battleOnly);
+					else if (typeof species.battleOnly === 'array' && species.battleOnly.length) set.species = this.sample(species.battleOnly);
 					set.name = set.species;
 					
 					// for now, let's give it a random Ability from its base form
@@ -1733,7 +1733,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				// but simply species if we want the form the randomizer actually chose (since that was recorded at the beginning of this loop)
 				
 				if (species.requiredItem) set.item = species.requiredItem;
-				else if (species.requiredItems) set.item = this.sample(species.requiredItems);
+				else if (species.requiredItems && typeof species.requiredItems === 'array' && species.requiredItems.length) set.item = this.sample(species.requiredItems);
 				if (species.requiredAbility) set.ability = species.requiredAbility;
 				if (species.requiredMove) {
 					if (!set.moves) set.moves = [];
@@ -2110,6 +2110,12 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				if (safeToPush) reducedFragmentsListThisStep.push(fragment);
 			}
 			if (reducedFragmentsListThisStep.length) fragmentsListThisStep = reducedFragmentsListThisStep;
+
+			// I'm so paranoid
+			if (!fragmentsListThisStep.length) {
+				eligibleFragments = false;
+				continue;
+			}
 			
 			// STEP 5: applying fragments
 			// finally, pick a random fragment from the narrowed-down pool, apply it to the set, and loop
