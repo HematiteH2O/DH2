@@ -1641,6 +1641,8 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				requestedSupport: this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].requestedSupport,
 				acceptedSupport: this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].acceptedSupport,
 				coveredStabs: [],
+				remainingStabTypes: [],
+				remainingStabMoves: [],
 			});
 		}
 		console.log(firstDraftTeam);
@@ -1746,6 +1748,9 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			for (const set of sets) {
 				if (set.moves) set.moveCount = set.moves.length;
 				if (set.evs) set.evCount = set.evs['hp'] + set.evs['atk'] + set.evs['def'] + set.evs['spa'] + set.evs['spd'] + set.evs['spe'];
+				// reset these each step
+				set.remainingStabTypes = [];
+				set.remainingStabMoves = [];
 			}
 			
 			// TODO: leave room for STABs
@@ -1806,6 +1811,69 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					if (fragment[format].requestedSupport) for (const request of fragment[format].requestedSupport) if (!teamHighPrioRequestedSupport.includes(request)) teamHighPrioRequestedSupport.push(request);
 					fragment.eligible = false;
 				}
+				// Choice items
+				if (fragment.item && ['Choice Band', 'Choice Specs', 'Choice Scarf'].includes(fragment.item) && fragment.pokemon.moves) {
+					for (const move of fragment.pokemon.moves) {
+						// what moves should you never be choiced into? I can come back to this and add more exceptions if I need
+						if (this.dex.moves.get(move).category === 'Status' && ![
+							'Healing Wish', 'Lunar Dance', 'Memento', 'Parting Shot', 'Chilly Reception',
+							'Trick', 'Switcheroo', 'Bestow',
+							'Defog', 'Tidy Up',
+						].includes(this.dex.moves.get(move).name)) fragment.eligible = false;
+					}
+				}
+				if (fragment.pokemon.item && ['Choice Band', 'Choice Specs', 'Choice Scarf'].includes(fragment.pokemon.item) && fragment.moves) {
+					for (const move of fragment.moves) {
+						if (this.dex.moves.get(move).category === 'Status' && ![
+							'Healing Wish', 'Lunar Dance', 'Memento', 'Parting Shot', 'Chilly Reception',
+							'Trick', 'Switcheroo', 'Bestow',
+							'Defog', 'Tidy Up',
+						].includes(this.dex.moves.get(move).name)) fragment.eligible = false;
+					}
+				}
+				// Assault Vest
+				if (fragment.item && fragment.item === 'Assault Vest' && fragment.pokemon.moves) {
+					for (const move of fragment.pokemon.moves) {
+						// reject status moves, except Me First
+						if (this.dex.moves.get(move).category === 'Status' && this.dex.moves.get(move).name !== 'Me First') fragment.eligible = false;
+					}
+				}
+				if (fragment.pokemon.item && fragment.pokemon.item === 'Assault Vest' && fragment.moves) {
+					for (const move of fragment.moves) {
+						// reject status moves, except Me First
+						if (this.dex.moves.get(move).category === 'Status' && this.dex.moves.get(move).name !== 'Me First') fragment.eligible = false;
+					}
+				}
+				// now is a good time to keep track of how many main STABs are still possible, for the next stap
+				if (fragment.eligible && fragment.role === 'mainstab') {
+					if (fragment.moveType && !fragment.pokemon.remainingStabTypes.includes(fragment.moveType)) fragment.pokemon.remainingStabTypes.push(fragment.moveType);
+					if (fragment.baseMove && !fragment.pokemon.remainingStabMoves.includes(fragment.baseMove)) fragment.pokemon.remainingStabMoves.push(fragment.baseMove);
+				}
+			}
+			fragmentsList = fragmentsList.filter((fragment) => (fragment.eligible === true));
+			
+			if (!fragmentsList.length) {
+				eligibleFragments = false;
+				continue;
+			}
+
+			// make sure to set aside room for STABs if they exist!
+			// this only actually matters if enough high-priority roles could be assigned to the same set fill it before you even get to STABs, so there are *some* situations when it won't come up at all
+			// but in the situations when it does come up, it's important to entirely deletes the ineligible fragment!
+			// otherwise, other Pokémon might start to request support that has been offered but isn't possible to fit on a set
+			for (const set of sets) {
+				let stabSpace = set.remainingStabTypes.length;
+				
+				// some Pokémon may end up with 3 or more "STAB" types by this point because of certain modifiers, but we only care about leaving space for any 2
+				if (stabSpace && stabSpace > 2) stabSpace = 2;
+				if (stabSpace && set.coveredStabs.length) stabSpace -= set.coveredStabs.length;
+				
+				if (stabSpace && stabSpace > 0) set.moveCount += stabSpace;
+			}
+			for (const fragment of fragmentsList) {
+				if (fragment.moves && fragment.pokemon.moves) {
+					if (fragment.moves.filter((move) => (!fragment.pokemon.moves.includes(move) && !fragment.pokemon.remainingStabMoves.includes(move))).length + fragment.pokemon.moveCount > 4) fragment.eligible = false;
+				}
 			}
 			fragmentsList = fragmentsList.filter((fragment) => (fragment.eligible === true));
 			
@@ -1821,7 +1889,6 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			// // // IMPORTANT: delete any fragment that's "just" a main STAB if another main STAB of the *same type* is already in!
 			// // // if I don't, I risk letting two fragments in for "compressing" with conflicting STABs of the same type, and then you can't actually fit them both anyway
 
-			// inside the loop
 			let teamRequestedSupport = [];
 			for (const request of baseRequestedSupport) if (!teamRequestedSupport.includes(request)) teamRequestedSupport.push(request);
 			for (const fragment of fragmentsList) if (fragment[format].requestedSupport) for (const request of fragment[format].requestedSupport) if (!teamRequestedSupport.includes(request)) teamRequestedSupport.push(request);
