@@ -2081,18 +2081,12 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					if (chosenFragment.evs['spe'] > chosenFragment.pokemon.evs['spe']) chosenFragment.pokemon.evs['spe'] = chosenFragment.evs['spe'];
 				}
 				if (chosenFragment.role) {
-					if (!['mainstab', 'protection'].includes(fragment.role) && !teamOfferedSupport.includes(chosenFragment.role)) teamOfferedSupport.push(chosenFragment.role);
+					if (!['mainstab', 'protection'].includes(chosenFragment.role) && !teamOfferedSupport.includes(chosenFragment.role)) teamOfferedSupport.push(chosenFragment.role);
 					else if (chosenFragment.role === 'mainstab' && chosenFragment.moveType && !chosenFragment.pokemon.coveredStabs.includes(chosenFragment.moveType)) chosenFragment.pokemon.coveredStabs.push(chosenFragment.moveType);
 				}
 				if (chosenFragment[format].requestedSupport) for (const request of chosenFragment[format].requestedSupport) if (!teamHighPrioRequestedSupport.includes(request)) teamHighPrioRequestedSupport.push(request);
 			}
 		}
-
-		// TODO: filling empty space in sets after fragments and STABs are done
-		// // double-checking if any resistance Abilities were important for resistances that aren't covered so far
-		// // reasonable amount of Protect in VGC, "spicy" moves, fun items, et cetera
-		// // obeying item clause was already mandatory for VGC; it's optional for singles, so the previous section doesn't enforce it... but by the time you're at this step, you should follow it anyway to get more fun sets!
-		// // (EXCEPTION: not gonna push item clause on LC - if something wants Eviolite or Berry Juice or something, it can have it)
 		
 		for (const set of sets) {
 			if (!set.item && format !== 'vgc') set.item = 'Leftovers'; // VGC respects item clause
