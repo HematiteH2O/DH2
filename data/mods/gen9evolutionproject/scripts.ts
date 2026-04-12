@@ -91,7 +91,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			// randbats initialization
 			if (
 				this.modData('FormatsData', id) && this.modData('FormatsData', id).tier &&
-				(this.modData('FormatsData', id).tier === "Evo!" || this.modData('FormatsData', id).tier === "(Prevo)")
+				(this.modData('FormatsData', id).tier === "Evo!" || this.modData('FormatsData', id).tier === "(Prevo)" || ['arceusbug', 'zygardecomplete'].includes(id))
 			) {
 				
 				// basic structure
@@ -1479,7 +1479,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			if (i === 0 && !team.length) {
 				// currentStep = eligiblePokemon.filter(id => this.dex.data.Pokedex[id].copyData);
 				// TESTING - I just wanna make sure battleOnly stuff is getting handled right jsdf
-				currentStep = ['overchillzen'];
+				currentStep = ['arceusbug', 'zygardecomplete'];
 			} else {
 				let requestedSupportInGeneral = [];
 				let offeredSupportInGeneral = {}; // this one is not just a list, but how many of each
