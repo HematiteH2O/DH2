@@ -2110,12 +2110,6 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				if (safeToPush) reducedFragmentsListThisStep.push(fragment);
 			}
 			if (reducedFragmentsListThisStep.length) fragmentsListThisStep = reducedFragmentsListThisStep;
-
-			// I'm so paranoid
-			if (!fragmentsListThisStep.length) {
-				eligibleFragments = false;
-				continue;
-			}
 			
 			// STEP 5: applying fragments
 			// finally, pick a random fragment from the narrowed-down pool, apply it to the set, and loop
