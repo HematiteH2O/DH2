@@ -108,7 +108,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 			}
 
-			// the real randbats initialization only needs to take place Pokémon you can bring to an Evo game
+			// the real randbats setup only needs to take place Pokémon you can bring to an Evo game
 			if (
 				this.modData('FormatsData', id) && this.modData('FormatsData', id).tier &&
 				(this.modData('FormatsData', id).tier === "Evo!" || this.modData('FormatsData', id).tier === "(Prevo)")
