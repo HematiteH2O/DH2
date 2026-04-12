@@ -45,7 +45,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			if (
 				!(this.dataCache.Pokedex[id] && this.dataCache.Pokedex[id].copyData) &&
 				!(this.modData('FormatsData', id) && this.modData('FormatsData', id).tier && ['Evo!', '(Prevo)'].includes(this.modData('FormatsData', id).tier))
-			) continue; // skip canon Pokémon that aren't in the dex - but allow Fakemon for both
+			) {
+				this.dataCache.Pokedex[id].randbats.singles.banned = true;
+				this.dataCache.Pokedex[id].randbats.vgc.banned = true;
+				continue; // skip canon Pokémon that aren't in the dex - but allow Fakemon for both
+			}
 
 			if (this.dataCache.Learnsets[id]) {
 				// movepool corrections
