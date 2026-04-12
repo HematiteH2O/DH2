@@ -1704,18 +1704,66 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 		let fragmentsList = [];
 		
 		for (const set of sets) {
+			let species = this.dex.species.get(set.species);
+			
+			if (set.hasBeenRandomized) {
+				// legality stuff, mostly for in-battle form changes
+				// if the player is the one who brought the set, the validator will already have checked if it was legal, so I shouldn't force any of these details;
+				// this is only for if the randomizer chose the Pokémon!
+				
+				if (species.battleOnly) {
+					if (typeof species.battleOnly === 'string') set.species = species.battleOnly;
+					else set.species = this.sample(species.battleOnly);
+					
+					// for now, let's give it a random Ability from its base form
+					// we'll overwrite this later if there are better options
+					if (this.dex.species.get(set.species).randbats) {
+						set.ability = this.sample(this.dex.species.get(set.species).randbats.abilities);
+					} else {
+						set.ability = this.dex.species.get(set.species).abilities[0];
+					}
+				}
+				// note that the rest of this will check this.dex.species.get(set.species) if we want specifically the base form (since we just changed the set to the base form),
+				// but simply species if we want the form the randomizer actually chose (since that was recorded at the beginning of this loop)
+				
+				if (species.requiredItem) set.item = species.requiredItem;
+				else if (species.requiredItems) set.item = this.sample(species.requiredItems);
+				if (species.requiredAbility) set.ability = species.requiredAbility;
+				if (species.requiredMove) {
+					if (!set.moves) set.moves = [];
+					if (!set.moves.includes(species.requiredMove) && set.moves.length < 4) set.moves.push(species.requiredMove);
+				}
+				if (species.forceTeraType) set.teraType = species.forceTeraType;
+	
+				// if there's only one possible Ability, account for it right away (in case it's a role, so the team knows it's covered)
+				if (this.dex.species.get(set.species).randbats && this.dex.species.get(set.species).randbats.abilities.length === 1) set.ability = this.dex.species.get(set.species).randbats.abilities[0];
+	
+				// some species may have been given hard-coded randbats details
+				if (species.randbats[format].mandatory) {
+					if (species.randbats[format].mandatory.ability) set.ability = species.randbats[format].mandatory.ability;
+					if (species.randbats[format].mandatory.item) set.item = species.randbats[format].mandatory.item;
+					if (species.randbats[format].mandatory.teraType) set.teraType = species.randbats[format].mandatory.teraType;
+					if (species.randbats[format].mandatory.moves) {
+						if (!set.moves) set.moves = [];
+						for (const move of species.randbats[format].mandatory.moves) {
+							if (!set.moves.includes(move) && set.moves.length < 4) set.moves.push(move);
+						}
+					}
+				}
+			}
+			
 			// push everything in viableStabs, offeredSupport, [format].requestedSupport and [format].acceptedSupport
 			// note that viableStabs is intentionally not sorted by type - for instance viableStabs.flying doesn't exist; all of the fragments are in viableStabs right now
-			for (const fragment of this.dex.species.get(set.species).randbats.viableStabs) {
+			for (const fragment of species.randbats.viableStabs) {
 				if (typeof fragment === 'string') continue;
 				let modFragment = Utils.deepClone(fragment);
 				modFragment.pokemon = set;
 				modFragment.role = 'mainstab'; // actually I don't want this to specify a type either
 				fragmentsList.push(modFragment);
 			}
-			for (const offeredSupport in this.dex.species.get(set.species).randbats.offeredSupport) {
-				if (this.dex.species.get(set.species).randbats.offeredSupport[offeredSupport] === 'true' && !teamOfferedSupport.includes(offeredSupport)) teamOfferedSupport.push(offeredSupport);
-				for (const fragment of this.dex.species.get(set.species).randbats.offeredSupport[offeredSupport]) {
+			for (const offeredSupport in species.randbats.offeredSupport) {
+				if (species.randbats.offeredSupport[offeredSupport] === 'true' && !teamOfferedSupport.includes(offeredSupport)) teamOfferedSupport.push(offeredSupport);
+				for (const fragment of species.randbats.offeredSupport[offeredSupport]) {
 					if (typeof fragment !== 'string') {
 						let modFragment = Utils.deepClone(fragment);
 						modFragment.pokemon = set;
@@ -1724,9 +1772,9 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					}
 				}
 			}
-			for (const requestedSupport in this.dex.species.get(set.species).randbats[format].requestedSupport) {
-				if (this.dex.species.get(set.species).randbats[format].requestedSupport[requestedSupport] === 'true' && !teamHighPrioRequestedSupport.includes(requestedSupport)) teamHighPrioRequestedSupport.push(requestedSupport);
-				for (const fragment of this.dex.species.get(set.species).randbats[format].requestedSupport[requestedSupport]) {
+			for (const requestedSupport in species.randbats[format].requestedSupport) {
+				if (species.randbats[format].requestedSupport[requestedSupport] === 'true' && !teamHighPrioRequestedSupport.includes(requestedSupport)) teamHighPrioRequestedSupport.push(requestedSupport);
+				for (const fragment of species.randbats[format].requestedSupport[requestedSupport]) {
 					if (typeof fragment !== 'string') {
 						let modFragment = Utils.deepClone(fragment);
 						modFragment.pokemon = set;
@@ -1734,9 +1782,9 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					}
 				}
 			}
-			for (const acceptedSupport in this.dex.species.get(set.species).randbats[format].acceptedSupport) {
-				if (this.dex.species.get(set.species).randbats[format].acceptedSupport[acceptedSupport] === 'true' && !teamHighPrioRequestedSupport.includes(acceptedSupport)) teamHighPrioRequestedSupport.push(acceptedSupport);
-				for (const fragment of this.dex.species.get(set.species).randbats[format].acceptedSupport[acceptedSupport]) {
+			for (const acceptedSupport in species.randbats[format].acceptedSupport) {
+				if (species.randbats[format].acceptedSupport[acceptedSupport] === 'true' && !teamHighPrioRequestedSupport.includes(acceptedSupport)) teamHighPrioRequestedSupport.push(acceptedSupport);
+				for (const fragment of species.randbats[format].acceptedSupport[acceptedSupport]) {
 					if (typeof fragment !== 'string') {
 						let modFragment = Utils.deepClone(fragment);
 						modFragment.pokemon = set;
