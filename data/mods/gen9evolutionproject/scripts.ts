@@ -1812,7 +1812,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					fragment.eligible = false;
 				}
 				// Choice items
-				if (fragment.item && ['Choice Band', 'Choice Specs', 'Choice Scarf'].includes(fragment.item) && fragment.pokemon.moves) {
+				if (((fragment.item && ['Choice Band', 'Choice Specs', 'Choice Scarf'].includes(fragment.item)) || (fragment.ability && fragment.ability === 'Gorilla Tactics')) && fragment.pokemon.moves) {
 					for (const move of fragment.pokemon.moves) {
 						// what moves should you never be choiced into? I can come back to this and add more exceptions if I need
 						if (this.dex.moves.get(move).category === 'Status' && ![
@@ -1822,7 +1822,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 						].includes(this.dex.moves.get(move).name)) fragment.eligible = false;
 					}
 				}
-				if (fragment.pokemon.item && ['Choice Band', 'Choice Specs', 'Choice Scarf'].includes(fragment.pokemon.item) && fragment.moves) {
+				if (((fragment.pokemon.item && ['Choice Band', 'Choice Specs', 'Choice Scarf'].includes(fragment.pokemon.item)) || (fragment.pokemon.ability && fragment.pokemon.ability === 'Gorilla Tactics')) && fragment.moves) {
 					for (const move of fragment.moves) {
 						if (this.dex.moves.get(move).category === 'Status' && ![
 							'Healing Wish', 'Lunar Dance', 'Memento', 'Parting Shot', 'Chilly Reception',
@@ -1843,6 +1843,14 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 						// reject status moves, except Me First
 						if (this.dex.moves.get(move).category === 'Status' && this.dex.moves.get(move).name !== 'Me First') fragment.eligible = false;
 					}
+				}
+				// don't run multiple protection moves on the same set
+				if (fragment.moves && fragment.pokemon.moves) {
+					let fragmentStall = false;
+					for (const move of fragment.moves) if (this.dex.moves.get(move).stallingMove || ['Fake Out', 'Substitute', 'Quick Guard', 'Wide Guard'].includes(this.dex.moves.get(move).name)) fragmentStall = true;
+					let pokemonStall = false;
+					for (const move of fragment.pokemon.moves) if (this.dex.moves.get(move).stallingMove || ['Fake Out', 'Substitute', 'Quick Guard', 'Wide Guard'].includes(this.dex.moves.get(move).name)) pokemonStall = true;
+					if (fragmentStall && pokemonStall) fragment.eligible = false;
 				}
 				// now is a good time to keep track of how many main STABs are still possible, for the next stap
 				if (fragment.eligible && fragment.role === 'mainstab') {
@@ -2059,7 +2067,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 		// // (EXCEPTION: not gonna push item clause on LC - if something wants Eviolite or Berry Juice or something, it can have it)
 		
 		for (const set of sets) {
-			if (!set.item) set.item = 'Leftovers';
+			if (!set.item && format !== 'vgc') set.item = 'Leftovers'; // VGC respects item clause
 			if (!set.ability) set.ability = this.dex.species.get(set.species).abilities[0];
 			if (!set.moves) set.moves = ["Protect"];
 			if (!set.nature) set.nature = '';
@@ -2071,6 +2079,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			if (!set.happiness) set.happiness = 255;
 			if (!set.teraType) set.teraType = this.dex.species.get(set.species).types[0];
 			set.level = setLevel;
+			if (!set.shiny) set.shiny = shiny; // clarifying: shiny is a variable we defined earlier, not the string "shiny"
 			set.hasBeenRandomized = true;
 		}
 
