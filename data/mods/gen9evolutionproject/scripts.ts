@@ -1781,6 +1781,9 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 						}
 					}
 				}
+
+				// we need that boss team "monotype" vibe!
+				if (monotype && !species.randbats.types.includes(monotype)) set.teraType = monotype;
 			}
 			
 			// push everything in viableStabs, offeredSupport, [format].requestedSupport and [format].acceptedSupport
