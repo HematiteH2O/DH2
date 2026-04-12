@@ -1723,7 +1723,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					
 					// for now, let's give it a random Ability from its base form
 					// we'll overwrite this later if there are better options
-					if (this.dex.species.get(set.species).randbats) {
+					if (this.dex.species.get(set.species).randbats.abilities.length) {
 						set.ability = this.sample(this.dex.species.get(set.species).randbats.abilities);
 					} else {
 						set.ability = this.dex.species.get(set.species).abilities[0];
