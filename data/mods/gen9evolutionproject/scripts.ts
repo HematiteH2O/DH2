@@ -1725,7 +1725,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				}
 			}
 			for (const requestedSupport in this.dex.species.get(set.species).randbats[format].requestedSupport) {
-				if (this.dex.species.get(set.species).randbats.requestedSupport[requestedSupport] === 'true' && !teamHighPrioRequestedSupport.includes(requestedSupport)) teamHighPrioRequestedSupport.push(requestedSupport);
+				if (this.dex.species.get(set.species).randbats[format].requestedSupport[requestedSupport] === 'true' && !teamHighPrioRequestedSupport.includes(requestedSupport)) teamHighPrioRequestedSupport.push(requestedSupport);
 				for (const fragment of this.dex.species.get(set.species).randbats[format].requestedSupport[requestedSupport]) {
 					if (typeof fragment !== 'string') {
 						let modFragment = Utils.deepClone(fragment);
@@ -1735,7 +1735,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				}
 			}
 			for (const acceptedSupport in this.dex.species.get(set.species).randbats[format].acceptedSupport) {
-				if (this.dex.species.get(set.species).randbats.acceptedSupport[acceptedSupport] === 'true' && !teamHighPrioRequestedSupport.includes(acceptedSupport)) teamHighPrioRequestedSupport.push(acceptedSupport);
+				if (this.dex.species.get(set.species).randbats[format].acceptedSupport[acceptedSupport] === 'true' && !teamHighPrioRequestedSupport.includes(acceptedSupport)) teamHighPrioRequestedSupport.push(acceptedSupport);
 				for (const fragment of this.dex.species.get(set.species).randbats[format].acceptedSupport[acceptedSupport]) {
 					if (typeof fragment !== 'string') {
 						let modFragment = Utils.deepClone(fragment);
