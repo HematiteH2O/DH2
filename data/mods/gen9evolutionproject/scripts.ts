@@ -89,31 +89,31 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			}
 			
 			// randbats initialization
+			// the bare-minimum initialization should happen for every Pokémon, in case the player brings something unexpected
+			newMon.randbats = {
+				name: newMon.name, // for console.logging convenience
+				types: [],
+				abilities: [],
+				viableStabs: [],
+				offeredSupport: {},
+				singles: {
+					requestedSupport: {},
+					acceptedSupport: {},
+				},
+				vgc: {
+					requestedSupport: {},
+					acceptedSupport: {},
+				},
+				weaknesses: {},
+				resistances: {},
+				immunities: {},
+			};
+
+			// but the rest of the information only needs to be set up for Pokémon they can bring to an Evo game
 			if (
 				this.modData('FormatsData', id) && this.modData('FormatsData', id).tier &&
-				(this.modData('FormatsData', id).tier === "Evo!" || this.modData('FormatsData', id).tier === "(Prevo)" || ['arceusbug', 'zygardecomplete'].includes(id))
+				(this.modData('FormatsData', id).tier === "Evo!" || this.modData('FormatsData', id).tier === "(Prevo)"
 			) {
-				
-				// basic structure
-				newMon.randbats = {
-					name: newMon.name, // for console.logging convenience
-					types: [],
-					abilities: [],
-					viableStabs: [],
-					offeredSupport: {},
-					singles: {
-						requestedSupport: {},
-						acceptedSupport: {},
-					},
-					vgc: {
-						requestedSupport: {},
-						acceptedSupport: {},
-					},
-					weaknesses: {},
-					resistances: {},
-					immunities: {},
-				};
-				
 				// banlists
 				if ([
 					'toxapex', 'noivernvariant', 'chandelure', 'corviknight', 'darmanitan', 'darmanitangalar', 'excadrill', 'hawlucha', 'garchomp', 'velocinobi',
