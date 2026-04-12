@@ -349,6 +349,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								moveBasePower: null,
 								moveCategory: null,
 								movePriority: null,
+
+								fragmentPriority: 4,
 							};
 							newMon.randbats.offeredSupport[`${(immunity).toLowerCase()}immune`].push(fragment);
 						}
@@ -384,6 +386,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								moveBasePower: null,
 								moveCategory: null,
 								movePriority: null,
+
+								fragmentPriority: 4,
 							};
 							newMon.randbats.offeredSupport[`${(resistance).toLowerCase()}resist`].push(fragment);
 						}
@@ -479,6 +483,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						if (!fragment.moveBasePower) fragment.moveBasePower = basePower;
 						if (!fragment.moveCategory) fragment.moveCategory = move.category;
 						if (!fragment.movePriority) fragment.movePriority = move.priority;
+
+						if (!fragment.fragmentPriority) fragment.fragmentPriority = 4;
 						
 						if (newMon.randbats.types.includes(fragment.moveType) && fragment.moveBasePower) fragment.stab = true;
 						// I usually think in terms of regular base powers,
@@ -1762,8 +1768,10 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			// STEP 2: fragment eligibility
 			for (const fragment of fragmentsList) {
 				fragment.eligible = true;
-				fragment.lowpriority = false;
 				fragment.highpriority = false;
+				if (fragment.role && fragment.role === 'mainstab') fragment.fragmentPriority = 2;
+				if (fragment.role && fragment.role === 'protection') fragment.fragmentPriority = 1;
+				if (fragment.role && fragment.role === 'spicy') fragment.fragmentPriority = 0;
 				
 				if (fragment.ability && fragment.pokemon.ability) {
 					if (fragment.ability === fragment.pokemon.ability) fragment.ability = null;
@@ -1908,17 +1916,17 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			for (const fragment of fragmentsList) {
 				if (fragment.role) {
 					// prioritize roles that aren't covered
-					if (teamOfferedSupport.includes(fragment.role)) fragment.lowpriority = true;
+					if (teamOfferedSupport.includes(fragment.role) && fragment.fragmentPriority === 4) fragment.fragmentPriority = 0;
 					if (fragment.role === 'mainstab') {
 						// don't do multiple main STABs of the same type
 						if (fragment.pokemon.coveredStabs.includes(fragment.moveType)) fragment.eligible = false;
 						// and don't bother to prioritize "STABs" of more than two types
-						else if (fragment.pokemon.coveredStabs.length > 1) fragment.lowpriority = true;
+						else if (fragment.pokemon.coveredStabs.length > 1 && fragment.fragmentPriority === 2) fragment.fragmentPriority = 0;
 					} else {
 						// if one half of a synergy exists, prioritize the other half
 						if (teamHighPrioRequestedSupport.includes(fragment.role) && !teamOfferedSupport.includes(fragment.role)) fragment.highpriority = true;
 						// if the team doesn't want the support, throw out the fragment
-						if (!teamRequestedSupport.includes(fragment.role) && !teamHighPrioRequestedSupport.includes(fragment.role)) fragment.eligible = false;
+						if (!teamRequestedSupport.includes(fragment.role) && !teamHighPrioRequestedSupport.includes(fragment.role) && fragment.role !== 'spicy') fragment.eligible = false;
 						// otherwise, record that the support is still possible at this point
 						else if (!possibleSupport.includes(fragment.role)) possibleSupport.push(fragment.role);
 					}
@@ -1967,12 +1975,26 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			// // // if there are only "low-priority" fragments, run with them; if not, filter them out of the current step and keep going
 
 			let prioritizeRoles = true;
+			// highpriority is dynamic and depends on the current step
 			let fragmentsListThisStep = fragmentsList.filter((fragment) => (fragment.highpriority));
-			if (!fragmentsListThisStep.length) fragmentsListThisStep = fragmentsList.filter((fragment) => (!fragment.lowpriority && !(fragment.role && fragment.role === 'mainstab')));
+			// the rest only matters if nothing is highpriority!
+			
+			// fragmentPriority of 4 is the default; it's meant to be used for roles that aren't covered but aren't also being fast-tracked by a specific Pokémon
+			if (!fragmentsListThisStep.length) fragmentsListThisStep = fragmentsList.filter((fragment) => (fragment.fragmentPriority > 3));
+			
 			if (!fragmentsListThisStep.length) {
-				prioritizeRoles = false;
-				fragmentsListThisStep = fragmentsList.filter((fragment) => (!fragment.lowpriority));
+				prioritizeRoles = false; // every possible role has either been assigned once or dismissed for the current step
+				// fragmentPriority of 3 is reserved for the threatlist feature; this is unused for now
+				fragmentsListThisStep = fragmentsList.filter((fragment) => (fragment.fragmentPriority > 2));
 			}
+			
+			// fragmentPriority of 2 is for main STABs
+			if (!fragmentsListThisStep.length) fragmentsListThisStep = fragmentsList.filter((fragment) => (fragment.fragmentPriority > 1));
+			
+			// fragmentPriority of 1 is for protection moves in VGC, but it won't come up in singles
+			if (!fragmentsListThisStep.length) fragmentsListThisStep = fragmentsList.filter((fragment) => (fragment.fragmentPriority > 0));
+			
+			// aaand the rest is a free-for-all aksjdhf
 			if (!fragmentsListThisStep.length) fragmentsListThisStep = fragmentsList;
 			if (!fragmentsListThisStep.length) {
 				eligibleFragments = false;
