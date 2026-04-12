@@ -1676,6 +1676,11 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 		// TODO: second-pass "for" loop (almost just a copy-paste of the original at this point - just saving it for the end so I don't have to make a bunch of changes twice)
 
 		// WIP: set constructor
+
+		// outside the loop
+		let teamOfferedSupport = [];
+		let teamHighPrioRequestedSupport = [];
+		
 		let sets = [];
 		let teamItemsSoFar = []; // for item clause
 		if (firstDraftTeam.length) {
@@ -1687,7 +1692,8 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 						if (pokemon.species === set.species) randomized = false;
 					}
 				}
-				if (randomized) sets.push(set);
+				if (randomized) set.hasBeenRandomized = true;
+				sets.push(set);
 			}
 		}
 
@@ -1708,6 +1714,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				fragmentsList.push(modFragment);
 			}
 			for (const offeredSupport in this.dex.species.get(set.species).randbats.offeredSupport) {
+				if (this.dex.species.get(set.species).randbats.offeredSupport[offeredSupport] === 'true' && !teamOfferedSupport.includes(offeredSupport)) teamOfferedSupport.push(offeredSupport);
 				for (const fragment of this.dex.species.get(set.species).randbats.offeredSupport[offeredSupport]) {
 					if (typeof fragment !== 'string') {
 						let modFragment = Utils.deepClone(fragment);
@@ -1718,6 +1725,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				}
 			}
 			for (const requestedSupport in this.dex.species.get(set.species).randbats[format].requestedSupport) {
+				if (this.dex.species.get(set.species).randbats.requestedSupport[requestedSupport] === 'true' && !teamHighPrioRequestedSupport.includes(requestedSupport)) teamHighPrioRequestedSupport.push(requestedSupport);
 				for (const fragment of this.dex.species.get(set.species).randbats[format].requestedSupport[requestedSupport]) {
 					if (typeof fragment !== 'string') {
 						let modFragment = Utils.deepClone(fragment);
@@ -1727,6 +1735,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				}
 			}
 			for (const acceptedSupport in this.dex.species.get(set.species).randbats[format].acceptedSupport) {
+				if (this.dex.species.get(set.species).randbats.acceptedSupport[acceptedSupport] === 'true' && !teamHighPrioRequestedSupport.includes(acceptedSupport)) teamHighPrioRequestedSupport.push(acceptedSupport);
 				for (const fragment of this.dex.species.get(set.species).randbats[format].acceptedSupport[acceptedSupport]) {
 					if (typeof fragment !== 'string') {
 						let modFragment = Utils.deepClone(fragment);
@@ -1736,10 +1745,6 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				}
 			}
 		}
-
-		// outside the loop
-		let teamOfferedSupport = [];
-		let teamHighPrioRequestedSupport = [];
 		
 		while (eligibleFragments) {
 			// if there are already no fragments left on any Pokémon, immediately set eligibleFragments to false and then "continue;" to end the loop
@@ -1813,7 +1818,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				) {
 					// the fragment is already complete, so I should also check it off of the role tally and then delete it from the fragments list
 					if (fragment.role) {
-						if (fragment.role !== 'mainstab' && !teamOfferedSupport.includes(fragment.role)) teamOfferedSupport.push(fragment.role);
+						if (!['mainstab', 'protection'].includes(fragment.role) && !teamOfferedSupport.includes(fragment.role)) teamOfferedSupport.push(fragment.role);
 						else if (fragment.role === 'mainstab' && fragment.moveType && !fragment.pokemon.coveredStabs.includes(fragment.moveType)) fragment.pokemon.coveredStabs.push(fragment.moveType);
 					}
 					if (fragment[format].requestedSupport) for (const request of fragment[format].requestedSupport) if (!teamHighPrioRequestedSupport.includes(request)) teamHighPrioRequestedSupport.push(request);
@@ -1908,6 +1913,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			let teamRequestedSupport = [];
 			for (const request of baseRequestedSupport) if (!teamRequestedSupport.includes(request)) teamRequestedSupport.push(request);
 			for (const fragment of fragmentsList) if (fragment[format].requestedSupport) for (const request of fragment[format].requestedSupport) if (!teamRequestedSupport.includes(request)) teamRequestedSupport.push(request);
+			for (const type of types) if (!teamRequestedSupport.includes(`${(type).toLowerCase()}resist`)) teamRequestedSupport.push(`${(type).toLowerCase()}resist`);
 			
 			let possibleSupport = [];
 			for (const support of teamOfferedSupport) if (!possibleSupport.includes(support)) possibleSupport.push(support);
@@ -1922,7 +1928,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 						if (fragment.pokemon.coveredStabs.includes(fragment.moveType)) fragment.eligible = false;
 						// and don't bother to prioritize "STABs" of more than two types
 						else if (fragment.pokemon.coveredStabs.length > 1 && fragment.fragmentPriority === 2) fragment.fragmentPriority = 0;
-					} else {
+					} else if (fragment.role !== 'protection') {
 						// if one half of a synergy exists, prioritize the other half
 						if (teamHighPrioRequestedSupport.includes(fragment.role) && !teamOfferedSupport.includes(fragment.role)) fragment.highpriority = true;
 						// if the team doesn't want the support, throw out the fragment
@@ -2010,7 +2016,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				let reducedFragmentsListThisStep = [];
 				let roleCount = {};
 				for (const fragment of fragmentsListThisStep) {
-					if (fragment.role && fragment.role !== 'mainstab') {
+					if (fragment.role && !['mainstab', 'protection'].includes(fragment.role)) {
 						if (!roleCount[fragment.role]) roleCount[fragment.role] = [];
 						if (!roleCount[fragment.role].includes(fragment.pokemon.name)) roleCount[fragment.role].push(fragment.pokemon.name);
 					}
@@ -2020,7 +2026,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					if (minRoleCount > roleCount[role].length) minRoleCount = roleCount[role].length;
 				}
 				for (const fragment of fragmentsListThisStep) {
-					if (fragment.role && fragment.role !== 'mainstab' && roleCount[fragment.role].length <= minRoleCount) reducedFragmentsListThisStep.push(fragment);
+					if (fragment.role && !['mainstab', 'protection'].includes(fragment.role) && roleCount[fragment.role].length <= minRoleCount) reducedFragmentsListThisStep.push(fragment);
 				}
 				if (reducedFragmentsListThisStep.length) fragmentsListThisStep = reducedFragmentsListThisStep;
 			}
@@ -2030,7 +2036,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			let reducedFragmentsListThisStep = [];
 			let roleScores = {};
 			for (const fragment of fragmentsListThisStep) {
-				if (fragment.role && fragment.role !== 'mainstab') {
+				if (fragment.role && !['mainstab', 'protection'].includes(fragment.role)) {
 					if (!roleScores[fragment.role]) roleScores[fragment.role] = 0;
 					if (fragment.score && fragment.score > roleScores[fragment.role]) roleScores[fragment.role] = fragment.score;
 				}
@@ -2041,7 +2047,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			}
 			for (const fragment of fragmentsListThisStep) {
 				let safeToPush = true;
-				if (fragment.role && fragment.role !== 'mainstab') {
+				if (fragment.role && !['mainstab', 'protection'].includes(fragment.role)) {
 					if (roleScores[fragment.role] && roleScores[fragment.role] > 0 && (!fragment.score || (roleScores[fragment.role] > fragment.score))) safeToPush = false;
 				}
 				else if (fragment.role && fragment.role === 'mainstab') {
@@ -2075,7 +2081,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					if (chosenFragment.evs['spe'] > chosenFragment.pokemon.evs['spe']) chosenFragment.pokemon.evs['spe'] = chosenFragment.evs['spe'];
 				}
 				if (chosenFragment.role) {
-					if (chosenFragment.role !== 'mainstab' && !teamOfferedSupport.includes(chosenFragment.role)) teamOfferedSupport.push(chosenFragment.role);
+					if (!['mainstab', 'protection'].includes(fragment.role) && !teamOfferedSupport.includes(chosenFragment.role)) teamOfferedSupport.push(chosenFragment.role);
 					else if (chosenFragment.role === 'mainstab' && chosenFragment.moveType && !chosenFragment.pokemon.coveredStabs.includes(chosenFragment.moveType)) chosenFragment.pokemon.coveredStabs.push(chosenFragment.moveType);
 				}
 				if (chosenFragment[format].requestedSupport) for (const request of chosenFragment[format].requestedSupport) if (!teamHighPrioRequestedSupport.includes(request)) teamHighPrioRequestedSupport.push(request);
@@ -2098,11 +2104,10 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					set.evs['hp'] === 0 && set.evs['atk'] === 0  && set.evs['def'] === 0 && set.evs['spa'] === 0 && set.evs['spd'] === 0 && set.evs['spe'] === 0
 				)
 			) set.evs = { hp: 4, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
-			if (!set.happiness) set.happiness = 255;
+			if (!set.happiness && set.hasBeenRandomized) set.happiness = 255;
 			if (!set.teraType) set.teraType = this.dex.species.get(set.species).types[0];
-			set.level = setLevel;
-			if (!set.shiny) set.shiny = shiny; // clarifying: shiny is a variable we defined earlier, not the string "shiny"
-			set.hasBeenRandomized = true;
+			if (set.hasBeenRandomized) set.level = setLevel;
+			if (!set.shiny && set.hasBeenRandomized) set.shiny = shiny; // clarifying: shiny is a variable we defined earlier, not the string "shiny"
 		}
 
 		// TODO: nickname check???
