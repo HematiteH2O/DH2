@@ -1535,26 +1535,6 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 							}
 						}
 					}
-
-					// TODO: filter requestedSupportInGeneral - make sure at least one thing in the eligible pool is offering it, and just skip it if not?
-					
-					requestedSupportThisStep = requestedSupportInGeneral.filter(
-						request => (!offeredSupportInGeneral[request])
-					); // if it's not at all represented
-					
-					if (!requestedSupportThisStep.length) { // ... or if all of them are represented, but this one is one of the least represented
-						/*
-						let minOffer = 6;
-						for (const offer in offeredSupportInGeneral) if (requestedSupportInGeneral.includes(offer) && minOffer > offeredSupportInGeneral[offer]) minOffer = offeredSupportInGeneral[offer];
-						*/
-						// actually, we don't need *that* many alternates - I'm just gonna say "secure 1 backup plan for each role" before other things become more important
-						requestedSupportThisStep = requestedSupportInGeneral.filter(
-							request => (offeredSupportInGeneral[request] === 1)
-						);
-					}
-					
-					console.log(resistancesThisStep);
-					console.log(`requested this step: ` + requestedSupportThisStep);
 				}
 
 				// one more setup thing: the last Pokémon chosen for monotype can be any type!
@@ -1595,11 +1575,33 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					}
 					// On the other hand, there's no reason at all to force a special Terastallized state, so that one is fine how it is
 				}
+				
+				// Another thing: I need to filter which kinds of support are possible to ask for, now that I've established the pool of eligible Pokémon
+				for (const request in requestedSupportInGeneral) {
+					let possible = false;
+					for (const id of eligiblePokemonThisStep) {
+						if (this.dex.data.Pokedex[id].randbats.offeredSupport[request]) possible = true;
+					}
+					if (possible) requestedSupportThisStep.push(request);
+				}
+				// This is because I noticed the team generator prioritizing impossible goals a couple of times on monotype
+				// It makes a pretty small difference in most cases, but it can come up if a type has multiple options for one goal and no options at all for another goal
 
-				// okay now we're starting for real P:
-				// first, we want to find offeredSupport that matches our requestedSupport
+				// Now let's see which of those attainable goals we want for this step!
+				if (requestedSupportThisStep.filter(request => (!offeredSupportInGeneral[request])).length) { // If possible, we want a role that's requested and not already covered
+					requestedSupportThisStep = requestedSupportThisStep.filter(request => (!offeredSupportInGeneral[request]));
+				} else { // Failing that, we want a role that's requested and only 1 Pokémon can potentially cover it so far
+					requestedSupportThisStep = requestedSupportThisStep.filter(request => (offeredSupportInGeneral[request] === 1));
+				}
+				// There's no next failsafe here, though - it's actually good if this still doesn't return anything!
+				// That means the team covered its bases as well as it could, so we'll get to skip the next step entirely
+				
+				console.log(resistancesThisStep);
+				console.log(`requested this step: ` + requestedSupportThisStep);
+
+				// If we have any requestedSupport at this point, we want to find offeredSupport that matches it
 				if (requestedSupportThisStep.length) {
-					// score them by how many roles they can fill, up to 3
+					// Score them by how many roles they can fill, but no more than 3
 					let maxScore = 0;
 					for (const id of eligiblePokemonThisStep) {
 						// species clause
@@ -1607,7 +1609,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 						
 						let score = 0;
 						for (const role of requestedSupportThisStep) if (this.dex.data.Pokedex[id].randbats.offeredSupport[role]) score++;
-						if (score > 3) score = 3; // you need space for STABs and stuff too - let's not spread one Pokémon too thin (I might change the threshold or how I handle this later)
+						if (score > 3) score = 3;
 						if (score > maxScore) { // reset
 							currentStep = [];
 							maxScore = score;
@@ -1615,18 +1617,25 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 						if (score === maxScore) currentStep.push(id);
 					}
 				}
+				// The reason we're capping out at 3 is because the Pokémon will need rooms for STABs and stuff too!
+				// If we don't have a cap here, we're likely to pick one Pokémon that can theoretically fill any role very early...
+				// and then think we've covered our bases and ignore roles entirely for the rest of the process...
+				// only to find that the Pokémon can't cover more than a handful of roles and the rest of the team can't fill the gaps it left.
+				// That's also why we like getting at least one backup option for each role if we can!
+				// It's still possible to end up with a team that isn't perfect because of how this is set up,
+				// but I think there are enough failsafes in later steps that it should come up with something usable more often than not,
+				// and I want it to be open-ended enough to leave room for variety and fun options, too!
 				
 				if (!currentStep.length) currentStep = eligiblePokemonThisStep.filter(id => !teamNumbersThisStep.includes(this.dex.data.Pokedex[id].num));
 				
-				// then, we'll try to look for anything with acceptedSupport that matches our offeredSupport
+				// Then, we'll try to look for anything with acceptedSupport that matches our offeredSupport
 				if (offeredSupportThisStep.length) {
-					// score them by how many roles they can fill, up to 3
 					let desiredSupport = [];
 					for (const id of currentStep) {
 						// species clause
 						if (teamNumbersThisStep.includes(this.dex.data.Pokedex[id].num)) continue;
 						
-						// for now, I think just a yes or a no is fine
+						// Unlike before, I think just a yes or a no is fine
 						let accepted = false;
 						for (const role of offeredSupportThisStep) if (this.dex.data.Pokedex[id].randbats[format].acceptedSupport[role] && !acceptedSupportThisStep.includes(role)) accepted = true;
 						if (accepted === true) desiredSupport.push(id);
