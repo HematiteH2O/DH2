@@ -1421,6 +1421,19 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 		// because it's not like I was gonna put Dragon Rage or Sonic Boom on any of the FE sets anyway
 		// but if Paul asks me to ban anything (like webs?), I'll figure it out ajkdfh
 
+		let regulationb = false;
+		// once Regulation B exists, I'll need to add a way for this to be "true"
+		// this will probably just be based on the format name! but I won't worry about it now because it doesn't exist yet
+		
+		let megaLimit = 1;
+		if (format === 'vgc') megaLimit = 2; // 2 Megas are fine for bring 6 pick 4
+		let restrictedLimit = 6; // singles restricted is just Ubers
+		if (format === 'vgc') restrictedLimit = 2;
+		
+		if (!regulationb) {
+			megaLimit = 0;
+			restrictedLimit = 0;
+		}
 
 		
 		// now let's gather a list of eligible Pokémon to use for the rest of the process
@@ -1429,7 +1442,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			if (
 				this.dex.data.Pokedex[id].randbats && // in the format/has randbats data
 				!originalTeamSpecies.includes(id) && !originalTeamNumbers.includes(this.dex.data.Pokedex[id].num) && // species clause
-				!(this.dex.data.Pokedex[id].randbats[format] && this.dex.data.Pokedex[id].randbats[format].banned) && // not banned
+				(!(this.dex.data.Pokedex[id].randbats[format] && this.dex.data.Pokedex[id].randbats[format].banned) || regulationb) && // not banned
 				(!monotype || this.dex.data.Pokedex[id].randbats.types.includes(monotype) ||
 				 (this.dex.data.Pokedex[id].forceTeraType && this.dex.data.Pokedex[id].forceTeraType === monotype)
 				) && // account for monotype, but our special Terastallized states get some flexibility
@@ -1442,7 +1455,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				if (
 					this.dex.data.Pokedex[id].randbats && // in the format/has randbats data
 					!originalTeamSpecies.includes(id) && !originalTeamNumbers.includes(this.dex.data.Pokedex[id].num) && // species clause
-					!(this.dex.data.Pokedex[id].randbats[format] && this.dex.data.Pokedex[id].randbats[format].banned) && // not banned
+					(!(this.dex.data.Pokedex[id].randbats[format] && this.dex.data.Pokedex[id].randbats[format].banned) || regulationb) && // not banned
 					(this.dex.data.Pokedex[id].randbats.stage && this.dex.data.Pokedex[id].randbats.stage === stage) // account for LC
 				) eligiblePokemon.push(id);
 			}
@@ -1494,6 +1507,12 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				
 				let teamNumbersThisStep = [];
 				let resistancesThisStep = [];
+				
+				// other special limits
+				let specialTerastallizedStateThisStep = false;
+				let megaThisStep = 0;
+				let restrictedThisStep = 0;
+				
 				if (firstDraftTeam.length) {
 					for (const request of baseRequestedSupport) if (!requestedSupportInGeneral.includes(request)) requestedSupportInGeneral.push(request);
 					for (const pokemon of firstDraftTeam) {
@@ -1507,6 +1526,13 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 						if (this.dex.species.get(pokemon.species)) {
 							if (this.dex.species.get(pokemon.species).num) teamNumbersThisStep.push(this.dex.species.get(pokemon.species).num);
 							for (const type of types) if (!resistancesThisStep.includes(type) && (this.dex.species.get(pokemon.species).randbats.immunities[type] || (this.dex.species.get(pokemon.species).randbats.resistances[type] && !this.dex.species.get(pokemon.species).randbats.weaknesses[type]))) resistancesThisStep.push(type);
+
+							// special limits
+							if (this.dex.species.get(pokemon.species).forceTeraType) specialTerastallizedStateThisStep = true;
+							if (regulationb) {
+								if (this.dex.species.get(pokemon.species).forme && this.dex.species.get(pokemon.species).forme.includes("Mega")) megaThisStep++;
+								if (this.dex.species.get(pokemon.species).tags && (this.dex.species.get(pokemon.species).tags.includes("Restricted Legendary") || this.dex.species.get(pokemon.species).tags.includes("Mythical"))) restrictedThisStep++;
+							}
 						}
 					}
 
@@ -1550,6 +1576,25 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				}
 				let eligiblePokemonThisStep = eligiblePokemon;
 				if (monotypeBypassEligiblePokemon.length) eligiblePokemonThisStep = monotypeBypassEligiblePokemon;
+
+				if (specialTerastallizedStateThisStep) { // regardless of the format, don't give more than one of these!
+					eligiblePokemonThisStep = eligiblePokemonThisStep.filter(id => !this.dex.data.Pokedex[id].forceTeraType);
+				}
+				
+				if (regulationb) {
+					// I realize I'm going to have to do a little more than this when we actually do Regulation B
+					// This section guarantees you don't go *over* the limit, but nothing is set up to guarantee you a Mega or two restricted Pokémon
+					// I don't actually know how I would even want to handle a singles Ubers format - it doesn't feel quite correct to force a full team of Ubers, does it?
+					// but I think for VGC, where you can only have 2 restricted Pokémon anyway, I'll probably want them to be the first two Pokémon generated every time
+					// Anyway, I'll come back to this when the format exists! This section unavoidably goes unused for now for obvious reasons
+					if (megaThisStep >= megaLimit) {
+						eligiblePokemonThisStep = eligiblePokemonThisStep.filter(id => !(this.dex.data.Pokedex[id].forme && this.dex.data.Pokedex[id].forme.includes("Mega")));
+					}
+					if (restrictedThisStep >= restrictedLimit) {
+						eligiblePokemonThisStep = eligiblePokemonThisStep.filter(id => !(this.dex.data.Pokedex[id].tags && (this.dex.data.Pokedex[id].tags.includes("Restricted Legendary") || this.dex.data.Pokedex[id].tags.includes("Mythical"))));
+					}
+					// On the other hand, there's no reason at all to force a special Terastallized state, so that one is fine how it is
+				}
 
 				// okay now we're starting for real P:
 				// first, we want to find offeredSupport that matches our requestedSupport
