@@ -22,6 +22,26 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		]; // certain Fakemon are based on Gen IX movepools specifically
 		
 		for (const id in this.dataCache.Pokedex) {
+			// for safety later, the bare-minimum randbats initialization should happen for every Pokémon, in case the player brings something unexpected
+			this.dataCache.Pokedex[id].randbats = {
+				name: this.dataCache.Pokedex[id].name, // for console.logging convenience
+				types: [],
+				abilities: [],
+				viableStabs: [],
+				offeredSupport: {},
+				singles: {
+					requestedSupport: {},
+					acceptedSupport: {},
+				},
+				vgc: {
+					requestedSupport: {},
+					acceptedSupport: {},
+				},
+				weaknesses: {},
+				resistances: {},
+				immunities: {},
+			};
+			
 			if (
 				!(this.dataCache.Pokedex[id] && this.dataCache.Pokedex[id].copyData) &&
 				!(this.modData('FormatsData', id) && this.modData('FormatsData', id).tier && ['Evo!', '(Prevo)'].includes(this.modData('FormatsData', id).tier))
@@ -87,29 +107,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					}
 				}
 			}
-			
-			// randbats initialization
-			// the bare-minimum initialization should happen for every Pokémon, in case the player brings something unexpected
-			newMon.randbats = {
-				name: newMon.name, // for console.logging convenience
-				types: [],
-				abilities: [],
-				viableStabs: [],
-				offeredSupport: {},
-				singles: {
-					requestedSupport: {},
-					acceptedSupport: {},
-				},
-				vgc: {
-					requestedSupport: {},
-					acceptedSupport: {},
-				},
-				weaknesses: {},
-				resistances: {},
-				immunities: {},
-			};
 
-			// but the rest of the information only needs to be set up for Pokémon they can bring to an Evo game
+			// the real randbats initialization only needs to take place Pokémon you can bring to an Evo game
 			if (
 				this.modData('FormatsData', id) && this.modData('FormatsData', id).tier &&
 				(this.modData('FormatsData', id).tier === "Evo!" || this.modData('FormatsData', id).tier === "(Prevo)")
