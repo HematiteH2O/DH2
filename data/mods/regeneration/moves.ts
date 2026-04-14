@@ -524,4 +524,38 @@ export const Moves: {[k: string]: ModdedMoveData} = {
 			},
 		},
 	},
+	tastetest: {
+		// seems like nothing has "num" so I hope that's okay
+		accuracy: 100,
+		basePower: 75,
+		category: "Special",
+		name: "Taste Test",
+		pp: 20,
+		priority: 0,
+		flags: {contact: 1, protect: 1, mirror: 1, metronome: 1},
+		secondary: {
+			chance: 100,
+			boosts: {
+				spe: -1,
+			},
+		},
+		onAfterHit(target, source) {
+			if (source.hp) {
+				if (!source.m.innates['tastetest']) source.m.innates['tastetest'] = {id: 'tastetest', name: 'Taste Test', target: source, tasteTested: []};
+				source.m.innates.tasteTested.push(target);
+				this.add('-message', `${source.illusion ? source.illusion.name : source.name} tasted ${target.illusion ? target.illusion.name : target.name} and memorized its flavor and texture!`);
+			}
+		},
+		condition: {
+			onBasePower(basePower, attacker, defender, move) {
+				if (attacker && defender && attacker === this.effectState.target && this.effectState.tasteTested.includes(defender)) {
+					this.add('-message', `${attacker.illusion ? attacker.illusion.name : attacker.name}'s damage was boosted because it knows ${target.illusion ? target.illusion.name : target.name}'s flavor and texture!`);
+					return this.chainModify(1.5);
+				}
+			}
+		},
+		target: "normal",
+		type: "Normal",
+		contestType: "Clever",
+	},
 };
