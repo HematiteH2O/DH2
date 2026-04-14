@@ -541,10 +541,9 @@ export const Moves: {[k: string]: ModdedMoveData} = {
 		},
 		onAfterHit(target, source) {
 			if (source.hp && target.hp) {
-				if (!source.m.innates) source.m.innates = {};
-				if (!source.m.innates['tastetest']) source.m.innates['tastetest'] = {id: 'tastetest', name: 'Taste Test', target: source, tasteTested: []};
-				if (!source.m.innates['tastetest'].tasteTested.includes(target)) {
-					source.m.innates['tastetest'].tasteTested.push(target);
+				if (!source.m.tasteTested) source.m.tasteTested = [];
+				if (!source.m.tasteTested.includes(target)) {
+					source.m.tasteTested.push(target);
 					this.add('-message', `${source.illusion ? source.illusion.name : source.name} licked ${target.illusion ? target.illusion.name : target.name} and learned its flavor and texture!`);
 					if (this.randomChance(1,5)) this.add('-message', `It didn't particularly like that flavor...`);
 				}
