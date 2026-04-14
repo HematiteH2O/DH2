@@ -1931,11 +1931,42 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			
 			// STEP 2: fragment eligibility
 			for (const fragment of fragmentsList) {
+				fragment.eligible = true;
+				
+				// basic fragment-specific checks
 				if (fragment.format && fragment.format !== format) {
 					fragment.eligible = false;
 					continue;
 				}
-				fragment.eligible = true;
+				if (fragment.unique) {
+					let unique = true;
+					for (const set of sets) if (set.moves && set.moves.includes(fragment.baseMove)) unique = false;
+					if (!unique) {
+						fragment.eligible = false;
+						continue;
+					}
+				}
+				if (fragment.avoid && pokemon.roles) {
+					let avoid = false;
+					for (const role of fragment.avoid) {
+						if (pokemon.roles.includes(role)) avoid = true;
+					}
+					if (avoid) {
+						fragment.eligible = false;
+						continue;
+					}
+				}
+				if (pokemon.avoid && fragment.role) {
+					let avoid = false;
+					for (const role of pokemon.avoid) {
+						if (role === fragment.role) avoid = true;
+					}
+					if (avoid) {
+						fragment.eligible = false;
+						continue;
+					}
+				}
+				
 				fragment.highpriority = false;
 				if (fragment.role && fragment.role === 'mainstab') fragment.fragmentPriority = 2;
 				if (fragment.role && fragment.role === 'protection') fragment.fragmentPriority = 1;
@@ -1984,11 +2015,17 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				) {
 					// the fragment is already complete, so I should also check it off of the role tally and then delete it from the fragments list
 					if (fragment.role) {
-						if (!['mainstab', 'protection'].includes(fragment.role)) {
+						if (!['mainstab', 'protection', 'spicy'].includes(fragment.role)) {
 							if (!teamOfferedSupport[fragment.role]) teamOfferedSupport[fragment.role] = [];
 							if (!teamOfferedSupport[fragment.role].includes(fragment.pokemon)) teamOfferedSupport[fragment.role].push(fragment.pokemon);
+							if (!fragment.pokemon.roles) fragment.pokemon.roles = [];
+							if (!fragment.pokemon.roles.includes(fragment.role)) fragment.pokemon.roles.push(fragment.role);
 						}
 						else if (fragment.role === 'mainstab' && fragment.moveType && !fragment.pokemon.coveredStabs.includes(fragment.moveType)) fragment.pokemon.coveredStabs.push(fragment.moveType);
+					}
+					if (fragment.avoid) {
+						if (!fragment.pokemon.avoid) fragment.pokemon.avoid = [];
+						for (const avoid of fragment.avoid) if (!fragment.pokemon.avoid.includes(avoid)) fragment.pokemon.avoid.push(avoid);
 					}
 					if (fragment[format].requestedSupport) for (const request of fragment[format].requestedSupport) {
 						if (!teamHighPrioRequestedSupport[request]) teamHighPrioRequestedSupport[request] = [];
@@ -2237,9 +2274,20 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				else if (fragment.role && fragment.role === 'mainstab') {
 					if (roleScores[fragment.pokemon] && roleScores[fragment.pokemon] > 0 && (!fragment.score || (roleScores[fragment.pokemon] > fragment.score))) safeToPush = false;
 				}
+				if (fragment.bypassScore) safeToPush = true;
 				if (safeToPush) reducedFragmentsListThisStep.push(fragment);
 			}
 			if (reducedFragmentsListThisStep.length) fragmentsListThisStep = reducedFragmentsListThisStep;
+
+			let weightedFragmentsListThisStep = [];
+			for (const fragment of fragmentsListThisStep) {
+				if (fragment.weight && fragment.weight > 0) {
+					for (let i = 0; i < fragment.weight; i++) weightedFragmentsListThisStep.push(fragment);
+				} else {
+					weightedFragmentsListThisStep.push(fragment);
+				}
+			}
+			if (weightedFragmentsListThisStep.length) fragmentsListThisStep = weightedFragmentsListThisStep;
 			
 			// STEP 5: applying fragments
 			// finally, pick a random fragment from the narrowed-down pool, apply it to the set, and loop
@@ -2267,8 +2315,15 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				if (chosenFragment.role) {
 					if (!['mainstab', 'protection', 'spicy'].includes(chosenFragment.role)) {
 						if (!teamOfferedSupport[chosenFragment.role]) teamOfferedSupport[chosenFragment.role] = [];
-						teamOfferedSupport[chosenFragment.role].push(chosenFragment.pokemon);
-					} else if (chosenFragment.role === 'mainstab' && chosenFragment.moveType && !chosenFragment.pokemon.coveredStabs.includes(chosenFragment.moveType)) chosenFragment.pokemon.coveredStabs.push(chosenFragment.moveType);
+						if (!teamOfferedSupport[chosenFragment.role].includes(chosenFragment.pokemon)) teamOfferedSupport[chosenFragment.role].push(chosenFragment.pokemon);
+						if (!chosenFragment.pokemon.roles) chosenFragment.pokemon.roles = [];
+						if (!chosenFragment.pokemon.roles.includes(chosenFragment.role)) chosenFragment.pokemon.roles.push(chosenFragment.role);
+					}
+					else if (chosenFragment.role === 'mainstab' && chosenFragment.moveType && !chosenFragment.pokemon.coveredStabs.includes(chosenFragment.moveType)) chosenFragment.pokemon.coveredStabs.push(chosenFragment.moveType);
+				}
+				if (chosenFragment.avoid) {
+					if (!chosenFragment.pokemon.avoid) chosenFragment.pokemon.avoid = [];
+					for (const avoid of chosenFragment.avoid) if (!chosenFragment.pokemon.avoid.includes(avoid)) chosenFragment.pokemon.avoid.push(avoid);
 				}
 				if (chosenFragment[format].requestedSupport) for (const request of chosenFragment[format].requestedSupport) {
 					if (!teamHighPrioRequestedSupport[request]) teamHighPrioRequestedSupport[request] = [];
