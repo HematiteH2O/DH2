@@ -285,7 +285,7 @@ export const Abilities: {[k: string]: ModdedAbilityData} = {
 		condition: {
 			onSwap(target) {
 				if (!target.fainted && (target.hp < target.maxhp)) {
-					target.heal(this.hp);
+					target.heal(this.effectState.hp);
 					this.add('-heal', target, target.getHealth, '[silent]');
 					this.add('-message', `${target.illusion ? target.illusion.name : target.name} had its HP restored by ${this.effectState.source.name}'s blood bank!`);
 				}
