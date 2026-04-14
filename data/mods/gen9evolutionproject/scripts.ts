@@ -2082,7 +2082,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			}
 			
 			let possibleSupport = {};
-			for (const support in teamOfferedSupport) possibleSupport[support] = teamOfferedSupport;
+			for (const support in teamOfferedSupport) possibleSupport[support] = teamOfferedSupport[support];
 
 			// getting priorities in order
 			for (const fragment of fragmentsList) {
