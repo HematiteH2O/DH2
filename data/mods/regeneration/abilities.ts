@@ -280,6 +280,7 @@ export const Abilities: {[k: string]: ModdedAbilityData} = {
 					this.add('-message', `${pokemon.name} is ready to share its blood bank!`);
 				}
 				if (pokemon.side.addSlotCondition(pokemon, 'bloodbank')) pokemon.side.slotConditions[pokemon.position]['bloodbank'].hp = this.effectState.hp / 2;
+				this.effectState.hp = 0;
 			}
 		},
 		condition: {
