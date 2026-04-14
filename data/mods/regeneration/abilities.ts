@@ -261,4 +261,36 @@ export const Abilities: {[k: string]: ModdedAbilityData} = {
 		rating: 1,
 		shortDesc: "After using a Normal-type move, the user's next attack will always be physical.",
 	},
+	bloodbank: {
+		onAfterMoveSecondarySelf(source, target, move) {
+			if (!move || !move.flags['bite'] ||!target) return;
+			this.add('-ability', source, 'Blood Bank');
+			this.add('-message', `${source.name} stored some of ${target.illusion ? target.illusion.name : target.name}'s HP in its blood bank!`);
+			if (!this.effectState.hp) this.effectState.hp = 0;
+			this.effectState.hp += move.multihit ? move.totalDamage : target.lastAttackedBy.damage;
+		},
+		onSwitchOut(pokemon) {
+			if (this.effectState.hp) {
+				this.add('-ability', pokemon, 'Blood Bank');
+				pokemon.heal(this.effectState.hp / 2);
+				this.add('-heal', pokemon, pokemon.getHealth, '[silent]');
+				this.add('-message', `${pokemon.name} restored its HP with its blood bank!`);
+				if (pokemon.side.addSlotCondition(pokemon, 'bloodbank')) pokemon.side.slotConditions[pokemon.position]['bloodbank'].effectState.hp = this.effectState.hp / 2;
+			}
+		},
+		condition: {
+			onSwap(target) {
+				if (!target.fainted && (target.hp < target.maxhp || target.status)) {
+					target.heal(this.effectState.hp);
+					this.add('-heal', target, target.getHealth, '[silent]');
+					this.add('-message', `${target.illusion ? target.illusion.name : target.name} had its HP restored by ${this.effectState.source.name}'s blood bank, too!`);
+				}
+				target.side.removeSlotCondition(target, 'bloodbank');
+			},
+		},
+		flags: {},
+		name: "Blood Bank",
+		rating: 1,
+		shortDesc: "Stores HP when biting, then heals self and ally on switch.",
+	},
 };
