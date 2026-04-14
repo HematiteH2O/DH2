@@ -2088,7 +2088,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			for (const fragment of fragmentsList) {
 				if (fragment.role) {
 					// prioritize roles that aren't covered
-					if (!teamOfferedSupport[fragment.role].filter((requester) => (requester !== fragment.pokemon)).length && fragment.fragmentPriority === 4) fragment.fragmentPriority = 0;
+					if ((!teamOfferedSupport[fragment.role] || !teamOfferedSupport[fragment.role].filter((requester) => (requester !== fragment.pokemon)).length) && fragment.fragmentPriority === 4) fragment.fragmentPriority = 0;
 					if (fragment.role === 'mainstab') {
 						// don't do multiple main STABs of the same type
 						if (fragment.pokemon.coveredStabs.includes(fragment.moveType)) fragment.eligible = false;
@@ -2096,9 +2096,9 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 						else if (fragment.pokemon.coveredStabs.length > 1 && fragment.fragmentPriority === 2) fragment.fragmentPriority = 0;
 					} else if (fragment.role !== 'protection') {
 						// if one half of a synergy exists, prioritize the other half
-						if (teamHighPrioRequestedSupport[fragment.role].filter((requester) => (requester !== fragment.pokemon)).length && !teamOfferedSupport[fragment.role]) fragment.highpriority = true;
+						if ((teamHighPrioRequestedSupport[fragment.role] && teamHighPrioRequestedSupport[fragment.role].filter((requester) => (requester !== fragment.pokemon)).length) && !teamOfferedSupport[fragment.role]) fragment.highpriority = true;
 						// if the team doesn't want the support, throw out the fragment
-						if (!teamRequestedSupport[fragment.role].filter((requester) => (requester !== fragment.pokemon)).length && !teamHighPrioRequestedSupport[fragment.role].filter((requester) => (requester !== fragment.pokemon)).length && fragment.role !== 'spicy') fragment.eligible = false;
+						if ((!teamRequestedSupport[fragment.role] || !teamRequestedSupport[fragment.role].filter((requester) => (requester !== fragment.pokemon)).length) && (!teamHighPrioRequestedSupport[fragment.role] || !teamHighPrioRequestedSupport[fragment.role].filter((requester) => (requester !== fragment.pokemon)).length) && fragment.role !== 'spicy') fragment.eligible = false;
 						// otherwise, record that the support is still possible at this point
 						else {
 							if (!possibleSupport[fragment.role]) possibleSupport[fragment.role] = [];
@@ -2112,9 +2112,9 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				if (fragment[format].requestedSupport) {
 					for (const request of fragment[format].requestedSupport) {
 						// if one half of a synergy exists, prioritize getting at least one of the other half
-						if (teamOfferedSupport[request].filter((requester) => (requester !== fragment.pokemon)).length && !teamHighPrioRequestedSupport[request]) fragment.highpriority = true;
+						if ((teamOfferedSupport[request] && teamOfferedSupport[request].filter((requester) => (requester !== fragment.pokemon)).length) && !teamHighPrioRequestedSupport[request]) fragment.highpriority = true;
 						// but filter out impossible requests
-						if (!possibleSupport[request].filter((requester) => (requester !== fragment.pokemon)).length) fragment.eligible = false;
+						if ((!possibleSupport[request] || !possibleSupport[request].filter((requester) => (requester !== fragment.pokemon)).length)) fragment.eligible = false;
 					}
 				}
 			}
