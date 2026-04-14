@@ -272,18 +272,22 @@ export const Abilities: {[k: string]: ModdedAbilityData} = {
 		onSwitchOut(pokemon) {
 			if (this.effectState.hp) {
 				this.add('-ability', pokemon, 'Blood Bank');
-				pokemon.heal(this.effectState.hp / 2);
-				this.add('-heal', pokemon, pokemon.getHealth, '[silent]');
-				this.add('-message', `${pokemon.name} restored its HP with its blood bank!`);
+				if (pokemon.hp < pokemon.maxhp) {
+					pokemon.heal(this.effectState.hp / 2);
+					this.add('-heal', pokemon, pokemon.getHealth, '[silent]');
+					this.add('-message', `${pokemon.name} restored its HP with its blood bank!`);
+				} else {
+					this.add('-message', `${pokemon.name} is ready to share its blood bank!`);
+				}
 				if (pokemon.side.addSlotCondition(pokemon, 'bloodbank')) pokemon.side.slotConditions[pokemon.position]['bloodbank'].effectState.hp = this.effectState.hp / 2;
 			}
 		},
 		condition: {
 			onSwap(target) {
-				if (!target.fainted && (target.hp < target.maxhp || target.status)) {
+				if (!target.fainted && (target.hp < target.maxhp)) {
 					target.heal(this.effectState.hp);
 					this.add('-heal', target, target.getHealth, '[silent]');
-					this.add('-message', `${target.illusion ? target.illusion.name : target.name} had its HP restored by ${this.effectState.source.name}'s blood bank, too!`);
+					this.add('-message', `${target.illusion ? target.illusion.name : target.name} had its HP restored by ${this.effectState.source.name}'s blood bank!`);
 				}
 				target.side.removeSlotCondition(target, 'bloodbank');
 			},
