@@ -279,13 +279,13 @@ export const Abilities: {[k: string]: ModdedAbilityData} = {
 				} else {
 					this.add('-message', `${pokemon.name} is ready to share its blood bank!`);
 				}
-				if (pokemon.side.addSlotCondition(pokemon, 'bloodbank')) pokemon.side.slotConditions[pokemon.position]['bloodbank'].effectState.hp = this.effectState.hp / 2;
+				if (pokemon.side.addSlotCondition(pokemon, 'bloodbank')) pokemon.side.slotConditions[pokemon.position]['bloodbank'].hp = this.effectState.hp / 2;
 			}
 		},
 		condition: {
 			onSwap(target) {
 				if (!target.fainted && (target.hp < target.maxhp)) {
-					target.heal(this.effectState.hp);
+					target.heal(this.hp);
 					this.add('-heal', target, target.getHealth, '[silent]');
 					this.add('-message', `${target.illusion ? target.illusion.name : target.name} had its HP restored by ${this.effectState.source.name}'s blood bank!`);
 				}
