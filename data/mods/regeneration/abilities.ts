@@ -263,7 +263,7 @@ export const Abilities: {[k: string]: ModdedAbilityData} = {
 	},
 	bloodbank: {
 		onAfterMoveSecondarySelf(source, target, move) {
-			if (!move || !move.flags['bite'] ||!target) return;
+			if (!move || !(move.flags['bite'] || move.name === 'Super Fang') || !target) return;
 			this.add('-ability', source, 'Blood Bank');
 			this.add('-message', `${source.name} stored some of ${target.illusion ? target.illusion.name : target.name}'s HP in its blood bank!`);
 			if (!this.effectState.hp) this.effectState.hp = 0;
