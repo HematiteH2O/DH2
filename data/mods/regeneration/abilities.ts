@@ -267,7 +267,7 @@ export const Abilities: {[k: string]: ModdedAbilityData} = {
 			this.add('-ability', source, 'Blood Bank');
 			this.add('-message', `${source.name} stored some of ${target.illusion ? target.illusion.name : target.name}'s HP in its blood bank!`);
 			if (!this.effectState.hp) this.effectState.hp = 0;
-			this.effectState.hp += move.multihit ? move.totalDamage : target.lastAttackedBy.damage;
+			this.effectState.hp += move.multihit ? move.totalDamage : target.getLastAttackedBy().damage;
 		},
 		onSwitchOut(pokemon) {
 			if (this.effectState.hp) {
