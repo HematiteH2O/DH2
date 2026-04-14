@@ -372,7 +372,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			baseDamage = this.battle.runEvent('ModifyDamage', pokemon, target, move, baseDamage);
 			
 			// MODDED for Taste Test
-			if (pokemon.m.innates['tastetest'] && pokemon.m.innates['tastetest'].tasteTested && pokemon.m.innates['tastetest'].tasteTested.includes(target)) baseDamage = this.battle.modify(baseDamage, 1.5);
+			if (pokemon.m.innates && pokemon.m.innates['tastetest'] && pokemon.m.innates['tastetest'].tasteTested && pokemon.m.innates['tastetest'].tasteTested.includes(target)) baseDamage = this.battle.modify(baseDamage, 1.5);
 	
 			if (move.isZOrMaxPowered && target.getMoveHitData(move).zBrokeProtect) {
 				baseDamage = this.battle.modify(baseDamage, 0.25);
