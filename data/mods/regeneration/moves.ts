@@ -525,7 +525,6 @@ export const Moves: {[k: string]: ModdedMoveData} = {
 		},
 	},
 	tastetest: {
-		// seems like nothing has "num" so I hope that's okay
 		accuracy: 100,
 		basePower: 75,
 		category: "Special",
@@ -533,6 +532,7 @@ export const Moves: {[k: string]: ModdedMoveData} = {
 		pp: 20,
 		priority: 0,
 		flags: {contact: 1, protect: 1, mirror: 1, metronome: 1},
+		shortDesc: "Boosts damage user does to target; lowers target's Speed.",
 		secondary: {
 			chance: 100,
 			boosts: {
@@ -541,13 +541,24 @@ export const Moves: {[k: string]: ModdedMoveData} = {
 		},
 		onAfterHit(target, source) {
 			if (source.hp && target.hp) {
-				if (!source.m.tasteTested) source.m.tasteTested = [];
+				let explainTasteTest = false;
+				if (!source.m.tasteTested) {
+					source.m.tasteTested = [];
+					explainTasteTest = true;
+				}
 				if (!source.m.tasteTested.includes(target)) {
 					source.m.tasteTested.push(target);
 					this.add('-message', `${source.illusion ? source.illusion.name : source.name} licked ${target.illusion ? target.illusion.name : target.name} and learned its flavor and texture!`);
 					if (this.randomChance(1,5)) this.add('-message', `It didn't particularly like that flavor...`);
 				}
+				if (explainTasteTest) {
+					this.hint(`Once ${source.illusion ? source.illusion.name : source.name} has taste-tested a Pokémon, all of its moves will do 1.5x the damage to that Pokémon for the rest of the battle. It can remember any number of Pokémon, but the effect doesn't increase if it uses Taste Test on the same Pokémon more than once.`);
+				}
 			}
+		},
+		onPrepareHit(target, source, move) {
+			this.attrLastMove('[still]');
+			this.add('-anim', source, "Lick", target);
 		},
 		target: "normal",
 		type: "Normal",
