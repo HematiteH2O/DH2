@@ -541,18 +541,11 @@ export const Moves: {[k: string]: ModdedMoveData} = {
 		},
 		onAfterHit(target, source) {
 			if (source.hp && target.hp) {
-				let explainTasteTest = false;
-				if (!source.m.tasteTested) {
-					source.m.tasteTested = [];
-					explainTasteTest = true;
-				}
+				if (!source.m.tasteTested) source.m.tasteTested = [];
 				if (!source.m.tasteTested.includes(target)) {
 					source.m.tasteTested.push(target);
 					this.add('-message', `${source.illusion ? source.illusion.name : source.name} licked ${target.illusion ? target.illusion.name : target.name} and learned its flavor and texture!`);
-					if (this.randomChance(1,5)) this.add('-message', `It didn't particularly like that flavor...`);
-				}
-				if (explainTasteTest) {
-					this.hint(`After using Taste Test, all of ${source.illusion ? source.illusion.name : source.name}'s moves will do 1.5x the damage to that target for the rest of the battle. It can remember any number of Pokémon, but the effect doesn't increase if it uses Taste Test on the same Pokémon more than once.`);
+					this.hint(`For the rest of the battle, all of ${source.illusion ? source.illusion.name : source.name}'s moves will do 1.5x the damage to ${target.illusion ? target.illusion.name : target.name}.`);
 				}
 			}
 		},
