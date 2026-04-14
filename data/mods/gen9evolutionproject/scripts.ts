@@ -1946,19 +1946,19 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 						continue;
 					}
 				}
-				if (fragment.avoid && pokemon.roles) {
+				if (fragment.avoid && fragment.pokemon.roles) {
 					let avoid = false;
 					for (const role of fragment.avoid) {
-						if (pokemon.roles.includes(role)) avoid = true;
+						if (fragment.pokemon.roles.includes(role)) avoid = true;
 					}
 					if (avoid) {
 						fragment.eligible = false;
 						continue;
 					}
 				}
-				if (pokemon.avoid && fragment.role) {
+				if (fragment.pokemon.avoid && fragment.role) {
 					let avoid = false;
-					for (const role of pokemon.avoid) {
+					for (const role of fragment.pokemon.avoid) {
 						if (role === fragment.role) avoid = true;
 					}
 					if (avoid) {
