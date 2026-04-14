@@ -552,7 +552,7 @@ export const Moves: {[k: string]: ModdedMoveData} = {
 					if (this.randomChance(1,5)) this.add('-message', `It didn't particularly like that flavor...`);
 				}
 				if (explainTasteTest) {
-					this.hint(`Once ${source.illusion ? source.illusion.name : source.name} has taste-tested a Pokémon, all of its moves will do 1.5x the damage to that Pokémon for the rest of the battle. It can remember any number of Pokémon, but the effect doesn't increase if it uses Taste Test on the same Pokémon more than once.`);
+					this.hint(`After using Taste Test, all of ${source.illusion ? source.illusion.name : source.name}'s moves will do 1.5x the damage to that target for the rest of the battle. It can remember any number of Pokémon, but the effect doesn't increase if it uses Taste Test on the same Pokémon more than once.`);
 				}
 			}
 		},
