@@ -541,6 +541,7 @@ export const Moves: {[k: string]: ModdedMoveData} = {
 		},
 		onAfterHit(target, source) {
 			if (source.hp && target.hp) {
+				if (!source.m.innates) source.m.innates = {};
 				if (!source.m.innates['tastetest']) source.m.innates['tastetest'] = {id: 'tastetest', name: 'Taste Test', target: source, tasteTested: []};
 				if (!source.m.innates['tastetest'].tasteTested.includes(target)) {
 					source.m.innates['tastetest'].tasteTested.push(target);
