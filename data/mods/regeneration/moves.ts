@@ -527,7 +527,7 @@ export const Moves: {[k: string]: ModdedMoveData} = {
 	tastetest: {
 		accuracy: 100,
 		basePower: 75,
-		category: "Special",
+		category: "Physical",
 		name: "Taste Test",
 		pp: 20,
 		priority: 0,
