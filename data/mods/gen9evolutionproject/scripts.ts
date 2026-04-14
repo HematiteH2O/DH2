@@ -139,6 +139,17 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (newMon.abilities[1]) newMon.randbats.abilities.push(newMon.abilities[1]);
 				if (newMon.abilities['H']) newMon.randbats.abilities.push(newMon.abilities['H']);
 				if (newMon.abilities['S']) newMon.randbats.abilities.push(newMon.abilities['S']);
+				if (newMon.battleOnly) {
+					if (newMon.requiredAbility) {
+						newMon.randbats.abilities.push(newMon.requiredAbility);
+					} else {
+						let baseMon = this.dex.species.get(newMon.battleOnly);
+						newMon.randbats.abilities.push(baseMon.abilities[0]);
+						if (baseMon.abilities[1]) newMon.randbats.abilities.push(baseMon.abilities[1]);
+						if (baseMon.abilities['H']) newMon.randbats.abilities.push(baseMon.abilities['H']);
+						if (baseMon.abilities['S']) newMon.randbats.abilities.push(baseMon.abilities['S']);
+					}
+				}
 
 				// type matchups
 				let weaknesses = [];
@@ -1799,14 +1810,15 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					if (typeof species.battleOnly === 'string') set.species = species.battleOnly;
 					else if (typeof species.battleOnly === 'object' && species.battleOnly.length) set.species = this.sample(species.battleOnly);
 					set.name = set.species;
-					
-					// for now, let's give it a random Ability from its base form
-					// we'll overwrite this later if there are better options
-					if (this.dex.species.get(set.species).randbats.abilities.length) {
-						set.ability = this.sample(this.dex.species.get(set.species).randbats.abilities);
-					} else {
-						set.ability = this.dex.species.get(set.species).abilities[0];
-					}
+					// We can set a "freeAbility" for the post-form-change Ability!
+					set.freeAbility = species.abilities[0];
+					// For an example, Mega Manectric will have Intimidate as its freeAbility
+					// That means that if we have a fragment requesting Intimidate in a Mega Manectric's pool, we want to check it off as completed right away
+					// We don't have to worry about "fitting" Intimidate later - any fragment with Intimidate will know it's covered from now on
+					// At the same time, we *don't* want to put Intimidate as the set's Ability!
+					// If we did, it wouldn't be a legal Manectric pre-Mega...
+					// but we'd also be rejecting perfectly viable support options like Lightning Rod if we think the Ability slot is taken by Intimidate!
+					// Defining set.freeAbility here is setup so we can get around both of these issues once we're in the main set construction loop
 				}
 				// note that the rest of this will check this.dex.species.get(set.species) if we want specifically the base form (since we just changed the set to the base form),
 				// but simply species if we want the form the randomizer actually chose (since that was recorded at the beginning of this loop)
@@ -1928,7 +1940,10 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				if (fragment.role && fragment.role === 'mainstab') fragment.fragmentPriority = 2;
 				if (fragment.role && fragment.role === 'protection') fragment.fragmentPriority = 1;
 				if (fragment.role && fragment.role === 'spicy') fragment.fragmentPriority = 0;
-				
+
+				if (fragment.ability && fragment.pokemon.freeAbility && fragment.ability === fragment.pokemon.freeAbility) {
+					fragment.ability = null;
+				}
 				if (fragment.ability && fragment.pokemon.ability) {
 					if (fragment.ability === fragment.pokemon.ability) fragment.ability = null;
 					else fragment.eligible = false;
