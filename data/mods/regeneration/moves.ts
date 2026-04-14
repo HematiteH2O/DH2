@@ -550,14 +550,6 @@ export const Moves: {[k: string]: ModdedMoveData} = {
 				}
 			}
 		},
-		condition: {
-			onBasePower(basePower, attacker, defender, move) {
-				if (attacker && defender && attacker === this.effectState.target && this.effectState.tasteTested.includes(defender)) {
-					this.add('-message', `${attacker.illusion ? attacker.illusion.name : attacker.name}'s damage was boosted because it knows ${target.illusion ? target.illusion.name : target.name}'s flavor and texture!`);
-					return this.chainModify(1.5);
-				}
-			}
-		},
 		target: "normal",
 		type: "Normal",
 		contestType: "Clever",
