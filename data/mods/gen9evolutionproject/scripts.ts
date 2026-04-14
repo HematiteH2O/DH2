@@ -1919,6 +1919,10 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			
 			// STEP 2: fragment eligibility
 			for (const fragment of fragmentsList) {
+				if (fragment.format && fragment.format !== format) {
+					fragment.eligible = false;
+					continue;
+				}
 				fragment.eligible = true;
 				fragment.highpriority = false;
 				if (fragment.role && fragment.role === 'mainstab') fragment.fragmentPriority = 2;
@@ -2066,7 +2070,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			let teamRequestedSupport = {};
 			for (const request of baseRequestedSupport) {
 				if (!teamRequestedSupport[request]) teamRequestedSupport[request] = [];
-				teamRequestedSupport.push("true");
+				teamRequestedSupport[request].push("true");
 			}
 			for (const fragment of fragmentsList) if (fragment[format].requestedSupport) for (const request of fragment[format].requestedSupport) {
 				if (!teamRequestedSupport[request]) teamRequestedSupport[request] = [];
@@ -2246,10 +2250,15 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					if (chosenFragment.evs['spe'] > chosenFragment.pokemon.evs['spe']) chosenFragment.pokemon.evs['spe'] = chosenFragment.evs['spe'];
 				}
 				if (chosenFragment.role) {
-					if (!['mainstab', 'protection'].includes(chosenFragment.role) && !teamOfferedSupport.includes(chosenFragment.role)) teamOfferedSupport.push(chosenFragment.role);
-					else if (chosenFragment.role === 'mainstab' && chosenFragment.moveType && !chosenFragment.pokemon.coveredStabs.includes(chosenFragment.moveType)) chosenFragment.pokemon.coveredStabs.push(chosenFragment.moveType);
+					if (!['mainstab', 'protection'].includes(chosenFragment.role)) {
+						if (!teamOfferedSupport[chosenFragment.role]) teamOfferedSupport[chosenFragment.role] = [];
+						teamOfferedSupport[chosenFragment.role].push(chosenFragment.pokemon);
+					} else if (chosenFragment.role === 'mainstab' && chosenFragment.moveType && !chosenFragment.pokemon.coveredStabs.includes(chosenFragment.moveType)) chosenFragment.pokemon.coveredStabs.push(chosenFragment.moveType);
 				}
-				if (chosenFragment[format].requestedSupport) for (const request of chosenFragment[format].requestedSupport) if (!teamHighPrioRequestedSupport.includes(request)) teamHighPrioRequestedSupport.push(request);
+				if (chosenFragment[format].requestedSupport) for (const request of chosenFragment[format].requestedSupport) {
+					if (!teamHighPrioRequestedSupport[request]) teamHighPrioRequestedSupport[request] = [];
+					teamHighPrioRequestedSupport[request].push(chosenFragment.pokemon);
+				}
 			}
 		}
 		
