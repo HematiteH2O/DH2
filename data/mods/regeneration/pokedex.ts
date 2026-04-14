@@ -161,6 +161,7 @@ export const Pokedex: {[speciesid: string]: SpeciesData} = {
 	// Minor Changes (mostly to prevent unevolved Pokemons in gen 1 to hold Eviolite)
 	golbat: {
 		inherit: true,
+		abilities: {0: "Blood Bank"},
 		evos: [],
 	},
 	magneton: {
