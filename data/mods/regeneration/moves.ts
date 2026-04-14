@@ -540,10 +540,13 @@ export const Moves: {[k: string]: ModdedMoveData} = {
 			},
 		},
 		onAfterHit(target, source) {
-			if (source.hp) {
+			if (source.hp && target.hp) {
 				if (!source.m.innates['tastetest']) source.m.innates['tastetest'] = {id: 'tastetest', name: 'Taste Test', target: source, tasteTested: []};
-				source.m.innates.tasteTested.push(target);
-				this.add('-message', `${source.illusion ? source.illusion.name : source.name} tasted ${target.illusion ? target.illusion.name : target.name} and memorized its flavor and texture!`);
+				if (!source.m.innates['tastetest'].tasteTested.includes(target)) {
+					source.m.innates['tastetest'].tasteTested.push(target);
+					this.add('-message', `${source.illusion ? source.illusion.name : source.name} licked ${target.illusion ? target.illusion.name : target.name} and learned its flavor and texture!`);
+					if (this.randomChance(1,5)) this.add('-message', `It didn't particularly like that flavor...`);
+				}
 			}
 		},
 		condition: {
