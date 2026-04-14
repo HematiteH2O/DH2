@@ -263,5 +263,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		this.modData("Learnsets", "marowak").learnset.knockoff = ["9L1"];
 		this.modData("Learnsets", "marowak").learnset.vengefulbone = ["9L1"];
 		this.modData("Learnsets", "marowak").learnset.closecombat = ["9L1"];
+		
+		this.modData("Learnsets", "lickitung").learnset.tastetest = ["9L1"];
 	},
 };
