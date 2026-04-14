@@ -567,10 +567,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								newMon.randbats.offeredSupport.priority.push(modFragment);
 							} else if (fragment.moveBasePower && !fragment.stab && !fragment.teraType && fragment.moveType !== 'Normal') {
 								// push to "spicy" for some last-pick set filler
-								if (!newMon.randbats.spicy) newMon.randbats.spicy = [];
+								if (!newMon.randbats.offeredSupport.spicy) newMon.randbats.offeredSupport.spicy = [];
 								let modFragment = Utils.deepClone(fragment);
 								modFragment.teraType = fragment.moveType;
-								newMon.randbats.spicy.push(modFragment);
+								newMon.randbats.offeredSupport.spicy.push(modFragment);
 							}
 						}
 						// spread
@@ -2074,7 +2074,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			}
 			for (const fragment of fragmentsList) if (fragment[format].requestedSupport) for (const request of fragment[format].requestedSupport) {
 				if (!teamRequestedSupport[request]) teamRequestedSupport[request] = [];
-				if (!teamRequestedSupport.includes(fragment.pokemon)) teamRequestedSupport[request].push(fragment.pokemon);
+				if (!teamRequestedSupport[request].includes(fragment.pokemon)) teamRequestedSupport[request].push(fragment.pokemon);
 			}
 			for (const type of types) {
 				if (!teamRequestedSupport[`${(type).toLowerCase()}resist`]) teamRequestedSupport[`${(type).toLowerCase()}resist`] = [];
@@ -2185,7 +2185,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				let reducedFragmentsListThisStep = [];
 				let roleCount = {};
 				for (const fragment of fragmentsListThisStep) {
-					if (fragment.role && !['mainstab', 'protection'].includes(fragment.role)) {
+					if (fragment.role && !['mainstab', 'protection', 'spicy'].includes(fragment.role)) {
 						if (!roleCount[fragment.role]) roleCount[fragment.role] = [];
 						if (!roleCount[fragment.role].includes(fragment.pokemon.name)) roleCount[fragment.role].push(fragment.pokemon.name);
 					}
@@ -2195,7 +2195,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					if (minRoleCount > roleCount[role].length) minRoleCount = roleCount[role].length;
 				}
 				for (const fragment of fragmentsListThisStep) {
-					if (fragment.role && !['mainstab', 'protection'].includes(fragment.role) && roleCount[fragment.role].length <= minRoleCount) reducedFragmentsListThisStep.push(fragment);
+					if (fragment.role && !['mainstab', 'protection', 'spicy'].includes(fragment.role) && roleCount[fragment.role].length <= minRoleCount) reducedFragmentsListThisStep.push(fragment);
 				}
 				if (reducedFragmentsListThisStep.length) fragmentsListThisStep = reducedFragmentsListThisStep;
 			}
@@ -2205,7 +2205,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			let reducedFragmentsListThisStep = [];
 			let roleScores = {};
 			for (const fragment of fragmentsListThisStep) {
-				if (fragment.role && !['mainstab', 'protection'].includes(fragment.role)) {
+				if (fragment.role && !['mainstab', 'protection', 'spicy'].includes(fragment.role)) {
 					if (!roleScores[fragment.role]) roleScores[fragment.role] = 0;
 					if (fragment.score && fragment.score > roleScores[fragment.role]) roleScores[fragment.role] = fragment.score;
 				}
@@ -2216,7 +2216,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			}
 			for (const fragment of fragmentsListThisStep) {
 				let safeToPush = true;
-				if (fragment.role && !['mainstab', 'protection'].includes(fragment.role)) {
+				if (fragment.role && !['mainstab', 'protection', 'spicy'].includes(fragment.role)) {
 					if (roleScores[fragment.role] && roleScores[fragment.role] > 0 && (!fragment.score || (roleScores[fragment.role] > fragment.score))) safeToPush = false;
 				}
 				else if (fragment.role && fragment.role === 'mainstab') {
@@ -2250,7 +2250,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					if (chosenFragment.evs['spe'] > chosenFragment.pokemon.evs['spe']) chosenFragment.pokemon.evs['spe'] = chosenFragment.evs['spe'];
 				}
 				if (chosenFragment.role) {
-					if (!['mainstab', 'protection'].includes(chosenFragment.role)) {
+					if (!['mainstab', 'protection', 'spicy'].includes(chosenFragment.role)) {
 						if (!teamOfferedSupport[chosenFragment.role]) teamOfferedSupport[chosenFragment.role] = [];
 						teamOfferedSupport[chosenFragment.role].push(chosenFragment.pokemon);
 					} else if (chosenFragment.role === 'mainstab' && chosenFragment.moveType && !chosenFragment.pokemon.coveredStabs.includes(chosenFragment.moveType)) chosenFragment.pokemon.coveredStabs.push(chosenFragment.moveType);
