@@ -1418,8 +1418,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			if (eligibleMonotypes.length) monotype = this.sample(eligibleMonotypes);
 		} else {
 			// but if not, the randomizer can decide if it should be monotype or not!
-			if (this.randomChance(1,2)) { // the chance can be anything I want, but 10% should be good for now
-				// temporarily testing at 50/50 instead!
+			if (this.randomChance(1,10)) { // the chance can be anything I want, but 10% should be good for now
 				if (!eligibleMonotypes.length) eligibleMonotypes = types;
 				monotype = this.sample(eligibleMonotypes);
 			}
