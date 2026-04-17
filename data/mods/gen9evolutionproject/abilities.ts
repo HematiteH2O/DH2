@@ -400,21 +400,26 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 	},
 	calcify: {
 		onStart(pokemon) { // pointless test
-			const newPoke = new Pokemon(pokemon.set, pokemon.side);
+			pokemon.side.pokemon.length++;
+			const newPos = target.side.pokemon.length - 1;
+			
+			let newPoke = new Pokemon(pokemon.set, pokemon.side);
 			for (const [key, value] of Object.entries(pokemon)) newPoke[key] = value;
-			newPoke['name'] = 'fakePokemon';
-			newPoke['fullname'] = 'fakePokemon';
-			pokemon.side.pokemon[-1] = newPoke;
+			newPoke['fullname'] = 'animation';
 			
 			newPoke.species = this.dex.species.get('salandit');
 			newPoke.baseSpecies = this.dex.species.get('salandit');
+			pokemon.side.pokemon[newPos] = newPoke;
 			this.add('-transform', pokemon, newPoke, '[silent]');
 			this.add('-anim', pokemon, "Splash", pokemon);
 			
 			newPoke.species = pokemon.species;
 			newPoke.baseSpecies = pokemon.baseSpecies;
+			pokemon.side.pokemon[newPos] = newPoke;
 			this.add('-transform', pokemon, newPoke, '[silent]');
-			delete pokemon.side.pokemon[-1];
+
+			delete pokemon.side.pokemon[newPos];
+			pokemon.side.pokemon.length--;
 		},
 		onModifyAtkPriority: 5,
 		onModifyAtk(atk, attacker, defender, move) {
