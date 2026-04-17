@@ -399,7 +399,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 	calcify: {
 		onStart(pokemon) { // pointless test
 			let fakeSpecies = {};
-			for (const elem in pokemon.species) {
+			for (const elem of pokemon.species) {
 				if (elem === 'spriteid') {
 					fakeSpecies[elem] = 'salandit';
 				} else if (elem === 'name') {
@@ -413,13 +413,11 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				}
 			}
 			let fakePokemon = {};
-			for (const elem in pokemon) {
+			for (const elem of pokemon) {
 				if (elem === 'name') {
 					fakeSpecies[elem] = 'fakePokemon';
 				} else if (elem === 'species') {
 					fakeSpecies[elem] = fakeSpecies;
-				} else if (pokemon[elem] === null) {
-					fakeSpecies[elem] = {};
 				} else {
 					fakeSpecies[elem] = pokemon[elem];
 				}
