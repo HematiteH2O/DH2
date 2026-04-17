@@ -1055,10 +1055,10 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 	attract: {
 		inherit: true,
 		condition: {
-			inherit: true,
+			noCopy: true, // doesn't get copied by Baton Pass
 			onStart(pokemon, source, effect) {
 				if (
-					(pokemon.species.gayLizard && source.gender !== 'F') ||
+					(pokemon.species.gayLizard && source.gender === 'F') ||
 					(!pokemon.species.gayLizard && !(pokemon.gender === 'M' && source.gender === 'F') && !(pokemon.gender === 'F' && source.gender === 'M'))
 				) {
 					this.debug('incompatible gender');
@@ -1083,6 +1083,23 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 					this.add('-sethp', pokemon, pokemon.getHealth, '[from] move: Attract', '[silent]');
 					this.add('-message', `Never mind, he's fine--`);
 				}
+			},
+			onUpdate(pokemon) {
+				if (this.effectState.source && !this.effectState.source.isActive && pokemon.volatiles['attract']) {
+					this.debug('Removing Attract volatile on ' + pokemon);
+					pokemon.removeVolatile('attract');
+				}
+			},
+			onBeforeMovePriority: 2,
+			onBeforeMove(pokemon, target, move) {
+				this.add('-activate', pokemon, 'move: Attract', '[of] ' + this.effectState.source);
+				if (this.randomChance(1, 2)) {
+					this.add('cant', pokemon, 'Attract');
+					return false;
+				}
+			},
+			onEnd(pokemon) {
+				this.add('-end', pokemon, 'Attract', '[silent]');
 			},
 		},
 		onTryImmunity(target, source) {
