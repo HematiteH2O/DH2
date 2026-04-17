@@ -2247,9 +2247,4 @@ export const Pokedex: {[speciesid: string]: ModdedSpeciesData} = {
 		evoCondition: "A newly-discovered evolution",
 		creator: "Albatross",
 	},
-	// TEMPORARY
-	salandit: {
-		inherit: true,
-		gayLizard: true,
-	},
 };
