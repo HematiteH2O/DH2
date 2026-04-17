@@ -875,14 +875,18 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 		inherit: true,
 		onDamagingHit(damage, target, source, move) {
 			if (move.category === 'Physical') {
-				if (target.species.name === 'Regirock-Kanto') {
+				if (target.species.name === 'Regirock-Kanto' && !target.alreadyFakedFormeChange) {
+					target.alreadyFakedFormeChange = true;
 					// purely cosmetic; there's no actual form change, but you should be able to make it look like one!
-					this.add('-formechange', target, 'Regirock-Kanto-Weak-Armor', '[silent]');
-					// this.add('-start', target, 'typechange', target.getTypes(true).join('/'), '[silent]');
+					this.add('-formechange', target, 'Salandit', '[silent]');
+					this.add('-start', target, 'typechange', target.getTypes(true).join('/'), '[silent]');
 					this.add('-anim', target, "Double Team", target); // fun
 				}
 				this.boost({def: -1, spe: 2}, target, target);
 			}
+		},
+		onEnd(pokemon) {
+			pokemon.alreadyFakedFormeChange = null;
 		},
 	},
 };
