@@ -399,6 +399,22 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 		num: -18,
 	},
 	calcify: {
+		onStart(pokemon) { // ONE more try
+			const backupSpecies = pokemon.species;
+			const backupBaseSpecies = pokemon.baseSpecies;
+			const backupForme = pokemon.forme;
+			
+			pokemon.species = 'Salandit';
+			pokemon.baseSpecies = 'Salandit';
+			pokemon.forme = '';
+			this.add('-end', pokemon, "Dynamax");
+			pokemon.species = backupSpecies;
+			pokemon.baseSpecies = backupBaseSpecies;
+			pokemon.forme = backupForme;
+			
+			this.add('-anim', pokemon, "Splash", pokemon);
+			this.add('-end', pokemon, "Dynamax");
+		},
 		onModifyAtkPriority: 5,
 		onModifyAtk(atk, attacker, defender, move) {
 			if (move.type === 'Rock') {
