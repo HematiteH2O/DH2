@@ -1456,6 +1456,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				(!monotype || this.dex.data.Pokedex[id].randbats.types.includes(monotype) ||
 				 (this.dex.data.Pokedex[id].forceTeraType && this.dex.data.Pokedex[id].forceTeraType === monotype)
 				) && // account for monotype, but our special Terastallized states get some flexibility
+				!(this.dex.data.Pokedex[id].forceTeraType && !this.dex.data.Pokedex[id].randbats.battleOnly) && // if something has a special Terastallized state, don't separately count the base form as eligible
 				(this.dex.data.Pokedex[id].randbats.stage && this.dex.data.Pokedex[id].randbats.stage === stage) // account for LC
 			) eligiblePokemon.push(id);
 		}
@@ -1559,6 +1560,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 							this.dex.data.Pokedex[id].randbats && // in the format/has randbats data
 							!originalTeamSpecies.includes(id) && !originalTeamNumbers.includes(this.dex.data.Pokedex[id].num) && // species clause
 							!(this.dex.data.Pokedex[id].randbats[format] && this.dex.data.Pokedex[id].randbats[format].banned) && // not banned
+							!(this.dex.data.Pokedex[id].forceTeraType && !this.dex.data.Pokedex[id].randbats.battleOnly) && // if something has a special Terastallized state, don't separately count the base form as eligible
 							(this.dex.data.Pokedex[id].randbats.stage && this.dex.data.Pokedex[id].randbats.stage === stage) && // account for LC
 							(!this.dex.data.Pokedex[id].forceTeraType || this.dex.data.Pokedex[id].forceTeraType === monotype) // we want to force a Tera Type later
 						) monotypeBypassEligiblePokemon.push(id);
@@ -1790,8 +1792,6 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				sets.push(set);
 			}
 		}
-
-		// TODO: enforce anything mandatory, including both format-specific mandatory moves and Abilities from the randbats data and. like. *actual* mandatory stuff like form items, battleOnly or required Tera Types
 		
 		// TEAMWIDE SET CONSTRUCTION: FRAGMENTS
 		let eligibleFragments = true;
@@ -1921,12 +1921,6 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				set.remainingStabTypes = [];
 				set.remainingStabMoves = [];
 			}
-			
-			// TODO: leave room for STABs
-			// // I thhhink it works in my favor to pick STABs last, but that also means I want to leave room for them - that means I should count how many types of viable STABs are already on the set and compare it to my target
-			// // if the target isn't met, I should subtract it from the amount of space I have left for moves
-			// // I do think I need to recalculate the target each step
-			// // for instance, Aerilate Flying moves may be the closest Shiftry-Johto gets to a "viable STAB" in some formats, but they stop being an option at all if it commits to another Ability first
 			
 			// STEP 2: fragment eligibility
 			for (const fragment of fragmentsList) {
