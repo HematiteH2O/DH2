@@ -414,10 +414,10 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				}
 			}
 			pokemon.species = fakeSpecies;
-			this.battle.add('-formechange', pokemon, pokemon.species.name, message);
+			this.add('-formechange', pokemon, pokemon.species.name, '[silent]');
 			this.add('-anim', pokemon, "Splash", pokemon);
 			pokemon.species = backupSpecies;
-			this.battle.add('-formechange', pokemon, pokemon.species.name, message);
+			this.add('-formechange', pokemon, pokemon.species.name, '[silent]');
 		},
 		onModifyAtkPriority: 5,
 		onModifyAtk(atk, attacker, defender, move) {
