@@ -402,6 +402,8 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 		onStart(pokemon) { // pointless test
 			const newPoke = new Pokemon(pokemon.set, pokemon.side);
 			for (const [key, value] of Object.entries(pokemon)) newPoke[key] = value;
+			newPoke['name'] = 'fakePokemon';
+			newPoke['fullname'] = 'fakePokemon';
 			
 			newPoke.species = this.dex.species.get('salandit');
 			newPoke.baseSpecies = this.dex.species.get('salandit');
