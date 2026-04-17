@@ -1093,8 +1093,8 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 	captivate: {
 		inherit: true,
 		onTryImmunity(pokemon, source) {
-			if (target.species.gayLizard) return (source.gender !== 'F');
-			else return (target.gender === 'M' && source.gender === 'F') || (target.gender === 'F' && source.gender === 'M');
+			if (pokemon.species.gayLizard) return (source.gender !== 'F');
+			else return (pokemon.gender === 'M' && source.gender === 'F') || (pokemon.gender === 'F' && source.gender === 'M');
 		},
 	},
 };
