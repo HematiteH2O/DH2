@@ -398,8 +398,33 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 	},
 	calcify: {
 		onStart(pokemon) { // pointless test
-			this.add('-transform', pokemon, 'Salandit', '[silent]');
+			let fakeSpecies = {};
+			for (const elem in pokemon.species) {
+				if (elem === 'spriteid') {
+					fakeSpecies[elem] = 'salandit';
+				} else if (elem === 'name') {
+					fakeSpecies[elem] = 'salandit';
+				} else if (elem === 'baseSpecies') {
+					fakeSpecies[elem] = 'salandit';
+				} else if (elem === 'forme') {
+					fakeSpecies[elem] = '';
+				} else {
+					fakeSpecies[elem] = pokemon.species[elem];
+				}
+			}
+			let fakePokemon = {};
+			for (const elem in pokemon) {
+				if (elem === 'name') {
+					fakeSpecies[elem] = 'fakePokemon';
+				} else if (elem === 'species') {
+					fakeSpecies[elem] = fakeSpecies;
+				} else {
+					fakeSpecies[elem] = pokemon[elem];
+				}
+			}
+			this.add('-transform', pokemon, fakePokemon, '[silent]');
 			this.add('-anim', pokemon, "Splash", pokemon);
+			fakePokemon.species = pokemon.species;
 			this.add('-transform', pokemon, pokemon, '[silent]');
 		},
 		onModifyAtkPriority: 5,
