@@ -399,23 +399,11 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 		num: -18,
 	},
 	calcify: {
-		onStart(pokemon) { // ONE more try
-			const backupSpecies = pokemon.species;
-			const backupBaseSpecies = pokemon.baseSpecies;
-			const backupForme = pokemon.forme;
-			
-			pokemon.species = 'Salandit';
-			pokemon.spriteid = 'salandit';
-			pokemon.baseSpecies = 'Salandit';
-			pokemon.forme = '';
-			console.log(pokemon);
-			this.add('-end', pokemon, 'Illusion', '[silent]');
-			pokemon.species = backupSpecies;
-			pokemon.baseSpecies = backupBaseSpecies;
-			pokemon.forme = backupForme;
-			
+		onStart(pokemon) {
+			let details = pokemon.details.replace(pokemon.species.name, 'Salandit');
+			this.add('detailschange', pokemon, details);
 			this.add('-anim', pokemon, "Splash", pokemon);
-			this.add('-end', pokemon, 'Illusion', '[silent]');
+			this.add('detailschange', pokemon, pokemon.details);
 		},
 		onModifyAtkPriority: 5,
 		onModifyAtk(atk, attacker, defender, move) {
