@@ -418,14 +418,18 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 					fakeSpecies[elem] = 'fakePokemon';
 				} else if (elem === 'species') {
 					fakeSpecies[elem] = fakeSpecies;
+				} else if (pokemon[elem] === null) {
+					fakeSpecies[elem] = {};
 				} else {
 					fakeSpecies[elem] = pokemon[elem];
 				}
 			}
+			console.log(pokemon);
+			console.log(fakePokemon);
 			this.add('-transform', pokemon, fakePokemon, '[silent]');
 			this.add('-anim', pokemon, "Splash", pokemon);
 			fakePokemon.species = pokemon.species;
-			this.add('-transform', pokemon, pokemon, '[silent]');
+			this.add('-transform', pokemon, fakePokemon, '[silent]');
 		},
 		onModifyAtkPriority: 5,
 		onModifyAtk(atk, attacker, defender, move) {
