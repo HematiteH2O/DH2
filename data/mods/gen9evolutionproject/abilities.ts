@@ -403,8 +403,12 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 			for (const elem in pokemon.species) {
 				if (elem === 'spriteid') {
 					fakeSpecies[elem] = 'salandit'; // sprite ID of choice here
-				} else if (elem === 'name') {
-					fakeSpecies[elem] = 'mimikyubusted'; // downplay the form change animation
+				} else if (elem === 'name') { // pretending to be a Mimikyu when changing form heavily downplays the form-change animation
+					fakeSpecies[elem] = 'Mimikyu-Busted';
+				} else if (elem === 'baseSpecies') {
+					fakeSpecies[elem] = 'Mimikyu';
+				} else if (elem === 'forme') {
+					fakeSpecies[elem] = 'Busted';
 				} else {
 					fakeSpecies[elem] = pokemon.species[elem];
 				}
