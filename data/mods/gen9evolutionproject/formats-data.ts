@@ -403,7 +403,4 @@ export const FormatsData: {[k: string]: ModdedSpeciesFormatsData} = {
 	dragonair: {tier: "(Prevo)"},
 	dragonite: {tier: "Evo!"},
 	dragoracle: {tier: "Evo!"},
-
-	// testing
-	salandit: {tier: "(Prevo)"},
 };
