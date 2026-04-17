@@ -399,30 +399,6 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 		num: -18,
 	},
 	calcify: {
-		// TESTING
-		onStart(pokemon) {
-			let fakeSpecies = {};
-			for (const elem in pokemon.species) {
-				if (elem === 'spriteid') {
-					fakeSpecies[elem] = 'salandit';
-				} else {
-					fakeSpecies[elem] = pokemon.species[elem];
-				}
-			}
-			let fakePokemon = {};
-			for (const elem in pokemon) {
-				if (elem === 'species') {
-					fakeSpecies[elem] = fakeSpecies;
-				} else {
-					fakeSpecies[elem] = pokemon[elem];
-				}
-			}
-			console.log(fakePokemon);
-			console.log(fakeSpecies);
-			pokemon.illusion = fakePokemon;
-			this.add('-anim', pokemon, "Splash", pokemon);
-			pokemon.illusion = null;
-		},
 		onModifyAtkPriority: 5,
 		onModifyAtk(atk, attacker, defender, move) {
 			if (move.type === 'Rock') {
