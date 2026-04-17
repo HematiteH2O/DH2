@@ -397,6 +397,24 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 		num: -18,
 	},
 	calcify: {
+		onStart(pokemon) { // pointless test
+			const backupSpecies = pokemon.species;
+			let fakeSpecies = {};
+			for (const elem in pokemon.species) {
+				if (elem === 'spriteid') {
+					fakeSpecies[elem] = 'salandit'; // sprite ID of choice here
+				} else if (elem === 'name') {
+					fakeSpecies[elem] = 'mimikyubusted'; // downplay the form change animation
+				} else {
+					fakeSpecies[elem] = pokemon.species[elem];
+				}
+			}
+			pokemon.species = fakeSpecies;
+			this.battle.add('-formechange', pokemon, pokemon.species.name, message);
+			this.add('-anim', pokemon, "Splash", pokemon);
+			pokemon.species = backupSpecies;
+			this.battle.add('-formechange', pokemon, pokemon.species.name, message);
+		},
 		onModifyAtkPriority: 5,
 		onModifyAtk(atk, attacker, defender, move) {
 			if (move.type === 'Rock') {
