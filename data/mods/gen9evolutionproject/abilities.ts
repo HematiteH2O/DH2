@@ -397,8 +397,9 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 		num: -18,
 	},
 	calcify: {
+		// TESTING
 		onStart(pokemon) {
-			this.add('-formechange', pokemon, pokemon.species.name, `[silent]`);
+			this.add('-formechange', pokemon, 'Salandit', `[silent]`);
 		},
 		onModifyAtkPriority: 5,
 		onModifyAtk(atk, attacker, defender, move) {
