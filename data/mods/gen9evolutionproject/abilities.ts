@@ -405,15 +405,17 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 			const backupForme = pokemon.forme;
 			
 			pokemon.species = 'Salandit';
+			pokemon.spriteid = 'salandit';
 			pokemon.baseSpecies = 'Salandit';
 			pokemon.forme = '';
-			this.add('-end', pokemon, "Dynamax");
+			console.log(pokemon);
+			this.add('-end', pokemon, 'Illusion', '[silent]');
 			pokemon.species = backupSpecies;
 			pokemon.baseSpecies = backupBaseSpecies;
 			pokemon.forme = backupForme;
 			
 			this.add('-anim', pokemon, "Splash", pokemon);
-			this.add('-end', pokemon, "Dynamax");
+			this.add('-end', pokemon, 'Illusion', '[silent]');
 		},
 		onModifyAtkPriority: 5,
 		onModifyAtk(atk, attacker, defender, move) {
