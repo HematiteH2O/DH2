@@ -878,7 +878,10 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 				if (target.species.name === 'Regirock-Kanto' && !target.alreadyFakedFormeChange) {
 					target.alreadyFakedFormeChange = true;
 					// purely cosmetic; there's no actual form change, but you can make it look like one for fun!
-					this.add('-formechange', target, 'Regirock-Kanto-Weak-Armor', '[silent]');
+					const backup = target.isActive;
+					target.isActive = null;
+					this.add('-formechange', target, 'Salandit', '[silent]');
+					target.isActive = backup;
 					this.add('-start', target, 'typechange', target.getTypes(true).join('/'), '[silent]');
 					this.add('-anim', target, "Double Team", target);
 				}
