@@ -399,12 +399,6 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 		num: -18,
 	},
 	calcify: {
-		onStart(pokemon) {
-			let details = pokemon.details.replace(pokemon.species.name, 'Salandit');
-			this.add('detailschange', pokemon, details);
-			this.add('-anim', pokemon, "Splash", pokemon);
-			this.add('detailschange', pokemon, pokemon.details);
-		},
 		onModifyAtkPriority: 5,
 		onModifyAtk(atk, attacker, defender, move) {
 			if (move.type === 'Rock') {
