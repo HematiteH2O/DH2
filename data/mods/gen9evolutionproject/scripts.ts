@@ -13,6 +13,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 	// GENERATING FAKEMON
 	
 	init() {
+		console.log(`Evo start`);
 		let customList = [];
 		let dexNo = -1;
 		const notm = ['terablast', 'hiddenpower']; // certain moves don't count TMs
@@ -837,6 +838,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 		this.modData('FormatsData', customList[random1]).tier = "Pokémon of the Day!";
 		this.modData('FormatsData', customList[random2]).tier = "Pokémon of the Day!";
 		this.modData('FormatsData', customList[random3]).tier = "Pokémon of the Day!";
+		console.log(`Evo end`);
 	},
 	
 	win(side?: SideID | '' | Side | null) { // modded to cue end-of-battle messages
