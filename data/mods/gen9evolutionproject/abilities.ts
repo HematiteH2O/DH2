@@ -1,3 +1,5 @@
+import {Pokemon} from "../../../sim/pokemon";
+
 export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 	eruptive: { // Volcanic Aurorus
 		onDamagingHit(damage, target, source, move) {
@@ -398,36 +400,17 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 	},
 	calcify: {
 		onStart(pokemon) { // pointless test
-			let fakeSpecies = {};
-			for (const elem of pokemon.species) {
-				if (elem === 'spriteid') {
-					fakeSpecies[elem] = 'salandit';
-				} else if (elem === 'name') {
-					fakeSpecies[elem] = 'salandit';
-				} else if (elem === 'baseSpecies') {
-					fakeSpecies[elem] = 'salandit';
-				} else if (elem === 'forme') {
-					fakeSpecies[elem] = '';
-				} else {
-					fakeSpecies[elem] = pokemon.species[elem];
-				}
-			}
-			let fakePokemon = {};
-			for (const elem of pokemon) {
-				if (elem === 'name') {
-					fakeSpecies[elem] = 'fakePokemon';
-				} else if (elem === 'species') {
-					fakeSpecies[elem] = fakeSpecies;
-				} else {
-					fakeSpecies[elem] = pokemon[elem];
-				}
-			}
-			console.log(pokemon);
-			console.log(fakePokemon);
-			this.add('-transform', pokemon, fakePokemon, '[silent]');
+			const newPoke = new Pokemon(pokemon.set, pokemon.side);
+			for (const [key, value] of Object.entries(pokemon)) newPoke[key] = value;
+			
+			newPoke.species = this.dex.species.get('salandit');
+			newPoke.baseSpecies = this.dex.species.get('salandit');
+			this.add('-transform', pokemon, newPoke, '[silent]');
 			this.add('-anim', pokemon, "Splash", pokemon);
-			fakePokemon.species = pokemon.species;
-			this.add('-transform', pokemon, fakePokemon, '[silent]');
+			
+			newPoke.species = pokemon.species;
+			newPoke.baseSpecies = pokemon.baseSpecies;
+			this.add('-transform', pokemon, newPoke, '[silent]');
 		},
 		onModifyAtkPriority: 5,
 		onModifyAtk(atk, attacker, defender, move) {
