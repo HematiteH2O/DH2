@@ -1077,11 +1077,11 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 					this.add('-start', pokemon, 'Attract');
 				}
 				if (pokemon.species.gayLizard) {
-					this.add('-sethp', pokemon, 0, '[from] move: Attract', '[silent]');
 					this.add('-ohko');
-					this.add('-anim', pokemon, "Dig", pokemon);
+					this.add('-sethp', pokemon, 0, '[from] move: Attract', '[silent]');
+					this.add('-anim', pokemon, "Memento", pokemon);
 					this.add('-message', `...`);
-					this.add('-anim', source, "Confide", source);
+					this.add('-anim', source, "Fake Tears", source);
 					this.add('-message', `...`);
 					this.add('-anim', pokemon, "Splash", pokemon);
 					this.add('-message', `... Okay he's fine`);
