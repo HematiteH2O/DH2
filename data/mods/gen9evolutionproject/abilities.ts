@@ -401,14 +401,12 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 	calcify: {
 		// TESTING
 		onStart(pokemon) {
-			if (pokemon.cloned) return;
-			pokemon.cloned = true;
-			let fakePokemon = Utils.deepClone(pokemon);
-			pokemon.cloned = null;
-			fakePokemon.species = 'Salandit';
-			console.log(fakePokemon);
-			pokemon.illusion = fakePokemon;
+			console.log(pokemon);
+			console.log(pokemon.species);
+			pokemon.species = 'Salandit';
+			pokemon.illusion = pokemon;
 			this.add('-anim', pokemon, "Splash", pokemon);
+			pokemon.species = 'Regirock-Kanto';
 			pokemon.illusion = null;
 		},
 		onModifyAtkPriority: 5,
