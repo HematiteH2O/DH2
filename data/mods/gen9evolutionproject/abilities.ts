@@ -1,3 +1,5 @@
+import { Utils } from '../../../lib/utils';
+
 export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 	eruptive: { // Volcanic Aurorus
 		onDamagingHit(damage, target, source, move) {
@@ -399,7 +401,10 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 	calcify: {
 		// TESTING
 		onStart(pokemon) {
-			this.add('-formechange', pokemon, 'Salandit', `[silent]`);
+			let fakePokemon = Utils.deepClone(pokemon);
+			fakePokemon.species = 'Salandit';
+			console.log(fakePokemon);
+			this.add('-transform', pokemon, fakePokemon);
 		},
 		onModifyAtkPriority: 5,
 		onModifyAtk(atk, attacker, defender, move) {
