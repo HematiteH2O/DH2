@@ -1082,8 +1082,8 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 					this.add('-message', `...`);
 					this.add('-anim', source, "Amnesia", source);
 					this.add('-message', `...`);
-					this.add('-anim', pokemon, "Splash", pokemon);
 					this.add('-message', `... Okay he's fine`);
+					this.add('-anim', pokemon, "Splash", pokemon);
 					this.add('-sethp', pokemon, pokemon.getHealth, '[from] move: Attract', '[silent]');
 				}
 			},
