@@ -404,6 +404,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 			for (const [key, value] of Object.entries(pokemon)) newPoke[key] = value;
 			newPoke['name'] = 'fakePokemon';
 			newPoke['fullname'] = 'fakePokemon';
+			pokemon.side.pokemon[-1] = newPoke;
 			
 			newPoke.species = this.dex.species.get('salandit');
 			newPoke.baseSpecies = this.dex.species.get('salandit');
@@ -413,6 +414,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 			newPoke.species = pokemon.species;
 			newPoke.baseSpecies = pokemon.baseSpecies;
 			this.add('-transform', pokemon, newPoke, '[silent]');
+			delete pokemon.side.pokemon[-1];
 		},
 		onModifyAtkPriority: 5,
 		onModifyAtk(atk, attacker, defender, move) {
