@@ -2016,6 +2016,10 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 						}
 						else if (fragment.role === 'mainstab' && fragment.moveType && !fragment.pokemon.coveredStabs.includes(fragment.moveType)) fragment.pokemon.coveredStabs.push(fragment.moveType);
 					}
+					if (fragment.tags) { // I only define each fragment with one role, but sometimes - especially for the "buddy" property later - I think it could come in handy to give them more labels than that
+						if (!fragment.pokemon.roles) fragment.pokemon.roles = [];
+						for (const tag of fragment.tags) if (!fragment.pokemon.roles.includes(tag)) fragment.pokemon.roles.push(tag);
+					}
 					if (fragment.avoid) {
 						if (!fragment.pokemon.avoid) fragment.pokemon.avoid = [];
 						for (const avoid of fragment.avoid) if (!fragment.pokemon.avoid.includes(avoid)) fragment.pokemon.avoid.push(avoid);
@@ -2026,6 +2030,49 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					}
 					fragment.eligible = false;
 				}
+
+				// "Fragment buddies" are for completely optional properties that are particularly nice to pair together
+				// For example, having U-turn isn't a prerequisite to being a viable Choice Band user,
+				// and having a Choice Band certainly isn't a prerequisite to running U-turn!
+				// but if we've decided to run Band anyway, and the more important set requirements have already been covered,
+				// it might be a good idea to give U-turn a bump in priority over the other possible remaining options
+				// This is something that just gets decided on a case-by-case basis per fragment; it's just good to have the option to set this up
+				if (fragment.buddy) {
+					if (fragment.buddy.ability && fragment.pokemon.freeAbility && fragment.ability === fragment.pokemon.freeAbility) {
+						fragment.buddy.ability = null;
+					}
+					if (fragment.buddy.ability && fragment.pokemon.ability && fragment.buddy.ability === fragment.pokemon.ability) fragment.buddy.ability = null;
+					if (fragment.buddy.item && fragment.pokemon.item && fragment.buddy.item === fragment.pokemon.item) fragment.buddy.item = null;
+					if (fragment.buddy.teraType && fragment.pokemon.teraType && fragment.buddy.teraType === fragment.pokemon.teraType) fragment.buddy.teraType = null;
+					if (fragment.buddy.moves && fragment.pokemon.moves) fragment.buddy.moves = fragment.buddy.moves.filter((move) => (!fragment.pokemon.moves.includes(move)));
+					if (fragment.buddy.roles && fragment.pokemon.roles) fragment.buddy.roles = fragment.buddy.roles.filter((role) => (!fragment.pokemon.roles.includes(role)));
+					if (fragment.buddy.evs && fragment.pokemon.evs) {
+						if (fragment.buddy.evs === fragment.pokemon.evs) fragment.buddy.evs = null;
+						else {
+							let evCount = 0;
+							if (fragment.buddy.evs['hp'] > fragment.pokemon.evs['hp']) evCount += fragment.buddy.evs['hp'] - fragment.pokemon.evs['hp'];
+							if (fragment.buddy.evs['atk'] > fragment.pokemon.evs['atk']) evCount += fragment.buddy.evs['atk'] - fragment.pokemon.evs['atk'];
+							if (fragment.buddy.evs['def'] > fragment.pokemon.evs['def']) evCount += fragment.buddy.evs['def'] - fragment.pokemon.evs['def'];
+							if (fragment.buddy.evs['spa'] > fragment.pokemon.evs['spa']) evCount += fragment.buddy.evs['spa'] - fragment.pokemon.evs['spa'];
+							if (fragment.buddy.evs['spd'] > fragment.pokemon.evs['spd']) evCount += fragment.buddy.evs['spd'] - fragment.pokemon.evs['spd'];
+							if (fragment.buddy.evs['spe'] > fragment.pokemon.evs['spe']) evCount += fragment.buddy.evs['spe'] - fragment.pokemon.evs['spe'];
+							
+							if (evCount === 0) fragment.buddy.evs = null;
+						}
+					}
+					
+					if (
+						!fragment.buddy.ability && !fragment.buddy.item && !fragment.buddy.teraType && !(fragment.buddy.moves && fragment.buddy.moves.length) && !(
+							fragment.buddy.evs && (fragment.buddy.evs['hp'] > 0 || fragment.buddy.evs['atk'] > 0 || fragment.buddy.evs['def'] > 0 || fragment.buddy.evs['spa'] > 0 || fragment.buddy.evs['spd'] > 0 || fragment.buddy.evs['spe'] > 0)
+						)
+					) {
+						// the fragment buddy is complete!
+						fragment.buddy = null;
+						fragment.buddycomplete = true;
+					}
+				}
+
+				// some more eligibility checks:
 				// Choice items
 				if (((fragment.item && ['Choice Band', 'Choice Specs', 'Choice Scarf'].includes(fragment.item)) || (fragment.ability && fragment.ability === 'Gorilla Tactics')) && fragment.pokemon.moves) {
 					for (const move of fragment.pokemon.moves) {
@@ -2213,9 +2260,15 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			
 			// fragmentPriority of 1 is for protection moves in VGC, but it won't come up in singles
 			if (!fragmentsListThisStep.length) fragmentsListThisStep = fragmentsList.filter((fragment) => (fragment.fragmentPriority > 0));
-			
-			// aaand the rest is a free-for-all aksjdhf
-			if (!fragmentsListThisStep.length) fragmentsListThisStep = fragmentsList;
+
+			// fragmentPriority of 0 is for "spicy" picks as well as roles that have already been completed
+			if (!fragmentsListThisStep.length) {
+				// if we have any with completed "buddy" fragments, let's prioritize those!
+				if (fragmentsList.filter((fragment) => (fragment.buddycomplete)).length) {
+					fragmentsListThisStep = fragmentsList.filter((fragment) => (fragment.buddycomplete));
+				// ... and if not, it's a total free-for-all from here P:
+				} else fragmentsListThisStep = fragmentsList;
+			}
 			if (!fragmentsListThisStep.length) {
 				eligibleFragments = false;
 				continue;
@@ -2313,6 +2366,10 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 						if (!chosenFragment.pokemon.roles.includes(chosenFragment.role)) chosenFragment.pokemon.roles.push(chosenFragment.role);
 					}
 					else if (chosenFragment.role === 'mainstab' && chosenFragment.moveType && !chosenFragment.pokemon.coveredStabs.includes(chosenFragment.moveType)) chosenFragment.pokemon.coveredStabs.push(chosenFragment.moveType);
+				}
+				if (chosenFragment.tags) {
+					if (!chosenFragment.pokemon.roles) chosenFragment.pokemon.roles = [];
+					for (const tag of chosenFragment.tags) if (!chosenFragment.pokemon.roles.includes(tag)) chosenFragment.pokemon.roles.push(tag);
 				}
 				if (chosenFragment.avoid) {
 					if (!chosenFragment.pokemon.avoid) chosenFragment.pokemon.avoid = [];
