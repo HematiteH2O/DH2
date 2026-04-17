@@ -1079,7 +1079,10 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 				if (pokemon.species.gayLizard) {
 					this.add('-sethp', pokemon, 0, '[from] move: Attract', '[silent]');
 					this.add('-ohko');
-					this.add('faint', pokemon);
+					this.add('-message', `testing animFaint`);
+					this.add('-anim', source, "animFaint", source);
+					this.add('-message', `testing faint`);
+					this.add('-anim', source, "faint", source);
 					this.add('-message', `...`);
 					this.add('-anim', source, "Amnesia", source);
 					this.add('-message', `...`);
@@ -1088,6 +1091,31 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 					this.add('-sethp', pokemon, pokemon.getHealth, '[from] move: Attract', '[silent]');
 				}
 			},
+			/*
+		this.updateStatbar(pokemon, false, true);
+		this.scene.updateSidebar(pokemon.side);
+		if (this.cryurl) {
+			BattleSound.playEffect(this.cryurl);
+		}
+		this.anim({
+			y: this.y - 80,
+			opacity: 0,
+		}, 'accel');
+		this.scene.waitFor(this.$el);
+		this.$el.promise().done(() => {
+			this.$el.remove();
+		});
+
+		let $statbar = this.$statbar;
+		if ($statbar) {
+			this.$statbar = null;
+			$statbar.animate({
+				opacity: 0,
+			}, 300, () => {
+				$statbar!.remove();
+			});
+		}
+			*/
 			onUpdate(pokemon) {
 				if (this.effectState.source && !this.effectState.source.isActive && pokemon.volatiles['attract']) {
 					this.debug('Removing Attract volatile on ' + pokemon);
