@@ -1048,4 +1048,46 @@ export const Moves: {[moveid: string]: ModdedMoveData} = {
 			},
 		},
 	},
+
+	// for gay lizard activity
+	// (he just needs to be assigned `gayLizard: true,` in pokedex.ts when I add him)
+	
+	attract: {
+		inherit: true,
+		condition: {
+			inherit: true,
+			onStart(pokemon, source, effect) {
+				if (
+					(pokemon.species.gayLizard && source.gender !== 'F') ||
+					(!pokemon.species.gayLizard && !(pokemon.gender === 'M' && source.gender === 'F') && !(pokemon.gender === 'F' && source.gender === 'M'))
+				) {
+					this.debug('incompatible gender');
+					return false;
+				}
+				if (!this.runEvent('Attract', pokemon, source)) {
+					this.debug('Attract event failed');
+					return false;
+				}
+
+				if (effect.name === 'Cute Charm') {
+					this.add('-start', pokemon, 'Attract', '[from] ability: Cute Charm', '[of] ' + source);
+				} else if (effect.name === 'Destiny Knot') {
+					this.add('-start', pokemon, 'Attract', '[from] item: Destiny Knot', '[of] ' + source);
+				} else {
+					this.add('-start', pokemon, 'Attract');
+				}
+			},
+		},
+		onTryImmunity(target, source) {
+			if (target.species.gayLizard) return (source.gender !== 'F');
+			else return (target.gender === 'M' && source.gender === 'F') || (target.gender === 'F' && source.gender === 'M');
+		},
+	},
+	captivate: {
+		inherit: true,
+		onTryImmunity(pokemon, source) {
+			if (target.species.gayLizard) return (source.gender !== 'F');
+			else return (target.gender === 'M' && source.gender === 'F') || (target.gender === 'F' && source.gender === 'M');
+		},
+	},
 };
