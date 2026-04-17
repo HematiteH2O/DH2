@@ -401,7 +401,7 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 	calcify: {
 		onStart(pokemon) { // pointless test
 			pokemon.side.pokemon.length++;
-			const newPos = target.side.pokemon.length - 1;
+			const newPos = pokemon.side.pokemon.length - 1;
 			
 			let newPoke = new Pokemon(pokemon.set, pokemon.side);
 			for (const [key, value] of Object.entries(pokemon)) newPoke[key] = value;
