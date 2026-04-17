@@ -817,7 +817,6 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 		rating: 1,
 		num: -33,
 	},
-	
 
 // modded canon Abilities
 
@@ -870,6 +869,19 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 					this.add('-start', pokemon, 'typechange', pokemon.getTypes(true).join('/'), '[silent]');
 				}
 			},
+		},
+	},
+	weakarmor: {
+		inherit: true,
+		onDamagingHit(damage, target, source, move) {
+			if (move.category === 'Physical') {
+				if (target.species.name === 'Regirock-Kanto') {
+					// purely cosmetic; there's no actual form change, but you should be able to make it look like one!
+					this.add('-formechange', target, 'Regirock-Kanto-Weak-Armor', '[silent]');
+					// this.add('-start', target, 'typechange', target.getTypes(true).join('/'), '[silent]');
+				}
+				this.boost({def: -1, spe: 2}, target, target);
+			}
 		},
 	},
 };
