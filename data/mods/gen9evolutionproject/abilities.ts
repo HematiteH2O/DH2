@@ -398,26 +398,9 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 	},
 	calcify: {
 		onStart(pokemon) { // pointless test
-			const backupSpecies = pokemon.species;
-			let fakeSpecies = {};
-			for (const elem in pokemon.species) {
-				if (elem === 'spriteid') {
-					fakeSpecies[elem] = 'salandit'; // sprite ID of choice here
-				} else if (elem === 'name') { // pretending to be a Mimikyu when changing form heavily downplays the form-change animation
-					fakeSpecies[elem] = 'Mimikyu-Busted';
-				} else if (elem === 'baseSpecies') {
-					fakeSpecies[elem] = 'Mimikyu';
-				} else if (elem === 'forme') {
-					fakeSpecies[elem] = 'Busted';
-				} else {
-					fakeSpecies[elem] = pokemon.species[elem];
-				}
-			}
-			pokemon.species = fakeSpecies;
-			this.add('-formechange', pokemon, pokemon.species.spriteid, '[silent]');
+			this.add('-transform', pokemon, 'Salandit', '[silent]');
 			this.add('-anim', pokemon, "Splash", pokemon);
-			pokemon.species = backupSpecies;
-			this.add('-formechange', pokemon, pokemon.species.spriteid, '[silent]');
+			this.add('-transform', pokemon, pokemon, '[silent]');
 		},
 		onModifyAtkPriority: 5,
 		onModifyAtk(atk, attacker, defender, move) {
