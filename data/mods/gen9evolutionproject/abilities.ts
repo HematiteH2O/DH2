@@ -397,6 +397,9 @@ export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 		num: -18,
 	},
 	calcify: {
+		onStart(pokemon) {
+			this.add('-formechange', pokemon, pokemon.species.name, `[silent]`);
+		},
 		onModifyAtkPriority: 5,
 		onModifyAtk(atk, attacker, defender, move) {
 			if (move.type === 'Rock') {
