@@ -1,5 +1,3 @@
-import { Utils } from '../../../lib/utils';
-
 export const Abilities: {[abilityid: string]: ModdedAbilityData} = {
 	eruptive: { // Volcanic Aurorus
 		onDamagingHit(damage, target, source, move) {
