@@ -1811,6 +1811,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					}
 				}
 				if (randomized) set.hasBeenRandomized = true;
+				set.coveredStabs = [];
 				set.remainingStabTypes = [];
 				set.remainingStabMoves = [];
 				sets.push(set);
