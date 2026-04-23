@@ -720,6 +720,9 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					}
 					if (!accepted) delete newMon.randbats.offeredSupport[offeredSupport];
 				}
+				if (newMon.name === 'Excadrill') console.log(newMon.randbats);
+				if (newMon.name === 'Excadrill') console.log(newMon.randbats.viableStabs);
+				if (newMon.name === 'Excadrill') console.log(newMon.randbats.offeredSupport);
 			}
 		}
 		
