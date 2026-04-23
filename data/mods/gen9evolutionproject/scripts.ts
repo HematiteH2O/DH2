@@ -1808,7 +1808,6 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					}
 				}
 				if (randomized) set.hasBeenRandomized = true;
-				set.coveredStabs = [];
 				set.remainingStabTypes = [];
 				set.remainingStabMoves = [];
 				sets.push(set);
@@ -1935,10 +1934,8 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 
 			// STEP 1: counting space
 			
-			console.log("New step happening - here's Excadrill:");
 			// identify how much space each Pokémon has left for fragments (specifically moveslots and leftover EVs, since there's only one item, Ability and Tera Type anyway)
 			for (const set of sets) {
-				if (set.name === 'Excadrill') console.log(set);
 				if (set.moves) set.moveCount = set.moves.length;
 				if (set.evs) set.evCount = set.evs['hp'] + set.evs['atk'] + set.evs['def'] + set.evs['spa'] + set.evs['spd'] + set.evs['spe'];
 				// reset these each step
@@ -1949,7 +1946,6 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			
 			// STEP 2: fragment eligibility
 			for (const fragment of fragmentsList) {
-				if (fragment.pokemon.name === 'Excadrill') console.log(fragment);
 				fragment.eligible = true;
 				
 				// basic fragment-specific checks
