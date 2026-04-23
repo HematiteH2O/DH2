@@ -565,10 +565,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							if (!fragment.stab && !fragment.teraType) modFragment.teraType = fragment.moveType;
 							if (fragment.moveBasePower >= 90 || (fragment.stab && fragment.moveBasePower >= 80)) newMon.randbats.viableStabs.push(modFragment);
 							if (fragment.moveBasePower >= 120 && !fragment.item) {
+								let modFragment2 = Utils.deepClone(modFragment);
 								// this will be a good threshold for choice item sets... I think
 								if (!newMon.randbats.offeredSupport.choicebreaker) newMon.randbats.offeredSupport.choicebreaker = [];
-								modFragment.item = (fragment.moveCategory === 'Physical' ? 'Choice Band' : 'Choice Specs');
-								newMon.randbats.offeredSupport.choicebreaker.push(modFragment);
+								modFragment2.item = (fragment.moveCategory === 'Physical' ? 'Choice Band' : 'Choice Specs');
+								newMon.randbats.offeredSupport.choicebreaker.push(modFragment2);
 							}
 						}
 						
@@ -720,9 +721,6 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					}
 					if (!accepted) delete newMon.randbats.offeredSupport[offeredSupport];
 				}
-				if (newMon.name === 'Excadrill') console.log(newMon.randbats);
-				if (newMon.name === 'Excadrill') console.log(newMon.randbats.viableStabs);
-				if (newMon.name === 'Excadrill') console.log(newMon.randbats.offeredSupport);
 			}
 		}
 		
@@ -1937,8 +1935,10 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 
 			// STEP 1: counting space
 			
+			console.log("New step happening - here's Excadrill:");
 			// identify how much space each Pokémon has left for fragments (specifically moveslots and leftover EVs, since there's only one item, Ability and Tera Type anyway)
 			for (const set of sets) {
+				if (set.name === 'Excadrill') console.log(set);
 				if (set.moves) set.moveCount = set.moves.length;
 				if (set.evs) set.evCount = set.evs['hp'] + set.evs['atk'] + set.evs['def'] + set.evs['spa'] + set.evs['spd'] + set.evs['spe'];
 				// reset these each step
@@ -1949,6 +1949,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			
 			// STEP 2: fragment eligibility
 			for (const fragment of fragmentsList) {
+				if (fragment.pokemon.name === 'Excadrill') console.log(fragment);
 				fragment.eligible = true;
 				
 				// basic fragment-specific checks
@@ -2363,7 +2364,10 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				}
 			}
 			if (weightedFragmentsListThisStep.length) fragmentsListThisStep = weightedFragmentsListThisStep;
-			
+
+			for (const set of sets) {
+				if (set.name === 'Excadrill') console.log(set);
+			}
 			// STEP 5: applying fragments
 			// finally, pick a random fragment from the narrowed-down pool, apply it to the set, and loop
 			let chosenFragment = this.sample(fragmentsListThisStep);
