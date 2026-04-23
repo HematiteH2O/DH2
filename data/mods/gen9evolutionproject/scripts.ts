@@ -547,6 +547,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						];
 						const rejectStabs = [ // moves that should not be a "main STAB" regardless of BP
 							'blastburn',
+							'hydrocannon',
+							'frenzyplant',
+							'meteorassault',
+							'rockwrecker',
+							'roaroftime', 'eternabeam',
+							'gigaimpact', 'hyperbeam',
 						];
 						if (!rejectStabs.includes(moveid)) {
 							// this allows for non-STAB moves if they're as strong as a STAB anyway, but I set the bar a little higher for now
@@ -582,7 +588,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								let modFragment = Utils.deepClone(fragment);
 								modFragment.score = fragment.moveBasePower;
 								newMon.randbats.offeredSupport.priority.push(modFragment);
-							} else if (fragment.moveBasePower && !fragment.stab && !fragment.teraType && fragment.moveType !== 'Normal') {
+							} else if (fragment.moveBasePower && (fragment.moveBasePower *1.5 > 40) && !fragment.stab && !fragment.teraType && fragment.moveType !== 'Normal') {
 								// push to "spicy" for some last-pick set filler
 								if (!newMon.randbats.offeredSupport.spicy) newMon.randbats.offeredSupport.spicy = [];
 								let modFragment = Utils.deepClone(fragment);
@@ -591,11 +597,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							}
 						}
 						// spread
-						if ((move.target === 'allAdjacentFoes' || moveid === 'expandingforce') && fragment.moveBasePower > 60 && moveid !== 'razorwind') {
+						if ((move.target === 'allAdjacentFoes' || moveid === 'expandingforce') && fragment.moveBasePower > 80 && moveid !== 'razorwind') {
 							if (!newMon.randbats.offeredSupport.spread) newMon.randbats.offeredSupport.spread = [];
 							newMon.randbats.offeredSupport.spread.push(fragment);
 						}
-						if (move.target === 'allAdjacent' && fragment.moveBasePower >= 80 && !move.selfdestruct && moveid !== 'synchronoise') {
+						if (move.target === 'allAdjacent' && fragment.moveBasePower >= 65 && !move.selfdestruct && moveid !== 'synchronoise') {
 							let modFragment = Utils.deepClone(fragment);
 							modFragment.vgc.requestedSupport.push(`${(fragment.moveType).toLowerCase()}immune`); // ex. "electricimmune"
 							
@@ -603,8 +609,13 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							newMon.randbats.offeredSupport.spread.push(modFragment);
 
 							// ex. "sideelectric"
-							if (!newMon.randbats.offeredSupport[`side${(fragment.moveType).toLowerCase()}`]) newMon.randbats.offeredSupport[`side${(fragment.moveType).toLowerCase()}`] = [];
-							newMon.randbats.offeredSupport[`side${(fragment.moveType).toLowerCase()}`].push(modFragment);
+							if (moveid === 'discharge') { // mostly for Cell Battery
+								if (!newMon.randbats.offeredSupport[`side${(fragment.moveType).toLowerCase()}nopara`]) newMon.randbats.offeredSupport[`side${(fragment.moveType).toLowerCase()}nopara`] = [];
+								newMon.randbats.offeredSupport[`side${(fragment.moveType).toLowerCase()}nopara`].push(modFragment);
+							} else {
+								if (!newMon.randbats.offeredSupport[`side${(fragment.moveType).toLowerCase()}`]) newMon.randbats.offeredSupport[`side${(fragment.moveType).toLowerCase()}`] = [];
+								newMon.randbats.offeredSupport[`side${(fragment.moveType).toLowerCase()}`].push(modFragment);
+							}
 						}
 						if ([
 							'tailwind', 'trickroom', 'stickyweb', 'silktrap',
@@ -2323,7 +2334,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					if (!roleScores[fragment.pokemon]) roleScores[fragment.pokemon] = 0;
 					if (fragment.score && fragment.score > roleScores[fragment.pokemon]) roleScores[fragment.pokemon] = fragment.score;
 					if (!safeScores[fragment.pokemon]) safeScores[fragment.pokemon] = 0;
-					if (fragment.safeStab && fragment.score && fragment.score > safeScores[fragment.pokemon]) safeScores[fragment.pokemon] = fragment.score;
+					if (fragment.safeStab && fragment.moveBasePower && fragment.moveBasePower > safeScores[fragment.pokemon]) safeScores[fragment.pokemon] = fragment.moveBasePower;
 				}
 			}
 			for (const fragment of fragmentsListThisStep) {
@@ -2333,7 +2344,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				}
 				else if (fragment.role && fragment.role === 'mainstab') {
 					if (roleScores[fragment.pokemon] && roleScores[fragment.pokemon] > 0 && (!fragment.score || (roleScores[fragment.pokemon] > fragment.score))) safeToPush = false;
-					if (safeScores[fragment.pokemon] && safeScores[fragment.pokemon] > 0 && (!fragment.score || (safeScores[fragment.pokemon] > fragment.score))) safeToPush = false;
+					if (!(fragment.score && fragment.score > 0) && safeScores[fragment.pokemon] && safeScores[fragment.pokemon] > 0 && (!fragment.moveBasePower || (safeScores[fragment.pokemon] > fragment.moveBasePower))) safeToPush = false;
 				}
 				if (fragment.bypassScore) safeToPush = true;
 				if (safeToPush) reducedFragmentsListThisStep.push(fragment);
