@@ -2372,9 +2372,6 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			}
 			if (weightedFragmentsListThisStep.length) fragmentsListThisStep = weightedFragmentsListThisStep;
 
-			for (const set of sets) {
-				if (set.name === 'Excadrill') console.log(set);
-			}
 			// STEP 5: applying fragments
 			// finally, pick a random fragment from the narrowed-down pool, apply it to the set, and loop
 			let chosenFragment = this.sample(fragmentsListThisStep);
