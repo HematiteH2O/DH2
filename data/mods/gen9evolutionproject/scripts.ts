@@ -52,8 +52,17 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				continue; // skip canon Pokémon that aren't in the dex - but allow Fakemon for both
 			}
 
+			const newMon = this.dataCache.Pokedex[id];
 			if (this.dataCache.Learnsets[id]) {
 				// movepool corrections
+				if (newMon.prevo) {
+					let prevoid = this.toID(newMon.prevo);
+					if (this.dataCache.Learnsets[prevoid]) for (const moveid of this.dataCache.Learnsets[prevoid]) if (!this.dataCache.Learnsets[id].move) this.dataCache.Learnsets[id].move = this.dataCache.Learnsets[prevoid].move;
+					if (this.dataCache.Pokedex[prevoid].prevo) {
+						let prevoid2 = this.toID(this.dataCache.Pokedex[prevoid].prevo);
+						if (this.dataCache.Learnsets[prevoid2]) for (const moveid of this.dataCache.Learnsets[prevoid2]) if (!this.dataCache.Learnsets[id].move) this.dataCache.Learnsets[id].move = this.dataCache.Learnsets[prevoid2].move;
+					}
+				}
 				for (const moveid of notm) {
 					if (this.dataCache.Learnsets[id].learnset && this.dataCache.Learnsets[id].learnset[moveid]) {
 						// check if it learns the move naturally
@@ -65,7 +74,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			}
 
 			// Fakemon creation
-			const newMon = this.dataCache.Pokedex[id];
 			if (newMon && newMon.copyData) { // weeding out Pokémon that aren't new
 				const copyData = this.dataCache.Pokedex[this.toID(newMon.copyData)];
 	
