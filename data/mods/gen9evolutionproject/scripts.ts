@@ -57,10 +57,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// movepool corrections
 				if (newMon.prevo) {
 					let prevoid = this.toID(newMon.prevo);
-					if (this.dataCache.Learnsets[prevoid]) for (const moveid of this.dataCache.Learnsets[prevoid]) if (!this.dataCache.Learnsets[id].move) this.dataCache.Learnsets[id].move = this.dataCache.Learnsets[prevoid].move;
+					if (this.dataCache.Learnsets[prevoid]) for (const moveid in this.dataCache.Learnsets[prevoid]) if (!this.dataCache.Learnsets[id].move) this.dataCache.Learnsets[id].move = this.dataCache.Learnsets[prevoid].move.filter((method) => (!method.includes('S')));
 					if (this.dataCache.Pokedex[prevoid].prevo) {
 						let prevoid2 = this.toID(this.dataCache.Pokedex[prevoid].prevo);
-						if (this.dataCache.Learnsets[prevoid2]) for (const moveid of this.dataCache.Learnsets[prevoid2]) if (!this.dataCache.Learnsets[id].move) this.dataCache.Learnsets[id].move = this.dataCache.Learnsets[prevoid2].move;
+						if (this.dataCache.Learnsets[prevoid2]) for (const moveid in this.dataCache.Learnsets[prevoid2]) if (!this.dataCache.Learnsets[id].move) this.dataCache.Learnsets[id].move = this.dataCache.Learnsets[prevoid2].move.filter((method) => (!method.includes('S')));
 					}
 				}
 				for (const moveid of notm) {
