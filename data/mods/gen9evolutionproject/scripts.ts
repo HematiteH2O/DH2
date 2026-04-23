@@ -540,17 +540,22 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						// Misty Explosion doesn't actually want Misty Terrain support
 
 					// general / STAB
-						const viableStabs = [
-							'firepunch', 'flamethrower', 'flareblitz', 'fireblast', 'overheat',
-							'scald', 'liquidation', 'hydropump',
+						// okay, the STAB categories are obviously way unfinished - I'm gonna come back to this
+						const safeStabs = [ // moves that are considered "reliable" or "drawback-free," which will later be used to filter out strictly worse moves
+							'firepunch', 'flamethrower',
+							'scald', 'liquidation',
 						];
-						if (viableStabs.includes(moveid)) {
+						const rejectStabs = [ // moves that should not be a "main STAB" regardless of BP
+							'blastburn',
+						];
+						if (!rejectStabs.includes(moveid)) {
 							// this allows for non-STAB moves if they're as strong as a STAB anyway, but I set the bar a little higher for now
 							// this will sometimes be the case for moves like Shiftry's Double-Edge or Repehk's Weather Ball!
 							// later on, I should be ready to check for how many unique types of "STABs" are covered;
 							// if there are at least 2 types in viableStabs, then the set should try to have viableStabs of any 2 types
 							
 							let modFragment = Utils.deepClone(fragment);
+							if (safeStabs.includes(moveid)) modFragment.safeStab = true;
 							if (!fragment.stab && !fragment.teraType) modFragment.teraType = fragment.moveType;
 							if (fragment.moveBasePower >= 90 || (fragment.stab && fragment.moveBasePower >= 80)) newMon.randbats.viableStabs.push(modFragment);
 							if (fragment.moveBasePower >= 120 && !fragment.item) {
@@ -2308,6 +2313,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			// // the "score" is on a per-role basis and not standardized, so only compare fragments with the same role!!!
 			let reducedFragmentsListThisStep = [];
 			let roleScores = {};
+			let safeScores = {};
 			for (const fragment of fragmentsListThisStep) {
 				if (fragment.role && !['mainstab', 'protection', 'spicy'].includes(fragment.role)) {
 					if (!roleScores[fragment.role]) roleScores[fragment.role] = 0;
@@ -2316,6 +2322,8 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				else if (fragment.role && fragment.role === 'mainstab') {
 					if (!roleScores[fragment.pokemon]) roleScores[fragment.pokemon] = 0;
 					if (fragment.score && fragment.score > roleScores[fragment.pokemon]) roleScores[fragment.pokemon] = fragment.score;
+					if (!safeScores[fragment.pokemon]) safeScores[fragment.pokemon] = 0;
+					if (fragment.safeStab && fragment.score && fragment.score > safeScores[fragment.pokemon]) safeScores[fragment.pokemon] = fragment.score;
 				}
 			}
 			for (const fragment of fragmentsListThisStep) {
@@ -2325,6 +2333,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				}
 				else if (fragment.role && fragment.role === 'mainstab') {
 					if (roleScores[fragment.pokemon] && roleScores[fragment.pokemon] > 0 && (!fragment.score || (roleScores[fragment.pokemon] > fragment.score))) safeToPush = false;
+					if (safeScores[fragment.pokemon] && safeScores[fragment.pokemon] > 0 && (!fragment.score || (safeScores[fragment.pokemon] > fragment.score))) safeToPush = false;
 				}
 				if (fragment.bypassScore) safeToPush = true;
 				if (safeToPush) reducedFragmentsListThisStep.push(fragment);
