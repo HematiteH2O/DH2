@@ -600,10 +600,13 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						// spread
 						if ((move.target === 'allAdjacentFoes' || moveid === 'expandingforce') && fragment.moveBasePower > 80 && moveid !== 'razorwind') {
 							if (!newMon.randbats.offeredSupport.spread) newMon.randbats.offeredSupport.spread = [];
-							newMon.randbats.offeredSupport.spread.push(fragment);
+							let modFragment = Utils.deepClone(fragment);
+							modFragment.score = fragment.moveBasePower;
+							newMon.randbats.offeredSupport.spread.push(modFragment);
 						}
 						if (move.target === 'allAdjacent' && fragment.moveBasePower >= 65 && !move.selfdestruct && moveid !== 'synchronoise') {
 							let modFragment = Utils.deepClone(fragment);
+							modFragment.score = fragment.moveBasePower;
 							modFragment.vgc.requestedSupport.push(`${(fragment.moveType).toLowerCase()}immune`); // ex. "electricimmune"
 							
 							if (!newMon.randbats.offeredSupport.spread) newMon.randbats.offeredSupport.spread = [];
@@ -1939,7 +1942,6 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				if (set.moves) set.moveCount = set.moves.length;
 				if (set.evs) set.evCount = set.evs['hp'] + set.evs['atk'] + set.evs['def'] + set.evs['spa'] + set.evs['spd'] + set.evs['spe'];
 				// reset these each step
-				set.coveredStabs = [],
 				set.remainingStabTypes = [];
 				set.remainingStabMoves = [];
 			}
