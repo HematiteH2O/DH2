@@ -635,7 +635,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								)
 							) {
 								modFragment.singles.safeStab = true;
-								if () modFragment.vgc.safeStab = true;
+								if (move.target !== 'allAdjacent') modFragment.vgc.safeStab = true;
 								modFragment.weight = 2;
 							}
 							if (!fragment.stab && !fragment.teraType) modFragment.teraType = fragment.moveType;
@@ -2481,7 +2481,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					if (!roleScores[fragment.pokemon]) roleScores[fragment.pokemon] = 0;
 					if (fragment.score && fragment.score > roleScores[fragment.pokemon]) roleScores[fragment.pokemon] = fragment.score;
 					if (!safeScores[fragment.pokemon]) safeScores[fragment.pokemon] = 0;
-					if (fragment.safeStab && fragment.moveBasePower && fragment.moveBasePower > safeScores[fragment.pokemon]) safeScores[fragment.pokemon] = fragment.moveBasePower;
+					if (fragment[format].safeStab && fragment.moveBasePower && fragment.moveBasePower > safeScores[fragment.pokemon]) safeScores[fragment.pokemon] = fragment.moveBasePower;
 				}
 			}
 			for (const fragment of fragmentsListThisStep) {
