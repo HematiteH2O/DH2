@@ -2235,7 +2235,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			for (const fragment of fragmentsList) {
 				if (fragment.role) {
 					// prioritize roles that aren't covered
-					if ((!teamOfferedSupport[fragment.role] || !teamOfferedSupport[fragment.role].filter((requester) => (requester !== fragment.pokemon)).length) && fragment.fragmentPriority === 4) fragment.fragmentPriority = 0;
+					if (teamOfferedSupport[fragment.role] && fragment.fragmentPriority === 4) fragment.fragmentPriority = 0;
 					if (fragment.role === 'mainstab') {
 						// don't do multiple main STABs of the same type
 						if (fragment.pokemon.coveredStabs.includes(fragment.moveType)) fragment.eligible = false;
