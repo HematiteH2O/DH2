@@ -2452,7 +2452,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					if (chosenFragment.evs['spe'] > chosenFragment.pokemon.evs['spe']) chosenFragment.pokemon.evs['spe'] = chosenFragment.evs['spe'];
 				}
 				if (chosenFragment.role) {
-					console.log(`${chosenFragment.pokemon.name} assigned ${chosenFragment.role} @ ${chosenFragment.fragmentPriority}` + (chosenFragment.baseMove ? ` (${chosenFragment.baseMove})` : ` `));
+					console.log(`${chosenFragment.fragmentPriority}${chosenFragment.highpriority ? ' (highprio)' : ' '}${chosenFragment.buddycomplete ? ' (buddycomplete)' : ' '} - ${chosenFragment.pokemon.name} assigned ${chosenFragment.role} (${chosenFragment.baseMove ? chosenFragment.baseMove : ' '})`);
 					if (!['mainstab', 'protection', 'spicy'].includes(chosenFragment.role)) {
 						if (!teamOfferedSupport[chosenFragment.role]) teamOfferedSupport[chosenFragment.role] = [];
 						if (!teamOfferedSupport[chosenFragment.role].includes(chosenFragment.pokemon)) teamOfferedSupport[chosenFragment.role].push(chosenFragment.pokemon);
