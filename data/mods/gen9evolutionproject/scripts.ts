@@ -547,6 +547,18 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							fragment.vgc.requestedSupport.push('grassyterrain');
 						}
 						// Misty Explosion doesn't actually want Misty Terrain support
+						if (['solarbeam', 'solarblade'].includes(moveid) && !(fragment.ability && ['Desolate Land', 'Drought'].includes(fragment.ability))) {
+							fragment.singles.requestedSupport.push('sun');
+							fragment.vgc.requestedSupport.push('sun');
+						}
+						if (['electroshot'].includes(moveid) && !(fragment.ability && ['Drizzle', 'Primordial Sea'].includes(fragment.ability))) {
+							fragment.singles.requestedSupport.push('rain');
+							fragment.vgc.requestedSupport.push('rain');
+						}
+						if (['auroraveil'].includes(moveid) && !(fragment.ability && ['Snow Warning'].includes(fragment.ability))) {
+							fragment.singles.requestedSupport.push('snow');
+							fragment.vgc.requestedSupport.push('snow');
+						}
 
 					// general / STAB
 						// okay, the STAB categories are obviously way unfinished - I'm gonna come back to this
@@ -555,24 +567,31 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							// Any move with over 95% accuracy*, provided it is also *not* on this list, will be considered "drawback-free" for later purposes
 							// That means anything that could be considered to have a drawback at all should be here!
 
-							// TODO: some moves with less than 100% accuracy should still be included in case modifiers make them relevant (for instance, Compound Eyes doesn't make Head Smash drawback-free like it does for Stone Edge)
-							// TODO: some moves, like Solar Blade, are only considered valid at all if they have the appropriate support - so they *should* be considered drawback-free if they make it to this point!
+							// some moves with less than 100% accuracy should still be included, in case modifiers make it relevant
+							// (for instance, Compound Eyes doesn't make Head Smash drawback-free, but it does for Stone Edge)
+
+							// some moves, like Electro Shot and Solar Blade, are only considered valid at all if they have the appropriate support -
+							// so they *should* be considered drawback-free if they make it to a point where it matters!
 							
 							// (*some things are over 95 but less than 100 because of modifiers like Compound Eyes or Wide Lens, but I'm choosing for those to count as drawback-free!)
 							
-							'flareblitz', 'ragingfury', 'armorcannon', 'burnup', 'eruption', 'shelltrap',
+							'flareblitz', 'ragingfury', 'vcreate', 'armorcannon', 'burnup', 'overheat', 'eruption', 'shelltrap',
 							'wavecrash', 'waterspout',
-							'wildcharge', 'doubleshock', 'volttackle', 'thunderclap', 'electroshot',
-							'woodhammer', 'solarblade', 'petaldance', 'solarbeam',
-							'reversal', 'vitalthrow', 'closecombat', 'superpower', 'focuspunch',
+							'wildcharge', 'supercellslam', 'doubleshock', 'volttackle', 'thunderclap',
+							'woodhammer', 'petaldance', 'leafstorm',
+							'icehammer',
+							'reversal', 'vitalthrow', 'hammerarm', 'jumpkick', 'axekick', 'closecombat', 'superpower', 'highjumpkick', 'focuspunch',
 							'headlongrush',
 							'skydrop', 'beakblast', 'bravebird', 'dragonascent',
+							'psychoboost',
 							'firstimpression',
-							'phantomforce', 'shadowforce',
-							'glaiverush', 'outrage', 'clangingscales', 'dragonenergy',
+							'headsmash',
+							'phantomforce', 'poltergeist', 'shadowforce',
+							'scaleshot', 'dragontail', 'glaiverush', 'outrage', 'clangingscales', 'dracometeor', 'dragonenergy',
 							'suckerpunch', 'jawlock', 'foulplay', 'hyperspacefury',
 							'hardpress', 'spinout', 'steelroller', 'gigatonhammer', 'makeitrain',
-							'crushgrip', 'flail', 'naturalgift', 'fakeout', 'doubleedge', 'headcharge', 'thrash', 'wringout',
+							'fleurcannon',
+							'crushgrip', 'flail', 'naturalgift', 'fakeout', 'takedown', 'doubleedge', 'headcharge', 'thrash', 'wringout',
 							
 							'renewingring', 'entanglement', 'slimecannon',
 						];
@@ -610,12 +629,13 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							if (
 								(!modFragment.moveAccuracy || modFragment.moveAccuracy > 95) &&
 								(!unsafeStabs.includes(moveid) ||
-								(['flareblitz', 'wavecrash', 'wildcharge', 'volttackle', 'woodhammer', 'doubleedge', 'headcharge'].includes(moveid) && fragment.ability && ['Rock Head', 'Magic Guard'].includes(fragment.ability)) ||
-								(['armorcannon', 'closecombat', 'superpower', 'headlongrush', 'dragonascent', 'clangingscales', 'hyperspacefury', 'spinout', 'makeitrain'].includes(moveid) && fragment.ability && ['Contrary'].includes(fragment.ability)) ||
-								(['electroshot'].includes(moveid) && fragment.ability && ['Drizzle', 'Primordial Sea', 'Storm Chaser'].includes(fragment.ability)) ||
-								(['solarblade', 'solarbeam'].includes(moveid) && fragment.ability && ['Desolate Land', 'Drought'].includes(fragment.ability)))
+								 (['flareblitz', 'wavecrash', 'wildcharge', 'volttackle', 'woodhammer', 'headsmash', 'takedown', 'doubleedge', 'headcharge'].includes(moveid) && fragment.ability && ['Rock Head', 'Magic Guard'].includes(fragment.ability)) ||
+								 (['mindblown', 'chloroblast', 'supercellslam', 'jumpkick', 'highjumpkick', 'steelbeam'].includes(moveid) && fragment.ability && ['Magic Guard'].includes(fragment.ability)) ||
+								 (['vcreate', 'armorcannon', 'overheat', 'leafstorm', 'icehammer', 'hammerarm', 'axekick', 'closecombat', 'superpower', 'headlongrush', 'dragonascent', 'psychoboost', 'clangingscales', 'dracometeor', 'hyperspacefury', 'spinout', 'makeitrain', 'fleurcannon'].includes(moveid) && fragment.ability && ['Contrary'].includes(fragment.ability))
+								)
 							) {
-								modFragment.safeStab = true;
+								modFragment.singles.safeStab = true;
+								if () modFragment.vgc.safeStab = true;
 								modFragment.weight = 2;
 							}
 							if (!fragment.stab && !fragment.teraType) modFragment.teraType = fragment.moveType;
