@@ -57,10 +57,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// movepool corrections
 				if (newMon.prevo) {
 					let prevoid = this.toID(newMon.prevo);
-					if (this.dataCache.Learnsets[prevoid]) for (const moveid in this.dataCache.Learnsets[prevoid]) if (!this.dataCache.Learnsets[id][moveid]) this.dataCache.Learnsets[id][moveid] = this.dataCache.Learnsets[prevoid][moveid].filter((method) => (!method.includes('S')));
+					if (this.dataCache.Learnsets[prevoid] && this.dataCache.Learnsets[prevoid].learnset) for (const moveid in this.dataCache.Learnsets[prevoid].learnset) if (!this.dataCache.Learnsets[id].learnset[moveid]) this.dataCache.Learnsets[id].learnset[moveid] = this.dataCache.Learnsets[prevoid].learnset[moveid].filter((method) => (!method.includes('S')));
 					if (this.dataCache.Pokedex[prevoid].prevo) {
 						let prevoid2 = this.toID(this.dataCache.Pokedex[prevoid].prevo);
-						if (this.dataCache.Learnsets[prevoid2]) for (const moveid in this.dataCache.Learnsets[prevoid2]) if (!this.dataCache.Learnsets[id][moveid]) this.dataCache.Learnsets[id][moveid] = this.dataCache.Learnsets[prevoid2][moveid].filter((method) => (!method.includes('S')));
+						if (this.dataCache.Learnsets[prevoid2] && this.dataCache.Learnsets[prevoid2].learnset) for (const moveid in this.dataCache.Learnsets[prevoid2].learnset) if (!this.dataCache.Learnsets[id].learnset[moveid]) this.dataCache.Learnsets[id].learnset[moveid] = this.dataCache.Learnsets[prevoid2].learnset[moveid].filter((method) => (!method.includes('S')));
 					}
 				}
 				for (const moveid of notm) {
