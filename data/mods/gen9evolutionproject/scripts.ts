@@ -1957,7 +1957,8 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				}
 			}
 		}
-		
+
+		let consoleLoggedEveryFragment = false;
 		while (eligibleFragments) {
 			// if there are already no fragments left on any Pokémon, immediately set eligibleFragments to false and then "continue;" to end the loop
 			if (!fragmentsList.length) {
@@ -2393,6 +2394,17 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			}
 			if (weightedFragmentsListThisStep.length) fragmentsListThisStep = weightedFragmentsListThisStep;
 
+			if (!consoleLoggedEveryFragment) {
+				consoleLoggedEveryFragment = true;
+				console.log(`FRAGMENTS LIST`);
+				for (const fragment of fragmentsList) {
+					console.log(fragment);
+				}
+				console.log(`FRAGMENTS LIST THIS STEP`);
+				for (const fragment of fragmentsListThisStep) {
+					console.log(fragment);
+				}
+			}
 			// STEP 5: applying fragments
 			// finally, pick a random fragment from the narrowed-down pool, apply it to the set, and loop
 			let chosenFragment = this.sample(fragmentsListThisStep);
