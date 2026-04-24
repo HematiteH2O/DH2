@@ -662,17 +662,17 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						}
 						// others are specialized, so you need one of each
 						if (
-							['reflect', 'kingsshield', 'breakingswipe', 'strengthsap'].includes(moveid) ||
+							['kingsshield', 'breakingswipe', 'strengthsap'].includes(moveid) ||
 							(['bittermalice', 'chillingwater', 'lunge', 'tropkick'].includes(moveid) && fragment.moveBasePower > 80) ||
-							(['growl', 'charm', 'tickle', 'featherdance'].includes(moveid) && fragment.movePriority > 0)
+							(['reflect', 'growl', 'charm', 'tickle', 'featherdance'].includes(moveid) && fragment.movePriority > 0)
 						) {
 							if (!newMon.randbats.offeredSupport.physicalreduction) newMon.randbats.offeredSupport.physicalreduction = [];
 							newMon.randbats.offeredSupport.physicalreduction.push(fragment);
 						}
 						if (
-							['lightscreen', 'snarl', 'strugglebug'].includes(moveid) ||
+							['snarl', 'strugglebug'].includes(moveid) ||
 							(['mysticalfire'].includes(moveid) && fragment.moveBasePower > 80) ||
-							(['eerieumpulse'].includes(moveid) && fragment.movePriority > 0)
+							(['lightscreen', 'eerieumpulse'].includes(moveid) && fragment.movePriority > 0)
 						) {
 							if (!newMon.randbats.offeredSupport.specialreduction) newMon.randbats.offeredSupport.specialreduction = [];
 							newMon.randbats.offeredSupport.specialreduction.push(fragment);
