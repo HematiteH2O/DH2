@@ -2342,12 +2342,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			}
 			
 			// at this point, if we have any with completed "buddy" fragments, let's prioritize those!
-			if (!fragmentsListThisStep.length) {
-				if (fragmentsList.filter((fragment) => (fragment.buddycomplete)).length) {
-					fragmentsListThisStep = fragmentsList.filter((fragment) => (fragment.buddycomplete));
-				// ... and if not, it's a total free-for-all from here P:
-				} else fragmentsListThisStep = fragmentsList;
-			}
+			if (!fragmentsListThisStep.length) if (fragmentsList.filter((fragment) => (fragment.buddycomplete)).length) fragmentsListThisStep = fragmentsList.filter((fragment) => (fragment.buddycomplete));
 			
 			// fragmentPriority of 2 is for main STABs
 			if (!fragmentsListThisStep.length) fragmentsListThisStep = fragmentsList.filter((fragment) => (fragment.fragmentPriority > 1));
