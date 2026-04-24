@@ -700,6 +700,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							}
 							else modFragment.score = 4; // the unique protection clones are the best
 							
+							if (!newMon.randbats.offeredSupport.protection) newMon.randbats.offeredSupport.protection = [];
 							newMon.randbats.offeredSupport.protection.push(modFragment);
 						}
 						
