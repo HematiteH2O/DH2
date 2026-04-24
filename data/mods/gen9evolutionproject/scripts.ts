@@ -696,7 +696,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								modFragment.score = 0; // never use unless its buddy role is checked off
 								if (!modFragment.buddy) modFragment.buddy = {};
 								if (!modFragment.buddy.roles) modFragment.buddy.roles = [];
-								modFragment.buddy.roles.push('setup');
+								if (newMon.randbats.types.includes('Ghost')) {
+									modFragment.buddy.roles.push('setup');
+								} else {
+									modFragment.buddy.roles.push('physicalsetup'); // it makes sense in my head okay
+								}
 							}
 							else modFragment.score = 5; // the unique protection clones are the best
 							
