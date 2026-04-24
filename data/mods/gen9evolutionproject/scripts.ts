@@ -556,6 +556,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							// That means anything that could be considered to have a drawback at all should be here!
 
 							// TODO: some moves with less than 100% accuracy should still be included in case modifiers make them relevant (for instance, Compound Eyes doesn't make Head Smash drawback-free like it does for Stone Edge)
+							// TODO: some moves, like Solar Blade, are only considered valid at all if they have the appropriate support - so they *should* be considered drawback-free if they make it to this point!
 							
 							// (*some things are over 95 but less than 100 because of modifiers like Compound Eyes or Wide Lens, but I'm choosing for those to count as drawback-free!)
 							
