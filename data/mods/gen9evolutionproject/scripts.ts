@@ -699,7 +699,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								modFragment.buddy.roles.push('setup');
 							}
 							else modFragment.score = 4; // the unique protection clones are the best
-							modFragment.vgc.requestedSupport.push(`${(fragment.moveType).toLowerCase()}immune`); // ex. "electricimmune"
+							
+							newMon.randbats.offeredSupport.protection.push(modFragment);
 						}
 						
 /*
