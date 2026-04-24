@@ -694,7 +694,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							else if (moveid === 'protect') modFragment.score = 0;
 							else if (moveid === 'substitute') {
 								modFragment.score = -1; // never use unless its buddy role is checked off
-								if (!modFragment.buddy || !modFragment.buddy.roles) modFragment.buddy.roles = [];
+								if (!modFragment.buddy) modFragment.buddy = {};
+								if (!modFragment.buddy.roles) modFragment.buddy.roles = [];
 								modFragment.buddy.roles.push('setup');
 							}
 							else modFragment.score = 4; // the unique protection clones are the best
