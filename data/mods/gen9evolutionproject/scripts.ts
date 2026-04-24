@@ -688,17 +688,17 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							modFragment.avoid.push('protection');
 							modFragment.avoid.push('redirection');
 							
-							if (['fakeout', 'quickguard', 'wideguard'].includes(moveid)) modFragment.score = 3;
-							else if (!['substitute', 'protect', 'detect'].includes(moveid)) modFragment.score = 2;
-							else if (moveid === 'detect') modFragment.score = 1;
-							else if (moveid === 'protect') modFragment.score = 0;
+							if (['fakeout', 'quickguard', 'wideguard'].includes(moveid)) modFragment.score = 4;
+							else if (!['substitute', 'protect', 'detect'].includes(moveid)) modFragment.score = 3;
+							else if (moveid === 'detect') modFragment.score = 2;
+							else if (moveid === 'protect') modFragment.score = 1;
 							else if (moveid === 'substitute') {
-								modFragment.score = -1; // never use unless its buddy role is checked off
+								modFragment.score = 0; // never use unless its buddy role is checked off
 								if (!modFragment.buddy) modFragment.buddy = {};
 								if (!modFragment.buddy.roles) modFragment.buddy.roles = [];
 								modFragment.buddy.roles.push('setup');
 							}
-							else modFragment.score = 4; // the unique protection clones are the best
+							else modFragment.score = 5; // the unique protection clones are the best
 							
 							if (!newMon.randbats.offeredSupport.protection) newMon.randbats.offeredSupport.protection = [];
 							newMon.randbats.offeredSupport.protection.push(modFragment);
