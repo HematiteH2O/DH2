@@ -599,7 +599,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						if (
 							!rejectStabs.includes(moveid) ||
 							(['dynamicpunch', 'inferno', 'zapcannon'].includes(moveid) && fragment.accuracy && fragment.accuracy === 100) ||
-							(['mindblown', 'chloroblast', 'steelbeam'].includes(moveid) && fragment.ability && fragment.ability === 'Magic Guard') ||
+							(['mindblown', 'chloroblast', 'steelbeam'].includes(moveid) && fragment.ability && fragment.ability === 'Magic Guard')
 						) {
 							// this allows for non-STAB moves if they're as strong as a STAB anyway, but I set the bar a little higher for now
 							// this will sometimes be the case for moves like Shiftry's Double-Edge or Repehk's Weather Ball!
