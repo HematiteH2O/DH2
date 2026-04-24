@@ -688,7 +688,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							modFragment.avoid.push('protection');
 							modFragment.avoid.push('redirection');
 							
-							if (['fakeout', 'quickguard', 'wideguard'].includes(moveid)) modFragment.score = 4;
+							if (['fakeout'].includes(moveid)) modFragment.score = 4;
 							else if (!['substitute', 'protect', 'detect'].includes(moveid)) modFragment.score = 3;
 							else if (moveid === 'detect') modFragment.score = 2;
 							else if (moveid === 'protect') modFragment.score = 1;
@@ -702,6 +702,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 									modFragment.buddy.roles.push('physicalsetup'); // it makes sense in my head okay
 								}
 							}
+							// I don't really want these to replace Protect 100% of the time, but it's nice to have a random chance of them for now:
+							else if (['quickguard', 'wideguard'].includes(moveid)) modFragment.bypassScore = true;
 							else modFragment.score = 5; // the unique protection clones are the best
 							
 							if (!newMon.randbats.offeredSupport.protection) newMon.randbats.offeredSupport.protection = [];
