@@ -644,17 +644,38 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							if (!newMon.randbats.offeredSupport.speedcontrol) newMon.randbats.offeredSupport.speedcontrol = [];
 							newMon.randbats.offeredSupport.speedcontrol.push(fragment);
 						}
-						if ([ // okay I'll revise this one in a bit but let's just see how it's going for now
-							'reflect', 'lightscreen', 'auroraveil',
-							// 'quickguard', 'wideguard', // should really be elsewhere
+
+						// some moves cover both physicalreduction and specialreduction at once
+						if (
+							(['auroraveil',
 							'followme', 'ragepowder',
-							'growl', 'babydolleyes', 'charm', 'tickle', 'featherdance', 'kingsshield', 'bittermalice', 'breakingswipe', 'chillingwater', 'lunge', 'strengthsap', 'tropkick',
-							'captivate', 'snarl', 'strugglebug', 'mysticalfire', 'eerieimpulse',
-							'memento', 'nobleroar', 'tearfullook', 'partingshot',
+							'shadowbox', 'memento', 'partingshot',
 							'grasswhistle', 'hypnosis', 'lovelykiss', 'sing', 'sleeppowder', 'spore', 'yawn'
-						].includes(moveid) && !(move.accuracy && move.accuracy < 70)) {
-							if (!newMon.randbats.offeredSupport.damagereduction) newMon.randbats.offeredSupport.damagereduction = [];
-							newMon.randbats.offeredSupport.damagereduction.push(fragment);
+						].includes(moveid) && !(move.accuracy && move.accuracy < 70)) ||
+							(['nobleroar', 'tearfullook'].includes(moveid) && fragment.movePriority > 0)
+						) {
+							if (!newMon.randbats.offeredSupport.physicalreduction) newMon.randbats.offeredSupport.physicalreduction = [];
+							newMon.randbats.offeredSupport.physicalreduction.push(fragment);
+							
+							if (!newMon.randbats.offeredSupport.specialreduction) newMon.randbats.offeredSupport.specialreduction = [];
+							newMon.randbats.offeredSupport.specialreduction.push(fragment);
+						}
+						// others are specialized, so you need one of each
+						if (
+							['reflect', 'kingsshield', 'breakingswipe', 'strengthsap'].includes(moveid) ||
+							(['bittermalice', 'chillingwater', 'lunge', 'tropkick'].includes(moveid) && fragment.moveBasePower > 80) ||
+							(['growl', 'charm', 'tickle', 'featherdance'].includes(moveid) && fragment.movePriority > 0)
+						) {
+							if (!newMon.randbats.offeredSupport.physicalreduction) newMon.randbats.offeredSupport.physicalreduction = [];
+							newMon.randbats.offeredSupport.physicalreduction.push(fragment);
+						}
+						if (
+							['lightscreen', 'snarl', 'strugglebug'].includes(moveid) ||
+							(['mysticalfire'].includes(moveid) && fragment.moveBasePower > 80) ||
+							(['eerieumpulse'].includes(moveid) && fragment.movePriority > 0)
+						) {
+							if (!newMon.randbats.offeredSupport.specialreduction) newMon.randbats.offeredSupport.specialreduction = [];
+							newMon.randbats.offeredSupport.specialreduction.push(fragment);
 						}
 						
 /*
@@ -1510,7 +1531,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 
 		let baseRequestedSupport = [];
 		// These are a kind of default checklist for each format, but there will be more specific requests as team members are evaluated
-		if (format === "vgc") baseRequestedSupport = ['fakeout', 'priority', 'spread', 'speedcontrol', 'damagereduction'];
+		if (format === "vgc") baseRequestedSupport = ['fakeout', 'priority', 'spread', 'speedcontrol', 'physicalreduction', 'specialreduction'];
 		else baseRequestedSupport = ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff', 'contactpunish', 'electricimmune', 'groundimmune'];
 		
 		// I also definitely need to evaluate the base team members for their requestedSupport, offeredSupport and acceptedSupport, but...
