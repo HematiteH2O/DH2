@@ -612,15 +612,28 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							modFragment.score = fragment.moveBasePower;
 							newMon.randbats.offeredSupport.spread.push(modFragment);
 						}
-						if (move.target === 'allAdjacent' && fragment.moveBasePower >= 65 && !move.selfdestruct && moveid !== 'synchronoise') {
+						if (move.target === 'allAdjacent' && !move.selfdestruct && moveid !== 'synchronoise') {
 							let modFragment = Utils.deepClone(fragment);
 							modFragment.score = fragment.moveBasePower;
-							modFragment.vgc.requestedSupport.push(`${(fragment.moveType).toLowerCase()}immune`); // ex. "electricimmune"
 							
-							if (!newMon.randbats.offeredSupport.spread) newMon.randbats.offeredSupport.spread = [];
-							newMon.randbats.offeredSupport.spread.push(modFragment);
+							// seems like we're getting a *lot* of options for these on almost every team, so let's limit ourselves to one of these per Pokémon!
+							if (!modFragment.tags) modFragment.tags = [];
+							if (!modFragment.tags.includes('allyspread')) modFragment.tags.push('allyspread');
+							if (!modFragment.avoid) modFragment.avoid = [];
+							if (!modFragment.avoid.includes('allyspread')) modFragment.avoid.push('allyspread');
+							// in testing so far, some sets have been getting *too* excited about ally immunities and filling up with several spread moves like this,
+							// which is bad, because ally synergies are given the highest priority -
+							// if we let them take every possible option for these, they run out of room for important things quickly!
 
-							// ex. "sideelectric"
+							// ones that we can use as a main spread should be strong!
+							if (fragment.moveBasePower > 80) {
+								modFragment.vgc.requestedSupport.push(`${(fragment.moveType).toLowerCase()}immune`); // ex. "electricimmune"
+								if (!newMon.randbats.offeredSupport.spread) newMon.randbats.offeredSupport.spread = [];
+								newMon.randbats.offeredSupport.spread.push(modFragment);
+							}
+							
+							// but we can drop the BP requirement if it's just to enable ally Abilities, like Lightning Rod
+							// these supports will be called, for example, "sideelectric" or "sideelectricnopara"
 							if (moveid === 'discharge') { // mostly for Cell Battery
 								if (!newMon.randbats.offeredSupport[`side${(fragment.moveType).toLowerCase()}nopara`]) newMon.randbats.offeredSupport[`side${(fragment.moveType).toLowerCase()}nopara`] = [];
 								newMon.randbats.offeredSupport[`side${(fragment.moveType).toLowerCase()}nopara`].push(modFragment);
