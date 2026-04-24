@@ -649,7 +649,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						if (
 							(['auroraveil',
 							'followme', 'ragepowder',
-							'shadowbox', 'memento', 'partingshot',
+							'shadowbox', 'partingshot',
 							'grasswhistle', 'hypnosis', 'lovelykiss', 'sing', 'sleeppowder', 'spore', 'yawn'
 						].includes(moveid) && !(move.accuracy && move.accuracy < 70)) ||
 							(['nobleroar', 'tearfullook'].includes(moveid) && fragment.movePriority > 0)
@@ -676,6 +676,29 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						) {
 							if (!newMon.randbats.offeredSupport.specialreduction) newMon.randbats.offeredSupport.specialreduction = [];
 							newMon.randbats.offeredSupport.specialreduction.push(fragment);
+						}
+						
+						// somewhat rudimentary handling of protection for VGC
+						if (move.stallingMove || ['fakeout', 'substitute', 'quickguard', 'wideguard'].includes(moveid)) {
+							let modFragment = Utils.deepClone(fragment);
+							
+							modFragment.format = 'vgc'; // forcibly skip these fragments for singles!
+							
+							if (!modFragment.avoid) modFragment.avoid = [];
+							modFragment.avoid.push('protection');
+							modFragment.avoid.push('redirection');
+							
+							if (['fakeout', 'quickguard', 'wideguard'].includes(moveid)) modFragment.score = 3;
+							else if (!['substitute', 'protect', 'detect'].includes(moveid)) modFragment.score = 2;
+							else if (moveid === 'detect') modFragment.score = 1;
+							else if (moveid === 'protect') modFragment.score = 0;
+							else if (moveid === 'substitute') {
+								modFragment.score = -1; // never use unless its buddy role is checked off
+								if (!modFragment.buddy || !modFragment.buddy.roles) modFragment.buddy.roles = [];
+								modFragment.buddy.roles.push('setup');
+							}
+							else modFragment.score = 4; // the unique protection clones are the best
+							modFragment.vgc.requestedSupport.push(`${(fragment.moveType).toLowerCase()}immune`); // ex. "electricimmune"
 						}
 						
 /*
@@ -2309,6 +2332,14 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				fragmentsListThisStep = fragmentsList.filter((fragment) => (fragment.fragmentPriority > 2));
 			}
 			
+			// at this point, if we have any with completed "buddy" fragments, let's prioritize those!
+			if (!fragmentsListThisStep.length) {
+				if (fragmentsList.filter((fragment) => (fragment.buddycomplete)).length) {
+					fragmentsListThisStep = fragmentsList.filter((fragment) => (fragment.buddycomplete));
+				// ... and if not, it's a total free-for-all from here P:
+				} else fragmentsListThisStep = fragmentsList;
+			}
+			
 			// fragmentPriority of 2 is for main STABs
 			if (!fragmentsListThisStep.length) fragmentsListThisStep = fragmentsList.filter((fragment) => (fragment.fragmentPriority > 1));
 			
@@ -2316,12 +2347,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			if (!fragmentsListThisStep.length) fragmentsListThisStep = fragmentsList.filter((fragment) => (fragment.fragmentPriority > 0));
 
 			// fragmentPriority of 0 is for "spicy" picks as well as roles that have already been completed
-			if (!fragmentsListThisStep.length) {
-				// if we have any with completed "buddy" fragments, let's prioritize those!
-				if (fragmentsList.filter((fragment) => (fragment.buddycomplete)).length) {
-					fragmentsListThisStep = fragmentsList.filter((fragment) => (fragment.buddycomplete));
-				// ... and if not, it's a total free-for-all from here P:
-				} else fragmentsListThisStep = fragmentsList;
+			if (!fragmentsListThisStep.length) fragmentsListThisStep = fragmentsList;
 			}
 			if (!fragmentsListThisStep.length) {
 				eligibleFragments = false;
