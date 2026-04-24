@@ -640,8 +640,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							}
 							if (!fragment.stab && !fragment.teraType) modFragment.teraType = fragment.moveType;
 							if (fragment.moveBasePower >= 90 || (fragment.stab && fragment.moveBasePower >= 80)) {
-								if (fragment.stab || fragment.moveType !== 'Normal') newMon.randbats.viableStabs.push(modFragment);
+								if (fragment.stab || fragment.moveType !== 'Normal' || fragment.moveBasePower >= 120) newMon.randbats.viableStabs.push(modFragment);
 								// stop giving random things Double-Edge!! I know it has good BP :sob:
+								// (the >= 120 preserves *really* strong cases like non-STAB Punk Rock Boomburst, but otherwise, it has to be coverage if it's not STAB)
 							}
 							if (fragment.moveBasePower >= 120 && !fragment.item) {
 								let modFragment2 = Utils.deepClone(modFragment);
