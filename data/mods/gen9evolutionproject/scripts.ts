@@ -2387,7 +2387,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			let roleScores = {};
 			let safeScores = {};
 			for (const fragment of fragmentsListThisStep) {
-				if (fragment.role && !['mainstab', 'protection', 'spicy'].includes(fragment.role)) {
+				if (fragment.role && !['mainstab', 'spicy'].includes(fragment.role)) {
 					if (!roleScores[fragment.role]) roleScores[fragment.role] = 0;
 					if (fragment.score && fragment.score > roleScores[fragment.role]) roleScores[fragment.role] = fragment.score;
 				}
@@ -2400,7 +2400,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			}
 			for (const fragment of fragmentsListThisStep) {
 				let safeToPush = true;
-				if (fragment.role && !['mainstab', 'protection', 'spicy'].includes(fragment.role)) {
+				if (fragment.role && !['mainstab', 'spicy'].includes(fragment.role)) {
 					if (roleScores[fragment.role] && roleScores[fragment.role] > 0 && (!fragment.score || (roleScores[fragment.role] > fragment.score))) safeToPush = false;
 				}
 				else if (fragment.role && fragment.role === 'mainstab') {
