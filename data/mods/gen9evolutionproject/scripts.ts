@@ -2142,7 +2142,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					}
 					
 					if (
-						!fragment.buddy.ability && !fragment.buddy.item && !fragment.buddy.teraType && !(fragment.buddy.moves && fragment.buddy.moves.length) && !(
+						!fragment.buddy.ability && !fragment.buddy.item && !fragment.buddy.teraType && !(fragment.buddy.moves && fragment.buddy.moves.length) && !(fragment.buddy.roles && fragment.buddy.roles.length) && !(
 							fragment.buddy.evs && (fragment.buddy.evs['hp'] > 0 || fragment.buddy.evs['atk'] > 0 || fragment.buddy.evs['def'] > 0 || fragment.buddy.evs['spa'] > 0 || fragment.buddy.evs['spd'] > 0 || fragment.buddy.evs['spe'] > 0)
 						)
 					) {
