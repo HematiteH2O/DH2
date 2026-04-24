@@ -28,18 +28,6 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 		// actual Data Mod feature
 		
 		onTeamPreview() {
-			// OKAY HEADS-UP:
-			// the below is for *my personal convenience* for randbats set generation - it should be *commented out* in any patch that actually gets loaded to DH
-			// I'm keeping it around so I can run it the same way every time I add a new slate
-			// don't forget to comment it out!!!
-			let randomizerData = `raw|<div class="infobox" open><details class ="details"><summary>Randomizer set summary exports</summary>`;
-			for (const id in this.dex.data.Pokedex) {
-				if (this.dex.data.Pokedex[id] && this.dex.data.Pokedex[id].randomizerInfo) randomizerData += this.dex.data.Pokedex[id].randomizerInfo;
-			}
-			randomizerData += `</details></div>`;
-			this.add(`${randomizerData}`);
-			// end commented-out section
-			
 			for (const side of this.sides) {
 				let showFakemon = false;
 				let extraLineBreak = false;
