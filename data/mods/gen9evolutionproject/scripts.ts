@@ -679,7 +679,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						}
 						
 						// somewhat rudimentary handling of protection for VGC
-						if (move.stallingMove || ['fakeout', 'substitute', 'quickguard', 'wideguard'].includes(moveid)) {
+						if ((move.stallingMove && moveid !== 'endure') || ['fakeout', 'substitute', 'quickguard', 'wideguard'].includes(moveid)) {
 							let modFragment = Utils.deepClone(fragment);
 							
 							modFragment.format = 'vgc'; // forcibly skip these fragments for singles!
