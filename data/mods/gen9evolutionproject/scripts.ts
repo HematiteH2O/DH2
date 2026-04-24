@@ -506,6 +506,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						if (!fragment.moveBasePower) fragment.moveBasePower = basePower;
 						if (!fragment.moveCategory) fragment.moveCategory = move.category;
 						if (!fragment.movePriority) fragment.movePriority = move.priority;
+						if (!fragment.moveAccuracy) fragment.moveAccuracy = move.accuracy;
 
 						if (!fragment.fragmentPriority) fragment.fragmentPriority = 4;
 						
@@ -549,27 +550,73 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 					// general / STAB
 						// okay, the STAB categories are obviously way unfinished - I'm gonna come back to this
-						const safeStabs = [ // moves that are considered "reliable" or "drawback-free," which will later be used to filter out strictly worse moves
-							'firepunch', 'flamethrower',
-							'scald', 'liquidation',
+						const unsafeStabs = [
+							// This list isn't any kind of penalty!
+							// Any move with over 95% accuracy*, provided it is also *not* on this list, will be considered "drawback-free" for later purposes
+							// That means anything that could be considered to have a drawback at all should be here!
+
+							// TODO: some moves with less than 100% accuracy should still be included in case modifiers make them relevant (for instance, Compound Eyes doesn't make Head Smash drawback-free like it does for Stone Edge)
+							
+							// (*some things are over 95 but less than 100 because of modifiers like Compound Eyes or Wide Lens, but I'm choosing for those to count as drawback-free!)
+							
+							'flareblitz', 'ragingfury', 'armorcannon', 'burnup', 'eruption', 'shelltrap',
+							'wavecrash', 'waterspout',
+							'wildcharge', 'doubleshock', 'volttackle', 'thunderclap', 'electroshot',
+							'woodhammer', 'solarblade', 'petaldance', 'solarbeam',
+							'reversal', 'vitalthrow', 'closecombat', 'superpower', 'focuspunch',
+							'headlongrush',
+							'skydrop', 'beakblast', 'bravebird', 'dragonascent',
+							'firstimpression',
+							'phantomforce', 'shadowforce',
+							'glaiverush', 'outrage', 'clangingscales', 'dragonenergy',
+							'suckerpunch', 'jawlock', 'foulplay', 'hyperspacefury',
+							'hardpress', 'spinout', 'steelroller', 'gigatonhammer', 'makeitrain',
+							'crushgrip', 'flail', 'naturalgift', 'fakeout', 'doubleedge', 'headcharge', 'thrash', 'wringout',
+							
+							'renewingring', 'entanglement', 'slimecannon',
 						];
-						const rejectStabs = [ // moves that should not be a "main STAB" regardless of BP
-							'blastburn',
-							'hydrocannon',
-							'frenzyplant',
-							'meteorassault',
+						const rejectStabs = [
+							// moves that generally shouldn't be treated as a *main* attacking or coverage move at all, regardless of BP
+							// plenty of these can come up later as "spicy" picks, though!
+							'inferno', 'blastburn', 'mindblown',
+							'dive', 'hydrocannon',
+							'zapcannon',
+							'chloroblast', 'frenzyplant',
+							'sheercold',
+							'counter', 'seismictoss', 'upperhand', 'dynamicpunch', 'meteorassault', 'finalgambit',
+							'belch',
+							'magnitude', 'fissure', 'dig',
+							'skyattack', // intentionally leaving Bounce and Fly in because they are a main STAB in some cases
+							'mirrorcoat', 'psywave', 'dreameater', 'futuresight', 'synchronoise', 'prismaticlaser',
 							'rockwrecker',
 							'roaroftime', 'eternabeam',
-							'gigaimpact', 'hyperbeam',
+							'beatup', 'comeuppance', 'ruination', 'fling',
+							'metalburst', 'doomdesire', 'steelbeam',
+							'naturesmadness', 'mistyexplosion',
+							'bide', 'endeavor', 'guillotine', 'horndrill', 'present', 'superfang', 'falseswipe', 'holdback', 'skullbash', 'lastresort', 'gigaimpact', 'selfdestruct', 'explosion', 'sonicboom', 'spitup', 'trumpcard', 'snore', 'razorwind', 'hyperbeam',
 						];
-						if (!rejectStabs.includes(moveid)) {
+						if (
+							!rejectStabs.includes(moveid) ||
+							(['dynamicpunch', 'inferno', 'zapcannon'].includes(moveid) && fragment.accuracy && fragment.accuracy === 100) ||
+							(['mindblown', 'chloroblast', 'steelbeam'].includes(moveid) && fragment.ability && fragment.ability === 'Magic Guard') ||
+						) {
 							// this allows for non-STAB moves if they're as strong as a STAB anyway, but I set the bar a little higher for now
 							// this will sometimes be the case for moves like Shiftry's Double-Edge or Repehk's Weather Ball!
 							// later on, I should be ready to check for how many unique types of "STABs" are covered;
 							// if there are at least 2 types in viableStabs, then the set should try to have viableStabs of any 2 types
 							
 							let modFragment = Utils.deepClone(fragment);
-							if (safeStabs.includes(moveid)) modFragment.safeStab = true;
+							if (
+								(!modFragment.moveAccuracy || modFragment.moveAccuracy > 95) &&
+								(!unsafeStabs.includes(moveid) ||
+								(['flareblitz', 'wavecrash', 'wildcharge', 'volttackle', 'woodhammer', 'doubleedge', 'headcharge'].includes(moveid) && fragment.ability && ['Rock Head', 'Magic Guard'].includes(fragment.ability)) ||
+								(['armorcannon', 'closecombat', 'superpower', 'headlongrush', 'dragonascent', 'clangingscales', 'hyperspacefury', 'spinout', 'makeitrain'].includes(moveid) && fragment.ability && ['Contrary'].includes(fragment.ability)) ||
+								(['electroshot'].includes(moveid) && fragment.ability && ['Drizzle', 'Primordial Sea', 'Storm Chaser'].includes(fragment.ability)) ||
+								(['solarblade', 'solarbeam'].includes(moveid) && fragment.ability && ['Desolate Land', 'Drought'].includes(fragment.ability)))
+							) {
+								modFragment.safeStab = true;
+								modFragment.weight = 2;
+							}
 							if (!fragment.stab && !fragment.teraType) modFragment.teraType = fragment.moveType;
 							if (fragment.moveBasePower >= 90 || (fragment.stab && fragment.moveBasePower >= 80)) newMon.randbats.viableStabs.push(modFragment);
 							if (fragment.moveBasePower >= 120 && !fragment.item) {
@@ -664,7 +711,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							'followme', 'ragepowder',
 							'shadowbox', 'partingshot',
 							'grasswhistle', 'hypnosis', 'lovelykiss', 'sing', 'sleeppowder', 'spore', 'yawn'
-						].includes(moveid) && !(move.accuracy && move.accuracy < 70)) ||
+						].includes(moveid) && !(fragment.moveAccuracy && fragment.moveAccuracy < 70)) ||
 							(['nobleroar', 'tearfullook'].includes(moveid) && fragment.movePriority > 0)
 						) {
 							if (!newMon.randbats.offeredSupport.physicalreduction) newMon.randbats.offeredSupport.physicalreduction = [];
