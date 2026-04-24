@@ -2348,7 +2348,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 
 			// fragmentPriority of 0 is for "spicy" picks as well as roles that have already been completed
 			if (!fragmentsListThisStep.length) fragmentsListThisStep = fragmentsList;
-			}
+			
 			if (!fragmentsListThisStep.length) {
 				eligibleFragments = false;
 				continue;
