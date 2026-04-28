@@ -904,8 +904,8 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 						// acceptedSupport
 						case 'Swift Swim':
 						case 'Dry Skin':
-							fragment.singles.acceptedSupport.push('rain');
-							fragment.vgc.acceptedSupport.push('rain');
+							fragment.singles.requestedSupport.push('rain');
+							fragment.vgc.requestedSupport.push('rain');
 							if (!newMon.randbats.singles.acceptedSupport.rain) newMon.randbats.singles.acceptedSupport.rain = [];
 							newMon.randbats.singles.acceptedSupport.rain.push(fragment);
 							if (!newMon.randbats.vgc.acceptedSupport.rain) newMon.randbats.vgc.acceptedSupport.rain = [];
@@ -914,8 +914,8 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 						case 'Chlorophyll':
 						case 'Solar Power':
 						case 'Harvest':
-							fragment.singles.acceptedSupport.push('sun');
-							fragment.vgc.acceptedSupport.push('sun');
+							fragment.singles.requestedSupport.push('sun');
+							fragment.vgc.requestedSupport.push('sun');
 							if (!newMon.randbats.singles.acceptedSupport.sun) newMon.randbats.singles.acceptedSupport.sun = [];
 							newMon.randbats.singles.acceptedSupport.sun.push(fragment);
 							if (!newMon.randbats.vgc.acceptedSupport.sun) newMon.randbats.vgc.acceptedSupport.sun = [];
@@ -923,8 +923,8 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 							break;
 						case 'Sand Rush':
 						case 'Sand Force':
-							fragment.singles.acceptedSupport.push('sand');
-							fragment.vgc.acceptedSupport.push('sand');
+							fragment.singles.requestedSupport.push('sand');
+							fragment.vgc.requestedSupport.push('sand');
 							if (!newMon.randbats.singles.acceptedSupport.sand) newMon.randbats.singles.acceptedSupport.sand = [];
 							newMon.randbats.singles.acceptedSupport.sand.push(fragment);
 							if (!newMon.randbats.vgc.acceptedSupport.sand) newMon.randbats.vgc.acceptedSupport.sand = [];
@@ -933,16 +933,16 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 						case 'Slush Rush':
 						case 'Ice Body':
 						case 'Frozen Focus':
-							fragment.singles.acceptedSupport.push('snow');
-							fragment.vgc.acceptedSupport.push('snow');
+							fragment.singles.requestedSupport.push('snow');
+							fragment.vgc.requestedSupport.push('snow');
 							if (!newMon.randbats.singles.acceptedSupport.snow) newMon.randbats.singles.acceptedSupport.snow = [];
 							newMon.randbats.singles.acceptedSupport.snow.push(fragment);
 							if (!newMon.randbats.vgc.acceptedSupport.snow) newMon.randbats.vgc.acceptedSupport.snow = [];
 							newMon.randbats.vgc.acceptedSupport.snow.push(fragment);
 							break;
 						case 'Surge Surfer':
-							fragment.singles.acceptedSupport.push('electricterrain');
-							fragment.vgc.acceptedSupport.push('electricterrain');
+							fragment.singles.requestedSupport.push('electricterrain');
+							fragment.vgc.requestedSupport.push('electricterrain');
 							if (!newMon.randbats.singles.acceptedSupport.electricterrain) newMon.randbats.singles.acceptedSupport.electricterrain = [];
 							newMon.randbats.singles.acceptedSupport.electricterrain.push(fragment);
 							if (!newMon.randbats.vgc.acceptedSupport.electricterrain) newMon.randbats.vgc.acceptedSupport.electricterrain = [];
