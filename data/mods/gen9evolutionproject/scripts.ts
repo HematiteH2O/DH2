@@ -492,6 +492,25 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 									fragments.push(modFragment);
 								}
 								break;
+							case 'Desolate Land':
+							case 'Drought':
+							case 'Mega Sol':
+								if (move.type === 'Fire' && basePower) {
+									let modFragment = {
+										ability: ability,
+										moveBasePower: basePower * 1.5,
+									};
+									fragments.push(modFragment);
+								}
+								if (moveid === 'weatherball') {
+									let modFragment = {
+										ability: ability,
+										moveType: 'Fire',
+										moveBasePower: 150,
+									};
+									fragments.push(modFragment);
+								}
+								break;
 							case 'Dragonize':
 								if (move.type === 'Normal' && basePower && !noModifyType.includes(moveid)) {
 									baseFragment.avoid = ['Dragonize'];
@@ -513,6 +532,62 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 									fragments.push(modFragment);
 								}
 								break;
+							case 'Drizzle':
+							case 'Primordial Sea':
+							case 'Storm Chaser':
+								if (move.type === 'Water' && basePower) {
+									let modFragment = {
+										ability: ability,
+										moveBasePower: basePower * 1.5,
+									};
+									fragments.push(modFragment);
+								}
+								if (['hurricane', 'thunder', 'bleakwindstorm', 'wildboltstorm', 'sandsearstorm'].includes(moveid)) {
+									// today I learned Springtide Storm is not affected by rain
+									let modFragment = {
+										ability: ability,
+										moveAccuracy: 100,
+									};
+									fragments.push(modFragment);
+								}
+								if (moveid === 'weatherball') {
+									let modFragment = {
+										ability: ability,
+										moveType: 'Water',
+										moveBasePower: 150,
+									};
+									fragments.push(modFragment);
+								}
+								break;
+							case 'Electric Surge':
+								if (!newMon.randbats.types.includes('Flying')) {
+									if (move.type === 'Electric' && basePower) {
+										let modFragment = {
+											ability: ability,
+											moveBasePower: basePower * 1.3,
+										};
+										if (moveid === 'Rising Voltage') modFragment.moveBasePower *= 2;
+										fragments.push(modFragment);
+									}
+									if (moveid === 'terrainpulse') {
+										let modFragment = {
+											ability: ability,
+											moveType: 'Electric',
+											moveBasePower: 130,
+										};
+										fragments.push(modFragment);
+									}
+								}
+								break;
+							case 'Gale Wings':
+								if (move.type === 'Flying') {
+									let modFragment = {
+										ability: ability,
+										movePriority: move.priority + 1,
+									};
+									fragments.push(modFragment);
+								}
+								break;
 							case 'Galvanize':
 								if (move.type === 'Normal' && basePower && !noModifyType.includes(moveid)) {
 									baseFragment.avoid = ['Galvanize'];
@@ -523,6 +598,27 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 										moveBasePower: basePower * 1.2,
 									};
 									fragments.push(modFragment);
+								}
+								break;
+							case 'Grassy Surge':
+							case 'Seed Sower':
+								if (!newMon.randbats.types.includes('Flying')) {
+									if (move.type === 'Grass' && basePower) {
+										let modFragment = {
+											ability: ability,
+											moveBasePower: basePower * 1.3,
+										};
+										if (moveid === 'Grassy Glide') modFragment.priority = 1;
+										fragments.push(modFragment);
+									}
+									if (moveid === 'terrainpulse') {
+										let modFragment = {
+											ability: ability,
+											moveType: 'Grass',
+											moveBasePower: 130,
+										};
+										fragments.push(modFragment);
+									}
 								}
 								break;
 							case 'Iron Fist':
@@ -541,6 +637,27 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 										moveBasePower: basePower * 1.5,
 									};
 									fragments.push(modFragment);
+								}
+								break;
+							case 'Mega-Neural':
+							case 'Psychic Surge':
+								if (!newMon.randbats.types.includes('Flying')) {
+									if (move.type === 'Psychic' && basePower) {
+										let modFragment = {
+											ability: ability,
+											moveBasePower: basePower * 1.3,
+										};
+										if (moveid === 'Expanding Force') modFragment.moveBasePower *= 1.5;
+										fragments.push(modFragment);
+									}
+									if (moveid === 'terrainpulse') {
+										let modFragment = {
+											ability: ability,
+											moveType: 'Psychic',
+											moveBasePower: 130,
+										};
+										fragments.push(modFragment);
+									}
 								}
 								break;
 							case 'Normalize':
@@ -575,6 +692,15 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 										tags: ['Pixilate'],
 										moveType: 'Fairy',
 										moveBasePower: basePower * 1.2,
+									};
+									fragments.push(modFragment);
+								}
+								break;
+							case 'Prankster':
+								if (move.category === 'Status') {
+									let modFragment = {
+										ability: ability,
+										movePriority: move.priority + 1,
 									};
 									fragments.push(modFragment);
 								}
@@ -618,11 +744,28 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 									fragments.push(modFragment);
 								}
 								break;
-							case 'Transistor':
-								if (move.type === 'Electric' && basePower) {
+							case 'Sand Stream':
+							case 'Sand Spit':
+								if (moveid === 'weatherball') {
 									let modFragment = {
 										ability: ability,
-										moveBasePower: basePower * 1.3,
+										moveType: 'Rock',
+										moveBasePower: 100,
+									};
+									fragments.push(modFragment);
+								}
+								break;
+							case 'Sand Force':
+								if (['Rock', 'Ground', 'Steel'].includes(move.type) && basePower) {
+									let modFragment = {
+										ability: ability,
+										moveBasePower: basePower * 1.2,
+										singles: {
+											requestedSupport: ['sand'],
+										},
+										vgc: {
+											requestedSupport: ['sand'],
+										},
 									};
 									fragments.push(modFragment);
 								}
@@ -641,6 +784,23 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 									let modFragment = {
 										ability: ability,
 										moveBasePower: basePower * 1.3,
+									};
+									fragments.push(modFragment);
+								}
+								break;
+							case 'Snow Warning':
+								if (moveid === 'weatherball') {
+									let modFragment = {
+										ability: ability,
+										moveType: 'Ice',
+										moveBasePower: 100,
+									};
+									fragments.push(modFragment);
+								}
+								if (moveid === 'blizzard') {
+									let modFragment = {
+										ability: ability,
+										moveAccuracy: 100,
 									};
 									fragments.push(modFragment);
 								}
@@ -678,6 +838,24 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 									let modFragment = {
 										ability: ability,
 										moveBasePower: basePower * 1.3,
+									};
+									fragments.push(modFragment);
+								}
+								break;
+							case 'Transistor':
+								if (move.type === 'Electric' && basePower) {
+									let modFragment = {
+										ability: ability,
+										moveBasePower: basePower * 1.3,
+									};
+									fragments.push(modFragment);
+								}
+								break;
+							case 'Triage':
+								if (move.flags['heal']) {
+									let modFragment = {
+										ability: ability,
+										movePriority: move.priority + 3,
 									};
 									fragments.push(modFragment);
 								}
@@ -755,7 +933,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							fragment.singles.requestedSupport.push('sun');
 							fragment.vgc.requestedSupport.push('sun');
 						}
-						if (['electroshot'].includes(moveid) && !(fragment.ability && ['Drizzle', 'Primordial Sea'].includes(fragment.ability))) {
+						if (['electroshot'].includes(moveid) && !(fragment.ability && ['Drizzle', 'Primordial Sea', 'Storm Chaser'].includes(fragment.ability))) {
 							fragment.singles.requestedSupport.push('rain');
 							fragment.vgc.requestedSupport.push('rain');
 						}
@@ -1099,15 +1277,6 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 							if (!newMon.randbats.offeredSupport.sun) newMon.randbats.offeredSupport.sun = [];
 							newMon.randbats.offeredSupport.sun.push(fragment);
 							break;
-						case 'Sand Stream':
-						case 'Sand Spit':
-							if (!newMon.randbats.offeredSupport.sand) newMon.randbats.offeredSupport.sand = [];
-							newMon.randbats.offeredSupport.sand.push(fragment);
-							break;
-						case 'Snow Warning':
-							if (!newMon.randbats.offeredSupport.snow) newMon.randbats.offeredSupport.snow = [];
-							newMon.randbats.offeredSupport.snow.push(fragment);
-							break;
 						case 'Electric Surge':
 							if (!newMon.randbats.offeredSupport.electricterrain) newMon.randbats.offeredSupport.electricterrain = [];
 							newMon.randbats.offeredSupport.electricterrain.push(fragment);
@@ -1118,11 +1287,11 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 							if (!newMon.randbats.offeredSupport.grassyterrain) newMon.randbats.offeredSupport.grassyterrain = [];
 							newMon.randbats.offeredSupport.grassyterrain.push(fragment);
 							break;
-						case 'Psychic Surge':
-							if (!newMon.randbats.offeredSupport.psychicterrain) newMon.randbats.offeredSupport.psychicterrain = [];
-							newMon.randbats.offeredSupport.psychicterrain.push(fragment);
-							if (!newMon.randbats.offeredSupport.antipriority) newMon.randbats.offeredSupport.antipriority = [];
-							newMon.randbats.offeredSupport.antipriority.push(fragment);
+						case 'Intimidate':
+							if (!newMon.randbats.offeredSupport.physreduction) newMon.randbats.offeredSupport.physreduction = [];
+							newMon.randbats.offeredSupport.physreduction.push(fragment);
+							if (!newMon.randbats.offeredSupport.intimidate) newMon.randbats.offeredSupport.intimidate = [];
+							newMon.randbats.offeredSupport.intimidate.push(fragment);
 							break;
 						case 'Misty Surge':
 							if (!newMon.randbats.offeredSupport.mistyterrain) newMon.randbats.offeredSupport.mistyterrain = [];
@@ -1132,11 +1301,33 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 							if (!newMon.randbats.offeredSupport.antisleep) newMon.randbats.offeredSupport.antisleep = [];
 							newMon.randbats.offeredSupport.antisleep.push(fragment);
 							break;
-						case 'Intimidate':
-							if (!newMon.randbats.offeredSupport.physreduction) newMon.randbats.offeredSupport.physreduction = [];
-							newMon.randbats.offeredSupport.physreduction.push(fragment);
-							if (!newMon.randbats.offeredSupport.intimidate) newMon.randbats.offeredSupport.intimidate = [];
-							newMon.randbats.offeredSupport.intimidate.push(fragment);
+						case 'Psychic Surge':
+							if (!newMon.randbats.offeredSupport.psychicterrain) newMon.randbats.offeredSupport.psychicterrain = [];
+							newMon.randbats.offeredSupport.psychicterrain.push(fragment);
+							if (!newMon.randbats.offeredSupport.antipriority) newMon.randbats.offeredSupport.antipriority = [];
+							newMon.randbats.offeredSupport.antipriority.push(fragment);
+							break;
+						case 'Sand Stream':
+						case 'Sand Spit':
+							if (!newMon.randbats.offeredSupport.sand) newMon.randbats.offeredSupport.sand = [];
+							newMon.randbats.offeredSupport.sand.push(fragment);
+							break;
+						case 'Snow Warning':
+							if (!newMon.randbats.offeredSupport.snow) newMon.randbats.offeredSupport.snow = [];
+							newMon.randbats.offeredSupport.snow.push(fragment);
+							break;
+						case 'Storm Chaser':
+							// we need any one of these, not all three
+							let modFragmentElectric = Utils.deepClone(fragment);
+							modFragmentElectric.vgc.requestedSupport.push('sideelectric');
+							let modFragmentFlying = Utils.deepClone(fragment);
+							modFragmentFlying.vgc.requestedSupport.push('sideflying');
+							let modFragmentWater = Utils.deepClone(fragment);
+							modFragmentWater.vgc.requestedSupport.push('sidewater');
+							if (!newMon.randbats.offeredSupport.rain) newMon.randbats.offeredSupport.rain = [];
+							newMon.randbats.offeredSupport.rain.push(modFragmentElectric);
+							newMon.randbats.offeredSupport.rain.push(modFragmentFlying);
+							newMon.randbats.offeredSupport.rain.push(modFragmentWater);
 							break;
 						// acceptedSupport
 						case 'Swift Swim':
