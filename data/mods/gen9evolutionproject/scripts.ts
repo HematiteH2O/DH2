@@ -461,7 +461,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					
 					// fill in default information
 					for (const fragment of fragments) {
-						if (newMon.name === 'Shiftry-Johto') console.log(fragment);
 						if (!fragment.baseMove) fragment.baseMove = move.name;
 						if (!fragment.moves) fragment.moves = [move.name];
 						
