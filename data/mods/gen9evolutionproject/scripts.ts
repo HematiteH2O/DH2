@@ -374,6 +374,14 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							// push fragments
 							let fragment = {
 								offeredSupport: [],
+								singles: {
+									requestedSupport: [],
+									acceptedSupport: [],
+								},
+								vgc: {
+									requestedSupport: [],
+									acceptedSupport: [],
+								},
 								fragmentPriority: 4,
 							};
 							newMon.randbats.offeredSupport[`${(resistance).toLowerCase()}resist`].push(fragment);
