@@ -2424,6 +2424,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					if (teamRequestedSupport[fragment.role] && !teamOfferedSupport[fragment.role]) {
 						// minor synergies get 4
 						if (fragment.role.includes(`immune`)) fragment.fragmentPriority = 4;
+						if (fragment.role.includes(`resist`)) fragment.fragmentPriority = 4;
 						// default synergies get 5
 						else if (baseRequestedSupport.includes(fragment.role)) fragment.fragmentPriority = 5;
 						// major, team-specific synergies get 6
