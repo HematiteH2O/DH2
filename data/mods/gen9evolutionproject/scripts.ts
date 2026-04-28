@@ -683,8 +683,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						}
 						if ([
 							'tailwind', 'trickroom', 'stickyweb', 'silktrap',
-							'bulldoze', 'cottonspore', 'stringshot',
-							'electroweb', 'icywind', 'glaciate',
+							'cottonspore', 'stringshot',
+							'electroweb', 'icywind', 'glaciate', // Bulldoze will receive special handling elsewhere because it doesn't work for every team
 							'thunderwave', 'nuzzle',
 							'syrupbomb', 'tarshot',
 						].includes(moveid) ||
