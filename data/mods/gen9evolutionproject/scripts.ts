@@ -190,6 +190,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 				for (const type of immunities) {
 					newMon.randbats.immunities[type] = "true";
+					newMon.randbats.resistances[type] = "true";
 				}
 				// finally, account for Abilities
 				for (const ability of newMon.randbats.abilities) {
