@@ -49,7 +49,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			) {
 				this.dataCache.Pokedex[id].randbats.singles.banned = true;
 				this.dataCache.Pokedex[id].randbats.vgc.banned = true;
-				continue; // skip canon Pokémon that aren't in the dex - but allow Fakemon for both
+				continue; // skip canon Pokémon that aren't in the dex - but allow Fakemon even if they aren't, since it matters for some form changes
 			}
 
 			const newMon = this.dataCache.Pokedex[id];
