@@ -446,8 +446,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						switch (ability) {
 							case 'Aerilate':
 								if (move.type === 'Normal' && basePower && !noModifyType.includes(moveid)) {
+									baseFragment.avoid = ['Aerilate']; // impossible to have an Aerilate-boosted Flying move and an actual Normal-type move on the same set
 									let modFragment = {
 										ability: 'Aerilate',
+										tags: ['Aerilate'],
 										moveType: 'Flying',
 										moveBasePower: basePower * 1.2,
 									};
@@ -459,6 +461,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					
 					// fill in default information
 					for (const fragment of fragments) {
+						if (newMon.name === 'Shiftry-Johto') console.log(fragment);
 						if (!fragment.baseMove) fragment.baseMove = move.name;
 						if (!fragment.moves) fragment.moves = [move.name];
 						
