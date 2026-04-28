@@ -2421,7 +2421,15 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			for (const fragment of fragmentsList) {
 				if (fragment.role) {
 					// prioritize roles that aren't covered
-					if (teamOfferedSupport[fragment.role] && fragment.fragmentPriority === 4) fragment.fragmentPriority = 0;
+					if (teamRequestedSupport[fragment.role] && !teamOfferedSupport[fragment.role]) {
+						// minor synergies get 4
+						if (fragment.role.includes(`immune`)) fragment.fragmentPriority = 4;
+						// default synergies get 5
+						else if (baseRequestedSupport.includes(fragment.role)) fragment.fragmentPriority = 5;
+						// major, team-specific synergies get 6
+						else fragment.fragmentPriority = 6;
+					}
+					if (teamOfferedSupport[fragment.role] && fragment.fragmentPriority > 3) fragment.fragmentPriority = 0;
 					if (fragment.role === 'mainstab') {
 						// don't do multiple main STABs of the same type
 						if (fragment.pokemon.coveredStabs.includes(fragment.moveType)) fragment.eligible = false;
@@ -2486,8 +2494,14 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			// highpriority is dynamic and depends on the current step
 			let fragmentsListThisStep = fragmentsList.filter((fragment) => (fragment.highpriority));
 			// the rest only matters if nothing is highpriority!
+
+			// fragmentPriority of 6 is for *specific team themes* that get fast-tracked
+			if (!fragmentsListThisStep.length) fragmentsListThisStep = fragmentsList.filter((fragment) => (fragment.fragmentPriority > 5));
 			
-			// fragmentPriority of 4 is the default; it's meant to be used for roles that aren't covered but aren't also being fast-tracked by a specific Pokémon
+			// fragmentPriority of 5 is for *standard roles* that aren't covered yet
+			if (!fragmentsListThisStep.length) fragmentsListThisStep = fragmentsList.filter((fragment) => (fragment.fragmentPriority > 4));
+			
+			// fragmentPriority of 4 is for *minor* synergies between team members, like immunity to an ally's spread move
 			if (!fragmentsListThisStep.length) fragmentsListThisStep = fragmentsList.filter((fragment) => (fragment.fragmentPriority > 3));
 			
 			if (!fragmentsListThisStep.length) {
