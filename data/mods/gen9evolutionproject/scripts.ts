@@ -350,14 +350,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						for (const ability of newMon.randbats.immunities[immunity].Ability) {
 							// push fragments
 							let fragment = {
-								baseMove: null,
-								moves: null,
-								
-								ability: ability,
-								item: null,
-								evs: {},
-								teraType: null,
-
 								offeredSupport: [],
 								singles: {
 									requestedSupport: [],
@@ -367,12 +359,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 									requestedSupport: [],
 									acceptedSupport: [],
 								},
-
-								moveType: null,
-								moveBasePower: null,
-								moveCategory: null,
-								movePriority: null,
-
 								fragmentPriority: 4,
 							};
 							newMon.randbats.offeredSupport[`${(immunity).toLowerCase()}immune`].push(fragment);
@@ -387,29 +373,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						for (const ability of newMon.randbats.resistances[resistance].Ability) {
 							// push fragments
 							let fragment = {
-								baseMove: null,
-								moves: null,
-								
-								ability: ability,
-								item: null,
-								evs: {},
-								teraType: null,
-
 								offeredSupport: [],
-								singles: {
-									requestedSupport: [],
-									acceptedSupport: [],
-								},
-								vgc: {
-									requestedSupport: [],
-									acceptedSupport: [],
-								},
-
-								moveType: null,
-								moveBasePower: null,
-								moveCategory: null,
-								movePriority: null,
-
 								fragmentPriority: 4,
 							};
 							newMon.randbats.offeredSupport[`${(resistance).toLowerCase()}resist`].push(fragment);
