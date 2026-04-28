@@ -904,39 +904,49 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 						// acceptedSupport
 						case 'Swift Swim':
 						case 'Dry Skin':
-							if (!newMon.randbats.singles.requestedSupport.rain) newMon.randbats.singles.requestedSupport.rain = [];
-							newMon.randbats.singles.requestedSupport.rain.push(fragment);
-							if (!newMon.randbats.vgc.requestedSupport.rain) newMon.randbats.vgc.requestedSupport.rain = [];
-							newMon.randbats.vgc.requestedSupport.rain.push(fragment);
+							fragment.singles.acceptedSupport.push('rain');
+							fragment.vgc.acceptedSupport.push('rain');
+							if (!newMon.randbats.singles.acceptedSupport.rain) newMon.randbats.singles.acceptedSupport.rain = [];
+							newMon.randbats.singles.acceptedSupport.rain.push(fragment);
+							if (!newMon.randbats.vgc.acceptedSupport.rain) newMon.randbats.vgc.acceptedSupport.rain = [];
+							newMon.randbats.vgc.acceptedSupport.rain.push(fragment);
 							break;
 						case 'Chlorophyll':
 						case 'Solar Power':
 						case 'Harvest':
-							if (!newMon.randbats.singles.requestedSupport.sun) newMon.randbats.singles.requestedSupport.sun = [];
-							newMon.randbats.singles.requestedSupport.sun.push(fragment);
-							if (!newMon.randbats.vgc.requestedSupport.sun) newMon.randbats.vgc.requestedSupport.sun = [];
-							newMon.randbats.vgc.requestedSupport.sun.push(fragment);
+							fragment.singles.acceptedSupport.push('sun');
+							fragment.vgc.acceptedSupport.push('sun');
+							if (!newMon.randbats.singles.acceptedSupport.sun) newMon.randbats.singles.acceptedSupport.sun = [];
+							newMon.randbats.singles.acceptedSupport.sun.push(fragment);
+							if (!newMon.randbats.vgc.acceptedSupport.sun) newMon.randbats.vgc.acceptedSupport.sun = [];
+							newMon.randbats.vgc.acceptedSupport.sun.push(fragment);
 							break;
 						case 'Sand Rush':
 						case 'Sand Force':
-							if (!newMon.randbats.singles.requestedSupport.sand) newMon.randbats.singles.requestedSupport.sand = [];
-							newMon.randbats.singles.requestedSupport.sand.push(fragment);
-							if (!newMon.randbats.vgc.requestedSupport.sand) newMon.randbats.vgc.requestedSupport.sand = [];
-							newMon.randbats.vgc.requestedSupport.sand.push(fragment);
+							fragment.singles.acceptedSupport.push('sand');
+							fragment.vgc.acceptedSupport.push('sand');
+							if (!newMon.randbats.singles.acceptedSupport.sand) newMon.randbats.singles.acceptedSupport.sand = [];
+							newMon.randbats.singles.acceptedSupport.sand.push(fragment);
+							if (!newMon.randbats.vgc.acceptedSupport.sand) newMon.randbats.vgc.acceptedSupport.sand = [];
+							newMon.randbats.vgc.acceptedSupport.sand.push(fragment);
 							break;
 						case 'Slush Rush':
 						case 'Ice Body':
 						case 'Frozen Focus':
-							if (!newMon.randbats.singles.requestedSupport.snow) newMon.randbats.singles.requestedSupport.snow = [];
-							newMon.randbats.singles.requestedSupport.snow.push(fragment);
-							if (!newMon.randbats.vgc.requestedSupport.snow) newMon.randbats.vgc.requestedSupport.snow = [];
-							newMon.randbats.vgc.requestedSupport.snow.push(fragment);
+							fragment.singles.acceptedSupport.push('snow');
+							fragment.vgc.acceptedSupport.push('snow');
+							if (!newMon.randbats.singles.acceptedSupport.snow) newMon.randbats.singles.acceptedSupport.snow = [];
+							newMon.randbats.singles.acceptedSupport.snow.push(fragment);
+							if (!newMon.randbats.vgc.acceptedSupport.snow) newMon.randbats.vgc.acceptedSupport.snow = [];
+							newMon.randbats.vgc.acceptedSupport.snow.push(fragment);
 							break;
 						case 'Surge Surfer':
-							if (!newMon.randbats.singles.requestedSupport.electricterrain) newMon.randbats.singles.requestedSupport.electricterrain = [];
-							newMon.randbats.singles.requestedSupport.electricterrain.push(fragment);
-							if (!newMon.randbats.vgc.requestedSupport.electricterrain) newMon.randbats.vgc.requestedSupport.electricterrain = [];
-							newMon.randbats.vgc.requestedSupport.electricterrain.push(fragment);
+							fragment.singles.acceptedSupport.push('electricterrain');
+							fragment.vgc.acceptedSupport.push('electricterrain');
+							if (!newMon.randbats.singles.acceptedSupport.electricterrain) newMon.randbats.singles.acceptedSupport.electricterrain = [];
+							newMon.randbats.singles.acceptedSupport.electricterrain.push(fragment);
+							if (!newMon.randbats.vgc.acceptedSupport.electricterrain) newMon.randbats.vgc.acceptedSupport.electricterrain = [];
+							newMon.randbats.vgc.acceptedSupport.electricterrain.push(fragment);
 							break;
 					}
 				}
