@@ -209,7 +209,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							newMon.randbats.resistances['Fire'] = {Ability: [ability]};
 						} else if (newMon.randbats.resistances['Fire'].Ability) newMon.randbats.resistances['Fire'].Ability.push(ability);
 					}
-					if (['Drought', 'Storm Chaser'].includes(ability)) {
+					if (['Drought', 'Orichalcum Pulse', 'Storm Chaser'].includes(ability)) {
 						if (!newMon.randbats.resistances['Water']) {
 							newMon.randbats.resistances['Water'] = {Ability: [ability]};
 						} else if (newMon.randbats.resistances['Water'].Ability) newMon.randbats.resistances['Water'].Ability.push(ability);
@@ -495,6 +495,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							case 'Desolate Land':
 							case 'Drought':
 							case 'Mega Sol':
+							case 'Orichalcum Pulse':
 								if (move.type === 'Fire' && basePower) {
 									let modFragment = {
 										ability: ability,
@@ -560,6 +561,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								}
 								break;
 							case 'Electric Surge':
+							case 'Hadron Engine':
 								if (!newMon.randbats.types.includes('Flying')) {
 									if (move.type === 'Electric' && basePower) {
 										let modFragment = {
@@ -913,23 +915,23 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					for (const fragment of fragments) {
 						
 					// support requirements before any context
-						if (moveid === 'risingvoltage' && fragment.ability !== 'Electric Surge') {
+						if (moveid === 'risingvoltage' && !['Electric Surge', 'Hadron Engine'].includes(fragment.ability)) {
 							fragment.moveBasePower *= 2;
 							fragment.singles.requestedSupport.push('electricterrain');
 							fragment.vgc.requestedSupport.push('electricterrain');
 						}
-						if (moveid === 'expandingforce' && fragment.ability !== 'Psychic Surge') {
+						if (moveid === 'expandingforce' && !['Mega-Neural', 'Psychic Surge'].includes(fragment.ability)) {
 							fragment.moveBasePower *= 1.5;
 							fragment.singles.requestedSupport.push('psychicterrain');
 							fragment.vgc.requestedSupport.push('psychicterrain');
 						}
-						if (moveid === 'grassyglide' && fragment.ability !== 'Grassy Surge') {
+						if (moveid === 'grassyglide'  && !['Grassy Surge', 'Seed Sower'].includes(fragment.ability))
 							fragment.movePriority += 1;
 							fragment.singles.requestedSupport.push('grassyterrain');
 							fragment.vgc.requestedSupport.push('grassyterrain');
 						}
 						// Misty Explosion doesn't actually want Misty Terrain support
-						if (['solarbeam', 'solarblade'].includes(moveid) && !(fragment.ability && ['Desolate Land', 'Drought'].includes(fragment.ability))) {
+						if (['solarbeam', 'solarblade'].includes(moveid) && !(fragment.ability && ['Desolate Land', 'Drought', 'Mega Sol', 'Orichalcum Pulse'].includes(fragment.ability))) {
 							fragment.singles.requestedSupport.push('sun');
 							fragment.vgc.requestedSupport.push('sun');
 						}
@@ -1274,10 +1276,12 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 							newMon.randbats.offeredSupport.rain.push(fragment);
 							break;
 						case 'Drought':
+						case 'Orichalcum Pulse':
 							if (!newMon.randbats.offeredSupport.sun) newMon.randbats.offeredSupport.sun = [];
 							newMon.randbats.offeredSupport.sun.push(fragment);
 							break;
 						case 'Electric Surge':
+						case 'Hadron Engine':
 							if (!newMon.randbats.offeredSupport.electricterrain) newMon.randbats.offeredSupport.electricterrain = [];
 							newMon.randbats.offeredSupport.electricterrain.push(fragment);
 							if (!newMon.randbats.offeredSupport.antisleep) newMon.randbats.offeredSupport.antisleep = [];
