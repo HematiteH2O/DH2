@@ -2420,6 +2420,10 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				if (!teamRequestedSupport[request]) teamRequestedSupport[request] = [];
 				if (!teamRequestedSupport[request].includes(fragment.pokemon)) teamRequestedSupport[request].push(fragment.pokemon);
 			}
+			for (const fragment of fragmentsList) if (fragment[format].acceptedSupport) for (const request of fragment[format].acceptedSupport) {
+				if (!teamRequestedSupport[request]) teamRequestedSupport[request] = [];
+				if (!teamRequestedSupport[request].includes(fragment.pokemon)) teamRequestedSupport[request].push(fragment.pokemon);
+			}
 			for (const type of types) {
 				if (!teamRequestedSupport[`${(type).toLowerCase()}resist`]) teamRequestedSupport[`${(type).toLowerCase()}resist`] = [];
 				teamRequestedSupport[`${(type).toLowerCase()}resist`].push("true");
@@ -2649,6 +2653,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					if (!teamHighPrioRequestedSupport[request]) teamHighPrioRequestedSupport[request] = [];
 					teamHighPrioRequestedSupport[request].push(chosenFragment.pokemon);
 				}
+				chosenFragment.eligible = false;
 			}
 		}
 		
