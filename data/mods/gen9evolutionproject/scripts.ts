@@ -444,14 +444,249 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					];
 					for (const ability of newMon.randbats.abilities) {
 						switch (ability) {
+							case 'Adaptability':
+								if (newMon.randbats.types.includes(move.type)) {
+									let modFragment = {
+										ability: ability,
+										moveBasePower: basePower * 4/3,
+									};
+									fragments.push(modFragment);
+								}
+								break;
 							case 'Aerilate':
 								if (move.type === 'Normal' && basePower && !noModifyType.includes(moveid)) {
 									baseFragment.avoid = ['Aerilate']; // impossible to have an Aerilate-boosted Flying move and an actual Normal-type move on the same set
 									let modFragment = {
-										ability: 'Aerilate',
+										ability: ability,
 										tags: ['Aerilate'],
 										moveType: 'Flying',
 										moveBasePower: basePower * 1.2,
+									};
+									fragments.push(modFragment);
+								}
+								break;
+							case 'Awakening':
+								if (move.type === 'Fighting' && basePower) {
+									let modFragment = {
+										ability: ability,
+										moveBasePower: basePower * 1.5,
+									};
+									fragments.push(modFragment);
+								}
+								break;
+							case 'Calcify':
+								if (move.type === 'Rock' && basePower) {
+									let modFragment = {
+										ability: ability,
+										moveBasePower: basePower * 1.3,
+									};
+									fragments.push(modFragment);
+								}
+								break;
+							case 'Canopy':
+								if (move.type === 'Grass' && basePower) {
+									let modFragment = {
+										ability: ability,
+										moveBasePower: basePower * 1.3,
+									};
+									fragments.push(modFragment);
+								}
+								break;
+							case 'Dragonize':
+								if (move.type === 'Normal' && basePower && !noModifyType.includes(moveid)) {
+									baseFragment.avoid = ['Dragonize'];
+									let modFragment = {
+										ability: ability,
+										tags: ['Dragonize'],
+										moveType: 'Dragon',
+										moveBasePower: basePower * 1.2,
+									};
+									fragments.push(modFragment);
+								}
+								break;
+							case `Dragon's Maw`:
+								if (move.type === 'Dragon' && basePower) {
+									let modFragment = {
+										ability: ability,
+										moveBasePower: basePower * 1.5,
+									};
+									fragments.push(modFragment);
+								}
+								break;
+							case 'Galvanize':
+								if (move.type === 'Normal' && basePower && !noModifyType.includes(moveid)) {
+									baseFragment.avoid = ['Galvanize'];
+									let modFragment = {
+										ability: ability,
+										tags: ['Galvanize'],
+										moveType: 'Electric',
+										moveBasePower: basePower * 1.2,
+									};
+									fragments.push(modFragment);
+								}
+								break;
+							case 'Iron Fist':
+								if (move.flags['punch'] && basePower) {
+									let modFragment = {
+										ability: ability,
+										moveBasePower: basePower * 1.2,
+									};
+									fragments.push(modFragment);
+								}
+								break;
+							case 'Mega Launcher':
+								if (move.flags['pulse'] && basePower) {
+									let modFragment = {
+										ability: ability,
+										moveBasePower: basePower * 1.5,
+									};
+									fragments.push(modFragment);
+								}
+								break;
+							case 'Normalize':
+								if (basePower && !noModifyType.includes(moveid)) {
+									baseFragment.avoid = ['Normalize'];
+									let modFragment = {
+										ability: ability,
+										tags: ['Normalize'],
+										moveType: 'Normal',
+										moveBasePower: basePower * 1.2,
+									};
+									fragments.push(modFragment);
+								}
+								break;
+							case 'Permafrost':
+								if (basePower && !noModifyType.includes(moveid)) {
+									baseFragment.avoid = ['Permafrost'];
+									let modFragment = {
+										ability: ability,
+										tags: ['Permafrost'],
+										moveType: 'Ice',
+										moveBasePower: basePower * 1.2,
+									};
+									fragments.push(modFragment);
+								}
+								break;
+							case 'Pixilate':
+								if (move.type === 'Normal' && basePower && !noModifyType.includes(moveid)) {
+									baseFragment.avoid = ['Pixilate'];
+									let modFragment = {
+										ability: ability,
+										tags: ['Pixilate'],
+										moveType: 'Fairy',
+										moveBasePower: basePower * 1.2,
+									};
+									fragments.push(modFragment);
+								}
+								break;
+							case 'Punk Rock':
+								if (move.flags['sound'] && basePower) {
+									let modFragment = {
+										ability: ability,
+										moveBasePower: basePower * 1.3,
+									};
+									fragments.push(modFragment);
+								}
+								break;
+							case 'Reckless':
+								if (move.recoil && basePower) {
+									let modFragment = {
+										ability: ability,
+										moveBasePower: basePower * 1.2,
+									};
+									fragments.push(modFragment);
+								}
+								break;
+							case 'Refrigerate':
+								if (move.type === 'Normal' && basePower && !noModifyType.includes(moveid)) {
+									baseFragment.avoid = ['Refrigerate'];
+									let modFragment = {
+										ability: ability,
+										tags: ['Refrigerate'],
+										moveType: 'Ice',
+										moveBasePower: basePower * 1.2,
+									};
+									fragments.push(modFragment);
+								}
+								break;
+							case 'Rocky Payload':
+								if (move.type === 'Rock' && basePower) {
+									let modFragment = {
+										ability: ability,
+										moveBasePower: basePower * 1.5,
+									};
+									fragments.push(modFragment);
+								}
+								break;
+							case 'Transistor':
+								if (move.type === 'Electric' && basePower) {
+									let modFragment = {
+										ability: ability,
+										moveBasePower: basePower * 1.3,
+									};
+									fragments.push(modFragment);
+								}
+								break;
+							case 'Sharpness':
+								if (move.flags['slicing'] && basePower) {
+									let modFragment = {
+										ability: ability,
+										moveBasePower: basePower * 1.5,
+									};
+									fragments.push(modFragment);
+								}
+								break;
+							case 'Sheer Force': // gonna have to make an exception for this in some utility categories
+								if ((move.secondaries || move.hasSheerForce) && basePower) {
+									let modFragment = {
+										ability: ability,
+										moveBasePower: basePower * 1.3,
+									};
+									fragments.push(modFragment);
+								}
+								break;
+							case 'Steelworker':
+							case 'Steely Spirit':
+								if (move.type === 'Steel' && basePower) {
+									let modFragment = {
+										ability: ability,
+										moveBasePower: basePower * 1.5,
+									};
+									fragments.push(modFragment);
+								}
+								break;
+							case 'Sharpness':
+								if (move.flags['bite'] && basePower) {
+									let modFragment = {
+										ability: ability,
+										moveBasePower: basePower * 1.5,
+									};
+									fragments.push(modFragment);
+								}
+								break;
+							case 'Technician':
+								if (basePower && basePower <= 60) {
+									let modFragment = {
+										ability: ability,
+										moveBasePower: basePower * 1.5,
+									};
+									fragments.push(modFragment);
+								}
+								break;
+							case 'Tough Claws':
+								if (move.flags['contact'] && basePower) {
+									let modFragment = {
+										ability: ability,
+										moveBasePower: basePower * 1.3,
+									};
+									fragments.push(modFragment);
+								}
+								break;
+							case 'Water Bubble':
+								if (move.type === 'Water' && basePower) {
+									let modFragment = {
+										ability: ability,
+										moveBasePower: basePower * 2,
 									};
 									fragments.push(modFragment);
 								}
