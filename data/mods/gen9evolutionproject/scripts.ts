@@ -2249,6 +2249,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				) {
 					// the fragment is already complete, so I should also check it off of the role tally and then delete it from the fragments list
 					if (fragment.role) {
+						console.log(`${fragment.fragmentPriority}${fragment.highpriority ? ' (highprio)' : ' '}${fragment.buddycomplete ? ' (buddycomplete)' : ' '} - ${fragment.pokemon.name} completed ${fragment.role} (${fragment.baseMove ? fragment.baseMove : ' '}) by default`);
 						if (!['mainstab', 'protection', 'personal'].includes(fragment.role)) {
 							if (!teamOfferedSupport[fragment.role]) teamOfferedSupport[fragment.role] = [];
 							if (!teamOfferedSupport[fragment.role].includes(fragment.pokemon)) teamOfferedSupport[fragment.role].push(fragment.pokemon);
@@ -2422,13 +2423,13 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				if (fragment.role) {
 					// prioritize roles that aren't covered
 					if (teamRequestedSupport[fragment.role] && !teamOfferedSupport[fragment.role]) {
-						// minor synergies get 4
-						if (fragment.role.includes(`immune`)) fragment.fragmentPriority = 4;
-						if (fragment.role.includes(`resist`)) fragment.fragmentPriority = 4;
-						// default synergies get 5
-						else if (baseRequestedSupport.includes(fragment.role)) fragment.fragmentPriority = 5;
 						// major, team-specific synergies get 6
-						else fragment.fragmentPriority = 6;
+						fragment.fragmentPriority = 6;
+						// default synergies get 5
+						if (baseRequestedSupport.includes(fragment.role)) fragment.fragmentPriority = 5;
+						// minor synergies get 4
+						if (fragment.role.indexOf(`immune`) >= 0) fragment.fragmentPriority = 4;
+						if (fragment.role.indexOf(`resist`) >= 0) fragment.fragmentPriority = 4;
 					}
 					if (teamOfferedSupport[fragment.role] && fragment.fragmentPriority > 3) fragment.fragmentPriority = 0;
 					if (fragment.role === 'mainstab') {
