@@ -655,7 +655,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 									fragments.push(modFragment);
 								}
 								break;
-							case 'Sharpness':
+							case 'Strong Jaw':
 								if (move.flags['bite'] && basePower) {
 									let modFragment = {
 										ability: ability,
