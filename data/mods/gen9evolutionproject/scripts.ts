@@ -461,11 +461,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						if (!fragment.baseMove) fragment.baseMove = move.name;
 						if (!fragment.moves) fragment.moves = [move.name];
 						
-						if (!fragment.ability) fragment.ability = null;
-						if (!fragment.item) fragment.item = null;
-						if (!fragment.evs) fragment.evs = { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
-						if (!fragment.teraType) fragment.teraType = null;
-						
 						if (!fragment.offeredSupport) fragment.offeredSupport = [];
 						if (!fragment.singles) fragment.singles = {};
 						if (!fragment.singles.requestedSupport) fragment.singles.requestedSupport = [];
