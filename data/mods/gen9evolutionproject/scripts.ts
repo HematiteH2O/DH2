@@ -351,7 +351,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						for (const ability of newMon.randbats.immunities[immunity].Ability) {
 							// push fragments
 							let fragment = {
-								offeredSupport: [],
+								ability: ability,
 								singles: {
 									requestedSupport: [],
 									acceptedSupport: [],
@@ -374,7 +374,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						for (const ability of newMon.randbats.resistances[resistance].Ability) {
 							// push fragments
 							let fragment = {
-								offeredSupport: [],
+								ability: ability,
 								singles: {
 									requestedSupport: [],
 									acceptedSupport: [],
@@ -462,7 +462,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						if (!fragment.baseMove) fragment.baseMove = move.name;
 						if (!fragment.moves) fragment.moves = [move.name];
 						
-						if (!fragment.offeredSupport) fragment.offeredSupport = [];
 						if (!fragment.singles) fragment.singles = {};
 						if (!fragment.singles.requestedSupport) fragment.singles.requestedSupport = [];
 						if (!fragment.singles.acceptedSupport) fragment.singles.acceptedSupport = [];
@@ -565,7 +564,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						];
 						const rejectStabs = [
 							// moves that generally shouldn't be treated as a *main* attacking or coverage move at all, regardless of BP
-							// plenty of these can come up later as "spicy" picks, though!
+							// plenty of these can come up later as "personal" picks, though!
 							'inferno', 'blastburn', 'mindblown',
 							'dive', 'hydrocannon',
 							'zapcannon',
@@ -638,11 +637,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								modFragment.score = fragment.moveBasePower;
 								newMon.randbats.offeredSupport.priority.push(modFragment);
 							} else if (fragment.moveBasePower && (fragment.moveBasePower *1.5 > 40) && !fragment.stab && !fragment.teraType && fragment.moveType !== 'Normal') {
-								// push to "spicy" for some last-pick set filler
-								if (!newMon.randbats.offeredSupport.spicy) newMon.randbats.offeredSupport.spicy = [];
+								// push to "personal" for some last-pick set filler
+								if (!newMon.randbats.offeredSupport.personal) newMon.randbats.offeredSupport.personal = [];
 								let modFragment = Utils.deepClone(fragment);
 								modFragment.teraType = fragment.moveType;
-								newMon.randbats.offeredSupport.spicy.push(modFragment);
+								newMon.randbats.offeredSupport.personal.push(modFragment);
 							}
 						}
 						// spread
@@ -837,6 +836,109 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 						} else accepted = true;
 					}
 					if (!accepted) delete newMon.randbats.offeredSupport[offeredSupport];
+				}
+				
+				// finally, some Abilities offer innate utility which has nothing to do with how they affect moves or type matchups, so let's cover those quickly
+				for (const ability of newMon.randbats.abilities) {
+					let fragment = {
+						ability: ability,
+						singles: {
+							requestedSupport: [],
+							acceptedSupport: [],
+						},
+						vgc: {
+							requestedSupport: [],
+							acceptedSupport: [],
+						},
+						fragmentPriority: 4,
+					};
+					switch (ability) {
+						// offeredSupport
+						case 'Drizzle':
+							if (!newMon.randbats.offeredSupport.rain) newMon.randbats.offeredSupport.rain = [];
+							newMon.randbats.offeredSupport.rain.push(fragment);
+							break;
+						case 'Drought':
+							if (!newMon.randbats.offeredSupport.sun) newMon.randbats.offeredSupport.sun = [];
+							newMon.randbats.offeredSupport.sun.push(fragment);
+							break;
+						case 'Sand Stream':
+						case 'Sand Spit':
+							if (!newMon.randbats.offeredSupport.sand) newMon.randbats.offeredSupport.sand = [];
+							newMon.randbats.offeredSupport.sand.push(fragment);
+							break;
+						case 'Snow Warning':
+							if (!newMon.randbats.offeredSupport.snow) newMon.randbats.offeredSupport.snow = [];
+							newMon.randbats.offeredSupport.snow.push(fragment);
+							break;
+						case 'Electric Surge':
+							if (!newMon.randbats.offeredSupport.electricterrain) newMon.randbats.offeredSupport.electricterrain = [];
+							newMon.randbats.offeredSupport.electricterrain.push(fragment);
+							if (!newMon.randbats.offeredSupport.antisleep) newMon.randbats.offeredSupport.antisleep = [];
+							newMon.randbats.offeredSupport.antisleep.push(fragment);
+							break;
+						case 'Grassy Surge':
+							if (!newMon.randbats.offeredSupport.grassyterrain) newMon.randbats.offeredSupport.grassyterrain = [];
+							newMon.randbats.offeredSupport.grassyterrain.push(fragment);
+							break;
+						case 'Psychic Surge':
+							if (!newMon.randbats.offeredSupport.psychicterrain) newMon.randbats.offeredSupport.psychicterrain = [];
+							newMon.randbats.offeredSupport.psychicterrain.push(fragment);
+							if (!newMon.randbats.offeredSupport.antipriority) newMon.randbats.offeredSupport.antipriority = [];
+							newMon.randbats.offeredSupport.antipriority.push(fragment);
+							break;
+						case 'Misty Surge':
+							if (!newMon.randbats.offeredSupport.mistyterrain) newMon.randbats.offeredSupport.mistyterrain = [];
+							newMon.randbats.offeredSupport.mistyterrain.push(fragment);
+							if (!newMon.randbats.offeredSupport.antistatus) newMon.randbats.offeredSupport.antistatus = [];
+							newMon.randbats.offeredSupport.antistatus.push(fragment);
+							if (!newMon.randbats.offeredSupport.antisleep) newMon.randbats.offeredSupport.antisleep = [];
+							newMon.randbats.offeredSupport.antisleep.push(fragment);
+							break;
+						case 'Intimidate':
+							if (!newMon.randbats.offeredSupport.physreduction) newMon.randbats.offeredSupport.physreduction = [];
+							newMon.randbats.offeredSupport.physreduction.push(fragment);
+							if (!newMon.randbats.offeredSupport.intimidate) newMon.randbats.offeredSupport.intimidate = [];
+							newMon.randbats.offeredSupport.intimidate.push(fragment);
+							break;
+						// acceptedSupport
+						case 'Swift Swim':
+						case 'Dry Skin':
+							if (!newMon.randbats.singles.acceptedSupport.rain) newMon.randbats.singles.acceptedSupport.rain = [];
+							newMon.randbats.singles.acceptedSupport.rain.push(fragment);
+							if (!newMon.randbats.vgc.acceptedSupport.rain) newMon.randbats.vgc.acceptedSupport.rain = [];
+							newMon.randbats.vgc.acceptedSupport.rain.push(fragment);
+							break;
+						case 'Chlorophyll':
+						case 'Solar Power':
+						case 'Harvest':
+							if (!newMon.randbats.singles.acceptedSupport.sun) newMon.randbats.singles.acceptedSupport.sun = [];
+							newMon.randbats.singles.acceptedSupport.sun.push(fragment);
+							if (!newMon.randbats.vgc.acceptedSupport.sun) newMon.randbats.vgc.acceptedSupport.sun = [];
+							newMon.randbats.vgc.acceptedSupport.sun.push(fragment);
+							break;
+						case 'Sand Rush':
+						case 'Sand Force':
+							if (!newMon.randbats.singles.acceptedSupport.sand) newMon.randbats.singles.acceptedSupport.sand = [];
+							newMon.randbats.singles.acceptedSupport.sand.push(fragment);
+							if (!newMon.randbats.vgc.acceptedSupport.sand) newMon.randbats.vgc.acceptedSupport.sand = [];
+							newMon.randbats.vgc.acceptedSupport.sand.push(fragment);
+							break;
+						case 'Slush Rush':
+						case 'Ice Body':
+						case 'Frozen Focus':
+							if (!newMon.randbats.singles.acceptedSupport.snow) newMon.randbats.singles.acceptedSupport.snow = [];
+							newMon.randbats.singles.acceptedSupport.snow.push(fragment);
+							if (!newMon.randbats.vgc.acceptedSupport.snow) newMon.randbats.vgc.acceptedSupport.snow = [];
+							newMon.randbats.vgc.acceptedSupport.snow.push(fragment);
+							break;
+						case 'Surge Surfer':
+							if (!newMon.randbats.singles.acceptedSupport.electricterrain) newMon.randbats.singles.acceptedSupport.electricterrain = [];
+							newMon.randbats.singles.acceptedSupport.electricterrain.push(fragment);
+							if (!newMon.randbats.vgc.acceptedSupport.electricterrain) newMon.randbats.vgc.acceptedSupport.electricterrain = [];
+							newMon.randbats.vgc.acceptedSupport.electricterrain.push(fragment);
+							break;
+					}
 				}
 			}
 		}
@@ -2102,7 +2204,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				fragment.highpriority = false;
 				if (fragment.role && fragment.role === 'mainstab') fragment.fragmentPriority = 2;
 				if (fragment.role && fragment.role === 'protection') fragment.fragmentPriority = 1;
-				if (fragment.role && fragment.role === 'spicy') fragment.fragmentPriority = 0;
+				if (fragment.role && fragment.role === 'personal') fragment.fragmentPriority = 0;
 
 				if (fragment.ability && fragment.pokemon.freeAbility && fragment.ability === fragment.pokemon.freeAbility) {
 					fragment.ability = null;
@@ -2147,7 +2249,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				) {
 					// the fragment is already complete, so I should also check it off of the role tally and then delete it from the fragments list
 					if (fragment.role) {
-						if (!['mainstab', 'protection', 'spicy'].includes(fragment.role)) {
+						if (!['mainstab', 'protection', 'personal'].includes(fragment.role)) {
 							if (!teamOfferedSupport[fragment.role]) teamOfferedSupport[fragment.role] = [];
 							if (!teamOfferedSupport[fragment.role].includes(fragment.pokemon)) teamOfferedSupport[fragment.role].push(fragment.pokemon);
 							if (!fragment.pokemon.roles) fragment.pokemon.roles = [];
@@ -2329,7 +2431,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 						// if one half of a synergy exists, prioritize the other half
 						if ((teamHighPrioRequestedSupport[fragment.role] && teamHighPrioRequestedSupport[fragment.role].filter((requester) => (requester !== fragment.pokemon)).length) && !teamOfferedSupport[fragment.role]) fragment.highpriority = true;
 						// if the team doesn't want the support, throw out the fragment
-						if ((!teamRequestedSupport[fragment.role] || !teamRequestedSupport[fragment.role].filter((requester) => (requester !== fragment.pokemon)).length) && (!teamHighPrioRequestedSupport[fragment.role] || !teamHighPrioRequestedSupport[fragment.role].filter((requester) => (requester !== fragment.pokemon)).length) && fragment.role !== 'spicy') fragment.eligible = false;
+						if ((!teamRequestedSupport[fragment.role] || !teamRequestedSupport[fragment.role].filter((requester) => (requester !== fragment.pokemon)).length) && (!teamHighPrioRequestedSupport[fragment.role] || !teamHighPrioRequestedSupport[fragment.role].filter((requester) => (requester !== fragment.pokemon)).length) && fragment.role !== 'personal') fragment.eligible = false;
 						// otherwise, record that the support is still possible at this point
 						else {
 							if (!possibleSupport[fragment.role]) possibleSupport[fragment.role] = [];
@@ -2403,7 +2505,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			// fragmentPriority of 1 is for protection moves in VGC, but it won't come up in singles
 			if (!fragmentsListThisStep.length) fragmentsListThisStep = fragmentsList.filter((fragment) => (fragment.fragmentPriority > 0));
 
-			// fragmentPriority of 0 is for "spicy" picks as well as roles that have already been completed
+			// fragmentPriority of 0 is for "personal" picks as well as roles that have already been completed
 			if (!fragmentsListThisStep.length) fragmentsListThisStep = fragmentsList;
 			
 			if (!fragmentsListThisStep.length) {
@@ -2420,7 +2522,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				let reducedFragmentsListThisStep = [];
 				let roleCount = {};
 				for (const fragment of fragmentsListThisStep) {
-					if (fragment.role && !['mainstab', 'protection', 'spicy'].includes(fragment.role)) {
+					if (fragment.role && !['mainstab', 'protection', 'personal'].includes(fragment.role)) {
 						if (!roleCount[fragment.role]) roleCount[fragment.role] = [];
 						if (!roleCount[fragment.role].includes(fragment.pokemon.name)) roleCount[fragment.role].push(fragment.pokemon.name);
 					}
@@ -2430,7 +2532,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 					if (minRoleCount > roleCount[role].length) minRoleCount = roleCount[role].length;
 				}
 				for (const fragment of fragmentsListThisStep) {
-					if (fragment.role && !['mainstab', 'protection', 'spicy'].includes(fragment.role) && roleCount[fragment.role].length <= minRoleCount) reducedFragmentsListThisStep.push(fragment);
+					if (fragment.role && !['mainstab', 'protection', 'personal'].includes(fragment.role) && roleCount[fragment.role].length <= minRoleCount) reducedFragmentsListThisStep.push(fragment);
 				}
 				if (reducedFragmentsListThisStep.length) fragmentsListThisStep = reducedFragmentsListThisStep;
 			}
@@ -2441,7 +2543,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			let roleScores = {};
 			let safeScores = {};
 			for (const fragment of fragmentsListThisStep) {
-				if (fragment.role && !['mainstab', 'spicy'].includes(fragment.role)) {
+				if (fragment.role && !['mainstab', 'personal'].includes(fragment.role)) {
 					if (!roleScores[fragment.role]) roleScores[fragment.role] = 0;
 					if (fragment.score && fragment.score > roleScores[fragment.role]) roleScores[fragment.role] = fragment.score;
 				}
@@ -2454,7 +2556,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 			}
 			for (const fragment of fragmentsListThisStep) {
 				let safeToPush = true;
-				if (fragment.role && !['mainstab', 'spicy'].includes(fragment.role)) {
+				if (fragment.role && !['mainstab', 'personal'].includes(fragment.role)) {
 					if (roleScores[fragment.role] && roleScores[fragment.role] > 0 && (!fragment.score || (roleScores[fragment.role] > fragment.score))) safeToPush = false;
 				}
 				else if (fragment.role && fragment.role === 'mainstab') {
@@ -2501,7 +2603,7 @@ singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff'
 				}
 				if (chosenFragment.role) {
 					console.log(`${chosenFragment.fragmentPriority}${chosenFragment.highpriority ? ' (highprio)' : ' '}${chosenFragment.buddycomplete ? ' (buddycomplete)' : ' '} - ${chosenFragment.pokemon.name} assigned ${chosenFragment.role} (${chosenFragment.baseMove ? chosenFragment.baseMove : ' '})`);
-					if (!['mainstab', 'protection', 'spicy'].includes(chosenFragment.role)) {
+					if (!['mainstab', 'protection', 'personal'].includes(chosenFragment.role)) {
 						if (!teamOfferedSupport[chosenFragment.role]) teamOfferedSupport[chosenFragment.role] = [];
 						if (!teamOfferedSupport[chosenFragment.role].includes(chosenFragment.pokemon)) teamOfferedSupport[chosenFragment.role].push(chosenFragment.pokemon);
 						if (!chosenFragment.pokemon.roles) chosenFragment.pokemon.roles = [];
