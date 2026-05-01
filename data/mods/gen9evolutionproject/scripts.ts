@@ -1172,12 +1172,130 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								}
 							}
 							// I don't really want these to replace Protect 100% of the time, but it's nice to have a random chance of them for now:
-							else if (['quickguard', 'wideguard'].includes(moveid)) modFragment.bypassScore = true;
+							else if (['quickguard', 'wideguard'].includes(moveid)) {
+								modFragment.bypassScore = true;
+								modFragment.unique = true;
+							}
 							else modFragment.score = 5; // the unique protection clones are the best
 							
 							if (!newMon.randbats.offeredSupport.protection) newMon.randbats.offeredSupport.protection = [];
 							newMon.randbats.offeredSupport.protection.push(modFragment);
 						}
+
+						// now we're getting into stuff that not every team will request by default, so I'll also have to establish what teams request them, or just setting them up does nothing!
+						// redirection
+						if (['allyswitch', 'followme', 'ragepowder'].includes(moveid)) {
+							if (!newMon.randbats.offeredSupport.redirection) newMon.randbats.offeredSupport.redirection = [];
+							newMon.randbats.offeredSupport.redirection.push(fragment);
+						}
+						// move disruption
+						if (['taunt', 'torment', 'encore', 'disable', 'skydrop', 'psychicnoise', 'upperhand', 'imprison'].includes(moveid)) {
+							// TODO: these *are not* all interchangeable and should be divided further
+							if (!newMon.randbats.offeredSupport.disruption) newMon.randbats.offeredSupport.disruption = [];
+							newMon.randbats.offeredSupport.disruption.push(fragment);
+						}
+						// fixed damage
+						if ([
+							'destinybond', 'counter', 'mirrorcoat', 'metalburst', 'comeuppance', 'endeavor',
+							'superfang', 'naturesmadness', 'ruination'
+						].includes(moveid)) {
+							// TODO: these *are not* all interchangeable and should be divided further
+							if (!newMon.randbats.offeredSupport.fixeddamage) newMon.randbats.offeredSupport.fixeddamage = [];
+							newMon.randbats.offeredSupport.fixeddamage.push(fragment);
+						}
+						// damage support
+						// physical
+						if (
+							[
+								'howl', 'decorate', 'helpinghand',
+								'leer', 'screech', 'obstruct', 'octolock', 'spicyextract', 'tickle',
+								'firelash', 'gravapple', 'thunderouskick'
+							].includes(moveid) ||
+							(['crushclaw', 'razorshell', 'triplearrows'].includes(moveid) && ((!fragment.ability && newMon.randbats.abilities.includes('Serene Grace')) || (fragment.ability && fragment.ability === 'Serene Grace')))
+						) {
+							// TODO: you want priority,
+							let modFragment = Utils.deepClone(fragment);
+							if ((['crushclaw', 'razorshell', 'triplearrows'].includes(moveid) && !fragment.ability && newMon.randbats.abilities.includes('Serene Grace'))) modFragment.ability = 'Serene Grace';
+							// TODO: these *are not* all interchangeable and should be divided further
+							if (!newMon.randbats.offeredSupport.defensereduction) newMon.randbats.offeredSupport.defensereduction = [];
+							newMon.randbats.offeredSupport.defensereduction.push(fragment);
+						}
+						// special
+						if (
+							[
+								'decorate', 'helpinghand',
+								'faketears', 'metalsound', 'octolock',
+								'acidspray', 'appleacid', 'luminacrash'
+							].includes(moveid) ||
+							(['lusterpurge', 'seedflare'].includes(moveid) && ((!fragment.ability && newMon.randbats.abilities.includes('Serene Grace')) || (fragment.ability && fragment.ability === 'Serene Grace')))
+						) {
+							let modFragment = Utils.deepClone(fragment);
+							if ((['lusterpurge', 'seedflare'].includes(moveid) && !fragment.ability && newMon.randbats.abilities.includes('Serene Grace'))) modFragment.ability = 'Serene Grace';
+							// TODO: these *are not* all interchangeable and should be divided further
+							if (!newMon.randbats.offeredSupport.spdefreduction) newMon.randbats.offeredSupport.spdefreduction = [];
+							newMon.randbats.offeredSupport.spdefreduction.push(fragment);
+						}
+						// side healing
+						if (
+							[
+								'healpulse', 'floralhealing', 'pollenpuff',
+								'lifedew', 'junglehealing', 'lunarblessing',
+								'revivalblessing',
+							].includes(moveid)
+						) {
+							if (!newMon.randbats.offeredSupport.sidehealing) newMon.randbats.offeredSupport.sidehealing = [];
+							newMon.randbats.offeredSupport.sidehealing.push(fragment);
+						}
+						// momentum
+						if (
+							[
+								'uturn', 'voltswitch', 'flipturn',
+								'batonpass', 'teleport', 'chillyreception', 'partingshot',
+							].includes(moveid)
+						) {
+							let modFragment = Utils.deepClone(fragment);
+							if (moveid === 'batonpass') modFragment.format = 'vgc'; // banned in singles
+							if (!newMon.randbats.offeredSupport.pivoting) newMon.randbats.offeredSupport.pivoting = [];
+							newMon.randbats.offeredSupport.pivoting.push(modFragment);
+							// TODO: also counts as "personal" with tag "momentum" and probably some buddy fragments
+						}
+
+					/*
+
+	Speed boosting:
+
+Shell Smash, Fillet Away, No Retreat < mixed setup
+Dragon Dance, Shift Gear, Tidy Up, Victory Dance < physical setup
+Quiver Dance, Geomancy < special setup
+
+Flame Charge, Aqua Step, Scale Shot, Trailblaze < *pair with* physical setup
+Esper Wing < *pair with* special setup
+Rapid Spin < *pair with* any setup
+
+	Setup:
+Swords Dance, Belly Drum, Power-Up Punch, Charge Beam, Fiery Dance, Growth, Nasty Plot, Tail Glow
+really should expand to include every kind of offensive boosting
+in VGC, best to pair with viable spread or priority of the same category
+
+Skill Swap, Entrainment, Simple Beam, Soak -> unique disruption/support
+Acupressure -> unique boosting
+Rototiller, Flower Shield, Magnetic Flux, Gear Up -> team-specific support
+
+NOT IN "OTHER" BUT THEY SHOULD BE
+Beat Up/other multihits
+Quash
+Snatch??
+Topsy-Turvy
+Fling
+Trick/Switcheroo
+Memento/Healing Wish/Explosion/Self-Destruct/Misty Explosion
+Pledge moves, Fusion moves
+Quick Guard/Wide Guard
+
+ALSO 
+manual field effects/team archetypes, but what qualifies something to set them? (priorities: weather, terrain, Gravity, Perish Song, Toxic Spikes, Sticky Web, Poison Gas)
+make sure to account for every possible acceptedSupport for each of these
+					*/
 						
 /*
 singles ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff', 'contactpunish', 'electricimmune', 'groundimmune'];
