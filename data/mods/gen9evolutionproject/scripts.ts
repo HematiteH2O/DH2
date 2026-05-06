@@ -2951,9 +2951,19 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (stabSpace && stabSpace > 0) set.moveCount += stabSpace;
 			}
 			for (const fragment of fragmentsList) {
+				let reportMovesLeft = false;
+				let movesLeft = [];
 				if (fragment.moves && fragment.pokemon.moves) {
 					if (fragment.moves.filter((move) => (!fragment.pokemon.moves.includes(move) && !fragment.pokemon.remainingStabMoves.includes(move))).length + fragment.pokemon.moveCount > 4) fragment.eligible = false;
-					if (!fragment.eligible) console.log(fragment.baseMove);
+					if (!fragment.eligible) {
+						console.log(`${fragment.pokemon.name} rejected ${fragment.baseMove} to save room for STABs`);
+						if (fragment.pokemon.name === 'Drampa-Shifu') reportMovesLeft = true;
+					}
+					if (fragment.eligible && !movesLeft.includes(fragment.baseMove) && fragment.pokemon.name === 'Drampa-Shifu') movesLeft.push(fragment.baseMove);
+				}
+				if (movesLeft && reportMovesLeft) {
+					console.log('Moves left:');
+					console.log(movesLeft);
 				}
 			}
 			fragmentsList = fragmentsList.filter((fragment) => (fragment.eligible === true));
