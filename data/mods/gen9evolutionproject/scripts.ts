@@ -1023,6 +1023,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								modFragment.weight = 2;
 							}
 							if (!fragment.stab && !fragment.teraType) modFragment.teraType = fragment.moveType;
+							if (!modFragment.tags) modFragment.tags = [];
+							if (!move.overrideOffensiveStat && !modFragment.tags.includes(${(move.category).toLowerCase()})) modFragment.tags.push(${(move.category).toLowerCase()});
 							if (fragment.moveBasePower >= 90 || (fragment.stab && fragment.moveBasePower >= 80)) {
 								if (fragment.stab || fragment.moveType !== 'Normal' || fragment.moveBasePower >= 120) newMon.randbats.viableStabs.push(modFragment);
 								// stop giving random things Double-Edge!! I know it has good BP :sob:
@@ -1259,8 +1261,87 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							newMon.randbats.offeredSupport.pivoting.push(modFragment);
 							// TODO: also counts as "personal" with tag "momentum" and probably some buddy fragments
 						}
+						// setup
+						// Speed-boosting setup
+						if (
+							[
+								'shellsmash', 'filletaway', 'noretreat', // mixed setup
+								'dragondance', 'shiftgear', 'tidyup', 'victorydance', // physical setup
+								'quiverdance', 'geomancy', // special setup
+
+								'rapidspin', // "mixed" Speed-boosting attacks
+								'flamecharge', 'aquastep', 'scaleshot', 'trailblaze', // physical Speed-boosting attacks
+								'esperwing', // special Speed-boosting attacks
+							].includes(moveid)
+						) {
+							let modFragment = Utils.deepClone(fragment);
+
+							if (!modFragment.tags) modFragment.tags = [];
+							modFragment.tags.push('speedsetup');
+							if (['dragondance', 'shiftgear', 'tidyup', 'victorydance'].includes(moveid)) modFragment.tags.push('physicalsetup');
+							if (['quiverdance', 'geomancy'].includes(moveid)) modFragment.tags.push('specialsetup');
+							
+							if (!modFragment.roles) modFragment.avoid = [];
+							if ([
+								'dragondance', 'shiftgear', 'victorydance',
+								'flamecharge', 'aquastep', 'scaleshot', 'trailblaze',
+							].includes(moveid)) modFragment.avoid.push('special');
+							if ([
+								'quiverdance', 'geomancy',
+								'esperwing',
+							].includes(moveid)) modFragment.avoid.push('physical');
+							modFragment.avoid.push('speedsetup'); // redundant to have more than one of these on the same set
+							
+							if (!modFragment.buddy) modFragment.buddy = {};
+							if (!modFragment.buddy.roles) modFragment.buddy.roles = [];
+							if ([
+								'dragondance', 'shiftgear', 'victorydance',
+								'flamecharge', 'aquastep', 'scaleshot', 'trailblaze',
+							].includes(moveid)) modFragment.buddy.roles.push('physical');
+							if ([
+								'quiverdance', 'geomancy',
+								'esperwing',
+							].includes(moveid)) modFragment.buddy.roles.push('special');
+							if (['flamecharge', 'aquastep', 'scaleshot', 'trailblaze'].includes(moveid)) modFragment.buddy.roles.push('physicalsetup');
+							if (['esperwing'].includes(moveid)) modFragment.buddy.roles.push('specialsetup');
+							
+							if (!newMon.randbats.offeredSupport.personal) newMon.randbats.offeredSupport.personal = [];
+							newMon.randbats.offeredSupport.personal.push(modFragment);
+						}
+						// physical setup
+						if (
+							[
+								'swordsdance', 'bulkup', // filler (I will expand this)
+							].includes(moveid)
+						) {
+							let modFragment = Utils.deepClone(fragment);
+
+							if (!modFragment.tags) modFragment.tags = [];
+							modFragment.tags.push('physicalsetup');
+							
+							if (!modFragment.roles) modFragment.avoid = [];
+							modFragment.avoid.push('special');
+							
+							if (!modFragment.buddy) modFragment.buddy = {};
+							if (!modFragment.buddy.roles) modFragment.buddy.roles = [];
+							modFragment.buddy.roles.push('physical');
+
+							let modFragmentPrioVGC = Utils.deepClone(modFragment);
+							modFragmentPrioVGC.format = 'vgc';
+							modFragmentPrioVGC.buddy.roles.push('priority');
+							let modFragmentSpreadVGC = Utils.deepClone(modFragment);
+							modFragmentSpreadVGC.format = 'vgc';
+							modFragmentSpreadVGC.buddy.roles.push('spread');
+							modFragment.format = 'singles';
+							
+							if (!newMon.randbats.offeredSupport.personal) newMon.randbats.offeredSupport.personal = [];
+							newMon.randbats.offeredSupport.personal.push(modFragment);
+							newMon.randbats.offeredSupport.personal.push(modFragmentPrioVGC);
+							newMon.randbats.offeredSupport.personal.push(modFragmentSpreadVGC);
+						}
+						// special setup
 					
-					// singles:
+					// singles-only:
 						// Knock Off
 						if (fragment.moves.includes('Knock Off')) {
 							if (!newMon.randbats.offeredSupport.knockoff) newMon.randbats.offeredSupport.knockoff = [];
