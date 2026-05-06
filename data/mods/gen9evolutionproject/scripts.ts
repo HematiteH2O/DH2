@@ -1024,7 +1024,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							}
 							if (!fragment.stab && !fragment.teraType) modFragment.teraType = fragment.moveType;
 							if (!modFragment.tags) modFragment.tags = [];
-							if (!move.overrideOffensiveStat && !modFragment.tags.includes(`${(move.category).toLowerCase()}`) modFragment.tags.push(`${(move.category).toLowerCase()}`);
+							if (!move.overrideOffensiveStat && !modFragment.tags.includes(`${(move.category).toLowerCase()}`)) modFragment.tags.push(`${(move.category).toLowerCase()}`);
 							if (fragment.moveBasePower >= 90 || (fragment.stab && fragment.moveBasePower >= 80)) {
 								if (fragment.stab || fragment.moveType !== 'Normal' || fragment.moveBasePower >= 120) newMon.randbats.viableStabs.push(modFragment);
 								// stop giving random things Double-Edge!! I know it has good BP :sob:
