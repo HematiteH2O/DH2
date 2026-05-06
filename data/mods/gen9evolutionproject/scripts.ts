@@ -1427,14 +1427,19 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								newMon.randbats.offeredSupport.personal.push(modFragment);
 								newMon.randbats.offeredSupport.personal.push(modFragmentPrioVGC);
 							} else if (moveid === 'curse') {
-								if (!newMon.randbats.types.includes('Ghost')) {
+								if (!newMon.randbats.types.includes('Ghost')) { // completely ignore the setup version of Curse if you're Ghost-type
+									// normally, singles Pokémon will avoid Curse if they have Bulk Up as an option
+									if (!learnset.bulkup) newMon.randbats.offeredSupport.personal.push(modFragment);
+									// but if you have something else tagged "minspeed" anyway, go for it!
 									let modFragmentCurseSlow = Utils.deepClone(modFragment);
-									if (!modFragmentCurseSlow.buddy.moves) modFragmentCurseSlow.buddy.moves = [];
-									modFragmentCurseSlow.buddy.moves.push('Gyro Ball');
-									modFragment.score = -2;
-									modFragmentCurseSlow.score = 2;
-									newMon.randbats.offeredSupport.personal.push(modFragment);
+									modFragmentCurseSlow.buddy.roles.push('minspeed');
 									newMon.randbats.offeredSupport.personal.push(modFragmentCurseSlow);
+									// this is to get it paired with things like Gyro Ball
+
+									// for VGC, it's not necessarily worse than Bulk Up, so I won't make that check
+									// but there are plenty situations when sets will be labeled minspeed, so it's still good to do that part:
+									modFragmentPrioVGC.buddy.roles.push('minspeed');
+									modFragmentSpreadVGC.buddy.roles.push('minspeed');
 									newMon.randbats.offeredSupport.personal.push(modFragmentPrioVGC);
 									newMon.randbats.offeredSupport.personal.push(modFragmentSpreadVGC);
 								}
@@ -2828,6 +2833,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 				if (fragment.item && fragment.pokemon.item) {
 					if (fragment.item === fragment.pokemon.item) fragment.item = null;
+					if (fragment.role === 'choicebreaker') fragment.role = 'mainstab';
 					else fragment.eligible = false;
 				}
 				if (fragment.item && format === 'vgc' && teamItemsSoFar.includes(fragment.item)) fragment.eligible = false; // item clause
