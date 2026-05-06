@@ -1025,7 +1025,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							if (!fragment.stab && !fragment.teraType) modFragment.teraType = fragment.moveType;
 							if (!modFragment.tags) modFragment.tags = [];
 							if (!move.overrideOffensiveStat && !modFragment.tags.includes(`${(move.category).toLowerCase()}`)) modFragment.tags.push(`${(move.category).toLowerCase()}`);
-							if (fragment.moveAccuracy < 85 || move.multiaccuracy) modFragment.tags.push('inaccurate');
+							if (fragment.moveAccuracy < 80 || move.multiaccuracy) modFragment.tags.push('inaccurate');
 							if (fragment.moveBasePower >= 90 || (fragment.stab && fragment.moveBasePower >= 80)) {
 								if (fragment.stab || fragment.moveType !== 'Normal' || fragment.moveBasePower >= 120) newMon.randbats.viableStabs.push(modFragment);
 								// stop giving random things Double-Edge!! I know it has good BP :sob:
@@ -1036,6 +1036,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								// this will be a good threshold for choice item sets... I think
 								if (!newMon.randbats.offeredSupport.choicebreaker) newMon.randbats.offeredSupport.choicebreaker = [];
 								modFragment2.item = (fragment.moveCategory === 'Physical' ? 'Choice Band' : 'Choice Specs');
+								if (!modFragment2.avoid) modFragment2.avoid = [];
+								modFragment2.avoid.push('speedsetup');
 								newMon.randbats.offeredSupport.choicebreaker.push(modFragment2);
 							}
 						}
@@ -1295,7 +1297,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							if (['dragondance', 'shiftgear', 'tidyup', 'victorydance'].includes(moveid)) modFragment.tags.push('physicalsetup');
 							if (['quiverdance', 'geomancy'].includes(moveid)) modFragment.tags.push('specialsetup');
 							
-							if (!modFragment.roles) modFragment.avoid = [];
+							if (!modFragment.avoid) modFragment.avoid = [];
 							if ([
 								'dragondance', 'shiftgear', 'victorydance',
 								'flamecharge', 'aquastep', 'scaleshot', 'trailblaze',
@@ -1335,7 +1337,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							let modFragment = Utils.deepClone(fragment);
 
 							if (!modFragment.tags) modFragment.tags = [];
-							if (!modFragment.roles) modFragment.avoid = [];
+							if (!modFragment.avoid) modFragment.avoid = [];
 							if (!modFragment.buddy) modFragment.buddy = {};
 							if (!modFragment.buddy.roles) modFragment.buddy.roles = [];
 
