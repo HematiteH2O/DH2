@@ -925,7 +925,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							fragment.singles.requestedSupport.push('psychicterrain');
 							fragment.vgc.requestedSupport.push('psychicterrain');
 						}
-						if (moveid === 'grassyglide'  && !['Grassy Surge', 'Seed Sower'].includes(fragment.ability))
+						if (moveid === 'grassyglide'  && !['Grassy Surge', 'Seed Sower'].includes(fragment.ability)) {
 							fragment.movePriority += 1;
 							fragment.singles.requestedSupport.push('grassyterrain');
 							fragment.vgc.requestedSupport.push('grassyterrain');
