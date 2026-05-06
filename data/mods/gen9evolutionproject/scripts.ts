@@ -2723,6 +2723,22 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			}
 		}
 
+		// quick sanity check: clearing out false positive "buddy fragments"
+		// if fragment.buddy existed but it was empty to begin with, it would mistakenly be treated as complete and prioritized
+		// I noticed this happening a couple of times during testing, so this is a failsafe!
+		for (const fragment of fragmentsList) {
+			if (fragment.buddy) {
+				if (
+					!fragment.buddy.ability && !fragment.buddy.item && !fragment.buddy.teraType && !(fragment.buddy.moves && fragment.buddy.moves.length) && !(fragment.buddy.roles && fragment.buddy.roles.length) && !(
+						fragment.buddy.evs && (fragment.buddy.evs['hp'] > 0 || fragment.buddy.evs['atk'] > 0 || fragment.buddy.evs['def'] > 0 || fragment.buddy.evs['spa'] > 0 || fragment.buddy.evs['spd'] > 0 || fragment.buddy.evs['spe'] > 0)
+					)
+				) {
+					fragment.buddy = null;
+					console.log(`${fragment.pokemon.name}'s ${fragment.baseMove} had a false positive buddy cleared`);
+				}
+			}
+		}
+
 		while (eligibleFragments) {
 			// if there are already no fragments left on any Pokémon, immediately set eligibleFragments to false and then "continue;" to end the loop
 			if (!fragmentsList.length) {
@@ -2964,7 +2980,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				let reportMovesLeft = false;
 				let movesLeft = [];
 				if (fragment.moves && fragment.pokemon.moves) {
-					if (fragment.moves.filter((move) => (!fragment.pokemon.moves.includes(move) && !fragment.pokemon.remainingStabMoves.includes(move))).length + fragment.pokemon.moveCount > 4) fragment.eligible = false;
+					if ((fragment.moves.filter((move) => (!fragment.pokemon.moves.includes(move) && !fragment.pokemon.remainingStabMoves.includes(move))).length + fragment.pokemon.moveCount) > 4) fragment.eligible = false;
 					if (!fragment.eligible) {
 						console.log(`${fragment.pokemon.name} rejected ${fragment.baseMove} to save room for STABs`);
 						if (fragment.pokemon.name === 'Drampa') reportMovesLeft = true;
