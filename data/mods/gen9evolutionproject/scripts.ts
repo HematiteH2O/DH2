@@ -1054,12 +1054,22 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								// this was initially a sample to test the score feature, but I think it's a good idea to keep it this way:
 								// if you have multiple candidates for priority users, the strongest one is picked first
 								let modFragment = Utils.deepClone(fragment);
+								if (['firstimpression', 'fakeout'].includes(moveid)) {
+									if (!modFragment.avoid) modFragment.avoid = [];
+									modFragment.avoid.push('physicalsetup');
+									modFragment.avoid.push('speedsetup');
+								}
 								modFragment.score = fragment.moveBasePower;
 								newMon.randbats.offeredSupport.priority.push(modFragment);
 							} else if (fragment.moveBasePower && (fragment.moveBasePower *1.5 > 40) && !fragment.stab && !fragment.teraType && fragment.moveType !== 'Normal') {
 								// push to "personal" for some last-pick set filler
 								if (!newMon.randbats.offeredSupport.personal) newMon.randbats.offeredSupport.personal = [];
 								let modFragment = Utils.deepClone(fragment);
+								if (['firstimpression', 'fakeout'].includes(moveid)) {
+									if (!modFragment.avoid) modFragment.avoid = [];
+									modFragment.avoid.push('physicalsetup');
+									modFragment.avoid.push('speedsetup');
+								}
 								modFragment.teraType = fragment.moveType;
 								newMon.randbats.offeredSupport.personal.push(modFragment);
 							}
@@ -1105,7 +1115,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							'tailwind', 'trickroom', 'stickyweb', 'silktrap',
 							'cottonspore', 'stringshot',
 							'electroweb', 'icywind', 'glaciate', // Bulldoze will receive special handling elsewhere because it doesn't work for every team
-							'thunderwave', 'nuzzle',
+							'thunderwave', 'nuzzle', 'glare', 'stunspore',
 							'syrupbomb', 'tarshot',
 						].includes(moveid) ||
 							 ([
@@ -2957,9 +2967,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (fragment.moves.filter((move) => (!fragment.pokemon.moves.includes(move) && !fragment.pokemon.remainingStabMoves.includes(move))).length + fragment.pokemon.moveCount > 4) fragment.eligible = false;
 					if (!fragment.eligible) {
 						console.log(`${fragment.pokemon.name} rejected ${fragment.baseMove} to save room for STABs`);
-						if (fragment.pokemon.name === 'Drampa-Shifu') reportMovesLeft = true;
+						if (fragment.pokemon.name === 'Drampa') reportMovesLeft = true;
 					}
-					if (fragment.eligible && !movesLeft.includes(fragment.baseMove) && fragment.pokemon.name === 'Drampa-Shifu') movesLeft.push(fragment.baseMove);
+					if (fragment.eligible && !movesLeft.includes(fragment.baseMove) && fragment.pokemon.name === 'Drampa') movesLeft.push(fragment.baseMove);
 				}
 				if (movesLeft && reportMovesLeft) {
 					console.log('Moves left:');
