@@ -1124,7 +1124,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							 (moveid === 'scaryface' && fragment.movePriority > 0)
 							) {
 							if (!newMon.randbats.offeredSupport.speedcontrol) newMon.randbats.offeredSupport.speedcontrol = [];
-							newMon.randbats.offeredSupport.speedcontrol.push(fragment);
+							let modFragment = Utils.deepClone(fragment);
+							if (!modFragment.avoid) modFragment.avoid = [];
+							modFragment.avoid.push('speedcontrol');
+							newMon.randbats.offeredSupport.speedcontrol.push(modFragment);
 						}
 
 						// some moves cover both physicalreduction and specialreduction at once
