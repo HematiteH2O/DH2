@@ -1281,7 +1281,7 @@ Skill Swap, Entrainment, Simple Beam, Soak -> unique disruption/support
 Acupressure -> unique boosting
 Rototiller, Flower Shield, Magnetic Flux, Gear Up -> team-specific support
 
-NOT IN "OTHER" BUT THEY SHOULD BE
+Round
 Beat Up/other multihits
 Quash
 Snatch??
@@ -1295,6 +1295,54 @@ Quick Guard/Wide Guard
 ALSO 
 manual field effects/team archetypes, but what qualifies something to set them? (priorities: weather, terrain, Gravity, Perish Song, Toxic Spikes, Sticky Web, Poison Gas)
 make sure to account for every possible acceptedSupport for each of these
+
+I'm thinking manual weather/terrain setters should offerSupport backup${fieldeffect} rather than directly offering the field effect, and only other field effect autosetters (not abusers) should requestSupport that
+Possible exception: priority (Prankster) users with extender items, but they should still have a lower score than autosetters and I'll scrutinize to make sure they're good at it
+Autosetters should both offerSupport and requestSupport a backup setter so having two autosetters on a team is also welcome
+
+(WEAKNESS COVERAGE on monotype teams? but that might fall under some of the other mechanics for EVing/attacking moves)
+
+- include Forest's Curse/Trick-or-Treat as a kind of support along with Soak
+- coding for Pickup is gonna be so funny
+- I will recreate Korrina's Focus Punch + nonsense "archetype" if I can
+- and "supporting" Foul Play the way Valerie does hdmfhf
+
+- Assurance might be doable but Assist is not jdhfmf
+
+- identifying support for Eruption-like moves (think Siebold)
+* Eruption-like moves requesting Healing Wish support in singles (and Sticky Web sometimes?), accepting healing, Speed control, redirection in VGC
+
+- recoil moves requesting Wish support?
+- Brine requesting Super Fang/Nature's Madness/et cetera support
+
+
+- go into more detail on Bulldoze as Speed control in general actually
+- I'm thinking there are specific situations where Bulldoze is naturally considered support (Ground-weak Weakness Policy partner)
+- and I need to elaborate on how the rest of the team is built around that (like maximizing Ground immunities and debuff immunities)
+- (Bulldoze should probably be mutually exclusive with Slime Time)
+
+- Swagger is going to have so many interactions, but it's also formerly universal, so I should be *careful* with what specifically gets a team to start engaging with it
+
+- the "threatlist" mechanic, when I get to it, is probably where status is going to come up the most as well - especially in singles
++ Air Balloon, resist Berries, Psychic Noise, move-binding effects... 
+
+
+
+Okay next up
+I'm gonna some kind of flag like "supportWantSpeed" to generalize things like Prankster, Speed-boosting Abilities or naturally high Speed as prerequisites for specific support moves
+I've noticed not only that that comes up as a prerequisite for a lot of things, but also that they all have basically the same conditions for being useful
+so I want to generalize it
+
+
+
+Reviving singles considerations I haven't covered effectively -
+something that doesn't mind Knock Off
+contact punisher
+pivoting
+at least one physical and one special attacker
++ clerics aren't factored in yet (how do I decide that a team wants those...? will think on it)
++ I also basically haven't acknowledged setup, which is insane?? I feel like that should just be one of the roles on every team 
+
 					*/
 						
 /*
