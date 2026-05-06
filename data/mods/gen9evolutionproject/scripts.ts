@@ -1482,16 +1482,19 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// and obviously ones with support available are favored, but ones with requestedSupport missing are completely ignored
 				
 				for (const fragment of newMon.randbats.viableStabs) {
+					let modFragment = Utils.deepClone(fragment);
+					modFragment.mainstab = true;
+					
 					if (fragment.singles.requestedSupport.length) {
 						for (const request of fragment.singles.requestedSupport) {
 							if (!newMon.randbats.singles.acceptedSupport[request]) newMon.randbats.singles.acceptedSupport[request] = [];
-							newMon.randbats.singles.acceptedSupport[request].push(fragment);
+							newMon.randbats.singles.acceptedSupport[request].push(modFragment);
 						}
 					}
 					if (fragment.vgc.requestedSupport.length) {
 						for (const request of fragment.vgc.requestedSupport) {
 							if (!newMon.randbats.vgc.acceptedSupport[request]) newMon.randbats.vgc.acceptedSupport[request] = [];
-							newMon.randbats.vgc.acceptedSupport[request].push(fragment);
+							newMon.randbats.vgc.acceptedSupport[request].push(modFragment);
 						}
 					}
 				}
@@ -2728,10 +2731,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			}
 		}
 
-		// quick sanity check: clearing out false positive "buddy fragments"
-		// if fragment.buddy existed but it was empty to begin with, it would mistakenly be treated as complete and prioritized
-		// I noticed this happening a couple of times during testing, so this is a failsafe!
 		for (const fragment of fragmentsList) {
+			// quick sanity check: clearing out false positive "buddy fragments"
+			// if fragment.buddy existed but it was empty to begin with, it would mistakenly be treated as complete and prioritized
+			// I noticed this happening a couple of times during testing, so this is a failsafe!
 			if (fragment.buddy) {
 				if (
 					!fragment.buddy.ability && !fragment.buddy.item && !fragment.buddy.teraType && !(fragment.buddy.moves && fragment.buddy.moves.length) && !(fragment.buddy.roles && fragment.buddy.roles.length) && !(
@@ -2739,9 +2742,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					)
 				) {
 					fragment.buddy = null;
-					console.log(`${fragment.pokemon.name}'s ${fragment.baseMove} had a false positive buddy cleared`);
 				}
 			}
+			// also, some fragments that came from requestedSupport or acceptedSupport still need to be identified as main STABs
+			if (!fragment.role && fragment.mainstab) fragment.role = 'mainstab';
 		}
 
 		while (eligibleFragments) {
