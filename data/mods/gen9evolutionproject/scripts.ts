@@ -1231,7 +1231,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							].includes(moveid) ||
 							(['crushclaw', 'razorshell', 'triplearrows'].includes(moveid) && ((!fragment.ability && newMon.randbats.abilities.includes('Serene Grace')) || (fragment.ability && fragment.ability === 'Serene Grace')))
 						) {
-							// TODO: you want priority,
+							// TODO:
+							// to be viable, many of these need priority, naturally high Speed, or an Ability that boosts Speed
+							// I should set up a way to generalize that, since it comes up for a lot of other kinds of support
 							let modFragment = Utils.deepClone(fragment);
 							if ((['crushclaw', 'razorshell', 'triplearrows'].includes(moveid) && !fragment.ability && newMon.randbats.abilities.includes('Serene Grace'))) modFragment.ability = 'Serene Grace';
 							// TODO: these *are not* all interchangeable and should be divided further
