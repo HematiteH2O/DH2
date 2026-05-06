@@ -2968,11 +2968,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			// but in the situations when it does come up, it's important to entirely deletes the ineligible fragment!
 			// otherwise, other Pokémon might start to request support that has been offered but isn't possible to fit on a set
 			for (const set of sets) {
-				let stabSpace = set.remainingStabTypes.length;
-				
 				// some Pokémon may end up with 3 or more "STAB" types by this point because of certain modifiers, but we only care about leaving space for any 2
-				if (stabSpace && stabSpace > 2) stabSpace = 2;
-				if (stabSpace && set.coveredStabs.length) stabSpace -= set.coveredStabs.length;
+				let maxStabSpace = 2;
+				if (set.coveredStabs.length) maxStabSpace -= set.coveredStabs.length;
+				
+				let stabSpace = set.remainingStabTypes.length;
+				if (stabSpace && stabSpace > maxStabSpace) stabSpace = maxStabSpace;
 				
 				if (stabSpace && stabSpace > 0) set.moveCount += stabSpace;
 			}
