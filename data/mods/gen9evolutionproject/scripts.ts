@@ -1356,6 +1356,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								modFragment.tags.push('accuracyboost');
 								modFragment.avoid.push('accuracyboost');
 							}
+							if (moveid === 'coil') {
+								modFragment.tags.push('accuracyboost');
+								modFragment.avoid.push('accuracyboost');
+							}
 							if (
 								[
 									'poweruppunch', 'chargebeam',
@@ -1407,7 +1411,19 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								modFragment.buddy.roles.push('priority');
 								newMon.randbats.offeredSupport.personal.push(modFragment);
 								newMon.randbats.offeredSupport.personal.push(modFragmentPrioVGC);
-							} else if (moveid !== 'curse' || !newMon.randbats.types.includes('Ghost')) {
+							} else if (moveid === 'curse') {
+								if (!newMon.randbats.types.includes('Ghost')) {
+									let modFragmentCurseSlow = Utils.deepClone(modFragment);
+									if (!modFragmentCurseSlow.buddy.moves) modFragmentCurseSlow.buddy.moves = [];
+									modFragmentCurseSlow.buddy.moves.push('Gyro Ball');
+									modFragment.score = -2;
+									modFragmentCurseSlow.score = 2;
+									newMon.randbats.offeredSupport.personal.push(modFragment);
+									newMon.randbats.offeredSupport.personal.push(modFragmentCurseSlow);
+									newMon.randbats.offeredSupport.personal.push(modFragmentPrioVGC);
+									newMon.randbats.offeredSupport.personal.push(modFragmentSpreadVGC);
+								}
+							} else {
 								newMon.randbats.offeredSupport.personal.push(modFragment);
 								newMon.randbats.offeredSupport.personal.push(modFragmentPrioVGC);
 								newMon.randbats.offeredSupport.personal.push(modFragmentSpreadVGC);
@@ -2937,6 +2953,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			for (const fragment of fragmentsList) {
 				if (fragment.moves && fragment.pokemon.moves) {
 					if (fragment.moves.filter((move) => (!fragment.pokemon.moves.includes(move) && !fragment.pokemon.remainingStabMoves.includes(move))).length + fragment.pokemon.moveCount > 4) fragment.eligible = false;
+					if (!fragment.eligible) console.log(fragment.baseMove);
 				}
 			}
 			fragmentsList = fragmentsList.filter((fragment) => (fragment.eligible === true));
@@ -3115,7 +3132,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			let roleScores = {};
 			let safeScores = {};
 			for (const fragment of fragmentsListThisStep) {
-				if (fragment.role && !['mainstab', 'personal'].includes(fragment.role)) {
+				if (fragment.role && !['mainstab'].includes(fragment.role)) {
 					if (!roleScores[fragment.role]) roleScores[fragment.role] = 0;
 					if (fragment.score && fragment.score > roleScores[fragment.role]) roleScores[fragment.role] = fragment.score;
 				}
@@ -3128,7 +3145,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			}
 			for (const fragment of fragmentsListThisStep) {
 				let safeToPush = true;
-				if (fragment.role && !['mainstab', 'personal'].includes(fragment.role)) {
+				if (fragment.role && !['mainstab'].includes(fragment.role)) {
 					if (roleScores[fragment.role] && roleScores[fragment.role] > 0 && (!fragment.score || (roleScores[fragment.role] > fragment.score))) safeToPush = false;
 				}
 				else if (fragment.role && fragment.role === 'mainstab') {
