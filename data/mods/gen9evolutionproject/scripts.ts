@@ -931,7 +931,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							fragment.vgc.requestedSupport.push('grassyterrain');
 						}
 						// Misty Explosion doesn't actually want Misty Terrain support
-						if (['solarbeam', 'solarblade'].includes(moveid) && !(fragment.ability && ['Desolate Land', 'Drought', 'Mega Sol', 'Orichalcum Pulse'].includes(fragment.ability))) {
+						if (['solarbeam', 'solarblade', 'growth'].includes(moveid) && !(fragment.ability && ['Desolate Land', 'Drought', 'Mega Sol', 'Orichalcum Pulse'].includes(fragment.ability))) {
 							fragment.singles.requestedSupport.push('sun');
 							fragment.vgc.requestedSupport.push('sun');
 						}
@@ -1025,6 +1025,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							if (!fragment.stab && !fragment.teraType) modFragment.teraType = fragment.moveType;
 							if (!modFragment.tags) modFragment.tags = [];
 							if (!move.overrideOffensiveStat && !modFragment.tags.includes(`${(move.category).toLowerCase()}`)) modFragment.tags.push(`${(move.category).toLowerCase()}`);
+							if (fragment.moveAccuracy < 85 || move.multiaccuracy) modFragment.tags.push('inaccurate');
 							if (fragment.moveBasePower >= 90 || (fragment.stab && fragment.moveBasePower >= 80)) {
 								if (fragment.stab || fragment.moveType !== 'Normal' || fragment.moveBasePower >= 120) newMon.randbats.viableStabs.push(modFragment);
 								// stop giving random things Double-Edge!! I know it has good BP :sob:
@@ -1265,7 +1266,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						// Speed-boosting setup
 						if (
 							[
-								'shellsmash', 'filletaway', 'noretreat', // mixed setup
+								'clangoroussoul', 'shellsmash', 'filletaway', 'noretreat', // mixed setup
 								'dragondance', 'shiftgear', 'tidyup', 'victorydance', // physical setup
 								'quiverdance', 'geomancy', // special setup
 
@@ -1304,27 +1305,90 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							].includes(moveid)) modFragment.buddy.roles.push('special');
 							if (['flamecharge', 'aquastep', 'scaleshot', 'trailblaze'].includes(moveid)) modFragment.buddy.roles.push('physicalsetup');
 							if (['esperwing'].includes(moveid)) modFragment.buddy.roles.push('specialsetup');
+
+							modFragment.score = 3; // the ones that count as offensive setup should outcompete other setup moves
 							
 							if (!newMon.randbats.offeredSupport.personal) newMon.randbats.offeredSupport.personal = [];
 							newMon.randbats.offeredSupport.personal.push(modFragment);
 						}
-						// physical setup
+						// offensive setup
 						if (
 							[
-								'swordsdance', 'bulkup', // filler (I will expand this)
+								'growth', 'workup',
+								'bellydrum', 'bulkup', 'coil', 'curse', 'honeclaws', 'howl', 'poweruppunch', 'swordsdance',
+								'calmmind', 'chargebeam', 'electroshot', 'fierydance', 'meteorbeam', 'mysticalpower', 'nastyplot', 'tailglow', 'takeheart', 'torchsong',
 							].includes(moveid)
 						) {
 							let modFragment = Utils.deepClone(fragment);
 
 							if (!modFragment.tags) modFragment.tags = [];
-							modFragment.tags.push('physicalsetup');
-							
 							if (!modFragment.roles) modFragment.avoid = [];
-							modFragment.avoid.push('special');
-							
 							if (!modFragment.buddy) modFragment.buddy = {};
 							if (!modFragment.buddy.roles) modFragment.buddy.roles = [];
-							modFragment.buddy.roles.push('physical');
+
+							// hard-coding notes:
+							// Belly Drum should require Sitrus and might want to require a priority move even in singles (?)
+							// Curse doesn't count for Ghost-types but probably has more specific requirements in general
+							// Hone Claws requires Triple Axel or a similar inaccurate move
+							// Work Up should only be for sets that are already mixed
+
+							// some moves have individual exceptions
+							if (moveid === 'workup') {
+								modFragment.tags.push('physicalsetup');
+								modFragment.tags.push('specialsetup');
+								modFragment.avoid.push('physicalsetup');
+								modFragment.avoid.push('specialsetup');
+								modFragment.buddy.roles.push('physical');
+								modFragment.buddy.roles.push('special');
+							}
+							if (moveid === 'bellydrum') {
+								if (!modFragment.item) modFragment.item = 'Sitrus Berry';
+							}
+							if (moveid === 'growth') {
+								// already requested sun support earlier
+								modFragment.tags.push('physicalsetup');
+								modFragment.tags.push('specialsetup');
+								modFragment.avoid.push('physicalsetup');
+								modFragment.avoid.push('specialsetup');
+							}
+							if (moveid === 'honeclaws') {
+								modFragment.buddy.roles.push('inaccurate');
+								modFragment.tags.push('accuracyboost');
+								modFragment.avoid.push('accuracyboost');
+							}
+							if (
+								[
+									'poweruppunch', 'chargebeam',
+								].includes(moveid)
+							) { // you probably don't really want these if there are other options
+								modFragment.score = -1;
+							} else {
+								modFragment.score = 1;
+							}
+
+							// physical setup
+							if (
+								[
+									'bellydrum', 'bulkup', 'coil', 'curse', 'honeclaws', 'howl', 'poweruppunch', 'swordsdance',
+								].includes(moveid)
+							) {
+								modFragment.tags.push('physicalsetup');
+								modFragment.avoid.push('special');
+								modFragment.avoid.push('physicalsetup');
+								modFragment.buddy.roles.push('physical');
+							}
+
+							// special setup
+							if (
+								[
+									'calmmind', 'chargebeam', 'electroshot', 'fierydance', 'meteorbeam', 'mysticalpower', 'nastyplot', 'tailglow', 'takeheart', 'torchsong',
+								].includes(moveid)
+							) {
+								modFragment.tags.push('specialsetup');
+								modFragment.avoid.push('physical');
+								if (moveid !== 'fierydance') modFragment.avoid.push('specialsetup');
+								modFragment.buddy.roles.push('special');
+							}
 
 							let modFragmentPrioVGC = Utils.deepClone(modFragment);
 							modFragmentPrioVGC.format = 'vgc';
@@ -1335,11 +1399,20 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							modFragment.format = 'singles';
 							
 							if (!newMon.randbats.offeredSupport.personal) newMon.randbats.offeredSupport.personal = [];
-							newMon.randbats.offeredSupport.personal.push(modFragment);
-							newMon.randbats.offeredSupport.personal.push(modFragmentPrioVGC);
-							newMon.randbats.offeredSupport.personal.push(modFragmentSpreadVGC);
+							if (moveid === 'howl') {
+								// you don't really need priority or spread to be a good Howl user in VGC, and we don't want to push it to singles
+								modFragment.format = 'vgc';
+								newMon.randbats.offeredSupport.personal.push(modFragment);
+							} else if (moveid === 'bellydrum') {
+								modFragment.buddy.roles.push('priority');
+								newMon.randbats.offeredSupport.personal.push(modFragment);
+								newMon.randbats.offeredSupport.personal.push(modFragmentPrioVGC);
+							} else if (moveid !== 'curse' || !newMon.randbats.types.includes('Ghost')) {
+								newMon.randbats.offeredSupport.personal.push(modFragment);
+								newMon.randbats.offeredSupport.personal.push(modFragmentPrioVGC);
+								newMon.randbats.offeredSupport.personal.push(modFragmentSpreadVGC);
+							}
 						}
-						// special setup
 					
 					// singles-only:
 						// Knock Off
