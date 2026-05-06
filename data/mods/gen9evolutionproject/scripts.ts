@@ -2794,6 +2794,16 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						continue;
 					}
 				}
+				if (fragment.pokemon.avoid && fragment.tags) {
+					let avoid = false;
+					for (const role of fragment.pokemon.avoid) {
+						if (fragment.tags.includes(role)) avoid = true;
+					}
+					if (avoid) {
+						fragment.eligible = false;
+						continue;
+					}
+				}
 				
 				fragment.highpriority = false;
 				if (fragment.role && fragment.role === 'mainstab') fragment.fragmentPriority = 2;
