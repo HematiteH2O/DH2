@@ -399,6 +399,85 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (newMon.baseSpecies && newMon.baseSpecies === 'Rotom') learnset = this.dataCache.Learnsets.rotom.learnset;
 				// going to handle their form-specific moves separately; this is fine for here!
 				if (!learnset) continue;
+
+				// we need to initialize this for certain kinds of Speed-reliant support in VGC
+				let viableVgcSupport = false;
+				let vgcSupportSubfragments = [];
+				if (newMon.baseStats.spe > 102) { // unboosted Speed cutoff: Garchomp
+					viableVgcSupport = true;
+				} else if (newMon.baseStats.spe > 72) { // +1 Speed cutoff: Aleon
+					if (newMon.randbats.abilities.includes('Speed Boost') {
+						vgcSupportSubfragments.push({
+							ability: 'Speed Boost',
+						});
+						viableVgcSupport = true;
+					}
+					if (newMon.randbats.abilities.includes('Noble Potential') {
+						vgcSupportSubfragments.push({
+							ability: 'Noble Potential',
+						});
+						viableVgcSupport = true;
+					}
+				} else if (newMon.baseStats.spe > 41) { // +2 Speed cutoff: Aleon
+					if (newMon.randbats.abilities.includes('Chlorophyll') {
+						vgcSupportSubfragments.push({
+							ability: 'Chlorophyll',
+							requestedSupport: ['sun'],
+						});
+						viableVgcSupport = true;
+					}
+					else if (newMon.randbats.abilities.includes('Swift Swim') {
+						vgcSupportSubfragments.push({
+							ability: 'Swift Swim',
+							requestedSupport: ['rain'],
+						});
+						viableVgcSupport = true;
+					}
+					else if (newMon.randbats.abilities.includes('Sand Rush') {
+						vgcSupportSubfragments.push({
+							ability: 'Sand Rush',
+							requestedSupport: ['sand'],
+						});
+						viableVgcSupport = true;
+					}
+					else if (newMon.randbats.abilities.includes('Slush Rush') {
+						vgcSupportSubfragments.push({
+							ability: 'Slush Rush',
+							requestedSupport: ['snow'],
+						});
+						viableVgcSupport = true;
+					}
+					else if (newMon.randbats.abilities.includes('Unburden') {
+						vgcSupportSubfragments.push({
+							ability: 'Unburden',
+							item: 'Grassy Seed',
+							requestedSupport: ['grassyterrain'],
+						});
+						vgcSupportSubfragments.push({
+							ability: 'Unburden',
+							item: 'Electric Seed',
+							requestedSupport: ['electricterrain'],
+						});
+						vgcSupportSubfragments.push({
+							ability: 'Unburden',
+							item: 'Misty Seed',
+							requestedSupport: ['mistyterrain'],
+						});
+						vgcSupportSubfragments.push({
+							ability: 'Unburden',
+							item: 'Psychic Seed',
+							requestedSupport: ['psychicterrain'],
+						});
+						viableVgcSupport = true;
+					}
+				}
+				if (newMon.baseStats.spe < 66 && learnset.trickroom.length) {
+					vgcSupportSubfragments.push({
+						moves: ['Trick Room'],
+						tags: ['minspeed'],
+					});
+					viableVgcSupport = true;
+				}
 				
 				for (const moveid in learnset) {
 					if (!learnset[moveid].length) continue;
@@ -1231,14 +1310,65 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							].includes(moveid) ||
 							(['crushclaw', 'razorshell', 'triplearrows'].includes(moveid) && ((!fragment.ability && newMon.randbats.abilities.includes('Serene Grace')) || (fragment.ability && fragment.ability === 'Serene Grace')))
 						) {
-							// TODO:
-							// to be viable, many of these need priority, naturally high Speed, or an Ability that boosts Speed
-							// I should set up a way to generalize that, since it comes up for a lot of other kinds of support
 							let modFragment = Utils.deepClone(fragment);
 							if ((['crushclaw', 'razorshell', 'triplearrows'].includes(moveid) && !fragment.ability && newMon.randbats.abilities.includes('Serene Grace'))) modFragment.ability = 'Serene Grace';
-							// TODO: these *are not* all interchangeable and should be divided further
-							if (!newMon.randbats.offeredSupport.defensereduction) newMon.randbats.offeredSupport.defensereduction = [];
-							newMon.randbats.offeredSupport.defensereduction.push(fragment);
+							
+							// to be viable, many of these need priority, naturally high Speed, or an Ability that boosts Speed
+							// I have set up a way to generalize that, since it comes up for a lot of other kinds of support
+							if (modFragment.movePriority > 0 || viableVgcSupport) {
+								let supportFragments = [];
+								if (modFragment.movePriority < 1) {
+									for (const subfragment of vgcSupportSubfragments) {
+										let newModFragment = Utils.deepClone(fragment);
+										let accept = true;
+										if (subfragment.ability) {
+											if (newModFragment.ability && newModFragment.ability !== subfragment.ability) accept = false;
+											newModFragment.ability = subfragment.ability;
+										}
+										if (subfragment.item) {
+											if (newModFragment.item && newModFragment.item !== subfragment.item) accept = false;
+											newModFragment.item = subfragment.item;
+										}
+										if (subfragment.teraType) {
+											if (newModFragment.teraType && newModFragment.teraType !== subfragment.teraType) accept = false;
+											newModFragment.teraType = subfragment.item;
+										}
+										if (subfragment.tags) {
+											if (!newModFragment.tags) newModFragment.tags = [];
+											for (const tag of subfragment.tags) if (!newModFragment.tags.includes(tag)) newModFragment.tags.push(tag);
+											if (newModFragment.avoid) {
+												for (const avoid of newModFragment.avoid) if (newModFragment.tags.includes(avoid)) accept = false;
+											}
+										}
+										if (subfragment.moves) {
+											if (!newModFragment.moves) newModFragment.moves = [];
+											for (const move of subfragment.moves) if (!newModFragment.moves.includes(move)) newModFragment.moves.push(move);
+											if (newModFragment.moves.length > 4) accept = false;
+										}
+										if (subfragment.requestedSupport) {
+											if (!newModFragment.requestedSupport) newModFragment.requestedSupport = [];
+											for (const requestedSupport of subfragment.requestedSupport) if (!newModFragment.requestedSupport.includes(requestedSupport)) newModFragment.requestedSupport.push(requestedSupport);
+										}
+										if (subfragment.evs) {
+											if (!newModFragment.evs) newModFragment.evs = subfragment.evs;
+											if (subfragment.evs.hp > newModFragment.evs.hp) newModFragment.evs.hp = subfragment.evs.hp;
+											if (subfragment.evs.atk > newModFragment.evs.atk) newModFragment.evs.atk = subfragment.evs.atk;
+											if (subfragment.evs.def > newModFragment.evs.def) newModFragment.evs.def = subfragment.evs.def;
+											if (subfragment.evs.spa > newModFragment.evs.spa) newModFragment.evs.spa = subfragment.evs.spa;
+											if (subfragment.evs.spd > newModFragment.evs.spd) newModFragment.evs.spd = subfragment.evs.spd;
+											if (subfragment.evs.spe > newModFragment.evs.spe) newModFragment.evs.spe = subfragment.evs.spe;
+											if (newModFragment.evs.hp + newModFragment.evs.atk + newModFragment.evs.def + newModFragment.evs.spa + newModFragment.evs.spd + newModFragment.evs.spe > 508) accept = false;
+										}
+										if (accept) supportFragments.push(newModFragment);
+									}
+								} else {
+									supportFragments.push(modFragment);
+								}
+								if (supportFragments.length) {
+									if (!newMon.randbats.offeredSupport.defensereduction) newMon.randbats.offeredSupport.defensereduction = [];
+									for (const supportFragment of supportFragments) newMon.randbats.offeredSupport.defensereduction.push(supportFragment);
+								}
+							}
 						}
 						// special
 						if (
