@@ -1127,7 +1127,19 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							if (!move.overrideOffensiveStat && !modFragment.tags.includes(`${(move.category).toLowerCase()}`)) modFragment.tags.push(`${(move.category).toLowerCase()}`);
 							if (fragment.moveAccuracy < 80 || move.multiaccuracy) modFragment.tags.push('inaccurate');
 							if (fragment.moveBasePower >= 90 || (fragment.stab && fragment.moveBasePower >= 80)) {
-								if (fragment.stab || fragment.moveType !== 'Normal' || fragment.moveBasePower >= 120) newMon.randbats.viableStabs.push(modFragment);
+								if (fragment.stab || fragment.moveType !== 'Normal' || fragment.moveBasePower >= 120) {
+									if ((move.category === 'Physical' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'def')) {
+										if (!modFragment.vgc) modFragment.vgc = {};
+										if (!modFragment.vgc.acceptedSupport) modFragment.vgc.acceptedSupport = [];
+										if (!modFragment.vgc.acceptedSupport.includes('defensereduction')) modFragment.vgc.acceptedSupport.push('defensereduction');
+									}
+									if ((move.category === 'Special' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'spd')) {
+										if (!modFragment.vgc) modFragment.vgc = {};
+										if (!modFragment.vgc.acceptedSupport) modFragment.vgc.acceptedSupport = [];
+										if (!modFragment.vgc.acceptedSupport.includes('spdefreduction')) modFragment.vgc.acceptedSupport.push('spdefreduction');
+									}
+									newMon.randbats.viableStabs.push(modFragment);
+								}
 								// stop giving random things Double-Edge!! I know it has good BP :sob:
 								// (the >= 120 preserves *really* strong cases like non-STAB Punk Rock Boomburst, but otherwise, it has to be coverage if it's not STAB)
 							}
@@ -1336,9 +1348,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							
 							// to be viable, many of these need priority, naturally high Speed, or an Ability that boosts Speed
 							// I have set up a way to generalize that, since it comes up for a lot of other kinds of support
-							if (modFragment.movePriority > 0 || viableVgcSupport) {
+							if (modFragment.movePriority > 0 || modFragment.baseMove === 'octolock' || viableVgcSupport) {
 								let supportFragments = [];
-								if (modFragment.movePriority < 1) {
+								if (modFragment.movePriority < 1 && modFragment.baseMove !== 'octolock') {
 									for (const subfragment of vgcSupportSubfragments) {
 										let newModFragment = Utils.deepClone(fragment);
 										let accept = true;
@@ -1402,9 +1414,63 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						) {
 							let modFragment = Utils.deepClone(fragment);
 							if ((['lusterpurge', 'seedflare'].includes(moveid) && !fragment.ability && newMon.randbats.abilities.includes('Serene Grace'))) modFragment.ability = 'Serene Grace';
-							// TODO: these *are not* all interchangeable and should be divided further
-							if (!newMon.randbats.offeredSupport.spdefreduction) newMon.randbats.offeredSupport.spdefreduction = [];
-							newMon.randbats.offeredSupport.spdefreduction.push(fragment);
+							
+							// to be viable, many of these need priority, naturally high Speed, or an Ability that boosts Speed
+							// I have set up a way to generalize that, since it comes up for a lot of other kinds of support
+							if (modFragment.movePriority > 0 || modFragment.baseMove === 'octolock' || viableVgcSupport) {
+								let supportFragments = [];
+								if (modFragment.movePriority < 1 && modFragment.baseMove !== 'octolock') {
+									for (const subfragment of vgcSupportSubfragments) {
+										let newModFragment = Utils.deepClone(fragment);
+										let accept = true;
+										if (subfragment.ability) {
+											if (newModFragment.ability && newModFragment.ability !== subfragment.ability) accept = false;
+											newModFragment.ability = subfragment.ability;
+										}
+										if (subfragment.item) {
+											if (newModFragment.item && newModFragment.item !== subfragment.item) accept = false;
+											newModFragment.item = subfragment.item;
+										}
+										if (subfragment.teraType) {
+											if (newModFragment.teraType && newModFragment.teraType !== subfragment.teraType) accept = false;
+											newModFragment.teraType = subfragment.item;
+										}
+										if (subfragment.tags) {
+											if (!newModFragment.tags) newModFragment.tags = [];
+											for (const tag of subfragment.tags) if (!newModFragment.tags.includes(tag)) newModFragment.tags.push(tag);
+											if (newModFragment.avoid) {
+												for (const avoid of newModFragment.avoid) if (newModFragment.tags.includes(avoid)) accept = false;
+											}
+										}
+										if (subfragment.moves) {
+											if (!newModFragment.moves) newModFragment.moves = [];
+											for (const move of subfragment.moves) if (!newModFragment.moves.includes(move)) newModFragment.moves.push(move);
+											if (newModFragment.moves.length > 4) accept = false;
+										}
+										if (subfragment.requestedSupport) {
+											if (!newModFragment.requestedSupport) newModFragment.requestedSupport = [];
+											for (const requestedSupport of subfragment.requestedSupport) if (!newModFragment.requestedSupport.includes(requestedSupport)) newModFragment.requestedSupport.push(requestedSupport);
+										}
+										if (subfragment.evs) {
+											if (!newModFragment.evs) newModFragment.evs = subfragment.evs;
+											if (subfragment.evs.hp > newModFragment.evs.hp) newModFragment.evs.hp = subfragment.evs.hp;
+											if (subfragment.evs.atk > newModFragment.evs.atk) newModFragment.evs.atk = subfragment.evs.atk;
+											if (subfragment.evs.def > newModFragment.evs.def) newModFragment.evs.def = subfragment.evs.def;
+											if (subfragment.evs.spa > newModFragment.evs.spa) newModFragment.evs.spa = subfragment.evs.spa;
+											if (subfragment.evs.spd > newModFragment.evs.spd) newModFragment.evs.spd = subfragment.evs.spd;
+											if (subfragment.evs.spe > newModFragment.evs.spe) newModFragment.evs.spe = subfragment.evs.spe;
+											if (newModFragment.evs.hp + newModFragment.evs.atk + newModFragment.evs.def + newModFragment.evs.spa + newModFragment.evs.spd + newModFragment.evs.spe > 508) accept = false;
+										}
+										if (accept) supportFragments.push(newModFragment);
+									}
+								} else {
+									supportFragments.push(modFragment);
+								}
+								if (supportFragments.length) {
+									if (!newMon.randbats.offeredSupport.defensereduction) newMon.randbats.offeredSupport.spdefreduction = [];
+									for (const supportFragment of supportFragments) newMon.randbats.offeredSupport.spdefreduction.push(supportFragment);
+								}
+							}
 						}
 						// side healing
 						if (
