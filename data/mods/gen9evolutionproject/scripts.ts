@@ -2154,7 +2154,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 					// okay, now the VGC support that was picky about Speed can get sorted properly into offeredSupport
 					for (const offeredSupport in pickyVgcSupport) {
-						for (const fragment of offeredSupport) {
+						for (const fragment of pickyVgcSupport[offeredSupport]) {
 							let supportFragments = [];
 							for (const subfragment of vgcSupportSubfragments) {
 								let modFragment = Utils.deepClone(fragment);
