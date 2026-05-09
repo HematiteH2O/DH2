@@ -1337,7 +1337,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						// physical
 						if (
 							[
-								'howl', 'coaching', 'decorate', 'helpinghand',
+								'howl', 'coaching', 'decorate', // 'helpinghand',
 								'leer', 'screech', 'obstruct', 'octolock', 'spicyextract', 'tickle',
 								'firelash', 'gravapple', 'thunderouskick'
 							].includes(moveid) ||
@@ -1406,7 +1406,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						// special
 						if (
 							[
-								'decorate', 'helpinghand',
+								'decorate', // 'helpinghand',
 								'faketears', 'metalsound', 'octolock',
 								'acidspray', 'appleacid', 'luminacrash'
 							].includes(moveid) ||
