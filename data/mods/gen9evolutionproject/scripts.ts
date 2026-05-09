@@ -14,6 +14,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 	
 	init() {
 		console.log(`Evo start`);
+		if (!(this.dex.data.Pokedex.bulbasaur.fakemonInitialized)) {
+			this.dex.data.Pokedex.bulbasaur.fakemonInitialized = true;
+		} else {
+			console.log(`If this message ever shows up, that's actually kinda neat`);
+		}
 		let customList = [];
 		let dexNo = -1;
 		const notm = ['terablast', 'hiddenpower']; // certain moves don't count TMs
