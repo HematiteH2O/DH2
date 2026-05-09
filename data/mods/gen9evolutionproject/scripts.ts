@@ -404,6 +404,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				let viableVgcSupport = false;
 				let vgcSupportSubfragments = [];
 				if (newMon.baseStats.spe > 102) { // unboosted Speed cutoff: Garchomp
+					vgcSupportSubfragments.push({
+						default: true,
+					});
 					viableVgcSupport = true;
 				} else if (newMon.baseStats.spe > 72) { // +1 Speed cutoff: Aleon
 					if (newMon.randbats.abilities.includes('Speed Boost')) {
@@ -1379,8 +1382,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 											if (newModFragment.moves.length > 4) accept = false;
 										}
 										if (subfragment.requestedSupport) {
-											if (!newModFragment.requestedSupport) newModFragment.requestedSupport = [];
-											for (const requestedSupport of subfragment.requestedSupport) if (!newModFragment.requestedSupport.includes(requestedSupport)) newModFragment.requestedSupport.push(requestedSupport);
+											if (!newModFragment.vgc.requestedSupport) newModFragment.vgc.requestedSupport = [];
+											for (const requestedSupport of subfragment.requestedSupport) if (!newModFragment.vgc.requestedSupport.includes(requestedSupport)) newModFragment.vgc.requestedSupport.push(requestedSupport);
 										}
 										if (subfragment.evs) {
 											if (!newModFragment.evs) newModFragment.evs = subfragment.evs;
@@ -1448,8 +1451,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 											if (newModFragment.moves.length > 4) accept = false;
 										}
 										if (subfragment.requestedSupport) {
-											if (!newModFragment.requestedSupport) newModFragment.requestedSupport = [];
-											for (const requestedSupport of subfragment.requestedSupport) if (!newModFragment.requestedSupport.includes(requestedSupport)) newModFragment.requestedSupport.push(requestedSupport);
+											if (!newModFragment.vgc.requestedSupport) newModFragment.vgc.requestedSupport = [];
+											for (const requestedSupport of subfragment.requestedSupport) if (!newModFragment.vgc.requestedSupport.includes(requestedSupport)) newModFragment.vgc.requestedSupport.push(requestedSupport);
 										}
 										if (subfragment.evs) {
 											if (!newModFragment.evs) newModFragment.evs = subfragment.evs;
