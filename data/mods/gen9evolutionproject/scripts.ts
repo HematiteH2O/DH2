@@ -646,7 +646,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		// This used to be in init(), but that meant it was getting called for each player every battle *anyway*
 		// Even though it's weird to be doing a bunch of dex initialization in getTeam(), this setup is effectively minimizing how often it gets called
 
-		if (!(this.dex.data.Pokedex.ycecroak.randbats && this.dex.data.Pokedex.ycecroak.randbats.name && this.dex.data.Pokedex.ycecroak.randbats.name === 'Ycecroak')) {
+		if (!(this.dex.data.Pokedex.bulbasaur.randbatsInitialized)) {
+			this.dex.data.Pokedex.bulbasaur.randbatsInitialized = true;
 			console.log(`Initializing randbats stuff`);
 			for (const id in this.dex.data.Pokedex) {
 				const newMon = this.dex.data.Pokedex[id];
