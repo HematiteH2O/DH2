@@ -13,14 +13,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 	// GENERATING FAKEMON
 	
 	init() {
-		// for the experiment
-		if (!this.modData('Pokedex', 'bulbasaur').fakemonInitialized) {
-			this.modData('Pokedex', 'bulbasaur').fakemonInitialized = true;
-		} else {
-			console.log(`If this message ever shows up, that's actually kinda neat`);
-			return;
-		}
-		// actual Evo stuff
 		console.log(`Evo start`);
 		let customList = [];
 		let dexNo = -1;
@@ -1061,6 +1053,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						});
 						viableVgcSupport = true;
 					}
+					const pickyVgcSupport = {};
 					
 					for (const moveid in learnset) {
 						if (!learnset[moveid].length) continue;
@@ -1910,58 +1903,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								
 								// to be viable, many of these need priority, naturally high Speed, or an Ability that boosts Speed
 								// I have set up a way to generalize that, since it comes up for a lot of other kinds of support
-								if (modFragment.movePriority > 0 || modFragment.baseMove === 'octolock' || viableVgcSupport) {
-									let supportFragments = [];
-									if (modFragment.movePriority < 1 && modFragment.baseMove !== 'octolock') {
-										for (const subfragment of vgcSupportSubfragments) {
-											let newModFragment = Utils.deepClone(fragment);
-											let accept = true;
-											if (subfragment.ability) {
-												if (newModFragment.ability && newModFragment.ability !== subfragment.ability) accept = false;
-												newModFragment.ability = subfragment.ability;
-											}
-											if (subfragment.item) {
-												if (newModFragment.item && newModFragment.item !== subfragment.item) accept = false;
-												newModFragment.item = subfragment.item;
-											}
-											if (subfragment.teraType) {
-												if (newModFragment.teraType && newModFragment.teraType !== subfragment.teraType) accept = false;
-												newModFragment.teraType = subfragment.item;
-											}
-											if (subfragment.tags) {
-												if (!newModFragment.tags) newModFragment.tags = [];
-												for (const tag of subfragment.tags) if (!newModFragment.tags.includes(tag)) newModFragment.tags.push(tag);
-												if (newModFragment.avoid) {
-													for (const avoid of newModFragment.avoid) if (newModFragment.tags.includes(avoid)) accept = false;
-												}
-											}
-											if (subfragment.moves) {
-												if (!newModFragment.moves) newModFragment.moves = [];
-												for (const move of subfragment.moves) if (!newModFragment.moves.includes(move)) newModFragment.moves.push(move);
-												if (newModFragment.moves.length > 4) accept = false;
-											}
-											if (subfragment.requestedSupport) {
-												if (!newModFragment.vgc.requestedSupport) newModFragment.vgc.requestedSupport = [];
-												for (const requestedSupport of subfragment.requestedSupport) if (!newModFragment.vgc.requestedSupport.includes(requestedSupport)) newModFragment.vgc.requestedSupport.push(requestedSupport);
-											}
-											if (subfragment.evs) {
-												if (!newModFragment.evs) newModFragment.evs = subfragment.evs;
-												if (subfragment.evs.hp > newModFragment.evs.hp) newModFragment.evs.hp = subfragment.evs.hp;
-												if (subfragment.evs.atk > newModFragment.evs.atk) newModFragment.evs.atk = subfragment.evs.atk;
-												if (subfragment.evs.def > newModFragment.evs.def) newModFragment.evs.def = subfragment.evs.def;
-												if (subfragment.evs.spa > newModFragment.evs.spa) newModFragment.evs.spa = subfragment.evs.spa;
-												if (subfragment.evs.spd > newModFragment.evs.spd) newModFragment.evs.spd = subfragment.evs.spd;
-												if (subfragment.evs.spe > newModFragment.evs.spe) newModFragment.evs.spe = subfragment.evs.spe;
-												if (newModFragment.evs.hp + newModFragment.evs.atk + newModFragment.evs.def + newModFragment.evs.spa + newModFragment.evs.spd + newModFragment.evs.spe > 508) accept = false;
-											}
-											if (accept) supportFragments.push(newModFragment);
-										}
-									} else {
-										supportFragments.push(modFragment);
-									}
-									if (supportFragments.length) {
+								if (modFragment.movePriority > 0 || modFragment.baseMove === 'octolock') {
 										if (!newMon.randbats.offeredSupport.defensereduction) newMon.randbats.offeredSupport.defensereduction = [];
-										for (const supportFragment of supportFragments) newMon.randbats.offeredSupport.defensereduction.push(supportFragment);
+										newMon.randbats.offeredSupport.defensereduction.push(modFragment);
+									} else {
+										if (!pickyVgcSupport.defensereduction) pickyVgcSupport.defensereduction = [];
+										pickyVgcSupport.defensereduction.push(modFragment);
 									}
 								}
 							}
@@ -1979,58 +1926,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								
 								// to be viable, many of these need priority, naturally high Speed, or an Ability that boosts Speed
 								// I have set up a way to generalize that, since it comes up for a lot of other kinds of support
-								if (modFragment.movePriority > 0 || modFragment.baseMove === 'octolock' || viableVgcSupport) {
-									let supportFragments = [];
-									if (modFragment.movePriority < 1 && modFragment.baseMove !== 'octolock') {
-										for (const subfragment of vgcSupportSubfragments) {
-											let newModFragment = Utils.deepClone(fragment);
-											let accept = true;
-											if (subfragment.ability) {
-												if (newModFragment.ability && newModFragment.ability !== subfragment.ability) accept = false;
-												newModFragment.ability = subfragment.ability;
-											}
-											if (subfragment.item) {
-												if (newModFragment.item && newModFragment.item !== subfragment.item) accept = false;
-												newModFragment.item = subfragment.item;
-											}
-											if (subfragment.teraType) {
-												if (newModFragment.teraType && newModFragment.teraType !== subfragment.teraType) accept = false;
-												newModFragment.teraType = subfragment.item;
-											}
-											if (subfragment.tags) {
-												if (!newModFragment.tags) newModFragment.tags = [];
-												for (const tag of subfragment.tags) if (!newModFragment.tags.includes(tag)) newModFragment.tags.push(tag);
-												if (newModFragment.avoid) {
-													for (const avoid of newModFragment.avoid) if (newModFragment.tags.includes(avoid)) accept = false;
-												}
-											}
-											if (subfragment.moves) {
-												if (!newModFragment.moves) newModFragment.moves = [];
-												for (const move of subfragment.moves) if (!newModFragment.moves.includes(move)) newModFragment.moves.push(move);
-												if (newModFragment.moves.length > 4) accept = false;
-											}
-											if (subfragment.requestedSupport) {
-												if (!newModFragment.vgc.requestedSupport) newModFragment.vgc.requestedSupport = [];
-												for (const requestedSupport of subfragment.requestedSupport) if (!newModFragment.vgc.requestedSupport.includes(requestedSupport)) newModFragment.vgc.requestedSupport.push(requestedSupport);
-											}
-											if (subfragment.evs) {
-												if (!newModFragment.evs) newModFragment.evs = subfragment.evs;
-												if (subfragment.evs.hp > newModFragment.evs.hp) newModFragment.evs.hp = subfragment.evs.hp;
-												if (subfragment.evs.atk > newModFragment.evs.atk) newModFragment.evs.atk = subfragment.evs.atk;
-												if (subfragment.evs.def > newModFragment.evs.def) newModFragment.evs.def = subfragment.evs.def;
-												if (subfragment.evs.spa > newModFragment.evs.spa) newModFragment.evs.spa = subfragment.evs.spa;
-												if (subfragment.evs.spd > newModFragment.evs.spd) newModFragment.evs.spd = subfragment.evs.spd;
-												if (subfragment.evs.spe > newModFragment.evs.spe) newModFragment.evs.spe = subfragment.evs.spe;
-												if (newModFragment.evs.hp + newModFragment.evs.atk + newModFragment.evs.def + newModFragment.evs.spa + newModFragment.evs.spd + newModFragment.evs.spe > 508) accept = false;
-											}
-											if (accept) supportFragments.push(newModFragment);
-										}
-									} else {
-										supportFragments.push(modFragment);
-									}
-									if (supportFragments.length) {
+								if (modFragment.movePriority > 0 || modFragment.baseMove === 'octolock') {
 										if (!newMon.randbats.offeredSupport.spdefreduction) newMon.randbats.offeredSupport.spdefreduction = [];
-										for (const supportFragment of supportFragments) newMon.randbats.offeredSupport.spdefreduction.push(supportFragment);
+										newMon.randbats.offeredSupport.spdefreduction.push(modFragment);
+									} else {
+										if (!pickyVgcSupport.spdefreduction) pickyVgcSupport.spdefreduction = [];
+										pickyVgcSupport.spdefreduction.push(modFragment);
 									}
 								}
 							}
@@ -2251,6 +2152,60 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							
 							// Upper Hand and team-supported Grassy Glide need their own cases and were *not* included in priority
 							// Venom Drench is also neat
+					}
+
+					// okay, now the VGC support that was picky about Speed can get sorted properly into offeredSupport
+					for (const offeredSupport in pickyVgcSupport) {
+						for (const fragment of offeredSupport) {
+							let supportFragments = [];
+							for (const subfragment of vgcSupportSubfragments) {
+								let modFragment = Utils.deepClone(fragment);
+								let accept = true;
+								if (subfragment.ability) {
+									if (modFragment.ability && modFragment.ability !== subfragment.ability) accept = false;
+									modFragment.ability = subfragment.ability;
+								}
+								if (subfragment.item) {
+									if (modFragment.item && modFragment.item !== subfragment.item) accept = false;
+									modFragment.item = subfragment.item;
+								}
+								if (subfragment.teraType) {
+									if (modFragment.teraType && modFragment.teraType !== subfragment.teraType) accept = false;
+									modFragment.teraType = subfragment.item;
+								}
+								if (subfragment.tags) {
+									if (!modFragment.tags) modFragment.tags = [];
+									for (const tag of subfragment.tags) if (!modFragment.tags.includes(tag)) modFragment.tags.push(tag);
+									if (modFragment.avoid) {
+										for (const avoid of modFragment.avoid) if (modFragment.tags.includes(avoid)) accept = false;
+									}
+								}
+								if (subfragment.moves) {
+									if (!modFragment.moves) modFragment.moves = [];
+									for (const move of subfragment.moves) if (!modFragment.moves.includes(move)) modFragment.moves.push(move);
+									if (modFragment.moves.length > 4) accept = false;
+								}
+								if (subfragment.requestedSupport) {
+									if (!modFragment.vgc.requestedSupport) modFragment.vgc.requestedSupport = [];
+									for (const requestedSupport of subfragment.requestedSupport) if (!modFragment.vgc.requestedSupport.includes(requestedSupport)) modFragment.vgc.requestedSupport.push(requestedSupport);
+								}
+								if (subfragment.evs) {
+									if (!modFragment.evs) modFragment.evs = subfragment.evs;
+									if (subfragment.evs.hp > modFragment.evs.hp) modFragment.evs.hp = subfragment.evs.hp;
+									if (subfragment.evs.atk > modFragment.evs.atk) modFragment.evs.atk = subfragment.evs.atk;
+									if (subfragment.evs.def > modFragment.evs.def) modFragment.evs.def = subfragment.evs.def;
+									if (subfragment.evs.spa > modFragment.evs.spa) modFragment.evs.spa = subfragment.evs.spa;
+									if (subfragment.evs.spd > modFragment.evs.spd) modFragment.evs.spd = subfragment.evs.spd;
+									if (subfragment.evs.spe > modFragment.evs.spe) modFragment.evs.spe = subfragment.evs.spe;
+									if (modFragment.evs.hp + modFragment.evs.atk + modFragment.evs.def + modFragment.evs.spa + modFragment.evs.spd + modFragment.evs.spe > 508) accept = false;
+								}
+								if (accept) supportFragments.push(modFragment);
+							}
+							if (supportFragments.length) {
+								if (!newMon.randbats.offeredSupport[offeredSupport]) newMon.randbats.offeredSupport[offeredSupport] = [];
+								for (const supportFragment of supportFragments) newMon.randbats.offeredSupport[offeredSupport].push(supportFragment);
+							}
+						}
 					}
 	
 					// okay I'm gonna have to figure out exactly how an individual fragment's support requests count
