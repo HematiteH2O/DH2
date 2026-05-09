@@ -649,9 +649,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		if (!(this.dex.data.Pokedex.ycecroak.randbats && this.dex.data.Pokedex.ycecroak.randbats.name && this.dex.data.Pokedex.ycecroak.randbats.name === 'Ycecroak')) {
 			console.log(`Initializing randbats stuff`);
 			for (const id in this.dex.data.Pokedex) {
+				const newMon = this.dex.data.Pokedex[id];
+				
 				// for safety later, the bare-minimum randbats initialization should happen for every Pokémon, in case the player brings something unexpected
-				this.dex.data.Pokedex[id].randbats = {
-					name: this.dex.data.Pokedex[id].name, // for console.logging convenience
+				newMon.randbats = {
+					name: newMon.name, // for console.logging convenience
 					types: [],
 					abilities: [],
 					viableStabs: [],
@@ -671,8 +673,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 	
 				// the real randbats setup only needs to take place Pokémon you can bring to an Evo game
 				if (
-					this.modData('FormatsData', id) && this.modData('FormatsData', id).tier &&
-					(this.modData('FormatsData', id).tier === "Evo!" || this.modData('FormatsData', id).tier === "(Prevo)")
+					this.dex.data.FormatsData[id] && this.dex.data.FormatsData[id].tier &&
+					(this.dex.data.FormatsData[id].tier === "Evo!" || this.dex.data.FormatsData[id].tier === "(Prevo)")
 				) {
 					// banlists
 					if ([
@@ -686,7 +688,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					].includes(id)) newMon.randbats.vgc.banned = true;
 					if (newMon.randbats.singles.banned && newMon.randbats.vgc.banned) continue;
 					
-					if (this.modData('FormatsData', id).tier === "Evo!" || ['porygon2', 'accelgor'].includes(id)) newMon.randbats.stage = 'Evo';
+					if (this.dex.data.FormatsData[id].tier === "Evo!" || ['porygon2', 'accelgor'].includes(id)) newMon.randbats.stage = 'Evo';
 					else if (newMon.evos && newMon.evos.length && !newMon.prevo && !['mareanie'].includes(id)) newMon.randbats.stage = 'LC';
 	
 					// basic information
