@@ -1716,6 +1716,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 										modFragment.avoid.push('speedsetup');
 									}
 									modFragment.score = fragment.moveBasePower;
+									
+									if (!modFragment.tags) modFragment.tags = [];
+									if (!move.overrideOffensiveStat && !modFragment.tags.includes(`${(move.category).toLowerCase()}`)) modFragment.tags.push(`${(move.category).toLowerCase()}`);
+									if (fragment.moveAccuracy < 80 || move.multiaccuracy) modFragment.tags.push('inaccurate');
+
 									if ((move.category === 'Physical' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'def')) {
 										if (!modFragment.vgc) modFragment.vgc = {};
 										if (!modFragment.vgc.acceptedSupport) modFragment.vgc.acceptedSupport = [];
@@ -1736,6 +1741,20 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 										modFragment.avoid.push('physicalsetup');
 										modFragment.avoid.push('speedsetup');
 									}
+									if (!modFragment.tags) modFragment.tags = [];
+									if (!move.overrideOffensiveStat && !modFragment.tags.includes(`${(move.category).toLowerCase()}`)) modFragment.tags.push(`${(move.category).toLowerCase()}`);
+									if (fragment.moveAccuracy < 80 || move.multiaccuracy) modFragment.tags.push('inaccurate');
+
+									if ((move.category === 'Physical' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'def')) {
+										if (!modFragment.vgc) modFragment.vgc = {};
+										if (!modFragment.vgc.acceptedSupport) modFragment.vgc.acceptedSupport = [];
+										if (!modFragment.vgc.acceptedSupport.includes('defensereduction')) modFragment.vgc.acceptedSupport.push('defensereduction');
+									}
+									if ((move.category === 'Special' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'spd')) {
+										if (!modFragment.vgc) modFragment.vgc = {};
+										if (!modFragment.vgc.acceptedSupport) modFragment.vgc.acceptedSupport = [];
+										if (!modFragment.vgc.acceptedSupport.includes('spdefreduction')) modFragment.vgc.acceptedSupport.push('spdefreduction');
+									}
 									modFragment.teraType = fragment.moveType;
 									newMon.randbats.offeredSupport.personal.push(modFragment);
 								}
@@ -1745,6 +1764,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								if (!newMon.randbats.offeredSupport.spread) newMon.randbats.offeredSupport.spread = [];
 								let modFragment = Utils.deepClone(fragment);
 								modFragment.score = fragment.moveBasePower;
+									
+								if (!modFragment.tags) modFragment.tags = [];
+								if (!move.overrideOffensiveStat && !modFragment.tags.includes(`${(move.category).toLowerCase()}`)) modFragment.tags.push(`${(move.category).toLowerCase()}`);
+								if (fragment.moveAccuracy < 80 || move.multiaccuracy) modFragment.tags.push('inaccurate');
+
 								if ((move.category === 'Physical' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'def')) {
 									if (!modFragment.vgc) modFragment.vgc = {};
 									if (!modFragment.vgc.acceptedSupport) modFragment.vgc.acceptedSupport = [];
@@ -1772,6 +1796,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 	
 								// ones that we can use as a main spread should be strong!
 								if (fragment.moveBasePower > 80) {
+									if (!modFragment.tags) modFragment.tags = [];
+									if (!move.overrideOffensiveStat && !modFragment.tags.includes(`${(move.category).toLowerCase()}`)) modFragment.tags.push(`${(move.category).toLowerCase()}`);
+									if (fragment.moveAccuracy < 80 || move.multiaccuracy) modFragment.tags.push('inaccurate');
+
 									modFragment.vgc.requestedSupport.push(`${(fragment.moveType).toLowerCase()}immune`); // ex. "electricimmune"
 									if (!newMon.randbats.offeredSupport.spread) newMon.randbats.offeredSupport.spread = [];
 									newMon.randbats.offeredSupport.spread.push(modFragment);
