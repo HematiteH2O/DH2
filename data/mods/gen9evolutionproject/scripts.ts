@@ -16,7 +16,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 	
 	init() {
 		// for the experiment
-		let dexOfTheDay = Dex.mod('gen9evolutionproject');
+		const dexOfTheDay = Dex.mod('gen9evolutionproject');
 		if (!(dexOfTheDay.data.Pokedex.bulbasaur.fakemonInitialized)) {
 			dexOfTheDay.data.Pokedex.bulbasaur.fakemonInitialized = true;
 		} else {
