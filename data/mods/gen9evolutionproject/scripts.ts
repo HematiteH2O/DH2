@@ -1,8 +1,6 @@
 import { Pokemon, EffectState } from '../../../sim/pokemon';
 import { Teams } from '../../../sim/teams';
 import { Utils } from '../../../lib/utils';
-// for a brief experiment:
-import { Dex } from '../../../sim/dex';
 
 export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 	teambuilderConfig: {
@@ -16,10 +14,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 	
 	init() {
 		// for the experiment
-		const {Dex} = require('pokemon-showdown');
-		const dexOfTheDay = Dex.mod('gen9evolutionproject');
-		if (!(dexOfTheDay.data.Pokedex.bulbasaur.fakemonInitialized)) {
-			dexOfTheDay.data.Pokedex.bulbasaur.fakemonInitialized = true;
+		if (!this.modData('Pokedex', 'bulbasaur').fakemonInitialized) {
+			this.modData('Pokedex', 'bulbasaur').fakemonInitialized = true;
 		} else {
 			console.log(`If this message ever shows up, that's actually kinda neat`);
 			return;
