@@ -1817,22 +1817,26 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							}
 							if ([
 								'tailwind', 'stickyweb', 'silktrap',
-								'cottonspore', 'stringshot',
+								'cottonspore', 'stringshot', 'scaryface',
 								'electroweb', 'icywind', 'glaciate', // Bulldoze will receive special handling elsewhere because it doesn't work for every team
 								'thunderwave', 'nuzzle', 'glare', 'stunspore',
 								'syrupbomb', 'tarshot',
 							].includes(moveid) ||
 								 ([
 									 'lowsweep', 'mudshot', 'drumbeating', 'pounce',
-								 ].includes(moveid) && fragment.moveBasePower > 80) ||
-								 (moveid === 'scaryface' && fragment.movePriority > 0)
+								 ].includes(moveid) && fragment.moveBasePower > 80)
 								) {
 								let modFragment = Utils.deepClone(fragment);
 								if (!modFragment.avoid) modFragment.avoid = [];
 								modFragment.avoid.push('speedcontrol');
 								
-								if (!newMon.randbats.offeredSupport.speedcontrol) newMon.randbats.offeredSupport.speedcontrol = [];
-								newMon.randbats.offeredSupport.speedcontrol.push(modFragment);
+								if (modFragment.movePriority > 0) {
+										if (!newMon.randbats.offeredSupport.speedcontrol) newMon.randbats.offeredSupport.speedcontrol = [];
+										newMon.randbats.offeredSupport.speedcontrol.push(modFragment);
+								} else {
+									if (!pickyVgcSupport.speedcontrol) pickyVgcSupport.speedcontrol = [];
+									pickyVgcSupport.speedcontrol.push(modFragment);
+								}
 							}
 							if (moveid === 'trickroom') {
 								let modFragment = Utils.deepClone(fragment);
@@ -1852,11 +1856,17 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							].includes(moveid) && !(fragment.moveAccuracy && fragment.moveAccuracy < 70)) ||
 								(['nobleroar', 'tearfullook'].includes(moveid) && fragment.movePriority > 0)
 							) {
-								if (!newMon.randbats.offeredSupport.physicalreduction) newMon.randbats.offeredSupport.physicalreduction = [];
-								newMon.randbats.offeredSupport.physicalreduction.push(fragment);
-								
-								if (!newMon.randbats.offeredSupport.specialreduction) newMon.randbats.offeredSupport.specialreduction = [];
-								newMon.randbats.offeredSupport.specialreduction.push(fragment);
+								if (fragment.movePriority > 0) {
+										if (!newMon.randbats.offeredSupport.physicalreduction) newMon.randbats.offeredSupport.physicalreduction = [];
+										newMon.randbats.offeredSupport.physicalreduction.push(fragment);
+										if (!newMon.randbats.offeredSupport.specialreduction) newMon.randbats.offeredSupport.specialreduction = [];
+										newMon.randbats.offeredSupport.specialreduction.push(fragment);
+								} else {
+									if (!pickyVgcSupport.physicalreduction) pickyVgcSupport.physicalreduction = [];
+									pickyVgcSupport.physicalreduction.push(fragment);
+									if (!pickyVgcSupport.specialreduction) pickyVgcSupport.specialreduction = [];
+									pickyVgcSupport.specialreduction.push(fragment);
+								}
 							}
 							// others are specialized, so you need one of each
 							if (
@@ -1864,16 +1874,26 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								(['bittermalice', 'chillingwater', 'lunge', 'tropkick'].includes(moveid) && fragment.moveBasePower > 80) ||
 								(['reflect', 'growl', 'charm', 'tickle', 'featherdance'].includes(moveid) && fragment.movePriority > 0)
 							) {
-								if (!newMon.randbats.offeredSupport.physicalreduction) newMon.randbats.offeredSupport.physicalreduction = [];
-								newMon.randbats.offeredSupport.physicalreduction.push(fragment);
+								if (fragment.movePriority > 0) {
+										if (!newMon.randbats.offeredSupport.physicalreduction) newMon.randbats.offeredSupport.physicalreduction = [];
+										newMon.randbats.offeredSupport.physicalreduction.push(fragment);
+								} else {
+									if (!pickyVgcSupport.physicalreduction) pickyVgcSupport.physicalreduction = [];
+									pickyVgcSupport.physicalreduction.push(fragment);
+								}
 							}
 							if (
 								['snarl', 'strugglebug'].includes(moveid) ||
 								(['mysticalfire'].includes(moveid) && fragment.moveBasePower > 80) ||
 								(['lightscreen', 'eerieumpulse'].includes(moveid) && fragment.movePriority > 0)
 							) {
-								if (!newMon.randbats.offeredSupport.specialreduction) newMon.randbats.offeredSupport.specialreduction = [];
-								newMon.randbats.offeredSupport.specialreduction.push(fragment);
+								if (fragment.movePriority > 0) {
+										if (!newMon.randbats.offeredSupport.specialreduction) newMon.randbats.offeredSupport.specialreduction = [];
+										newMon.randbats.offeredSupport.specialreduction.push(fragment);
+								} else {
+									if (!pickyVgcSupport.specialreduction) pickyVgcSupport.specialreduction = [];
+									pickyVgcSupport.specialreduction.push(fragment);
+								}
 							}
 							
 							// somewhat rudimentary handling of protection for VGC
