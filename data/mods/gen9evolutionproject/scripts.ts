@@ -1467,7 +1467,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 									supportFragments.push(modFragment);
 								}
 								if (supportFragments.length) {
-									if (!newMon.randbats.offeredSupport.defensereduction) newMon.randbats.offeredSupport.spdefreduction = [];
+									if (!newMon.randbats.offeredSupport.spdefreduction) newMon.randbats.offeredSupport.spdefreduction = [];
 									for (const supportFragment of supportFragments) newMon.randbats.offeredSupport.spdefreduction.push(supportFragment);
 								}
 							}
