@@ -1681,19 +1681,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								if (!move.overrideOffensiveStat && !modFragment.tags.includes(`${(move.category).toLowerCase()}`)) modFragment.tags.push(`${(move.category).toLowerCase()}`);
 								if (fragment.moveAccuracy < 80 || move.multiaccuracy) modFragment.tags.push('inaccurate');
 								if (fragment.moveBasePower >= 90 || (fragment.stab && fragment.moveBasePower >= 80)) {
-									if (fragment.stab || fragment.moveType !== 'Normal' || fragment.moveBasePower >= 120) {
-										if ((move.category === 'Physical' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'def')) {
-											if (!modFragment.vgc) modFragment.vgc = {};
-											if (!modFragment.vgc.acceptedSupport) modFragment.vgc.acceptedSupport = [];
-											if (!modFragment.vgc.acceptedSupport.includes('defensereduction')) modFragment.vgc.acceptedSupport.push('defensereduction');
-										}
-										if ((move.category === 'Special' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'spd')) {
-											if (!modFragment.vgc) modFragment.vgc = {};
-											if (!modFragment.vgc.acceptedSupport) modFragment.vgc.acceptedSupport = [];
-											if (!modFragment.vgc.acceptedSupport.includes('spdefreduction')) modFragment.vgc.acceptedSupport.push('spdefreduction');
-										}
-										newMon.randbats.viableStabs.push(modFragment);
-									}
+									if (fragment.stab || fragment.moveType !== 'Normal' || fragment.moveBasePower >= 120) newMon.randbats.viableStabs.push(modFragment);
 									// stop giving random things Double-Edge!! I know it has good BP :sob:
 									// (the >= 120 preserves *really* strong cases like non-STAB Punk Rock Boomburst, but otherwise, it has to be coverage if it's not STAB)
 								}
@@ -1728,6 +1716,16 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 										modFragment.avoid.push('speedsetup');
 									}
 									modFragment.score = fragment.moveBasePower;
+									if ((move.category === 'Physical' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'def')) {
+										if (!modFragment.vgc) modFragment.vgc = {};
+										if (!modFragment.vgc.acceptedSupport) modFragment.vgc.acceptedSupport = [];
+										if (!modFragment.vgc.acceptedSupport.includes('defensereduction')) modFragment.vgc.acceptedSupport.push('defensereduction');
+									}
+									if ((move.category === 'Special' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'spd')) {
+										if (!modFragment.vgc) modFragment.vgc = {};
+										if (!modFragment.vgc.acceptedSupport) modFragment.vgc.acceptedSupport = [];
+										if (!modFragment.vgc.acceptedSupport.includes('spdefreduction')) modFragment.vgc.acceptedSupport.push('spdefreduction');
+									}
 									newMon.randbats.offeredSupport.priority.push(modFragment);
 								} else if (fragment.moveBasePower && (fragment.moveBasePower *1.5 > 40) && !fragment.stab && !fragment.teraType && fragment.moveType !== 'Normal') {
 									// push to "personal" for some last-pick set filler
@@ -1747,6 +1745,16 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								if (!newMon.randbats.offeredSupport.spread) newMon.randbats.offeredSupport.spread = [];
 								let modFragment = Utils.deepClone(fragment);
 								modFragment.score = fragment.moveBasePower;
+								if ((move.category === 'Physical' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'def')) {
+									if (!modFragment.vgc) modFragment.vgc = {};
+									if (!modFragment.vgc.acceptedSupport) modFragment.vgc.acceptedSupport = [];
+									if (!modFragment.vgc.acceptedSupport.includes('defensereduction')) modFragment.vgc.acceptedSupport.push('defensereduction');
+								}
+								if ((move.category === 'Special' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'spd')) {
+									if (!modFragment.vgc) modFragment.vgc = {};
+									if (!modFragment.vgc.acceptedSupport) modFragment.vgc.acceptedSupport = [];
+									if (!modFragment.vgc.acceptedSupport.includes('spdefreduction')) modFragment.vgc.acceptedSupport.push('spdefreduction');
+								}
 								newMon.randbats.offeredSupport.spread.push(modFragment);
 							}
 							if (move.target === 'allAdjacent' && !move.selfdestruct && moveid !== 'synchronoise') {
@@ -1780,7 +1788,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								}
 							}
 							if ([
-								'tailwind', 'trickroom', 'stickyweb', 'silktrap',
+								'tailwind', 'stickyweb', 'silktrap',
 								'cottonspore', 'stringshot',
 								'electroweb', 'icywind', 'glaciate', // Bulldoze will receive special handling elsewhere because it doesn't work for every team
 								'thunderwave', 'nuzzle', 'glare', 'stunspore',
@@ -1791,11 +1799,20 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								 ].includes(moveid) && fragment.moveBasePower > 80) ||
 								 (moveid === 'scaryface' && fragment.movePriority > 0)
 								) {
-								if (!newMon.randbats.offeredSupport.speedcontrol) newMon.randbats.offeredSupport.speedcontrol = [];
 								let modFragment = Utils.deepClone(fragment);
 								if (!modFragment.avoid) modFragment.avoid = [];
 								modFragment.avoid.push('speedcontrol');
+								
+								if (!newMon.randbats.offeredSupport.speedcontrol) newMon.randbats.offeredSupport.speedcontrol = [];
 								newMon.randbats.offeredSupport.speedcontrol.push(modFragment);
+							}
+							if (moveid === 'trickroom') {
+								let modFragment = Utils.deepClone(fragment);
+								if (!modFragment.tags) modFragment.tags = [];
+								modFragment.tags.push('minspeed');
+								
+								if (!newMon.randbats.offeredSupport.trickroom) newMon.randbats.offeredSupport.trickroom = [];
+								newMon.randbats.offeredSupport.trickroom.push(modFragment);
 							}
 	
 							// some moves cover both physicalreduction and specialreduction at once
@@ -1877,6 +1894,26 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								// TODO: these *are not* all interchangeable and should be divided further
 								if (!newMon.randbats.offeredSupport.disruption) newMon.randbats.offeredSupport.disruption = [];
 								newMon.randbats.offeredSupport.disruption.push(fragment);
+							}
+							// anti-Trick Room
+							if ([
+								'taunt', 'encore', 'imprison',
+								'spore', 'sleeppowder',
+								'trickroom',
+							].includes(moveid)) {
+								let modFragment = Utils.deepClone(fragment);
+								let role = 'antitrickroom';
+								if (moveid === 'imprison') {
+									if (learnset.trickroom && learnset.trickroom.length) modFragment.moves.push('Trick Room');
+									else if (learnset.protect && learnset.protect.length) {
+										modFragment.moves.push('Protect');
+										role = 'antiprotect';
+									} else role = null;
+								}
+								if (role) {
+									if (!newMon.randbats.offeredSupport[role]) newMon.randbats.offeredSupport[role] = [];
+									newMon.randbats.offeredSupport[role].push(fragment);
+								}
 							}
 							// fixed damage
 							if ([
@@ -2499,7 +2536,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 		let baseRequestedSupport = [];
 		// These are a kind of default checklist for each format, but there will be more specific requests as team members are evaluated
-		if (format === "vgc") baseRequestedSupport = ['fakeout', 'priority', 'spread', 'speedcontrol', 'physicalreduction', 'specialreduction'];
+		if (format === "vgc") baseRequestedSupport = ['fakeout', 'priority', 'spread', 'speedcontrol', 'antitrickroom', 'physicalreduction', 'specialreduction'];
 		else baseRequestedSupport = ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff', 'contactpunish', 'electricimmune', 'groundimmune'];
 		
 		// I also definitely need to evaluate the base team members for their requestedSupport, offeredSupport and acceptedSupport, but...
