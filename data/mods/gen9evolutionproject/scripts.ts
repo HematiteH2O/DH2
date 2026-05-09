@@ -1906,10 +1906,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								if (modFragment.movePriority > 0 || modFragment.baseMove === 'octolock') {
 										if (!newMon.randbats.offeredSupport.defensereduction) newMon.randbats.offeredSupport.defensereduction = [];
 										newMon.randbats.offeredSupport.defensereduction.push(modFragment);
-									} else {
-										if (!pickyVgcSupport.defensereduction) pickyVgcSupport.defensereduction = [];
-										pickyVgcSupport.defensereduction.push(modFragment);
-									}
+								} else {
+									if (!pickyVgcSupport.defensereduction) pickyVgcSupport.defensereduction = [];
+									pickyVgcSupport.defensereduction.push(modFragment);
 								}
 							}
 							// special
@@ -1927,12 +1926,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								// to be viable, many of these need priority, naturally high Speed, or an Ability that boosts Speed
 								// I have set up a way to generalize that, since it comes up for a lot of other kinds of support
 								if (modFragment.movePriority > 0 || modFragment.baseMove === 'octolock') {
-										if (!newMon.randbats.offeredSupport.spdefreduction) newMon.randbats.offeredSupport.spdefreduction = [];
-										newMon.randbats.offeredSupport.spdefreduction.push(modFragment);
-									} else {
-										if (!pickyVgcSupport.spdefreduction) pickyVgcSupport.spdefreduction = [];
-										pickyVgcSupport.spdefreduction.push(modFragment);
-									}
+									if (!newMon.randbats.offeredSupport.spdefreduction) newMon.randbats.offeredSupport.spdefreduction = [];
+									newMon.randbats.offeredSupport.spdefreduction.push(modFragment);
+								} else {
+									if (!pickyVgcSupport.spdefreduction) pickyVgcSupport.spdefreduction = [];
+									pickyVgcSupport.spdefreduction.push(modFragment);
 								}
 							}
 							// side healing
