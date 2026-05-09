@@ -492,7 +492,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						viableVgcSupport = true;
 					}
 				}
-				if (newMon.baseStats.spe < 66 && learnset.trickroom.length) {
+				if (newMon.baseStats.spe < 66 && learnset.trickroom && learnset.trickroom.length) {
 					vgcSupportSubfragments.push({
 						moves: ['Trick Room'],
 						tags: ['minspeed'],
