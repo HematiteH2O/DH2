@@ -1912,7 +1912,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								}
 								if (role) {
 									if (!newMon.randbats.offeredSupport[role]) newMon.randbats.offeredSupport[role] = [];
-									newMon.randbats.offeredSupport[role].push(fragment);
+									newMon.randbats.offeredSupport[role].push(modFragment);
 								}
 							}
 							// fixed damage
