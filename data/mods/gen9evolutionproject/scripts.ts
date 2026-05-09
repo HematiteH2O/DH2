@@ -406,48 +406,69 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (newMon.baseStats.spe > 102) { // unboosted Speed cutoff: Garchomp
 					viableVgcSupport = true;
 				} else if (newMon.baseStats.spe > 72) { // +1 Speed cutoff: Aleon
-					if (newMon.randbats.abilities.includes('Speed Boost') {
+					if (newMon.randbats.abilities.includes('Speed Boost')) {
 						vgcSupportSubfragments.push({
 							ability: 'Speed Boost',
 						});
 						viableVgcSupport = true;
 					}
-					if (newMon.randbats.abilities.includes('Noble Potential') {
+					if (newMon.randbats.abilities.includes('Noble Potential')) {
 						vgcSupportSubfragments.push({
 							ability: 'Noble Potential',
 						});
 						viableVgcSupport = true;
 					}
+					if (newMon.randbats.abilities.includes('Quark Drive')) {
+						vgcSupportSubfragments.push({
+							ability: 'Quark Drive',
+							requestedSupport: ['electricterrain'],
+						});
+						vgcSupportSubfragments.push({
+							ability: 'Quark Drive',
+							item: ['Booster Energy'],
+						});
+					}
+					if (newMon.randbats.abilities.includes('Protosynthesis')) {
+						vgcSupportSubfragments.push({
+							ability: 'Protosynthesis',
+							requestedSupport: ['sun'],
+						});
+						vgcSupportSubfragments.push({
+							ability: 'Protosynthesis',
+							item: ['Booster Energy'],
+						});
+						viableVgcSupport = true;
+					}
 				} else if (newMon.baseStats.spe > 41) { // +2 Speed cutoff: Aleon
-					if (newMon.randbats.abilities.includes('Chlorophyll') {
+					if (newMon.randbats.abilities.includes('Chlorophyll')) {
 						vgcSupportSubfragments.push({
 							ability: 'Chlorophyll',
 							requestedSupport: ['sun'],
 						});
 						viableVgcSupport = true;
 					}
-					else if (newMon.randbats.abilities.includes('Swift Swim') {
+					else if (newMon.randbats.abilities.includes('Swift Swim')) {
 						vgcSupportSubfragments.push({
 							ability: 'Swift Swim',
 							requestedSupport: ['rain'],
 						});
 						viableVgcSupport = true;
 					}
-					else if (newMon.randbats.abilities.includes('Sand Rush') {
+					else if (newMon.randbats.abilities.includes('Sand Rush')) {
 						vgcSupportSubfragments.push({
 							ability: 'Sand Rush',
 							requestedSupport: ['sand'],
 						});
 						viableVgcSupport = true;
 					}
-					else if (newMon.randbats.abilities.includes('Slush Rush') {
+					else if (newMon.randbats.abilities.includes('Slush Rush')) {
 						vgcSupportSubfragments.push({
 							ability: 'Slush Rush',
 							requestedSupport: ['snow'],
 						});
 						viableVgcSupport = true;
 					}
-					else if (newMon.randbats.abilities.includes('Unburden') {
+					else if (newMon.randbats.abilities.includes('Unburden')) {
 						vgcSupportSubfragments.push({
 							ability: 'Unburden',
 							item: 'Grassy Seed',
