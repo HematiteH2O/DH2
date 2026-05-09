@@ -13,6 +13,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 	// GENERATING FAKEMON
 	
 	init() {
+		if (this.dataCache.Pokedex.ycecroak.randbats) {
+			console.log(`Evo init NOT repeated`);
+			return;
+		}
 		console.log(`Evo start`);
 		let customList = [];
 		let dexNo = -1;
