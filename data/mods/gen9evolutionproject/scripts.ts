@@ -646,10 +646,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		// This used to be in init(), but that meant it was getting called for each player every battle *anyway*
 		// Even though it's weird to be doing a bunch of dex initialization in getTeam(), this setup is effectively minimizing how often it gets called
 
-		if (!(this.dex.data.Pokedex.bulbasaur.randbatsInitialized)) {
-			this.dex.data.Pokedex.bulbasaur.randbatsInitialized = true;
-			console.log(`Initializing randbats stuff`);
-			for (const id in this.dex.data.Pokedex) {
+		for (const id in this.dex.data.Pokedex) {
+			if (!(this.dex.data.Pokedex[id].randbatsInitialized)) {
 				const newMon = this.dex.data.Pokedex[id];
 				
 				// for safety later, the bare-minimum randbats initialization should happen for every Pokémon, in case the player brings something unexpected
@@ -671,6 +669,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					resistances: {},
 					immunities: {},
 				};
+				newMon.randbatsInitialized = true;
 	
 				// the real randbats setup only needs to take place Pokémon you can bring to an Evo game
 				if (
@@ -2389,8 +2388,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					}
 				}
 			}
-		} else {
-			console.log(`NOT initializing randbats stuff because we already did`);
 		}
 
 		let originalTeamSpecies = [];
