@@ -2000,9 +2000,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 									}
 
 									// we don't want several of the same type on the same set
-									modFragment.tags.push(`${(move.type).toLowerCase()}priority`);
+									modFragment.tags.push(`${(modFragment.moveType).toLowerCase()}priority`);
 									if (!modFragment.avoid) modFragment.avoid = [];
-									modFragment.avoid.push(`${(move.type).toLowerCase()}priority`);
+									modFragment.avoid.push(`${(modFragment.moveType).toLowerCase()}priority`);
 									
 									newMon.randbats.offeredSupport.priority.push(modFragment);
 								} else if (fragment.moveBasePower && (fragment.moveBasePower *1.5 > 40) && !fragment.stab && !fragment.teraType && fragment.moveType !== 'Normal') {
@@ -2031,9 +2031,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 									modFragment.teraType = fragment.moveType;
 
 									// we don't want several of the same type on the same set
-									modFragment.tags.push(`${(move.type).toLowerCase()}priority`);
+									modFragment.tags.push(`${(modFragment.moveType).toLowerCase()}priority`);
 									if (!modFragment.avoid) modFragment.avoid = [];
-									modFragment.avoid.push(`${(move.type).toLowerCase()}priority`);
+									modFragment.avoid.push(`${(modFragment.moveType).toLowerCase()}priority`);
 									
 									newMon.randbats.offeredSupport.personal.push(modFragment);
 								}
@@ -2060,9 +2060,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								}
 
 								// we don't want several of the same type on the same set
-								modFragment.tags.push(`${(move.type).toLowerCase()}spread`);
+								modFragment.tags.push(`${(modFragment.moveType).toLowerCase()}spread`);
 								if (!modFragment.avoid) modFragment.avoid = [];
-								modFragment.avoid.push(`${(move.type).toLowerCase()}spread`);
+								modFragment.avoid.push(`${(modFragment.moveType).toLowerCase()}spread`);
 								
 								newMon.randbats.offeredSupport.spread.push(modFragment);
 							}
@@ -2080,8 +2080,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								// if we let them take every possible option for these, they run out of room for important things quickly!
 
 								// we don't want several of the same type on the same set
-								modFragment.tags.push(`${(move.type).toLowerCase()}spread`);
-								modFragment.avoid.push(`${(move.type).toLowerCase()}spread`);
+								modFragment.tags.push(`${(modFragment.moveType).toLowerCase()}spread`);
+								modFragment.avoid.push(`${(modFragment.moveType).toLowerCase()}spread`);
 								
 								// ones that we can use as a main spread should be strong!
 								if (fragment.moveBasePower > 80 && fragment.moveAccuracy >= 90) {
