@@ -1871,7 +1871,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							if (moveid === 'trickroom') {
 								let modFragment = Utils.deepClone(fragment);
 								if (!modFragment.tags) modFragment.tags = [];
+								modFragment.tags.push('backuptrickroom');
 								modFragment.tags.push('minspeed');
+								modFragment.singles.requestedSupport.push('backuptrickroom');
+								modFragment.vgc.acceptedSupport.push('backuptrickroom');
 								
 								if (!newMon.randbats.offeredSupport.trickroom) newMon.randbats.offeredSupport.trickroom = [];
 								newMon.randbats.offeredSupport.trickroom.push(modFragment);
@@ -2106,6 +2109,76 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								newMon.randbats.offeredSupport.pivoting.push(modFragment);
 								// TODO: also counts as "personal" with tag "momentum" and probably some buddy fragments
 							}
+							// backup field effect setting
+							if (
+								[
+									'sunnyday', 'raindance', 'sandstorm', 'hail', 'snowscape', 'chillyreception',
+									'electricterrain', 'psychicterrain', 'grassyterrain', 'mistyterrain',
+								].includes(moveid)
+							) {
+								let accept = [];
+								let fieldeffect = sun;
+								
+								switch (moveid) {
+									// offeredSupport
+									case 'raindance':
+										fieldeffect = rain;
+										break;
+									case 'sandstorm':
+										fieldeffect = sand;
+										break;
+									case 'hail':
+									case 'snowscape':
+									case 'chillyreception':
+										fieldeffect = snow;
+										break;
+									case 'electricterrain':
+										fieldeffect = electricterrain;
+										break;
+									case 'grassyterrain':
+										fieldeffect = grassyterrain;
+										break;
+									case 'mistyterrain':
+										fieldeffect = mistyterrain;
+										break;
+									case 'psychicterrain':
+										fieldeffect = psychicterrain;
+										break;
+								}
+
+								// usually, you want the backup setter to provide some other support as well - especially something that would make it a good lead
+								// and there are some other characteristics that can depend on the field effect itself!
+								// so...
+								if (learnset.tailwind && learnset.tailwind.length) {
+									let tailwindFragment = Utils.deepClone(fragment);
+									tailwindFragment.moves.push('Tailwind');
+									if (!tailwindFragment.tags) modFragment.tags.push('speedcontrol');
+									accept.push(tailwindFragment);
+								}
+								if (learnset.fakeout && learnset.fakeout.length) {
+									let fakeOutFragment = Utils.deepClone(fragment);
+									fakeOutFragment.moves.push('Fake Out');
+									if (!fakeOutFragment.tags) modFragment.tags.push('fakeout');
+									accept.push(tailwindFragment);
+								}
+								// these ones shouldn't usually have backup setters just because they can
+								if (['sandstorm', 'snow', 'grassyterrain', 'mistyterrain'].includes(fieldeffect)) accept = [];
+								// in theory, I can expand on this list with more specific criteria for each field effect!
+								// but I don't know what I would do with most of them just yet
+
+								if (accept) {
+									for (const modFragment of accept) {
+										if (modFragment.movePriority > 0) {
+											if (!newMon.randbats.offeredSupport[`backup${fieldeffect}`]) newMon.randbats.offeredSupport[`backup${fieldeffect}`] = [];
+											newMon.randbats.offeredSupport[`backup${fieldeffect}`].push(modFragment);
+										} else {
+											if (!pickyVgcSupport[`backup${fieldeffect}`]) pickyVgcSupport[`backup${fieldeffect}`] = [];
+											pickyVgcSupport[`backup${fieldeffect}`].push(modFragment);
+										}
+									}
+								}
+							}
+							
 							// setup
 							// Speed-boosting setup
 							if (
@@ -2334,7 +2407,13 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								}
 								if (subfragment.requestedSupport) {
 									if (!modFragment.vgc.requestedSupport) modFragment.vgc.requestedSupport = [];
-									for (const requestedSupport of subfragment.requestedSupport) if (!modFragment.vgc.requestedSupport.includes(requestedSupport)) modFragment.vgc.requestedSupport.push(requestedSupport);
+									for (const requestedSupport of subfragment.requestedSupport) {
+										if (offeredSupport === requestedSupport) accept = false;
+										if (offeredSupport === `backup${requestedSupport}`) accept = false;
+										// I don't want, for example, the fastest Swift Swim user on the team to be pressured to run Rain Dance simply to support its own Drizzle user
+										// backup rain setters should be things like Pranskter users, not rain abusers!
+										if (!modFragment.vgc.requestedSupport.includes(requestedSupport)) modFragment.vgc.requestedSupport.push(requestedSupport);
+									}
 								}
 								if (subfragment.evs) {
 									if (!modFragment.evs) modFragment.evs = subfragment.evs;
@@ -2426,22 +2505,49 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						switch (ability) {
 							// offeredSupport
 							case 'Drizzle':
+								let modFragment = Utils.deepClone(fragment);
+								modFragment.singles.acceptedSupport.push('rain');
+								modFragment.singles.acceptedSupport.push('backuprain');
+								modFragment.vgc.acceptedSupport.push('rain');
+								modFragment.vgc.acceptedSupport.push('backuprain');
+								
 								if (!newMon.randbats.offeredSupport.rain) newMon.randbats.offeredSupport.rain = [];
-								newMon.randbats.offeredSupport.rain.push(fragment);
+								newMon.randbats.offeredSupport.rain.push(modFragment);
 								break;
 							case 'Drought':
 							case 'Orichalcum Pulse':
+								let modFragment = Utils.deepClone(fragment);
+								modFragment.singles.acceptedSupport.push('sun');
+								modFragment.singles.acceptedSupport.push('backupsun');
+								modFragment.vgc.acceptedSupport.push('sun');
+								modFragment.vgc.acceptedSupport.push('backupsun');
+								
 								if (!newMon.randbats.offeredSupport.sun) newMon.randbats.offeredSupport.sun = [];
-								newMon.randbats.offeredSupport.sun.push(fragment);
+								newMon.randbats.offeredSupport.sun.push(modFragment);
 								break;
 							case 'Electric Surge':
 							case 'Hadron Engine':
+								let modFragment = Utils.deepClone(fragment);
+								modFragment.singles.acceptedSupport.push('electricterrain');
+								modFragment.singles.acceptedSupport.push('backupelectricterrain');
+								modFragment.vgc.acceptedSupport.push('electricterrain');
+								modFragment.vgc.acceptedSupport.push('backupelectricterrain');
+								
 								if (!newMon.randbats.offeredSupport.electricterrain) newMon.randbats.offeredSupport.electricterrain = [];
-								newMon.randbats.offeredSupport.electricterrain.push(fragment);
+								newMon.randbats.offeredSupport.electricterrain.push(modFragment);
 								if (!newMon.randbats.offeredSupport.antisleep) newMon.randbats.offeredSupport.antisleep = [];
-								newMon.randbats.offeredSupport.antisleep.push(fragment);
+								newMon.randbats.offeredSupport.antisleep.push(modFragment);
 								break;
 							case 'Grassy Surge':
+								let modFragment = Utils.deepClone(fragment);
+								modFragment.singles.acceptedSupport.push('grassyterrain');
+								modFragment.singles.acceptedSupport.push('backupgrassyterrain');
+								modFragment.vgc.acceptedSupport.push('grassyterrain');
+								modFragment.vgc.acceptedSupport.push('backupgrassyterrain');
+								// full disclosure: it's relatively unlikely that anything will actually be set to offer the support "backupgrassyterrain"
+								// this is just because it's almost never a worthwhile consideration
+								// but I'm still adding the acceptedSupport here for completion just in case it comes up
+								
 								if (!newMon.randbats.offeredSupport.grassyterrain) newMon.randbats.offeredSupport.grassyterrain = [];
 								newMon.randbats.offeredSupport.grassyterrain.push(fragment);
 								break;
@@ -2452,40 +2558,93 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								newMon.randbats.offeredSupport.intimidate.push(fragment);
 								break;
 							case 'Misty Surge':
+								let modFragment = Utils.deepClone(fragment);
+								modFragment.singles.acceptedSupport.push('mistyterrain');
+								modFragment.singles.acceptedSupport.push('backupmistyterrain');
+								modFragment.vgc.acceptedSupport.push('mistyterrain');
+								modFragment.vgc.acceptedSupport.push('backupmistyterrain');
+								// full disclosure: it's relatively unlikely that anything will actually be set to offer the support "backupmistyterrain"
+								// this is just because it's almost never a worthwhile consideration
+								// but I'm still adding the acceptedSupport here for completion just in case it comes up
+
 								if (!newMon.randbats.offeredSupport.mistyterrain) newMon.randbats.offeredSupport.mistyterrain = [];
-								newMon.randbats.offeredSupport.mistyterrain.push(fragment);
+								newMon.randbats.offeredSupport.mistyterrain.push(modFragment);
 								if (!newMon.randbats.offeredSupport.antistatus) newMon.randbats.offeredSupport.antistatus = [];
-								newMon.randbats.offeredSupport.antistatus.push(fragment);
+								newMon.randbats.offeredSupport.antistatus.push(modFragment);
 								if (!newMon.randbats.offeredSupport.antisleep) newMon.randbats.offeredSupport.antisleep = [];
-								newMon.randbats.offeredSupport.antisleep.push(fragment);
+								newMon.randbats.offeredSupport.antisleep.push(modFragment);
 								break;
 							case 'Psychic Surge':
+							case 'Mega-Neural':
+								let modFragment = Utils.deepClone(fragment);
+								modFragment.singles.acceptedSupport.push('psychicterrain');
+								modFragment.singles.acceptedSupport.push('backuppsychicterrain');
+								modFragment.vgc.acceptedSupport.push('psychicterrain');
+								modFragment.vgc.acceptedSupport.push('backuppsychicterrain');
+								
 								if (!newMon.randbats.offeredSupport.psychicterrain) newMon.randbats.offeredSupport.psychicterrain = [];
-								newMon.randbats.offeredSupport.psychicterrain.push(fragment);
+								newMon.randbats.offeredSupport.psychicterrain.push(modFragment);
 								if (!newMon.randbats.offeredSupport.antipriority) newMon.randbats.offeredSupport.antipriority = [];
-								newMon.randbats.offeredSupport.antipriority.push(fragment);
+								newMon.randbats.offeredSupport.antipriority.push(modFragment);
 								break;
 							case 'Sand Stream':
 							case 'Sand Spit':
+								let modFragment = Utils.deepClone(fragment);
+								modFragment.singles.acceptedSupport.push('sand');
+								modFragment.singles.acceptedSupport.push('backupsand');
+								modFragment.vgc.acceptedSupport.push('sand');
+								modFragment.vgc.acceptedSupport.push('backupsand');
+								// full disclosure: it's relatively unlikely that anything will actually be set to offer the support "backupsand"
+								// this is just because it's almost never a worthwhile consideration
+								// but I'm still adding the acceptedSupport here for completion just in case it comes up
+								
 								if (!newMon.randbats.offeredSupport.sand) newMon.randbats.offeredSupport.sand = [];
-								newMon.randbats.offeredSupport.sand.push(fragment);
+								newMon.randbats.offeredSupport.sand.push(modFragment);
 								break;
 							case 'Snow Warning':
+								let modFragment = Utils.deepClone(fragment);
+								modFragment.singles.acceptedSupport.push('snow');
+								modFragment.singles.acceptedSupport.push('backupsnow');
+								modFragment.vgc.acceptedSupport.push('snow');
+								modFragment.vgc.acceptedSupport.push('backupsnow');
+								// full disclosure: it's relatively unlikely that anything will actually be set to offer the support "backupsnow"
+								// this is just because it's almost never a worthwhile consideration
+								// but I'm still adding the acceptedSupport here for completion just in case it comes up
+								
 								if (!newMon.randbats.offeredSupport.snow) newMon.randbats.offeredSupport.snow = [];
-								newMon.randbats.offeredSupport.snow.push(fragment);
+								newMon.randbats.offeredSupport.snow.push(modFragment);
 								break;
 							case 'Storm Chaser':
 								// we need any one of these, not all three
 								let modFragmentElectric = Utils.deepClone(fragment);
+								modFragmentElectric.singles.acceptedSupport.push('rain');
+								modFragmentElectric.singles.acceptedSupport.push('backuprain');
+								modFragmentElectric.vgc.acceptedSupport.push('rain');
+								modFragmentElectric.vgc.acceptedSupport.push('backuprain');
 								modFragmentElectric.vgc.requestedSupport.push('sideelectric');
+								
 								let modFragmentFlying = Utils.deepClone(fragment);
+								modFragmentFlying.singles.acceptedSupport.push('rain');
+								modFragmentFlying.singles.acceptedSupport.push('backuprain');
+								modFragmentFlying.vgc.acceptedSupport.push('rain');
+								modFragmentFlying.vgc.acceptedSupport.push('backuprain');
 								modFragmentFlying.vgc.requestedSupport.push('sideflying');
+								
 								let modFragmentWater = Utils.deepClone(fragment);
+								modFragmentWater.singles.acceptedSupport.push('rain');
+								modFragmentWater.singles.acceptedSupport.push('backuprain');
+								modFragmentWater.vgc.acceptedSupport.push('rain');
+								modFragmentWater.vgc.acceptedSupport.push('backuprain');
 								modFragmentWater.vgc.requestedSupport.push('sidewater');
+								
 								if (!newMon.randbats.offeredSupport.rain) newMon.randbats.offeredSupport.rain = [];
+								if (!newMon.randbats.offeredSupport.backuprain) newMon.randbats.offeredSupport.backuprain = [];
 								newMon.randbats.offeredSupport.rain.push(modFragmentElectric);
 								newMon.randbats.offeredSupport.rain.push(modFragmentFlying);
 								newMon.randbats.offeredSupport.rain.push(modFragmentWater);
+								newMon.randbats.offeredSupport.backuprain.push(modFragmentElectric);
+								newMon.randbats.offeredSupport.backuprain.push(modFragmentFlying);
+								newMon.randbats.offeredSupport.backuprain.push(modFragmentWater);
 								break;
 							// acceptedSupport
 							case 'Swift Swim':
