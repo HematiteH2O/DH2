@@ -1893,11 +1893,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								modFragment.vgc.requestedSupport.push('gravity');
 								alternateFragments.push(modFragment);
 							}
-							if (fragment.moveType === 'Ground' && fragment.baseMove !== 'Thousand Arrows') {
-								let modFragment = Utils.deepClone(fragment);
-								modFragment.singles.acceptedSupport.push('gravity');
-								modFragment.vgc.acceptedSupport.push('gravity');
-								alternateFragments.push(modFragment);
+							if (fragment.moveType === 'Ground' && fragment.moveBasePower && fragment.baseMove !== 'Thousand Arrows') {
+								fragment.singles.acceptedSupport.push('gravity');
+								fragment.vgc.acceptedSupport.push('gravity');
 							}
 
 							// poison
@@ -2053,7 +2051,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 									modFragment.buddy.roles.push('accuracyboost');
 								}
 								if (fragment.moveAccuracy <= 75) modFragment.score = -1; // this gets bypassed if something like Hone Claws or Coil is rolled
-								if (fragment.moveBasePower >= 90 || (fragment.stab && fragment.moveBasePower >= 80)) {
+								if (fragment.moveBasePower >= 90 || ((fragment.stab|| moveid === 'round') && fragment.moveBasePower >= 80)) {
 									if (fragment.stab || fragment.moveType !== 'Normal' || fragment.moveBasePower >= 120 || moveid === 'round') {
 										newMon.randbats.viableStabs.push(modFragment);
 										if (moveid === 'Round') {
