@@ -2653,7 +2653,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								}
 								if (subfragment.teraType) {
 									if (modFragment.teraType && modFragment.teraType !== subfragment.teraType) accept = false;
-									modFragment.teraType = subfragment.item;
+									modFragment.teraType = subfragment.teraType;
 								}
 								if (subfragment.tags) {
 									if (!modFragment.tags) modFragment.tags = [];
