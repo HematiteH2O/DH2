@@ -1308,6 +1308,16 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 										fragments.push(modFragment);
 									}
 									break;
+								case 'Hustle':
+									if (move.category === 'Physical') {
+										let modFragment = {
+											ability: ability,
+											moveBasePower: basePower * 2,
+											moveAccuracy: basePower * 0.8,
+										};
+										fragments.push(modFragment);
+									}
+									break;
 								case 'Iron Fist':
 									if (move.flags['punch'] && basePower) {
 										let modFragment = {
