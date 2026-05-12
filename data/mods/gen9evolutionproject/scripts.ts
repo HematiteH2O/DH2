@@ -1118,6 +1118,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							'hiddenpower', 'judgment', 'multiattack', 'naturalgift', 'revelationdance', 'struggle', 'technoblast', 'terrainpulse', 'weatherball',
 						];
 						for (const ability of newMon.randbats.abilities) {
+							let modifier = 1; // for Orichalcum Pulse and Hadron Engine later
 							switch (ability) {
 								case 'Adaptability':
 									if (newMon.randbats.types.includes(move.type) && !['terrainpulse', 'weatherball'].includes(moveid)) {
@@ -1171,7 +1172,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								case 'Drought':
 								case 'Mega Sol':
 								case 'Orichalcum Pulse':
-									let modifier = 1;
 									if (ability === 'Orichalcum Pulse' && move.category === 'Physical') modifier = 4/3;
 									if (move.type === 'Fire' && basePower) {
 										let modFragment = {
@@ -1239,7 +1239,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 									break;
 								case 'Electric Surge':
 								case 'Hadron Engine':
-									let modifier = 1;
 									if (ability === 'Hadron Engine' && move.category === 'Special') modifier = 4/3;
 									if (!newMon.randbats.types.includes('Flying')) {
 										if (move.type === 'Electric' && basePower) {
