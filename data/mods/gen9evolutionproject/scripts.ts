@@ -1880,12 +1880,13 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								(['auroraveil',
 								'followme', 'ragepowder',
 								'shadowbox', 'partingshot',
+								'nobleroar',
 								'grasswhistle', 'hypnosis', 'lovelykiss', 'sing', 'sleeppowder', 'spore', 'yawn'
 							].includes(moveid) && !(fragment.moveAccuracy && fragment.moveAccuracy < 70)) ||
 								(['nobleroar', 'tearfullook'].includes(moveid) && fragment.movePriority > 0)
 							) {
 								let modFragment = Utils.deepClone(fragment);
-								if (modFragment.moveCategory && modFragment.moveCategory === 'status') {
+								if (['nobleroar'].includes(moveid)) {
 									if (!modFragment.tags) modFragment.tags = [];
 									modFragment.tags.push('statusdebuffmove');
 									if (!modFragment.avoid) modFragment.avoid = [];
@@ -1910,7 +1911,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								(['reflect', 'growl', 'charm', 'tickle', 'featherdance'].includes(moveid) && fragment.movePriority > 0)
 							) {
 								let modFragment = Utils.deepClone(fragment);
-								if (modFragment.moveCategory && modFragment.moveCategory === 'status') {
+								if (['growl', 'charm', 'tickle', 'featherdance'].includes(moveid)) {
 									if (!modFragment.tags) modFragment.tags = [];
 									modFragment.tags.push('statusdebuffmove');
 									if (!modFragment.avoid) modFragment.avoid = [];
@@ -1930,7 +1931,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								(['lightscreen', 'eerieumpulse'].includes(moveid) && fragment.movePriority > 0)
 							) {
 								let modFragment = Utils.deepClone(fragment);
-								if (modFragment.moveCategory && modFragment.moveCategory === 'status') {
+								if (['eerieimpulse'].includes(moveid)) {
 									if (!modFragment.tags) modFragment.tags = [];
 									modFragment.tags.push('statusdebuffmove');
 									if (!modFragment.avoid) modFragment.avoid = [];
@@ -2033,7 +2034,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								(['crushclaw', 'razorshell', 'triplearrows'].includes(moveid) && ((!fragment.ability && newMon.randbats.abilities.includes('Serene Grace')) || (fragment.ability && fragment.ability === 'Serene Grace')))
 							) {
 								let modFragment = Utils.deepClone(fragment);
-								if (modFragment.moveCategory && modFragment.moveCategory === 'status') {
+								if (['leer', 'screech', 'obstruct', 'octolock', 'spicyextract', 'tickle'].includes(moveid)) {
 									if (!modFragment.tags) modFragment.tags = [];
 									modFragment.tags.push('statusdebuffmove');
 									if (!modFragment.avoid) modFragment.avoid = [];
@@ -2061,7 +2062,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								(['lusterpurge', 'seedflare'].includes(moveid) && ((!fragment.ability && newMon.randbats.abilities.includes('Serene Grace')) || (fragment.ability && fragment.ability === 'Serene Grace')))
 							) {
 								let modFragment = Utils.deepClone(fragment);
-								if (modFragment.moveCategory && modFragment.moveCategory === 'status') {
+								if (['faketears', 'metalsound', 'octolock'].includes(moveid)) {
 									if (!modFragment.tags) modFragment.tags = [];
 									modFragment.tags.push('statusdebuffmove');
 									if (!modFragment.avoid) modFragment.avoid = [];
