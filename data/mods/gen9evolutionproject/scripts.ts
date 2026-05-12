@@ -2358,6 +2358,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 									tailwindFragment.moves.push('Tailwind');
 									if (!tailwindFragment.tags) tailwindFragment.tags = [];
 									tailwindFragment.tags.push('speedcontrol');
+									fakeOutFragment.format = 'vgc';
 									accept.push(tailwindFragment);
 								}
 								if (learnset.fakeout && learnset.fakeout.length) {
@@ -2365,6 +2366,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 									fakeOutFragment.moves.push('Fake Out');
 									if (!fakeOutFragment.tags) fakeOutFragment.tags = [];
 									fakeOutFragment.tags.push('fakeout');
+									fakeOutFragment.format = 'vgc';
 									accept.push(fakeOutFragment);
 								}
 								// these ones shouldn't usually have backup setters just because they can
