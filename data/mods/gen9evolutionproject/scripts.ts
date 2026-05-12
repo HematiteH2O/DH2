@@ -1391,6 +1391,23 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 										}
 									}
 									break;
+								case 'Merciless':
+									if (move.category !== 'Status' && !move.willCrit) {
+										let modFragment = {
+											ability: ability,
+											moveBasePower: basePower * 1.5,
+											singles: {
+												acceptedSupport: [],
+												requestedSupport: ['poison'],
+											},
+											vgc: {
+												acceptedSupport: [],
+												requestedSupport: ['poison'],
+											},
+										};
+										fragments.push(modFragment);
+									}
+									break;
 								case 'Normalize':
 									if (basePower && !noModifyType.includes(moveid)) {
 										baseFragment.avoid = ['Normalize'];
@@ -1867,6 +1884,38 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								modFragment.vgc.requestedSupport.push('mistyterrain');
 								alternateFragments.push(modFragment);
 							}
+
+							// Gravity
+							if (!move.ohko && fragment.moveAccuracy <= 75) {
+								let modFragment = Utils.deepClone(fragment);
+								modFragment.moveAccuracy *= 5/3;
+								modFragment.singles.requestedSupport.push('gravity');
+								modFragment.vgc.requestedSupport.push('gravity');
+								alternateFragments.push(modFragment);
+							}
+							if (fragment.moveType === 'Ground' && fragment.baseMove !== 'Thousand Arrows') {
+								let modFragment = Utils.deepClone(fragment);
+								modFragment.singles.acceptedSupport.push('gravity');
+								modFragment.vgc.acceptedSupport.push('gravity');
+								alternateFragments.push(modFragment);
+							}
+
+							// poison
+							if (
+								['Venoshock', 'Barb Barrage', 'Hex', 'Infernal Parade'].includes(fragment.baseMove) &&
+								!(fragment.ability && fragment.ability === 'Technician')
+							) {
+								let modFragment = Utils.deepClone(fragment);
+								if (fragment.tags && (fragment.tags.includes('poison') || (['Hex', 'Infernal Parade'].includes(fragment.baseMove) && fragment.tags.includes('status')))) {
+									modFragment.singles.acceptedSupport.push('poison');
+									modFragment.vgc.acceptedSupport.push('poison');
+								} else {
+									modFragment.moveBasePower *= 2;
+									modFragment.singles.requestedSupport.push('poison');
+									modFragment.vgc.requestedSupport.push('poison');
+								}
+								alternateFragments.push(modFragment);
+							}
 							
 							if (newMon.randbats.types.includes(fragment.moveType) && fragment.moveBasePower) fragment.stab = true;
 							// I usually think in terms of regular base powers,
@@ -2229,6 +2278,22 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								
 								if (!newMon.randbats.offeredSupport.trickroom) newMon.randbats.offeredSupport.trickroom = [];
 								newMon.randbats.offeredSupport.trickroom.push(modFragment);
+							}
+							if (moveid === 'gravity') {
+								if (!pickyVgcSupport.gravity) pickyVgcSupport.gravity = [];
+								pickyVgcSupport.gravity.push(fragment);
+							}
+							if (['poisongas', 'mortalspin', 'toxicspikes'].includes(moveid)) {
+								let modFragment = Utils.deepClone(fragment);
+								if (moveid === 'poisongas') modFragment.format = 'vgc';
+
+								if (modFragment.movePriority > 0 || moveid === 'mortalspin') {
+										if (!newMon.randbats.offeredSupport.poison) newMon.randbats.offeredSupport.poison = [];
+										newMon.randbats.offeredSupport.poison.push(modFragment);
+								} else {
+									if (!pickyVgcSupport.poison) pickyVgcSupport.poison = [];
+									pickyVgcSupport.poison.push(modFragment);
+								}
 							}
 	
 							// some moves cover both physicalreduction and specialreduction at once
