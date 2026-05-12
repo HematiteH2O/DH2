@@ -941,12 +941,16 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					}
 
 					if (newMon.randbats.types.includes('Ice')) {
-						newMon.randbats.singles.acceptedSupport.snow = 'true';
-						newMon.randbats.vgc.acceptedSupport.snow = 'true';
+						if (!newMon.randbats.singles.acceptedSupport.snow) newMon.randbats.singles.acceptedSupport.snow = [];
+						newMon.randbats.singles.acceptedSupport.snow.push('true');
+						if (!newMon.randbats.vgc.acceptedSupport.snow) newMon.randbats.vgc.acceptedSupport.snow = [];
+						newMon.randbats.vgc.acceptedSupport.snow.push('true');
 					}
 					if (newMon.randbats.types.includes('Rock')) {
-						newMon.randbats.singles.acceptedSupport.sand = 'true';
-						newMon.randbats.vgc.acceptedSupport.sand = 'true';
+						if (!newMon.randbats.singles.acceptedSupport.sand) newMon.randbats.singles.acceptedSupport.sand = [];
+						newMon.randbats.singles.acceptedSupport.sand.push('true');
+						if (!newMon.randbats.vgc.acceptedSupport.sand) newMon.randbats.vgc.acceptedSupport.sand = [];
+						newMon.randbats.vgc.acceptedSupport.sand.push('true');
 					}
 	
 					// then I can start iterating over the movepool!
@@ -3529,7 +3533,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 			}
 			for (const requestedSupport in species.randbats[format].requestedSupport) {
-				if (species.randbats[format].requestedSupport[requestedSupport] === 'true') {
+				if (typeof fragment === 'string' && fragment === 'true') {
 					if (!teamHighPrioRequestedSupport[requestedSupport]) teamHighPrioRequestedSupport[requestedSupport] = [];
 					if (!teamHighPrioRequestedSupport[requestedSupport].includes(set)) teamHighPrioRequestedSupport[requestedSupport].push(set);
 				}
@@ -3542,11 +3546,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 			}
 			for (const acceptedSupport in species.randbats[format].acceptedSupport) {
-				if (species.randbats[format].acceptedSupport[acceptedSupport] === 'true') {
-					if (!teamHighPrioRequestedSupport[acceptedSupport]) teamHighPrioRequestedSupport[acceptedSupport] = [];
-					if (!teamHighPrioRequestedSupport[acceptedSupport].includes(set)) teamHighPrioRequestedSupport[acceptedSupport].push(set);
-				}
 				for (const fragment of species.randbats[format].acceptedSupport[acceptedSupport]) {
+					if (typeof fragment === 'string' && fragment === 'true') {
+						if (!teamHighPrioRequestedSupport[acceptedSupport]) teamHighPrioRequestedSupport[acceptedSupport] = [];
+						if (!teamHighPrioRequestedSupport[acceptedSupport].includes(set)) teamHighPrioRequestedSupport[acceptedSupport].push(set);
+					}
 					if (typeof fragment !== 'string') {
 						let modFragment = Utils.deepClone(fragment);
 						modFragment.pokemon = set;
