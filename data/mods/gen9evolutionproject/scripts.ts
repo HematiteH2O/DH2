@@ -2344,7 +2344,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 									pickyVgcSupport.poison.push(modFragment);
 								}
 							}
-							if (moveid === 'Round') {
+							if (moveid === 'round') {
 								if (fragment.moveBasePower >= 80) {
 									let modFragment = Utils.deepClone(fragment);
 									modFragment.format = 'vgc';
