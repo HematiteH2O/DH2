@@ -1171,10 +1171,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								case 'Drought':
 								case 'Mega Sol':
 								case 'Orichalcum Pulse':
+									let modifier = 1;
+									if (ability === 'Orichalcum Pulse' && move.category === 'Physical') modifier = 4/3;
 									if (move.type === 'Fire' && basePower) {
 										let modFragment = {
 											ability: ability,
-											moveBasePower: basePower * 1.5,
+											moveBasePower: basePower * 1.5 * modifier,
 										};
 										fragments.push(modFragment);
 									}
@@ -1237,11 +1239,13 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 									break;
 								case 'Electric Surge':
 								case 'Hadron Engine':
+									let modifier = 1;
+									if (ability === 'Hadron Engine' && move.category === 'Special') modifier = 4/3;
 									if (!newMon.randbats.types.includes('Flying')) {
 										if (move.type === 'Electric' && basePower) {
 											let modFragment = {
 												ability: ability,
-												moveBasePower: basePower * 1.3,
+												moveBasePower: basePower * 1.3 * modifier,
 											};
 											if (moveid === 'Rising Voltage') modFragment.moveBasePower *= 2;
 											fragments.push(modFragment);
@@ -1250,7 +1254,15 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 											let modFragment = {
 												ability: ability,
 												moveType: 'Electric',
-												moveBasePower: 130,
+												moveBasePower: 100 * 1.3 * modifier,
+											};
+											fragments.push(modFragment);
+										}
+										if (moveid === 'naturepower') {
+											let modFragment = {
+												ability: ability,
+												moveType: 'Electric',
+												moveBasePower: 90 * 1.3 * modifier,
 											};
 											fragments.push(modFragment);
 										}
@@ -1330,6 +1342,14 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 											};
 											fragments.push(modFragment);
 										}
+										if (moveid === 'naturepower') {
+											let modFragment = {
+												ability: ability,
+												moveType: 'Grass',
+												moveBasePower: 90 * 1.3,
+											};
+											fragments.push(modFragment);
+										}
 									}
 									break;
 								case 'Huge Power':
@@ -1389,6 +1409,14 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 											};
 											fragments.push(modFragment);
 										}
+										if (moveid === 'naturepower') {
+											let modFragment = {
+												ability: ability,
+												moveType: 'Psychic',
+												moveBasePower: 90 * 1.3,
+											};
+											fragments.push(modFragment);
+										}
 									}
 									break;
 								case 'Merciless':
@@ -1406,6 +1434,26 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 											},
 										};
 										fragments.push(modFragment);
+									}
+									break;
+								case 'Misty Surge':
+									if (!newMon.randbats.types.includes('Flying')) {
+										if (moveid === 'terrainpulse') {
+											let modFragment = {
+												ability: ability,
+												moveType: 'Fairy',
+												moveBasePower: 100,
+											};
+											fragments.push(modFragment);
+										}
+										if (moveid === 'naturepower') {
+											let modFragment = {
+												ability: ability,
+												moveType: 'Fairy',
+												moveBasePower: 95,
+											};
+											fragments.push(modFragment);
+										}
 									}
 									break;
 								case 'Normalize':
@@ -2054,9 +2102,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								if (fragment.moveBasePower >= 90 || ((fragment.stab|| moveid === 'round') && fragment.moveBasePower >= 80)) {
 									if (fragment.stab || fragment.moveType !== 'Normal' || fragment.moveBasePower >= 120 || moveid === 'round') {
 										if (moveid === 'Round') {
-											modFragment.vgc.requestedSupport.push('round');
+											let roundFragment = Utils.deepClone(modFragment);
 											if (!pickyVgcSupport.round) pickyVgcSupport.round = [];
-											pickyVgcSupport.round.push(modFragment);
+											pickyVgcSupport.round.push(roundFragment);
+											modFragment.vgc.requestedSupport.push('round');
 										}
 										newMon.randbats.viableStabs.push(modFragment);
 									}
