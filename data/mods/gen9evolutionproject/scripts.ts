@@ -2345,14 +2345,17 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								}
 							}
 							if (moveid === 'Round') {
-								let modFragment = Utils.deepClone(fragment);
-								modFragment.format = 'vgc';
-								modFragment.vgc.requestedSupport.push('round');
 								if (fragment.moveBasePower >= 80) {
-									if (!newMon.randbats.offeredSupport.round) newMon.randbats.offeredSupport.round = [];
-									newMon.randbats.offeredSupport.round.push(modFragment);
+									let modFragment = Utils.deepClone(fragment);
+									modFragment.format = 'vgc';
+									modFragment.vgc.requestedSupport.push('round');
+									if (!newMon.randbats.offeredSupport.roundattack) newMon.randbats.offeredSupport.roundattack = [];
+									newMon.randbats.offeredSupport.roundattack.push(modFragment);
 								}
 								if (fragment.moveBasePower >= 70) {
+									let modFragment = Utils.deepClone(fragment);
+									modFragment.format = 'vgc';
+									modFragment.vgc.requestedSupport.push('roundattack');
 									if (!pickyVgcSupport.round) pickyVgcSupport.round = [];
 									pickyVgcSupport.round.push(modFragment);
 								}
