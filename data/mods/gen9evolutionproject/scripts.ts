@@ -1179,12 +1179,17 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 											moveBasePower: basePower * 1.5 * modifier,
 										};
 										fragments.push(modFragment);
-									}
-									if (moveid === 'weatherball') {
+									} else if (moveid === 'weatherball') {
 										let modFragment = {
 											ability: ability,
 											moveType: 'Fire',
 											moveBasePower: 150,
+										};
+										fragments.push(modFragment);
+									} else if (modifier > 1) {
+										let modFragment = {
+											ability: ability,
+											moveBasePower: basePower * modifier,
 										};
 										fragments.push(modFragment);
 									}
@@ -1248,20 +1253,24 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 											};
 											if (moveid === 'Rising Voltage') modFragment.moveBasePower *= 2;
 											fragments.push(modFragment);
-										}
-										if (moveid === 'terrainpulse') {
+										} else if (moveid === 'terrainpulse') {
 											let modFragment = {
 												ability: ability,
 												moveType: 'Electric',
 												moveBasePower: 100 * 1.3 * modifier,
 											};
 											fragments.push(modFragment);
-										}
-										if (moveid === 'naturepower') {
+										} else if (moveid === 'naturepower') {
 											let modFragment = {
 												ability: ability,
 												moveType: 'Electric',
 												moveBasePower: 90 * 1.3 * modifier,
+											};
+											fragments.push(modFragment);
+										} else if (modifier > 1) {
+											let modFragment = {
+												ability: ability,
+												moveBasePower: basePower * modifier,
 											};
 											fragments.push(modFragment);
 										}
@@ -2349,13 +2358,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 									let modFragment = Utils.deepClone(fragment);
 									modFragment.format = 'vgc';
 									modFragment.vgc.requestedSupport.push('round');
-									if (!newMon.randbats.offeredSupport.roundattack) newMon.randbats.offeredSupport.roundattack = [];
-									newMon.randbats.offeredSupport.roundattack.push(modFragment);
+									if (!newMon.randbats.offeredSupport.round) newMon.randbats.offeredSupport.round = [];
+									newMon.randbats.offeredSupport.round.push(modFragment);
 								}
 								if (fragment.moveBasePower >= 70) {
 									let modFragment = Utils.deepClone(fragment);
 									modFragment.format = 'vgc';
-									modFragment.vgc.requestedSupport.push('roundattack');
 									if (!pickyVgcSupport.round) pickyVgcSupport.round = [];
 									pickyVgcSupport.round.push(modFragment);
 								}
