@@ -1239,6 +1239,23 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 										}
 									}
 									break;
+								case 'Frozen Focus':
+									if (move.category === 'Special') {
+										let modFragment = {
+											ability: ability,
+											moveBasePower: basePower * 1.5,
+											singles: {
+												acceptedSupport: [],
+												requestedSupport: ['snow'],
+											},
+											vgc: {
+												acceptedSupport: [],
+												requestedSupport: ['snow'],
+											},
+										};
+										fragments.push(modFragment);
+									}
+									break;
 								case 'Gale Wings':
 									if (move.type === 'Flying') {
 										let modFragment = {
@@ -1279,6 +1296,16 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 											};
 											fragments.push(modFragment);
 										}
+									}
+									break;
+								case 'Huge Power':
+								case 'Pure Power':
+									if (move.category === 'Physical') {
+										let modFragment = {
+											ability: ability,
+											moveBasePower: basePower * 2,
+										};
+										fragments.push(modFragment);
 									}
 									break;
 								case 'Iron Fist':
@@ -1461,6 +1488,23 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 										let modFragment = {
 											ability: ability,
 											moveAccuracy: 100,
+										};
+										fragments.push(modFragment);
+									}
+									break;
+								case 'Solar Power':
+									if (move.category === 'Special') {
+										let modFragment = {
+											ability: ability,
+											moveBasePower: basePower * 1.5,
+											singles: {
+												acceptedSupport: [],
+												requestedSupport: ['sun'],
+											},
+											vgc: {
+												acceptedSupport: [],
+												requestedSupport: ['sun'],
+											},
 										};
 										fragments.push(modFragment);
 									}
@@ -2358,7 +2402,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 									tailwindFragment.moves.push('Tailwind');
 									if (!tailwindFragment.tags) tailwindFragment.tags = [];
 									tailwindFragment.tags.push('speedcontrol');
-									fakeOutFragment.format = 'vgc';
+									tailwindFragment.format = 'vgc';
 									accept.push(tailwindFragment);
 								}
 								if (learnset.fakeout && learnset.fakeout.length) {
@@ -2857,7 +2901,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								newMon.randbats.vgc.acceptedSupport.rain.push(fragment);
 								break;
 							case 'Chlorophyll':
-							case 'Solar Power':
 							case 'Harvest':
 								fragment.singles.requestedSupport.push('sun');
 								fragment.vgc.requestedSupport.push('sun');
@@ -2877,7 +2920,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								break;
 							case 'Slush Rush':
 							case 'Ice Body':
-							case 'Frozen Focus':
 								fragment.singles.requestedSupport.push('snow');
 								fragment.vgc.requestedSupport.push('snow');
 								if (!newMon.randbats.singles.acceptedSupport.snow) newMon.randbats.singles.acceptedSupport.snow = [];
