@@ -2143,14 +2143,14 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								if (learnset.tailwind && learnset.tailwind.length) {
 									let tailwindFragment = Utils.deepClone(fragment);
 									tailwindFragment.moves.push('Tailwind');
-									if (!tailwindFragment.tags) modFragment.tags.push('speedcontrol');
+									if (!tailwindFragment.tags) tailwindFragment.tags.push('speedcontrol');
 									accept.push(tailwindFragment);
 								}
 								if (learnset.fakeout && learnset.fakeout.length) {
 									let fakeOutFragment = Utils.deepClone(fragment);
 									fakeOutFragment.moves.push('Fake Out');
-									if (!fakeOutFragment.tags) modFragment.tags.push('fakeout');
-									accept.push(tailwindFragment);
+									if (!fakeOutFragment.tags) fakeOutFragment.tags.push('fakeout');
+									accept.push(fakeOutFragment);
 								}
 								// these ones shouldn't usually have backup setters just because they can
 								if (['sandstorm', 'snow', 'grassyterrain', 'mistyterrain'].includes(fieldeffect)) accept = [];
