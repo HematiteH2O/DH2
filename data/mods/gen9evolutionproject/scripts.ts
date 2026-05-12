@@ -3747,6 +3747,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						if (!fragment.pokemon.avoid) fragment.pokemon.avoid = [];
 						for (const avoid of fragment.avoid) if (!fragment.pokemon.avoid.includes(avoid)) fragment.pokemon.avoid.push(avoid);
 					}
+					if (fragment[format].acceptedSupport) for (const request of fragment[format].acceptedSupport) {
+						if (!teamHighPrioRequestedSupport[request]) teamHighPrioRequestedSupport[request] = [];
+						if (!teamHighPrioRequestedSupport[request].includes(fragment.pokemon)) teamHighPrioRequestedSupport[request].push(fragment.pokemon);
+					}
 					if (fragment[format].requestedSupport) for (const request of fragment[format].requestedSupport) {
 						if (!teamHighPrioRequestedSupport[request]) teamHighPrioRequestedSupport[request] = [];
 						if (!teamHighPrioRequestedSupport[request].includes(fragment.pokemon)) teamHighPrioRequestedSupport[request].push(fragment.pokemon);
@@ -4131,6 +4135,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (chosenFragment.avoid) {
 					if (!chosenFragment.pokemon.avoid) chosenFragment.pokemon.avoid = [];
 					for (const avoid of chosenFragment.avoid) if (!chosenFragment.pokemon.avoid.includes(avoid)) chosenFragment.pokemon.avoid.push(avoid);
+				}
+				if (chosenFragment[format].acceptedSupport) for (const request of chosenFragment[format].acceptedSupport) {
+					if (!teamHighPrioRequestedSupport[request]) teamHighPrioRequestedSupport[request] = [];
+					teamHighPrioRequestedSupport[request].push(chosenFragment.pokemon);
 				}
 				if (chosenFragment[format].requestedSupport) for (const request of chosenFragment[format].requestedSupport) {
 					if (!teamHighPrioRequestedSupport[request]) teamHighPrioRequestedSupport[request] = [];
