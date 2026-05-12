@@ -3873,7 +3873,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							'Healing Wish', 'Lunar Dance', 'Memento', 'Parting Shot', 'Chilly Reception',
 							'Trick', 'Switcheroo', 'Bestow',
 							'Defog', 'Tidy Up',
+							'Nature Power', 'Sleep Talk',
 						].includes(this.dex.moves.get(move).name)) fragment.eligible = false;
+						if (['Fake Out', 'First Impression'].includes(move)) fragment.eligible = false;
 					}
 				}
 				if (((fragment.pokemon.item && ['Choice Band', 'Choice Specs', 'Choice Scarf'].includes(fragment.pokemon.item)) || (fragment.pokemon.ability && fragment.pokemon.ability === 'Gorilla Tactics')) && fragment.moves) {
@@ -3882,7 +3884,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							'Healing Wish', 'Lunar Dance', 'Memento', 'Parting Shot', 'Chilly Reception',
 							'Trick', 'Switcheroo', 'Bestow',
 							'Defog', 'Tidy Up',
+							'Nature Power', 'Sleep Talk',
 						].includes(this.dex.moves.get(move).name)) fragment.eligible = false;
+						if (['Fake Out', 'First Impression'].includes(move)) fragment.eligible = false;
 					}
 				}
 				// Assault Vest
