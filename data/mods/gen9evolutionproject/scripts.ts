@@ -2101,18 +2101,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 									modFragment.buddy.roles.push('accuracyboost');
 								}
 								if (fragment.moveAccuracy <= 75) modFragment.score = -1; // this gets bypassed if something like Hone Claws or Coil is rolled
-								if (moveid === 'Round') {
-									modFragment.format = 'vgc';
-									modFragment.vgc.requestedSupport.push('round');
-									if (fragment.moveBasePower >= 80) newMon.randbats.viableStabs.push(modFragment);
-									if (fragment.moveBasePower >= 70) {
-										if (!pickyVgcSupport.round) pickyVgcSupport.round = [];
-										pickyVgcSupport.round.push(modFragment);
-									}
-								} else if (
-										(fragment.stab && fragment.moveBasePower >= 80) ||
-										(fragment.moveType !== 'Normal' && fragment.moveBasePower >= 90) ||
-										fragment.moveBasePower >= 120
+								if (
+									(fragment.stab && fragment.moveBasePower >= 80) ||
+									(fragment.moveType !== 'Normal' && fragment.moveBasePower >= 90) ||
+									fragment.moveBasePower >= 120
 								) {
 									newMon.randbats.viableStabs.push(modFragment);
 									// stop giving random things Double-Edge!! I know it has good BP :sob:
@@ -2345,11 +2337,24 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								if (moveid === 'toxicspikes') modFragment.format = 'singles';
 
 								if (modFragment.movePriority > 0 || moveid === 'mortalspin') {
-										if (!newMon.randbats.offeredSupport.poison) newMon.randbats.offeredSupport.poison = [];
-										newMon.randbats.offeredSupport.poison.push(modFragment);
+									if (!newMon.randbats.offeredSupport.poison) newMon.randbats.offeredSupport.poison = [];
+									newMon.randbats.offeredSupport.poison.push(modFragment);
 								} else {
 									if (!pickyVgcSupport.poison) pickyVgcSupport.poison = [];
 									pickyVgcSupport.poison.push(modFragment);
+								}
+							}
+							if (moveid === 'Round') {
+								let modFragment = Utils.deepClone(fragment);
+								modFragment.format = 'vgc';
+								modFragment.vgc.requestedSupport.push('round');
+								if (fragment.moveBasePower >= 80) {
+									if (!newMon.randbats.offeredSupport.round) newMon.randbats.offeredSupport.round = [];
+									newMon.randbats.offeredSupport.round.push(modFragment);
+								}
+								if (fragment.moveBasePower >= 70) {
+									if (!pickyVgcSupport.round) pickyVgcSupport.round = [];
+									pickyVgcSupport.round.push(modFragment);
 								}
 							}
 	
