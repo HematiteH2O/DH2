@@ -1731,6 +1731,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 										if (!modFragment.vgc.acceptedSupport) modFragment.vgc.acceptedSupport = [];
 										if (!modFragment.vgc.acceptedSupport.includes('spdefreduction')) modFragment.vgc.acceptedSupport.push('spdefreduction');
 									}
+
+									// we don't want several of the same type on the same set
+									modFragment.tags.push(`${(move.type).toLowerCase()}priority`);
+									if (!modFragment.avoid) modFragment.avoid = [];
+									modFragment.avoid.push(`${(move.type).toLowerCase()}priority`);
+									
 									newMon.randbats.offeredSupport.priority.push(modFragment);
 								} else if (fragment.moveBasePower && (fragment.moveBasePower *1.5 > 40) && !fragment.stab && !fragment.teraType && fragment.moveType !== 'Normal') {
 									// push to "personal" for some last-pick set filler
@@ -1756,6 +1762,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 										if (!modFragment.vgc.acceptedSupport.includes('spdefreduction')) modFragment.vgc.acceptedSupport.push('spdefreduction');
 									}
 									modFragment.teraType = fragment.moveType;
+
+									// we don't want several of the same type on the same set
+									modFragment.tags.push(`${(move.type).toLowerCase()}priority`);
+									if (!modFragment.avoid) modFragment.avoid = [];
+									modFragment.avoid.push(`${(move.type).toLowerCase()}priority`);
+									
 									newMon.randbats.offeredSupport.personal.push(modFragment);
 								}
 							}
@@ -1779,6 +1791,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 									if (!modFragment.vgc.acceptedSupport) modFragment.vgc.acceptedSupport = [];
 									if (!modFragment.vgc.acceptedSupport.includes('spdefreduction')) modFragment.vgc.acceptedSupport.push('spdefreduction');
 								}
+
+								// we don't want several of the same type on the same set
+								modFragment.tags.push(`${(move.type).toLowerCase()}spread`);
+								if (!modFragment.avoid) modFragment.avoid = [];
+								modFragment.avoid.push(`${(move.type).toLowerCase()}spread`);
+								
 								newMon.randbats.offeredSupport.spread.push(modFragment);
 							}
 							if (move.target === 'allAdjacent' && !move.selfdestruct && moveid !== 'synchronoise') {
@@ -1793,7 +1811,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								// in testing so far, some sets have been getting *too* excited about ally immunities and filling up with several spread moves like this,
 								// which is bad, because ally synergies are given the highest priority -
 								// if we let them take every possible option for these, they run out of room for important things quickly!
-	
+
+								// we don't want several of the same type on the same set
+								modFragment.tags.push(`${(move.type).toLowerCase()}spread`);
+								modFragment.avoid.push(`${(move.type).toLowerCase()}spread`);
+								
 								// ones that we can use as a main spread should be strong!
 								if (fragment.moveBasePower > 80) {
 									if (!modFragment.tags) modFragment.tags = [];
@@ -1830,6 +1852,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								if (!modFragment.avoid) modFragment.avoid = [];
 								modFragment.avoid.push('speedcontrol');
 								
+								if (['cottonspore', 'stringshot', 'scaryface'].includes(moveid)) {
+									if (!modFragment.tags) modFragment.tags = [];
+									modFragment.tags.push('statusdebuffmove');
+									modFragment.avoid.push('statusdebuffmove');
+								}
+								
 								if (modFragment.movePriority > 0) {
 										if (!newMon.randbats.offeredSupport.speedcontrol) newMon.randbats.offeredSupport.speedcontrol = [];
 										newMon.randbats.offeredSupport.speedcontrol.push(modFragment);
@@ -1856,16 +1884,23 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							].includes(moveid) && !(fragment.moveAccuracy && fragment.moveAccuracy < 70)) ||
 								(['nobleroar', 'tearfullook'].includes(moveid) && fragment.movePriority > 0)
 							) {
-								if (fragment.movePriority > 0) {
-										if (!newMon.randbats.offeredSupport.physicalreduction) newMon.randbats.offeredSupport.physicalreduction = [];
-										newMon.randbats.offeredSupport.physicalreduction.push(fragment);
-										if (!newMon.randbats.offeredSupport.specialreduction) newMon.randbats.offeredSupport.specialreduction = [];
-										newMon.randbats.offeredSupport.specialreduction.push(fragment);
+								let modFragment = Utils.deepClone(fragment);
+								if (modFragment.moveCategory && modFragment.moveCategory === 'status') {
+									if (!modFragment.tags) modFragment.tags = [];
+									modFragment.tags.push('statusdebuffmove');
+									if (!modFragment.avoid) modFragment.avoid = [];
+									modFragment.avoid.push('statusdebuffmove');
+								}
+								if (modFragment.movePriority > 0) {
+									if (!newMon.randbats.offeredSupport.physicalreduction) newMon.randbats.offeredSupport.physicalreduction = [];
+									newMon.randbats.offeredSupport.physicalreduction.push(modFragment);
+									if (!newMon.randbats.offeredSupport.specialreduction) newMon.randbats.offeredSupport.specialreduction = [];
+									newMon.randbats.offeredSupport.specialreduction.push(modFragment);
 								} else {
 									if (!pickyVgcSupport.physicalreduction) pickyVgcSupport.physicalreduction = [];
-									pickyVgcSupport.physicalreduction.push(fragment);
+									pickyVgcSupport.physicalreduction.push(modFragment);
 									if (!pickyVgcSupport.specialreduction) pickyVgcSupport.specialreduction = [];
-									pickyVgcSupport.specialreduction.push(fragment);
+									pickyVgcSupport.specialreduction.push(modFragment);
 								}
 							}
 							// others are specialized, so you need one of each
@@ -1874,12 +1909,19 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								(['bittermalice', 'chillingwater', 'lunge', 'tropkick'].includes(moveid) && fragment.moveBasePower > 80) ||
 								(['reflect', 'growl', 'charm', 'tickle', 'featherdance'].includes(moveid) && fragment.movePriority > 0)
 							) {
-								if (fragment.movePriority > 0) {
-										if (!newMon.randbats.offeredSupport.physicalreduction) newMon.randbats.offeredSupport.physicalreduction = [];
-										newMon.randbats.offeredSupport.physicalreduction.push(fragment);
+								let modFragment = Utils.deepClone(fragment);
+								if (modFragment.moveCategory && modFragment.moveCategory === 'status') {
+									if (!modFragment.tags) modFragment.tags = [];
+									modFragment.tags.push('statusdebuffmove');
+									if (!modFragment.avoid) modFragment.avoid = [];
+									modFragment.avoid.push('statusdebuffmove');
+								}
+								if (modFragment.movePriority > 0) {
+									if (!newMon.randbats.offeredSupport.physicalreduction) newMon.randbats.offeredSupport.physicalreduction = [];
+									newMon.randbats.offeredSupport.physicalreduction.push(modFragment);
 								} else {
 									if (!pickyVgcSupport.physicalreduction) pickyVgcSupport.physicalreduction = [];
-									pickyVgcSupport.physicalreduction.push(fragment);
+									pickyVgcSupport.physicalreduction.push(modFragment);
 								}
 							}
 							if (
@@ -1887,12 +1929,19 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								(['mysticalfire'].includes(moveid) && fragment.moveBasePower > 80) ||
 								(['lightscreen', 'eerieumpulse'].includes(moveid) && fragment.movePriority > 0)
 							) {
-								if (fragment.movePriority > 0) {
-										if (!newMon.randbats.offeredSupport.specialreduction) newMon.randbats.offeredSupport.specialreduction = [];
-										newMon.randbats.offeredSupport.specialreduction.push(fragment);
+								let modFragment = Utils.deepClone(fragment);
+								if (modFragment.moveCategory && modFragment.moveCategory === 'status') {
+									if (!modFragment.tags) modFragment.tags = [];
+									modFragment.tags.push('statusdebuffmove');
+									if (!modFragment.avoid) modFragment.avoid = [];
+									modFragment.avoid.push('statusdebuffmove');
+								}
+								if (modFragment.movePriority > 0) {
+									if (!newMon.randbats.offeredSupport.specialreduction) newMon.randbats.offeredSupport.specialreduction = [];
+									newMon.randbats.offeredSupport.specialreduction.push(modFragment);
 								} else {
 									if (!pickyVgcSupport.specialreduction) pickyVgcSupport.specialreduction = [];
-									pickyVgcSupport.specialreduction.push(fragment);
+									pickyVgcSupport.specialreduction.push(modFragment);
 								}
 							}
 							
@@ -1948,6 +1997,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								'taunt', 'encore', 'imprison',
 								'spore', 'sleeppowder',
 								'trickroom',
+								'roar', 'whirlwind', 'dragontail', 'circlethrow',
 							].includes(moveid)) {
 								let modFragment = Utils.deepClone(fragment);
 								let role = 'antitrickroom';
@@ -1976,13 +2026,19 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							// physical
 							if (
 								[
-									'howl', 'coaching', 'decorate', // 'helpinghand',
+									'howl', 'coaching', 'decorate', 'helpinghand',
 									'leer', 'screech', 'obstruct', 'octolock', 'spicyextract', 'tickle',
 									'firelash', 'gravapple', 'thunderouskick'
 								].includes(moveid) ||
 								(['crushclaw', 'razorshell', 'triplearrows'].includes(moveid) && ((!fragment.ability && newMon.randbats.abilities.includes('Serene Grace')) || (fragment.ability && fragment.ability === 'Serene Grace')))
 							) {
 								let modFragment = Utils.deepClone(fragment);
+								if (modFragment.moveCategory && modFragment.moveCategory === 'status') {
+									if (!modFragment.tags) modFragment.tags = [];
+									modFragment.tags.push('statusdebuffmove');
+									if (!modFragment.avoid) modFragment.avoid = [];
+									modFragment.avoid.push('statusdebuffmove');
+								}
 								if ((['crushclaw', 'razorshell', 'triplearrows'].includes(moveid) && !fragment.ability && newMon.randbats.abilities.includes('Serene Grace'))) modFragment.ability = 'Serene Grace';
 								
 								// to be viable, many of these need priority, naturally high Speed, or an Ability that boosts Speed
@@ -1998,13 +2054,19 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							// special
 							if (
 								[
-									'decorate', // 'helpinghand',
+									'decorate', 'helpinghand',
 									'faketears', 'metalsound', 'octolock',
 									'acidspray', 'appleacid', 'luminacrash'
 								].includes(moveid) ||
 								(['lusterpurge', 'seedflare'].includes(moveid) && ((!fragment.ability && newMon.randbats.abilities.includes('Serene Grace')) || (fragment.ability && fragment.ability === 'Serene Grace')))
 							) {
 								let modFragment = Utils.deepClone(fragment);
+								if (modFragment.moveCategory && modFragment.moveCategory === 'status') {
+									if (!modFragment.tags) modFragment.tags = [];
+									modFragment.tags.push('statusdebuffmove');
+									if (!modFragment.avoid) modFragment.avoid = [];
+									modFragment.avoid.push('statusdebuffmove');
+								}
 								if ((['lusterpurge', 'seedflare'].includes(moveid) && !fragment.ability && newMon.randbats.abilities.includes('Serene Grace'))) modFragment.ability = 'Serene Grace';
 								
 								// to be viable, many of these need priority, naturally high Speed, or an Ability that boosts Speed
