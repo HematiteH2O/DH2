@@ -1086,7 +1086,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								break;
 							case 'Nature Power':
 								basePower = 80;
-								moveCategory = 'Special',
+								moveCategory = 'Special';
 								break;
 						}
 						// I notice the Acrobatics fragment is gonna take some special attention, but one thing at a time
