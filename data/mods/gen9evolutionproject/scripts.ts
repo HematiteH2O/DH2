@@ -1886,27 +1886,32 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							}
 						}
 						if (alternateFragments) for (const fragment of alternateFragments) {
-							// account for moves that changed type
-							if (newMon.randbats.types.includes(fragment.moveType) && fragment.moveBasePower && !fragment.stab) {
-								fragment.stab = true;
-								fragment.moveBasePower *= 1.5;
-								if (newMon.randbats.abilities.includes('Adaptability') && !fragment.ability) {
-									let modFragment = Utils.deepClone(fragment);
-									modFragment.moveBasePower *= 4/3;
-									modFragment.ability = 'Adaptability';
-									fragments.push(modFragment);
-								}
+							
+							if (newMon.randbats.types.includes(fragment.moveType) && fragment.moveBasePower) fragment.stab = true;
+							// I usually think in terms of regular base powers,
+							// so it's more intuitive for me to divide for lack of STAB than to multiply for STAB:
+							if (!fragment.stab) fragment.moveBasePower /= 1.5;
+							
+							// interested in accounting for base stats (as modifiers to base power) before continuing
+							// let's say the following steps' base powers are standardized around ~100 base Attack/SpA with 252 EVs
+							// so if the actual stat is more or less than that, the base power should be scaled accoridngly
+							if (newMon.randbats.stage && newMon.randbats.stage === 'LC') {
+								// okay let's say more like base 85 here aksjdfh
+								if (fragment.moveCategory === 'Physical') fragment.moveBasePower *= ((Math.floor((newMon.baseStats.atk*2+94)/20)+5)/18);
+								if (fragment.moveCategory === 'Special') fragment.moveBasePower *= ((Math.floor((newMon.baseStats.spa*2+94)/20)+5)/18);
+							} else {
+								if (fragment.moveCategory === 'Physical') fragment.moveBasePower *= ((newMon.baseStats.atk*2+99)/299);
+								if (fragment.moveCategory === 'Special') fragment.moveBasePower *= ((newMon.baseStats.spa*2+99)/299);
 							}
-							if (!(newMon.randbats.types.includes(fragment.moveType) && fragment.moveBasePower) && fragment.stab) {
-								fragment.stab = false;
-								if (fragment.ability && fragment.ability === 'Adaptability') {
-									fragment.moveBasePower /= 2;
-									fragment.ability = null;
-								} else {
-									fragment.moveBasePower /= 1.5;
-								}
-							}
+							
 							fragments.push(fragment);
+							
+							if (fragment.stab && newMon.randbats.abilities.includes('Adaptability') && !fragment.ability) {
+								let modFragment = Utils.deepClone(fragment);
+								modFragment.moveBasePower *= 4/3;
+								modFragment.ability = 'Adaptability';
+								fragments.push(modFragment);
+							}
 						}
 	
 						for (const fragment of fragments) {
