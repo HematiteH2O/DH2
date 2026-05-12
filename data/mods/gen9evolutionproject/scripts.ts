@@ -2237,7 +2237,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							}
 							if ([
 								'tailwind', 'stickyweb', 'silktrap',
-								'cottonspore', 'stringshot', 'scaryface',
+								'cottonspore', 'stringshot', 'scaryface', 'venomdrench',
 								'electroweb', 'icywind', 'glaciate', // Bulldoze will receive special handling elsewhere because it doesn't work for every team
 								'thunderwave', 'nuzzle', 'glare', 'stunspore',
 								'syrupbomb', 'tarshot', 'quash',
@@ -2245,7 +2245,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								 ([
 									 'lowsweep', 'mudshot', 'drumbeating', 'pounce',
 								 ].includes(moveid) && fragment.moveBasePower > 80)
-								) {
+							) {
 								let modFragment = Utils.deepClone(fragment);
 								if (!modFragment.avoid) modFragment.avoid = [];
 								modFragment.avoid.push('speedcontrol');
@@ -2257,6 +2257,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 									modFragment.tags.push('statusdebuffmove');
 									modFragment.avoid.push('statusdebuffmove');
 								}
+								if (moveid === 'venomdrench') modFragment.vgc.requestedSupport.push('poison');
 								
 								if (modFragment.movePriority > 0) {
 										if (!newMon.randbats.offeredSupport.speedcontrol) newMon.randbats.offeredSupport.speedcontrol = [];
@@ -2299,7 +2300,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								(['auroraveil',
 								'followme', 'ragepowder',
 								'shadowbox', 'partingshot',
-								'nobleroar',
+								'nobleroar', 'venomdrench',
 								'grasswhistle', 'hypnosis', 'lovelykiss', 'sing', 'sleeppowder', 'spore', 'yawn'
 							].includes(moveid) && !(fragment.moveAccuracy && fragment.moveAccuracy < 70)) ||
 								(['nobleroar', 'tearfullook'].includes(moveid) && fragment.movePriority > 0)
@@ -2311,6 +2312,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 									if (!modFragment.avoid) modFragment.avoid = [];
 									modFragment.avoid.push('statusdebuffmove');
 								}
+								if (moveid === 'venomdrench') modFragment.vgc.requestedSupport.push('poison');
 								if (modFragment.movePriority > 0) {
 									if (!newMon.randbats.offeredSupport.physicalreduction) newMon.randbats.offeredSupport.physicalreduction = [];
 									newMon.randbats.offeredSupport.physicalreduction.push(modFragment);
