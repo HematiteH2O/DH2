@@ -2053,12 +2053,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								if (fragment.moveAccuracy <= 75) modFragment.score = -1; // this gets bypassed if something like Hone Claws or Coil is rolled
 								if (fragment.moveBasePower >= 90 || ((fragment.stab|| moveid === 'round') && fragment.moveBasePower >= 80)) {
 									if (fragment.stab || fragment.moveType !== 'Normal' || fragment.moveBasePower >= 120 || moveid === 'round') {
-										newMon.randbats.viableStabs.push(modFragment);
 										if (moveid === 'Round') {
 											modFragment.vgc.requestedSupport.push('round');
 											if (!pickyVgcSupport.round) pickyVgcSupport.round = [];
 											pickyVgcSupport.round.push(modFragment);
 										}
+										newMon.randbats.viableStabs.push(modFragment);
 									}
 									// stop giving random things Double-Edge!! I know it has good BP :sob:
 									// (the >= 120 preserves *really* strong cases like non-STAB Punk Rock Boomburst, but otherwise, it has to be coverage if it's not STAB)
