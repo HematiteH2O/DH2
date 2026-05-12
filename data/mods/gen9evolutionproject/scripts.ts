@@ -1933,17 +1933,20 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							}
 
 							// Gravity
-							if (!move.ohko && fragment.moveAccuracy <= 75) {
+							if (!move.ohko && fragment.moveAccuracy <= 75 && moveid !== 'Blizzard') {
 								let modFragment = Utils.deepClone(fragment);
 								modFragment.moveAccuracy *= 5/3;
 								modFragment.singles.requestedSupport.push('gravity');
 								modFragment.vgc.requestedSupport.push('gravity');
 								alternateFragments.push(modFragment);
 							}
+							/*
+							// in theory, Gravity helps with Ground moves, but in practice, ... uhhhh these make way too many teams ask for Gravity sjkdfhg
 							if (fragment.moveType === 'Ground' && fragment.moveBasePower && fragment.baseMove !== 'Thousand Arrows') {
 								fragment.singles.acceptedSupport.push('gravity');
 								fragment.vgc.acceptedSupport.push('gravity');
 							}
+							*/
 
 							// poison
 							if (
@@ -2327,6 +2330,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								newMon.randbats.offeredSupport.trickroom.push(modFragment);
 							}
 							if (moveid === 'gravity') {
+								// I think this is getting overused,
+								// so I might want it to request some kind of support that limits its scope to more specific abusers
 								if (!pickyVgcSupport.gravity) pickyVgcSupport.gravity = [];
 								pickyVgcSupport.gravity.push(fragment);
 							}
@@ -2739,9 +2744,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								}
 								if (
 									[
-										'poweruppunch', 'chargebeam', 'honeclaws',
+										'poweruppunch', 'chargebeam',
+										'honeclaws', 'workup',
 									].includes(moveid)
-								) { // you usually don't really want these if there are other options
+								) { // you usually don't really want these if there are other options - unless they're a buddy move for some other reason
 									modFragment.score = -1;
 								} else {
 									modFragment.score = 1;
