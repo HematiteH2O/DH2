@@ -1852,7 +1852,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								if (!modFragment.avoid) modFragment.avoid = [];
 								modFragment.avoid.push('speedcontrol');
 								
-								if (['cottonspore', 'stringshot', 'scaryface'].includes(moveid)) {
+								// if (['cottonspore', 'stringshot', 'scaryface'].includes(moveid)) {
+								// actually, I want to be more charitable here - Cotton Spore and String Shot are really good moves and shouldn't be rejected like this
+								if (['scaryface'].includes(moveid)) {
 									if (!modFragment.tags) modFragment.tags = [];
 									modFragment.tags.push('statusdebuffmove');
 									modFragment.avoid.push('statusdebuffmove');
@@ -2034,7 +2036,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								(['crushclaw', 'razorshell', 'triplearrows'].includes(moveid) && ((!fragment.ability && newMon.randbats.abilities.includes('Serene Grace')) || (fragment.ability && fragment.ability === 'Serene Grace')))
 							) {
 								let modFragment = Utils.deepClone(fragment);
-								if (['leer', 'screech', 'obstruct', 'octolock', 'spicyextract', 'tickle'].includes(moveid)) {
+								if (['leer', 'screech', 'octolock', 'spicyextract', 'tickle'].includes(moveid)) {
 									if (!modFragment.tags) modFragment.tags = [];
 									modFragment.tags.push('statusdebuffmove');
 									if (!modFragment.avoid) modFragment.avoid = [];
