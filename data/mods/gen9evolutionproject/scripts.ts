@@ -978,7 +978,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							});
 							vgcSupportSubfragments.push({
 								ability: 'Quark Drive',
-								item: ['Booster Energy'],
+								item: 'Booster Energy',
 							});
 						}
 						if (newMon.randbats.abilities.includes('Protosynthesis')) {
@@ -988,7 +988,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							});
 							vgcSupportSubfragments.push({
 								ability: 'Protosynthesis',
-								item: ['Booster Energy'],
+								item: 'Booster Energy',
 							});
 							viableVgcSupport = true;
 						}
