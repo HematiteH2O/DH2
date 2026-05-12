@@ -2285,6 +2285,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							if (['poisongas', 'mortalspin', 'toxicspikes'].includes(moveid)) {
 								let modFragment = Utils.deepClone(fragment);
 								if (moveid === 'poisongas') modFragment.format = 'vgc';
+								if (moveid === 'toxicspikes') modFragment.format = 'singles';
 
 								if (modFragment.movePriority > 0 || moveid === 'mortalspin') {
 										if (!newMon.randbats.offeredSupport.poison) newMon.randbats.offeredSupport.poison = [];
