@@ -2117,32 +2117,23 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								].includes(moveid)
 							) {
 								let accept = [];
-								let fieldeffect = sun;
+								let fieldeffect = moveid;
 								
 								switch (moveid) {
 									// offeredSupport
+									case 'sunnyday':
+										fieldeffect = 'sun';
+										break;
 									case 'raindance':
-										fieldeffect = rain;
+										fieldeffect = 'rain';
 										break;
 									case 'sandstorm':
-										fieldeffect = sand;
+										fieldeffect = 'sand';
 										break;
 									case 'hail':
 									case 'snowscape':
 									case 'chillyreception':
-										fieldeffect = snow;
-										break;
-									case 'electricterrain':
-										fieldeffect = electricterrain;
-										break;
-									case 'grassyterrain':
-										fieldeffect = grassyterrain;
-										break;
-									case 'mistyterrain':
-										fieldeffect = mistyterrain;
-										break;
-									case 'psychicterrain':
-										fieldeffect = psychicterrain;
+										fieldeffect = 'snow';
 										break;
 								}
 
