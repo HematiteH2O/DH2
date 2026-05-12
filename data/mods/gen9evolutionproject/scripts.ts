@@ -2160,7 +2160,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								'cottonspore', 'stringshot', 'scaryface',
 								'electroweb', 'icywind', 'glaciate', // Bulldoze will receive special handling elsewhere because it doesn't work for every team
 								'thunderwave', 'nuzzle', 'glare', 'stunspore',
-								'syrupbomb', 'tarshot',
+								'syrupbomb', 'tarshot', 'quash',
 							].includes(moveid) ||
 								 ([
 									 'lowsweep', 'mudshot', 'drumbeating', 'pounce',
