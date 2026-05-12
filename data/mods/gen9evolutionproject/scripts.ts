@@ -1084,6 +1084,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							case 'Grass Knot':
 								basePower = 60; // some of these are gonna be arbitrary :'D
 								break;
+							case 'Nature Power':
+								basePower = 80;
+								moveCategory = 'Special',
+								break;
 						}
 						// I notice the Acrobatics fragment is gonna take some special attention, but one thing at a time
 	
@@ -1099,7 +1103,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						for (const ability of newMon.randbats.abilities) {
 							switch (ability) {
 								case 'Adaptability':
-									if (newMon.randbats.types.includes(move.type)) {
+									if (newMon.randbats.types.includes(move.type) && !['terrainpulse', 'weatherball'].includes(moveid)) {
 										let modFragment = {
 											ability: ability,
 											moveBasePower: basePower * 4/3,
@@ -1529,6 +1533,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						}
 						
 						// fill in default information
+						let alternateFragments = [];
 						for (const fragment of fragments) {
 							if (!fragment.baseMove) fragment.baseMove = move.name;
 							if (!fragment.moves) fragment.moves = [move.name];
@@ -1548,6 +1553,201 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 	
 							if (!fragment.fragmentPriority) fragment.fragmentPriority = 4;
 							
+							// support requirements before any context
+							if (moveid === 'risingvoltage' && !['Electric Surge', 'Hadron Engine'].includes(fragment.ability)) {
+								fragment.moveBasePower *= 2;
+								fragment.singles.requestedSupport.push('electricterrain');
+								fragment.vgc.requestedSupport.push('electricterrain');
+								// can still work with Ground immunity
+							}
+							if (moveid === 'expandingforce' && !['Mega-Neural', 'Psychic Surge'].includes(fragment.ability)) {
+								fragment.moveBasePower *= 1.5;
+								fragment.singles.requestedSupport.push('psychicterrain');
+								fragment.vgc.requestedSupport.push('psychicterrain');
+								if (!fragment.avoid) fragment.avoid = [];
+								fragment.avoid.push('groundimmune');
+							}
+							if (moveid === 'grassyglide'  && !['Grassy Surge', 'Seed Sower'].includes(fragment.ability)) {
+								fragment.movePriority += 1;
+								fragment.singles.requestedSupport.push('grassyterrain');
+								fragment.vgc.requestedSupport.push('grassyterrain');
+								if (!fragment.avoid) fragment.avoid = [];
+								fragment.avoid.push('groundimmune');
+							}
+							// Misty Explosion doesn't actually want Misty Terrain support
+							if (['solarbeam', 'solarblade', 'growth'].includes(moveid) && !(fragment.ability && ['Desolate Land', 'Drought', 'Mega Sol', 'Orichalcum Pulse'].includes(fragment.ability))) {
+								fragment.singles.requestedSupport.push('sun');
+								fragment.vgc.requestedSupport.push('sun');
+							}
+							if (['electroshot'].includes(moveid) && !(fragment.ability && ['Drizzle', 'Primordial Sea', 'Storm Chaser'].includes(fragment.ability))) {
+								fragment.singles.requestedSupport.push('rain');
+								fragment.vgc.requestedSupport.push('rain');
+							}
+							if (['auroraveil', 'blizzard'].includes(moveid) && !(fragment.ability && ['Snow Warning'].includes(fragment.ability))) {
+								fragment.singles.requestedSupport.push('snow');
+								fragment.vgc.requestedSupport.push('snow');
+							}
+
+							// sun
+							if (
+								(fragment.moveType === 'Fire' || fragment.baseMove === 'Hydro Steam') &&
+								!(fragment.ability && ['Desolate Land', 'Drought', 'Mega Sol', 'Orichalcum Pulse'].includes(fragment.ability))
+							) {
+								let modFragment = Utils.deepClone(fragment);
+								modFragment.moveBasePower *= 1.5;
+								modFragment.singles.requestedSupport.push('sun');
+								modFragment.vgc.requestedSupport.push('sun');
+								alternateFragments.push(modFragment);
+							}
+							if (
+								fragment.baseMove === 'Weather Ball' &&
+								!(fragment.ability && ['Desolate Land', 'Drought', 'Mega Sol', 'Orichalcum Pulse'].includes(fragment.ability))
+							) {
+								let modFragment = Utils.deepClone(fragment);
+								modFragment.moveBasePower *= 3;
+								modFragment.moveType = 'Fire';
+								modFragment.singles.requestedSupport.push('sun');
+								modFragment.vgc.requestedSupport.push('sun');
+								alternateFragments.push(modFragment);
+							}
+
+							// rain
+							if (
+								(fragment.moveType === 'Water') &&
+								!(fragment.ability && ['Drizzle', 'Primordial Sea', 'Storm Chaser'].includes(fragment.ability))
+							) {
+								let modFragment = Utils.deepClone(fragment);
+								modFragment.moveBasePower *= 1.5;
+								modFragment.singles.requestedSupport.push('rain');
+								modFragment.vgc.requestedSupport.push('rain');
+								alternateFragments.push(modFragment);
+							}
+							if (
+								fragment.baseMove === 'Weather Ball' &&
+								!(fragment.ability && ['Drizzle', 'Primordial Sea', 'Storm Chaser'].includes(fragment.ability))
+							) {
+								let modFragment = Utils.deepClone(fragment);
+								modFragment.moveBasePower *= 3;
+								modFragment.moveType = 'Water';
+								modFragment.singles.requestedSupport.push('rain');
+								modFragment.vgc.requestedSupport.push('rain');
+								alternateFragments.push(modFragment);
+							}
+
+							// sand
+							if (
+								fragment.baseMove === 'Weather Ball' &&
+								!(fragment.ability && ['Sand Stream'].includes(fragment.ability))
+							) {
+								let modFragment = Utils.deepClone(fragment);
+								modFragment.moveBasePower *= 2;
+								modFragment.moveType = 'Rock';
+								modFragment.singles.requestedSupport.push('sand');
+								modFragment.vgc.requestedSupport.push('sand');
+								alternateFragments.push(modFragment);
+							}
+
+							// snow
+							if (
+								fragment.baseMove === 'Weather Ball' &&
+								!(fragment.ability && ['Snow Warning'].includes(fragment.ability))
+							) {
+								let modFragment = Utils.deepClone(fragment);
+								modFragment.moveBasePower *= 2;
+								modFragment.moveType = 'Ice';
+								modFragment.singles.requestedSupport.push('snow');
+								modFragment.vgc.requestedSupport.push('snow');
+								alternateFragments.push(modFragment);
+							}
+
+							// Electric Terrain
+							if (
+								fragment.moveType === 'Electric' && !(fragment.ability && ['Electric Surge', 'Hadron Engine'].includes(fragment.ability))
+							) {
+								let modFragment = Utils.deepClone(fragment);
+								modFragment.moveBasePower *= 1.3;
+								modFragment.singles.requestedSupport.push('electricterrain');
+								modFragment.vgc.requestedSupport.push('electricterrain');
+								if (!modFragment.avoid) modFragment.avoid = [];
+								modFragment.avoid.push('groundimmune');
+								alternateFragments.push(modFragment);
+							}
+							if (
+								['Terrain Pulse', 'Nature Power'].includes(fragment.baseMove) && !(fragment.ability && ['Electric Surge', 'Hadron Engine'].includes(fragment.ability))
+							) {
+								let modFragment = Utils.deepClone(fragment);
+								if (fragment.baseMove === 'Terrain Pulse') modFragment.moveBasePower *= 2;
+								if (fragment.baseMove === 'Nature Power') modFragment.moveBasePower *= (9 / 8);
+								modFragment.moveBasePower *= 1.3;
+								modFragment.moveType = 'Electric';
+								modFragment.singles.requestedSupport.push('electricterrain');
+								modFragment.vgc.requestedSupport.push('electricterrain');
+								alternateFragments.push(modFragment);
+							}
+
+							// Grassy Terrain
+							if (
+								fragment.moveType === 'Grass' && !(fragment.ability && ['Grassy Surge', 'Seed Sower'].includes(fragment.ability))
+							) {
+								let modFragment = Utils.deepClone(fragment);
+								modFragment.moveBasePower *= 1.3;
+								modFragment.singles.requestedSupport.push('grassyterrain');
+								modFragment.vgc.requestedSupport.push('grassyterrain');
+								if (!modFragment.avoid) modFragment.avoid = [];
+								modFragment.avoid.push('groundimmune');
+								alternateFragments.push(modFragment);
+							}
+							if (
+								['Terrain Pulse', 'Nature Power'].includes(fragment.baseMove) && !(fragment.ability && ['Grassy Surge', 'Seed Sower'].includes(fragment.ability))
+							) {
+								let modFragment = Utils.deepClone(fragment);
+								if (fragment.baseMove === 'Terrain Pulse') modFragment.moveBasePower *= 2;
+								if (fragment.baseMove === 'Nature Power') modFragment.moveBasePower *= (9 / 8);
+								modFragment.moveBasePower *= 1.3;
+								modFragment.moveType = 'Grass';
+								modFragment.singles.requestedSupport.push('grassyterrain');
+								modFragment.vgc.requestedSupport.push('grassyterrain');
+								alternateFragments.push(modFragment);
+							}
+							
+							// Psychic Terrain
+							if (
+								fragment.moveType === 'Psychic' && !(fragment.ability && ['Psychic Surge', 'Mega-Neural'].includes(fragment.ability))
+							) {
+								let modFragment = Utils.deepClone(fragment);
+								modFragment.moveBasePower *= 1.3;
+								modFragment.singles.requestedSupport.push('psychicterrain');
+								modFragment.vgc.requestedSupport.push('psychicterrain');
+								if (!modFragment.avoid) modFragment.avoid = [];
+								modFragment.avoid.push('groundimmune');
+								alternateFragments.push(modFragment);
+							}
+							if (
+								['Terrain Pulse', 'Nature Power'].includes(fragment.baseMove) && !(fragment.ability && ['Psychic Surge', 'Mega-Neural'].includes(fragment.ability))
+							) {
+								let modFragment = Utils.deepClone(fragment);
+								if (fragment.baseMove === 'Terrain Pulse') modFragment.moveBasePower *= 2;
+								if (fragment.baseMove === 'Nature Power') modFragment.moveBasePower *= (9 / 8);
+								modFragment.moveBasePower *= 1.3;
+								modFragment.moveType = 'Psychic';
+								modFragment.singles.requestedSupport.push('psychicterrain');
+								modFragment.vgc.requestedSupport.push('psychicterrain');
+								alternateFragments.push(modFragment);
+							}
+
+							// Misty Terrain
+							if (
+								['Terrain Pulse', 'Nature Power'].includes(fragment.baseMove) && !(fragment.ability && ['Misty Surge'].includes(fragment.ability))
+							) {
+								let modFragment = Utils.deepClone(fragment);
+								if (fragment.baseMove === 'Terrain Pulse') modFragment.moveBasePower *= 2;
+								if (fragment.baseMove === 'Nature Power') modFragment.moveBasePower *= (95 / 80);
+								modFragment.moveType = 'Fairy';
+								modFragment.singles.requestedSupport.push('mistyterrain');
+								modFragment.vgc.requestedSupport.push('mistyterrain');
+								alternateFragments.push(modFragment);
+							}
+							
 							if (newMon.randbats.types.includes(fragment.moveType) && fragment.moveBasePower) fragment.stab = true;
 							// I usually think in terms of regular base powers,
 							// so it's more intuitive for me to divide for lack of STAB than to multiply for STAB:
@@ -1565,38 +1765,31 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								if (fragment.moveCategory === 'Special') fragment.moveBasePower *= ((newMon.baseStats.spa*2+99)/299);
 							}
 						}
+						if (alternateFragments) for (const fragment of alternateFragments) {
+							// account for moves that changed type
+							if (newMon.randbats.types.includes(fragment.moveType) && fragment.moveBasePower && !fragment.stab) {
+								fragment.stab = true;
+								fragment.moveBasePower *= 1.5;
+								if (newMon.randbats.abilities.incudes('Adaptability') && !fragment.ability) {
+									let modFragment = Utils.deepClone(fragment);
+									modFragment.moveBasePower *= 4/3;
+									modFragment.ability = 'Adaptability';
+									fragments.push(modFragment);
+								}
+							}
+							if (!(newMon.randbats.types.includes(fragment.moveType) && fragment.moveBasePower) && fragment.stab) {
+								fragment.stab = false;
+								if (fragment.ability && fragment.ability === 'Adaptability') {
+									fragment.moveBasePower /= 2;
+									fragment.ability = null;
+								} else {
+									fragment.moveBasePower /= 1.5;
+								}
+							}
+							fragments.push(fragment);
+						}
 	
 						for (const fragment of fragments) {
-							
-						// support requirements before any context
-							if (moveid === 'risingvoltage' && !['Electric Surge', 'Hadron Engine'].includes(fragment.ability)) {
-								fragment.moveBasePower *= 2;
-								fragment.singles.requestedSupport.push('electricterrain');
-								fragment.vgc.requestedSupport.push('electricterrain');
-							}
-							if (moveid === 'expandingforce' && !['Mega-Neural', 'Psychic Surge'].includes(fragment.ability)) {
-								fragment.moveBasePower *= 1.5;
-								fragment.singles.requestedSupport.push('psychicterrain');
-								fragment.vgc.requestedSupport.push('psychicterrain');
-							}
-							if (moveid === 'grassyglide'  && !['Grassy Surge', 'Seed Sower'].includes(fragment.ability)) {
-								fragment.movePriority += 1;
-								fragment.singles.requestedSupport.push('grassyterrain');
-								fragment.vgc.requestedSupport.push('grassyterrain');
-							}
-							// Misty Explosion doesn't actually want Misty Terrain support
-							if (['solarbeam', 'solarblade', 'growth'].includes(moveid) && !(fragment.ability && ['Desolate Land', 'Drought', 'Mega Sol', 'Orichalcum Pulse'].includes(fragment.ability))) {
-								fragment.singles.requestedSupport.push('sun');
-								fragment.vgc.requestedSupport.push('sun');
-							}
-							if (['electroshot'].includes(moveid) && !(fragment.ability && ['Drizzle', 'Primordial Sea', 'Storm Chaser'].includes(fragment.ability))) {
-								fragment.singles.requestedSupport.push('rain');
-								fragment.vgc.requestedSupport.push('rain');
-							}
-							if (['auroraveil'].includes(moveid) && !(fragment.ability && ['Snow Warning'].includes(fragment.ability))) {
-								fragment.singles.requestedSupport.push('snow');
-								fragment.vgc.requestedSupport.push('snow');
-							}
 	
 						// general / STAB
 							// okay, the STAB categories are obviously way unfinished - I'm gonna come back to this
@@ -2049,7 +2242,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								
 								// to be viable, many of these need priority, naturally high Speed, or an Ability that boosts Speed
 								// I have set up a way to generalize that, since it comes up for a lot of other kinds of support
-								if (modFragment.movePriority > 0 || modFragment.baseMove === 'octolock') {
+								if (modFragment.movePriority > 0 || modFragment.baseMove === 'Octolock') {
 										if (!newMon.randbats.offeredSupport.defensereduction) newMon.randbats.offeredSupport.defensereduction = [];
 										newMon.randbats.offeredSupport.defensereduction.push(modFragment);
 								} else {
@@ -2077,7 +2270,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								
 								// to be viable, many of these need priority, naturally high Speed, or an Ability that boosts Speed
 								// I have set up a way to generalize that, since it comes up for a lot of other kinds of support
-								if (modFragment.movePriority > 0 || modFragment.baseMove === 'octolock') {
+								if (modFragment.movePriority > 0 || modFragment.baseMove === 'Octolock') {
 									if (!newMon.randbats.offeredSupport.spdefreduction) newMon.randbats.offeredSupport.spdefreduction = [];
 									newMon.randbats.offeredSupport.spdefreduction.push(modFragment);
 								} else {
