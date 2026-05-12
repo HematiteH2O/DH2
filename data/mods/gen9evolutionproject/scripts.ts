@@ -2101,18 +2101,22 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 									modFragment.buddy.roles.push('accuracyboost');
 								}
 								if (fragment.moveAccuracy <= 75) modFragment.score = -1; // this gets bypassed if something like Hone Claws or Coil is rolled
-								if (fragment.moveBasePower >= 90 || ((fragment.stab|| moveid === 'round') && fragment.moveBasePower >= 80)) {
-									if (fragment.stab || fragment.moveType !== 'Normal' || fragment.moveBasePower >= 120 || moveid === 'round') {
-										if (moveid === 'Round') {
-											let roundFragment = Utils.deepClone(modFragment);
-											if (!pickyVgcSupport.round) pickyVgcSupport.round = [];
-											pickyVgcSupport.round.push(roundFragment);
-											modFragment.vgc.requestedSupport.push('round');
-										}
-										newMon.randbats.viableStabs.push(modFragment);
+								if (moveid === 'Round') {
+									modFragment.format = 'vgc';
+									modFragment.vgc.requestedSupport.push('round');
+									if (fragment.moveBasePower >= 80) newMon.randbats.viableStabs.push(modFragment);
+									if (fragment.moveBasePower >= 70) {
+										if (!pickyVgcSupport.round) pickyVgcSupport.round = [];
+										pickyVgcSupport.round.push(modFragment);
 									}
+								} else if (
+										(fragment.stab && fragment.moveBasePower >= 80) ||
+										(fragment.moveType !== 'Normal' && fragment.moveBasePower >= 90) ||
+										fragment.moveBasePower >= 120
+								) {
+									newMon.randbats.viableStabs.push(modFragment);
 									// stop giving random things Double-Edge!! I know it has good BP :sob:
-									// (the >= 120 preserves *really* strong cases like non-STAB Punk Rock Boomburst, but otherwise, it has to be coverage if it's not STAB)
+									// (the >= 120 preserves *really* strong cases like non-STAB Punk Rock Boomburst, but otherwise, it has to at least be a coverage type if it's not STAB)
 								}
 								if (fragment.moveBasePower >= 120 && !fragment.item) {
 									let modFragment2 = Utils.deepClone(modFragment);
