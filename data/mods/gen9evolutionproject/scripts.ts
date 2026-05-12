@@ -2503,9 +2503,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							fragmentPriority: 4,
 						};
 						switch (ability) {
+							let modFragment = Utils.deepClone(fragment);
 							// offeredSupport
 							case 'Drizzle':
-								let modFragment = Utils.deepClone(fragment);
 								modFragment.singles.acceptedSupport.push('rain');
 								modFragment.singles.acceptedSupport.push('backuprain');
 								modFragment.vgc.acceptedSupport.push('rain');
@@ -2516,7 +2516,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								break;
 							case 'Drought':
 							case 'Orichalcum Pulse':
-								let modFragment = Utils.deepClone(fragment);
 								modFragment.singles.acceptedSupport.push('sun');
 								modFragment.singles.acceptedSupport.push('backupsun');
 								modFragment.vgc.acceptedSupport.push('sun');
@@ -2527,7 +2526,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								break;
 							case 'Electric Surge':
 							case 'Hadron Engine':
-								let modFragment = Utils.deepClone(fragment);
 								modFragment.singles.acceptedSupport.push('electricterrain');
 								modFragment.singles.acceptedSupport.push('backupelectricterrain');
 								modFragment.vgc.acceptedSupport.push('electricterrain');
@@ -2539,7 +2537,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								newMon.randbats.offeredSupport.antisleep.push(modFragment);
 								break;
 							case 'Grassy Surge':
-								let modFragment = Utils.deepClone(fragment);
 								modFragment.singles.acceptedSupport.push('grassyterrain');
 								modFragment.singles.acceptedSupport.push('backupgrassyterrain');
 								modFragment.vgc.acceptedSupport.push('grassyterrain');
@@ -2558,7 +2555,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								newMon.randbats.offeredSupport.intimidate.push(fragment);
 								break;
 							case 'Misty Surge':
-								let modFragment = Utils.deepClone(fragment);
 								modFragment.singles.acceptedSupport.push('mistyterrain');
 								modFragment.singles.acceptedSupport.push('backupmistyterrain');
 								modFragment.vgc.acceptedSupport.push('mistyterrain');
@@ -2576,7 +2572,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								break;
 							case 'Psychic Surge':
 							case 'Mega-Neural':
-								let modFragment = Utils.deepClone(fragment);
 								modFragment.singles.acceptedSupport.push('psychicterrain');
 								modFragment.singles.acceptedSupport.push('backuppsychicterrain');
 								modFragment.vgc.acceptedSupport.push('psychicterrain');
@@ -2589,7 +2584,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								break;
 							case 'Sand Stream':
 							case 'Sand Spit':
-								let modFragment = Utils.deepClone(fragment);
 								modFragment.singles.acceptedSupport.push('sand');
 								modFragment.singles.acceptedSupport.push('backupsand');
 								modFragment.vgc.acceptedSupport.push('sand');
@@ -2602,7 +2596,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								newMon.randbats.offeredSupport.sand.push(modFragment);
 								break;
 							case 'Snow Warning':
-								let modFragment = Utils.deepClone(fragment);
 								modFragment.singles.acceptedSupport.push('snow');
 								modFragment.singles.acceptedSupport.push('backupsnow');
 								modFragment.vgc.acceptedSupport.push('snow');
