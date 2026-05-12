@@ -975,20 +975,24 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							vgcSupportSubfragments.push({
 								ability: 'Quark Drive',
 								requestedSupport: ['electricterrain'],
+								avoid: ['boosterenergy'],
 							});
 							vgcSupportSubfragments.push({
 								ability: 'Quark Drive',
 								item: 'Booster Energy',
+								tags: ['boosterenergy'],
 							});
 						}
 						if (newMon.randbats.abilities.includes('Protosynthesis')) {
 							vgcSupportSubfragments.push({
 								ability: 'Protosynthesis',
 								requestedSupport: ['sun'],
+								avoid: ['boosterenergy'],
 							});
 							vgcSupportSubfragments.push({
 								ability: 'Protosynthesis',
 								item: 'Booster Energy',
+								tags: ['boosterenergy'],
 							});
 							viableVgcSupport = true;
 						}
@@ -1237,6 +1241,23 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 											};
 											fragments.push(modFragment);
 										}
+									}
+									break;
+								case 'Flower Gift':
+									if (move.category === 'Physical') {
+										let modFragment = {
+											ability: ability,
+											moveBasePower: basePower * 1.5,
+											singles: {
+												acceptedSupport: [],
+												requestedSupport: ['sun'],
+											},
+											vgc: {
+												acceptedSupport: [],
+												requestedSupport: ['sun'],
+											},
+										};
+										fragments.push(modFragment);
 									}
 									break;
 								case 'Frozen Focus':
@@ -1633,13 +1654,25 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								fragment.singles.requestedSupport.push('sun');
 								fragment.vgc.requestedSupport.push('sun');
 							}
+							if (['synthesis', 'moonlight', 'morningsun'].includes(moveid) && !(fragment.ability && ['Desolate Land', 'Drought', 'Mega Sol', 'Orichalcum Pulse'].includes(fragment.ability))) {
+								fragment.singles.acceptedSupport.push('sun');
+								fragment.vgc.acceptedSupport.push('sun');
+							}
 							if (['electroshot'].includes(moveid) && !(fragment.ability && ['Drizzle', 'Primordial Sea', 'Storm Chaser'].includes(fragment.ability))) {
 								fragment.singles.requestedSupport.push('rain');
 								fragment.vgc.requestedSupport.push('rain');
 							}
+							if (['shoreup'].includes(moveid) && !(fragment.ability && ['Sand Stream'].includes(fragment.ability))) {
+								fragment.singles.acceptedSupport.push('sand');
+								fragment.vgc.acceptedSupport.push('sand');
+							}
 							if (['auroraveil'].includes(moveid) && !(fragment.ability && ['Snow Warning'].includes(fragment.ability))) {
 								fragment.singles.requestedSupport.push('snow');
 								fragment.vgc.requestedSupport.push('snow');
+							}
+							if (['shaveoff'].includes(moveid) && !(fragment.ability && ['Snow Warning'].includes(fragment.ability))) {
+								fragment.singles.acceptedSupport.push('snow');
+								fragment.vgc.acceptedSupport.push('snow');
 							}
 
 							// sun
@@ -2810,10 +2843,21 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								newMon.randbats.offeredSupport.grassyterrain.push(fragment);
 								break;
 							case 'Intimidate':
-								if (!newMon.randbats.offeredSupport.physreduction) newMon.randbats.offeredSupport.physreduction = [];
-								newMon.randbats.offeredSupport.physreduction.push(fragment);
+								if (!newMon.randbats.offeredSupport.physicalreduction) newMon.randbats.offeredSupport.physicalreduction = [];
+								newMon.randbats.offeredSupport.physicalreduction.push(fragment);
 								if (!newMon.randbats.offeredSupport.intimidate) newMon.randbats.offeredSupport.intimidate = [];
 								newMon.randbats.offeredSupport.intimidate.push(fragment);
+								break;
+							case 'Flower Gift':
+								fragment.singles.requestedSupport.push('sun');
+								fragment.vgc.requestedSupport.push('sun');
+								if (!newMon.randbats.singles.acceptedSupport.sun) newMon.randbats.singles.acceptedSupport.sun = [];
+								newMon.randbats.singles.acceptedSupport.sun.push(fragment);
+								if (!newMon.randbats.vgc.acceptedSupport.sun) newMon.randbats.vgc.acceptedSupport.sun = [];
+								newMon.randbats.vgc.acceptedSupport.sun.push(fragment);
+								
+								if (!newMon.randbats.offeredSupport.specialreduction) newMon.randbats.offeredSupport.specialreduction = [];
+								newMon.randbats.offeredSupport.specialreduction.push(fragment);
 								break;
 							case 'Misty Surge':
 								fragment.singles.acceptedSupport.push('mistyterrain');
@@ -2903,8 +2947,23 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							// acceptedSupport
 							case 'Swift Swim':
 							case 'Dry Skin':
+							case 'Rain Dish':
 								fragment.singles.requestedSupport.push('rain');
 								fragment.vgc.requestedSupport.push('rain');
+								if (!newMon.randbats.singles.acceptedSupport.rain) newMon.randbats.singles.acceptedSupport.rain = [];
+								newMon.randbats.singles.acceptedSupport.rain.push(fragment);
+								if (!newMon.randbats.vgc.acceptedSupport.rain) newMon.randbats.vgc.acceptedSupport.rain = [];
+								newMon.randbats.vgc.acceptedSupport.rain.push(fragment);
+								break;
+							case 'Hydration':
+								fragment.singles.requestedSupport.push('rain');
+								fragment.vgc.requestedSupport.push('rain');
+								if (learnset.rest && learnset.rest.length) {
+									fragment.baseMove = 'Rest';
+									fragment.moves = ['Rest'];
+									fragment.tags = 'recovery';
+									fragment.role = 'personal';
+								}
 								if (!newMon.randbats.singles.acceptedSupport.rain) newMon.randbats.singles.acceptedSupport.rain = [];
 								newMon.randbats.singles.acceptedSupport.rain.push(fragment);
 								if (!newMon.randbats.vgc.acceptedSupport.rain) newMon.randbats.vgc.acceptedSupport.rain = [];
@@ -2930,6 +2989,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								break;
 							case 'Slush Rush':
 							case 'Ice Body':
+							case 'Ice Face':
 								fragment.singles.requestedSupport.push('snow');
 								fragment.vgc.requestedSupport.push('snow');
 								if (!newMon.randbats.singles.acceptedSupport.snow) newMon.randbats.singles.acceptedSupport.snow = [];
