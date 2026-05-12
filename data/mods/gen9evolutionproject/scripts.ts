@@ -2503,44 +2503,43 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							fragmentPriority: 4,
 						};
 						switch (ability) {
-							let modFragment = Utils.deepClone(fragment);
 							// offeredSupport
 							case 'Drizzle':
-								modFragment.singles.acceptedSupport.push('rain');
-								modFragment.singles.acceptedSupport.push('backuprain');
-								modFragment.vgc.acceptedSupport.push('rain');
-								modFragment.vgc.acceptedSupport.push('backuprain');
+								fragment.singles.acceptedSupport.push('rain');
+								fragment.singles.acceptedSupport.push('backuprain');
+								fragment.vgc.acceptedSupport.push('rain');
+								fragment.vgc.acceptedSupport.push('backuprain');
 								
 								if (!newMon.randbats.offeredSupport.rain) newMon.randbats.offeredSupport.rain = [];
-								newMon.randbats.offeredSupport.rain.push(modFragment);
+								newMon.randbats.offeredSupport.rain.push(fragment);
 								break;
 							case 'Drought':
 							case 'Orichalcum Pulse':
-								modFragment.singles.acceptedSupport.push('sun');
-								modFragment.singles.acceptedSupport.push('backupsun');
-								modFragment.vgc.acceptedSupport.push('sun');
-								modFragment.vgc.acceptedSupport.push('backupsun');
+								fragment.singles.acceptedSupport.push('sun');
+								fragment.singles.acceptedSupport.push('backupsun');
+								fragment.vgc.acceptedSupport.push('sun');
+								fragment.vgc.acceptedSupport.push('backupsun');
 								
 								if (!newMon.randbats.offeredSupport.sun) newMon.randbats.offeredSupport.sun = [];
-								newMon.randbats.offeredSupport.sun.push(modFragment);
+								newMon.randbats.offeredSupport.sun.push(fragment);
 								break;
 							case 'Electric Surge':
 							case 'Hadron Engine':
-								modFragment.singles.acceptedSupport.push('electricterrain');
-								modFragment.singles.acceptedSupport.push('backupelectricterrain');
-								modFragment.vgc.acceptedSupport.push('electricterrain');
-								modFragment.vgc.acceptedSupport.push('backupelectricterrain');
+								fragment.singles.acceptedSupport.push('electricterrain');
+								fragment.singles.acceptedSupport.push('backupelectricterrain');
+								fragment.vgc.acceptedSupport.push('electricterrain');
+								fragment.vgc.acceptedSupport.push('backupelectricterrain');
 								
 								if (!newMon.randbats.offeredSupport.electricterrain) newMon.randbats.offeredSupport.electricterrain = [];
-								newMon.randbats.offeredSupport.electricterrain.push(modFragment);
+								newMon.randbats.offeredSupport.electricterrain.push(fragment);
 								if (!newMon.randbats.offeredSupport.antisleep) newMon.randbats.offeredSupport.antisleep = [];
-								newMon.randbats.offeredSupport.antisleep.push(modFragment);
+								newMon.randbats.offeredSupport.antisleep.push(fragment);
 								break;
 							case 'Grassy Surge':
-								modFragment.singles.acceptedSupport.push('grassyterrain');
-								modFragment.singles.acceptedSupport.push('backupgrassyterrain');
-								modFragment.vgc.acceptedSupport.push('grassyterrain');
-								modFragment.vgc.acceptedSupport.push('backupgrassyterrain');
+								fragment.singles.acceptedSupport.push('grassyterrain');
+								fragment.singles.acceptedSupport.push('backupgrassyterrain');
+								fragment.vgc.acceptedSupport.push('grassyterrain');
+								fragment.vgc.acceptedSupport.push('backupgrassyterrain');
 								// full disclosure: it's relatively unlikely that anything will actually be set to offer the support "backupgrassyterrain"
 								// this is just because it's almost never a worthwhile consideration
 								// but I'm still adding the acceptedSupport here for completion just in case it comes up
@@ -2555,89 +2554,89 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								newMon.randbats.offeredSupport.intimidate.push(fragment);
 								break;
 							case 'Misty Surge':
-								modFragment.singles.acceptedSupport.push('mistyterrain');
-								modFragment.singles.acceptedSupport.push('backupmistyterrain');
-								modFragment.vgc.acceptedSupport.push('mistyterrain');
-								modFragment.vgc.acceptedSupport.push('backupmistyterrain');
+								fragment.singles.acceptedSupport.push('mistyterrain');
+								fragment.singles.acceptedSupport.push('backupmistyterrain');
+								fragment.vgc.acceptedSupport.push('mistyterrain');
+								fragment.vgc.acceptedSupport.push('backupmistyterrain');
 								// full disclosure: it's relatively unlikely that anything will actually be set to offer the support "backupmistyterrain"
 								// this is just because it's almost never a worthwhile consideration
 								// but I'm still adding the acceptedSupport here for completion just in case it comes up
 
 								if (!newMon.randbats.offeredSupport.mistyterrain) newMon.randbats.offeredSupport.mistyterrain = [];
-								newMon.randbats.offeredSupport.mistyterrain.push(modFragment);
+								newMon.randbats.offeredSupport.mistyterrain.push(fragment);
 								if (!newMon.randbats.offeredSupport.antistatus) newMon.randbats.offeredSupport.antistatus = [];
-								newMon.randbats.offeredSupport.antistatus.push(modFragment);
+								newMon.randbats.offeredSupport.antistatus.push(fragment);
 								if (!newMon.randbats.offeredSupport.antisleep) newMon.randbats.offeredSupport.antisleep = [];
-								newMon.randbats.offeredSupport.antisleep.push(modFragment);
+								newMon.randbats.offeredSupport.antisleep.push(fragment);
 								break;
 							case 'Psychic Surge':
 							case 'Mega-Neural':
-								modFragment.singles.acceptedSupport.push('psychicterrain');
-								modFragment.singles.acceptedSupport.push('backuppsychicterrain');
-								modFragment.vgc.acceptedSupport.push('psychicterrain');
-								modFragment.vgc.acceptedSupport.push('backuppsychicterrain');
+								fragment.singles.acceptedSupport.push('psychicterrain');
+								fragment.singles.acceptedSupport.push('backuppsychicterrain');
+								fragment.vgc.acceptedSupport.push('psychicterrain');
+								fragment.vgc.acceptedSupport.push('backuppsychicterrain');
 								
 								if (!newMon.randbats.offeredSupport.psychicterrain) newMon.randbats.offeredSupport.psychicterrain = [];
-								newMon.randbats.offeredSupport.psychicterrain.push(modFragment);
+								newMon.randbats.offeredSupport.psychicterrain.push(fragment);
 								if (!newMon.randbats.offeredSupport.antipriority) newMon.randbats.offeredSupport.antipriority = [];
-								newMon.randbats.offeredSupport.antipriority.push(modFragment);
+								newMon.randbats.offeredSupport.antipriority.push(fragment);
 								break;
 							case 'Sand Stream':
 							case 'Sand Spit':
-								modFragment.singles.acceptedSupport.push('sand');
-								modFragment.singles.acceptedSupport.push('backupsand');
-								modFragment.vgc.acceptedSupport.push('sand');
-								modFragment.vgc.acceptedSupport.push('backupsand');
+								fragment.singles.acceptedSupport.push('sand');
+								fragment.singles.acceptedSupport.push('backupsand');
+								fragment.vgc.acceptedSupport.push('sand');
+								fragment.vgc.acceptedSupport.push('backupsand');
 								// full disclosure: it's relatively unlikely that anything will actually be set to offer the support "backupsand"
 								// this is just because it's almost never a worthwhile consideration
 								// but I'm still adding the acceptedSupport here for completion just in case it comes up
 								
 								if (!newMon.randbats.offeredSupport.sand) newMon.randbats.offeredSupport.sand = [];
-								newMon.randbats.offeredSupport.sand.push(modFragment);
+								newMon.randbats.offeredSupport.sand.push(fragment);
 								break;
 							case 'Snow Warning':
-								modFragment.singles.acceptedSupport.push('snow');
-								modFragment.singles.acceptedSupport.push('backupsnow');
-								modFragment.vgc.acceptedSupport.push('snow');
-								modFragment.vgc.acceptedSupport.push('backupsnow');
+								fragment.singles.acceptedSupport.push('snow');
+								fragment.singles.acceptedSupport.push('backupsnow');
+								fragment.vgc.acceptedSupport.push('snow');
+								fragment.vgc.acceptedSupport.push('backupsnow');
 								// full disclosure: it's relatively unlikely that anything will actually be set to offer the support "backupsnow"
 								// this is just because it's almost never a worthwhile consideration
 								// but I'm still adding the acceptedSupport here for completion just in case it comes up
 								
 								if (!newMon.randbats.offeredSupport.snow) newMon.randbats.offeredSupport.snow = [];
-								newMon.randbats.offeredSupport.snow.push(modFragment);
+								newMon.randbats.offeredSupport.snow.push(fragment);
 								break;
 							case 'Storm Chaser':
 								// we need any one of these, not all three
-								let modFragmentElectric = Utils.deepClone(fragment);
-								modFragmentElectric.singles.acceptedSupport.push('rain');
-								modFragmentElectric.singles.acceptedSupport.push('backuprain');
-								modFragmentElectric.vgc.acceptedSupport.push('rain');
-								modFragmentElectric.vgc.acceptedSupport.push('backuprain');
-								modFragmentElectric.vgc.requestedSupport.push('sideelectric');
+								let fragmentElectric = Utils.deepClone(fragment);
+								fragmentElectric.singles.acceptedSupport.push('rain');
+								fragmentElectric.singles.acceptedSupport.push('backuprain');
+								fragmentElectric.vgc.acceptedSupport.push('rain');
+								fragmentElectric.vgc.acceptedSupport.push('backuprain');
+								fragmentElectric.vgc.requestedSupport.push('sideelectric');
 								
-								let modFragmentFlying = Utils.deepClone(fragment);
-								modFragmentFlying.singles.acceptedSupport.push('rain');
-								modFragmentFlying.singles.acceptedSupport.push('backuprain');
-								modFragmentFlying.vgc.acceptedSupport.push('rain');
-								modFragmentFlying.vgc.acceptedSupport.push('backuprain');
-								modFragmentFlying.vgc.requestedSupport.push('sideflying');
+								let fragmentFlying = Utils.deepClone(fragment);
+								fragmentFlying.singles.acceptedSupport.push('rain');
+								fragmentFlying.singles.acceptedSupport.push('backuprain');
+								fragmentFlying.vgc.acceptedSupport.push('rain');
+								fragmentFlying.vgc.acceptedSupport.push('backuprain');
+								fragmentFlying.vgc.requestedSupport.push('sideflying');
 								
-								let modFragmentWater = Utils.deepClone(fragment);
-								modFragmentWater.singles.acceptedSupport.push('rain');
-								modFragmentWater.singles.acceptedSupport.push('backuprain');
-								modFragmentWater.vgc.acceptedSupport.push('rain');
-								modFragmentWater.vgc.acceptedSupport.push('backuprain');
-								modFragmentWater.vgc.requestedSupport.push('sidewater');
+								let fragmentWater = Utils.deepClone(fragment);
+								fragmentWater.singles.acceptedSupport.push('rain');
+								fragmentWater.singles.acceptedSupport.push('backuprain');
+								fragmentWater.vgc.acceptedSupport.push('rain');
+								fragmentWater.vgc.acceptedSupport.push('backuprain');
+								fragmentWater.vgc.requestedSupport.push('sidewater');
 								
 								if (!newMon.randbats.offeredSupport.rain) newMon.randbats.offeredSupport.rain = [];
 								if (!newMon.randbats.offeredSupport.backuprain) newMon.randbats.offeredSupport.backuprain = [];
-								newMon.randbats.offeredSupport.rain.push(modFragmentElectric);
-								newMon.randbats.offeredSupport.rain.push(modFragmentFlying);
-								newMon.randbats.offeredSupport.rain.push(modFragmentWater);
-								newMon.randbats.offeredSupport.backuprain.push(modFragmentElectric);
-								newMon.randbats.offeredSupport.backuprain.push(modFragmentFlying);
-								newMon.randbats.offeredSupport.backuprain.push(modFragmentWater);
+								newMon.randbats.offeredSupport.rain.push(fragmentElectric);
+								newMon.randbats.offeredSupport.rain.push(fragmentFlying);
+								newMon.randbats.offeredSupport.rain.push(fragmentWater);
+								newMon.randbats.offeredSupport.backuprain.push(fragmentElectric);
+								newMon.randbats.offeredSupport.backuprain.push(fragmentFlying);
+								newMon.randbats.offeredSupport.backuprain.push(fragmentWater);
 								break;
 							// acceptedSupport
 							case 'Swift Swim':
