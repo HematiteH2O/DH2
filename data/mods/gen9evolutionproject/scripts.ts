@@ -941,10 +941,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					}
 
 					if (newMon.randbats.types.includes('Ice')) {
-						newMon.randbats.acceptedSupport.snow = 'true';
+						newMon.randbats.singles.acceptedSupport.snow = 'true';
+						newMon.randbats.vgc.acceptedSupport.snow = 'true';
 					}
 					if (newMon.randbats.types.includes('Rock')) {
-						newMon.randbats.acceptedSupport.sand = 'true';
+						newMon.randbats.singles.acceptedSupport.sand = 'true';
+						newMon.randbats.vgc.acceptedSupport.sand = 'true';
 					}
 	
 					// then I can start iterating over the movepool!
