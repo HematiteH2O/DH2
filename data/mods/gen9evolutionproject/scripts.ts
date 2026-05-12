@@ -1997,7 +1997,13 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								if (!fragment.stab && !fragment.teraType) modFragment.teraType = fragment.moveType;
 								if (!modFragment.tags) modFragment.tags = [];
 								if (!move.overrideOffensiveStat && !modFragment.tags.includes(`${(move.category).toLowerCase()}`)) modFragment.tags.push(`${(move.category).toLowerCase()}`);
-								if (fragment.moveAccuracy < 80 || move.multiaccuracy) modFragment.tags.push('inaccurate');
+								if (fragment.moveAccuracy < 80 || move.multiaccuracy) {
+									modFragment.tags.push('inaccurate');
+									if (!modFragment.buddy) modFragment.buddy = {};
+									if (!modFragment.buddy.roles) modFragment.buddy.roles = [];
+									modFragment.buddy.roles.push('accuracyboost');
+								}
+								if (fragment.moveAccuracy <= 75) modFragment.score = -1; // this gets bypassed if something like Hone Claws or Coil is rolled
 								if (fragment.moveBasePower >= 90 || (fragment.stab && fragment.moveBasePower >= 80)) {
 									if (fragment.stab || fragment.moveType !== 'Normal' || fragment.moveBasePower >= 120) newMon.randbats.viableStabs.push(modFragment);
 									// stop giving random things Double-Edge!! I know it has good BP :sob:
@@ -2037,7 +2043,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 									
 									if (!modFragment.tags) modFragment.tags = [];
 									if (!move.overrideOffensiveStat && !modFragment.tags.includes(`${(move.category).toLowerCase()}`)) modFragment.tags.push(`${(move.category).toLowerCase()}`);
-									if (fragment.moveAccuracy < 80 || move.multiaccuracy) modFragment.tags.push('inaccurate');
+									if (fragment.moveAccuracy < 80 || move.multiaccuracy) {
+										modFragment.tags.push('inaccurate');
+										if (!modFragment.buddy) modFragment.buddy = {};
+										if (!modFragment.buddy.roles) modFragment.buddy.roles = [];
+										modFragment.buddy.roles.push('accuracyboost');
+									}
 
 									if ((move.category === 'Physical' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'def')) {
 										if (!modFragment.vgc) modFragment.vgc = {};
@@ -2067,7 +2078,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 									}
 									if (!modFragment.tags) modFragment.tags = [];
 									if (!move.overrideOffensiveStat && !modFragment.tags.includes(`${(move.category).toLowerCase()}`)) modFragment.tags.push(`${(move.category).toLowerCase()}`);
-									if (fragment.moveAccuracy < 80 || move.multiaccuracy) modFragment.tags.push('inaccurate');
+									if (fragment.moveAccuracy < 80 || move.multiaccuracy) {
+										modFragment.tags.push('inaccurate');
+										if (!modFragment.buddy) modFragment.buddy = {};
+										if (!modFragment.buddy.roles) modFragment.buddy.roles = [];
+										modFragment.buddy.roles.push('accuracyboost');
+									}
 
 									if ((move.category === 'Physical' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'def')) {
 										if (!modFragment.vgc) modFragment.vgc = {};
@@ -2097,7 +2113,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 									
 								if (!modFragment.tags) modFragment.tags = [];
 								if (!move.overrideOffensiveStat && !modFragment.tags.includes(`${(move.category).toLowerCase()}`)) modFragment.tags.push(`${(move.category).toLowerCase()}`);
-								if (fragment.moveAccuracy < 80 || move.multiaccuracy) modFragment.tags.push('inaccurate');
+								if (fragment.moveAccuracy < 80 || move.multiaccuracy) {
+									modFragment.tags.push('inaccurate');
+									if (!modFragment.buddy) modFragment.buddy = {};
+									if (!modFragment.buddy.roles) modFragment.buddy.roles = [];
+									modFragment.buddy.roles.push('accuracyboost');
+								}
 
 								if ((move.category === 'Physical' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'def')) {
 									if (!modFragment.vgc) modFragment.vgc = {};
@@ -2138,7 +2159,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								if (fragment.moveBasePower > 80 && fragment.moveAccuracy >= 90) {
 									if (!modFragment.tags) modFragment.tags = [];
 									if (!move.overrideOffensiveStat && !modFragment.tags.includes(`${(move.category).toLowerCase()}`)) modFragment.tags.push(`${(move.category).toLowerCase()}`);
-									if (fragment.moveAccuracy < 80 || move.multiaccuracy) modFragment.tags.push('inaccurate');
+									if (fragment.moveAccuracy < 80 || move.multiaccuracy) {
+										modFragment.tags.push('inaccurate');
+										if (!modFragment.buddy) modFragment.buddy = {};
+										if (!modFragment.buddy.roles) modFragment.buddy.roles = [];
+										modFragment.buddy.roles.push('accuracyboost');
+									}
 
 									modFragment.vgc.requestedSupport.push(`${(fragment.moveType).toLowerCase()}immune`); // ex. "electricimmune"
 									if (!newMon.randbats.offeredSupport.spread) newMon.randbats.offeredSupport.spread = [];
@@ -2592,9 +2618,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								}
 								if (
 									[
-										'poweruppunch', 'chargebeam',
+										'poweruppunch', 'chargebeam', 'honeclaws',
 									].includes(moveid)
-								) { // you probably don't really want these if there are other options
+								) { // you usually don't really want these if there are other options
 									modFragment.score = -1;
 								} else {
 									modFragment.score = 1;
