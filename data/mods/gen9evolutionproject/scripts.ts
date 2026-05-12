@@ -1583,7 +1583,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								fragment.singles.requestedSupport.push('rain');
 								fragment.vgc.requestedSupport.push('rain');
 							}
-							if (['auroraveil', 'blizzard'].includes(moveid) && !(fragment.ability && ['Snow Warning'].includes(fragment.ability))) {
+							if (['auroraveil'].includes(moveid) && !(fragment.ability && ['Snow Warning'].includes(fragment.ability))) {
 								fragment.singles.requestedSupport.push('snow');
 								fragment.vgc.requestedSupport.push('snow');
 							}
@@ -1633,6 +1633,16 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								modFragment.vgc.requestedSupport.push('rain');
 								alternateFragments.push(modFragment);
 							}
+							if (
+								['Thunder', 'Hurricane', 'Bleakwind Storm', 'Wildbolt Storm', 'Sandsear Storm'].includes(fragment.baseMove) &&
+								!(fragment.ability && ['Drizzle', 'Primordial Sea', 'Storm Chaser'].includes(fragment.ability))
+							) {
+								let modFragment = Utils.deepClone(fragment);
+								modFragment.moveAccuracy = 100;
+								modFragment.singles.requestedSupport.push('rain');
+								modFragment.vgc.requestedSupport.push('rain');
+								alternateFragments.push(modFragment);
+							}
 
 							// sand
 							if (
@@ -1648,6 +1658,16 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							}
 
 							// snow
+							if (
+								fragment.baseMove === 'Blizzard' &&
+								!(fragment.ability && ['Snow Warning'].includes(fragment.ability))
+							) {
+								let modFragment = Utils.deepClone(fragment);
+								modFragment.moveAccuracy = 100;
+								modFragment.singles.requestedSupport.push('snow');
+								modFragment.vgc.requestedSupport.push('snow');
+								alternateFragments.push(modFragment);
+							}
 							if (
 								fragment.baseMove === 'Weather Ball' &&
 								!(fragment.ability && ['Snow Warning'].includes(fragment.ability))
@@ -1965,7 +1985,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								}
 							}
 							// spread
-							if ((move.target === 'allAdjacentFoes' || moveid === 'expandingforce') && fragment.moveBasePower > 80 && moveid !== 'razorwind') {
+							if ((move.target === 'allAdjacentFoes' || moveid === 'expandingforce') && fragment.moveBasePower > 80 && fragment.moveAccuracy >= 90 && moveid !== 'razorwind') {
 								if (!newMon.randbats.offeredSupport.spread) newMon.randbats.offeredSupport.spread = [];
 								let modFragment = Utils.deepClone(fragment);
 								modFragment.score = fragment.moveBasePower;
@@ -2010,7 +2030,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								modFragment.avoid.push(`${(move.type).toLowerCase()}spread`);
 								
 								// ones that we can use as a main spread should be strong!
-								if (fragment.moveBasePower > 80) {
+								if (fragment.moveBasePower > 80 && fragment.moveAccuracy >= 90) {
 									if (!modFragment.tags) modFragment.tags = [];
 									if (!move.overrideOffensiveStat && !modFragment.tags.includes(`${(move.category).toLowerCase()}`)) modFragment.tags.push(`${(move.category).toLowerCase()}`);
 									if (fragment.moveAccuracy < 80 || move.multiaccuracy) modFragment.tags.push('inaccurate');
