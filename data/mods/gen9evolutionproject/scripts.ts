@@ -1790,7 +1790,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							if (newMon.randbats.types.includes(fragment.moveType) && fragment.moveBasePower && !fragment.stab) {
 								fragment.stab = true;
 								fragment.moveBasePower *= 1.5;
-								if (newMon.randbats.abilities.incudes('Adaptability') && !fragment.ability) {
+								if (newMon.randbats.abilities.includes('Adaptability') && !fragment.ability) {
 									let modFragment = Utils.deepClone(fragment);
 									modFragment.moveBasePower *= 4/3;
 									modFragment.ability = 'Adaptability';
