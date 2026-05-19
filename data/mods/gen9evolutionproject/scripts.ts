@@ -3379,7 +3379,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 				if (monotypeBypassEligiblePokemon.length) eligiblePokemonThisStep = monotypeBypassEligiblePokemon;
 			}
-			let chosenRandomPokemon = this.sample(currentStepEligiblePokemon);
+			let chosenRandomPokemon = this.sample(eligiblePokemonThisStep);
 			firstDraftTeam.push({
 				name: this.dex.data.Pokedex[chosenRandomPokemon].name,
 				species: this.dex.data.Pokedex[chosenRandomPokemon].name,
