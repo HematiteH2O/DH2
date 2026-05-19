@@ -3637,7 +3637,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			let chosenRandomPokemon = this.sample(currentStep);
 			// we can replace the drafted team member accordingly
 			console.log(`Replaced ${draftTeamMember.name} with ${chosenRandomPokemon}`);
-			draftTeamMember = {
+			firstDraftTeam[draftTeamMember] = {
 				name: this.dex.data.Pokedex[chosenRandomPokemon].name,
 				species: this.dex.data.Pokedex[chosenRandomPokemon].name,
 				offeredSupport: this.dex.data.Pokedex[chosenRandomPokemon].randbats.offeredSupport,
