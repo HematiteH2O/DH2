@@ -3224,7 +3224,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		} else team = [];
 		
 		let shiny = false;
-		if (!team.length && this.randomChance(1, 100)) shiny = true; // the whole team will be Shiny 1% of the time
+		if (!team.length && this.randomChance(1, 100)) shiny = true; // for fun, the whole team will be Shiny 1% of the time
 
 
 		
@@ -3306,83 +3306,63 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 
 		
-		// Okay, now we know our format, whether or not we're playing LC, a list of originalTeamSpecies, and the entire pool of eligiblePokemon and their randbats data
-		// Next, we should start evaluating what we have so far and what we need for a team
-
-		let baseRequestedSupport = [];
-		// These are a kind of default checklist for each format, but there will be more specific requests as team members are evaluated
-		if (format === "vgc") baseRequestedSupport = ['fakeout', 'priority', 'spread', 'speedcontrol', 'antitrickroom', 'physicalreduction', 'specialreduction'];
-		else baseRequestedSupport = ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff', 'contactpunish', 'electricimmune', 'groundimmune'];
-		
-		// I also definitely need to evaluate the base team members for their requestedSupport, offeredSupport and acceptedSupport, but...
-		// I'm not ready to do that just yet, so I'll leave them blank for now.
+		// I would like to evaluate the base team members in more detail for their requestedSupport, offeredSupport and acceptedSupport, but...
+		// I'm not ready to do that just yet, so I'll leave them as their species defaults for now.
 		// I'll come back to this after I've gone over the main support list!
 		
 		if (team.length) {
 			for (const pokemon of team) {
-				pokemon.requestedSupport = {};
-				pokemon.offeredSupport = {};
-				pokemon.acceptedSupport = {};
+				pokemon.requestedSupport = this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].requestedSupport;
+				pokemon.offeredSupport = this.dex.data.Pokedex[chosenRandomPokemon].randbats.offeredSupport;
+				pokemon.acceptedSupport = this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].acceptedSupport;
+				pokemon.coveredStabs = [];
+				pokemon.remainingStabTypes = [];
+				pokemon.remainingStabMoves = [];
+				
+				pokemon.doNotReroll = true;
 			}
 		}
 		
 		// Now, we can start picking a first pass of team members
-		// For now, when we decide something, we should push it to selectedRandSpecies, not to the team just yet; we'll get to build sets later!
+		// For now, when we decide something, we should push it to firstDraftTeam, not to the team just yet; we'll get to build sets later!
 		// That said...
 		const firstDraftTeam = [];
 		if (team.length) for (const pokemon of team) firstDraftTeam.push(pokemon);
 		// ... it's still useful to have a copy that can track everything we need right away!
 
-		for (let i = 0; i < (6 - team.length); ++i) {
-			let currentStep = [];
-			// before I forget:
-			// if a team started completely empty, I want the first Pokémon selected to be a completely random Evo 2 sub - never a canon Pokémon and not weighted in any way
-			if (i === 0 && !team.length) {
-				currentStep = eligiblePokemon.filter(id => this.dex.data.Pokedex[id].copyData);
-			} else {
-				let requestedSupportInGeneral = [];
-				let offeredSupportInGeneral = {}; // this one is not just a list, but how many of each
-				
-				let requestedSupportThisStep = [];
-				let offeredSupportThisStep = [];
-				let acceptedSupportThisStep = [];
-				
-				let teamNumbersThisStep = [];
-				let resistancesThisStep = [];
-				
-				// other special limits
-				let specialTerastallizedStateThisStep = false;
-				let megaThisStep = 0;
-				let restrictedThisStep = 0;
-				
-				if (firstDraftTeam.length) {
-					for (const request of baseRequestedSupport) if (!requestedSupportInGeneral.includes(request)) requestedSupportInGeneral.push(request);
-					for (const pokemon of firstDraftTeam) {
-						for (const requestedSupport in pokemon.requestedSupport) if (!requestedSupportInGeneral.includes(requestedSupport)) requestedSupportInGeneral.push(requestedSupport);
-						for (const offeredSupport in pokemon.offeredSupport) {
-							if (!offeredSupportThisStep.includes(offeredSupport)) offeredSupportThisStep.push(offeredSupport);
-							if (!offeredSupportInGeneral[offeredSupport]) offeredSupportInGeneral[offeredSupport] = 0;
-							offeredSupportInGeneral[offeredSupport]++;
-						}
-						for (const acceptedSupport in pokemon.acceptedSupport) if (!acceptedSupportThisStep.includes(acceptedSupport)) acceptedSupportThisStep.push(acceptedSupport);
-						if (this.dex.species.get(pokemon.species)) {
-							if (this.dex.species.get(pokemon.species).num) teamNumbersThisStep.push(this.dex.species.get(pokemon.species).num);
-							for (const type of types) if (!resistancesThisStep.includes(type) && (this.dex.species.get(pokemon.species).randbats.immunities[type] || (this.dex.species.get(pokemon.species).randbats.resistances[type] && !this.dex.species.get(pokemon.species).randbats.weaknesses[type]))) resistancesThisStep.push(type);
-
-							// special limits
-							if (this.dex.species.get(pokemon.species).forceTeraType) specialTerastallizedStateThisStep = true;
-							if (regulationb) {
-								if (this.dex.species.get(pokemon.species).forme && this.dex.species.get(pokemon.species).forme.includes("Mega")) megaThisStep++;
-								if (this.dex.species.get(pokemon.species).tags && (this.dex.species.get(pokemon.species).tags.includes("Restricted Legendary") || this.dex.species.get(pokemon.species).tags.includes("Mythical"))) restrictedThisStep++;
-							}
-						}
-					}
-				}
-
-				// one more setup thing: the last Pokémon chosen for monotype can be any type!
+		// This might look strange, but before we make any informed decisions, it will help us to come up with a *completely* random selection of 6 Pokémon
+		// Most of these will likely be replaced shortly with more "optimal" choices, so you wouldn't expect it to matter!
+		// but it's actually a valuable fix to a problem I was running into earlier:
+		// when we added Pokémon one at a time and based our choices on an incomplete team, it was common to keep adding the same Pokémon,
+		// because the selection ended up biased towards whatever could potentially fill the most roles in general when it assumed none of them were being filled
+		// Starting with a fully-random selection of 6 Pokémon and then gradually making it better means that a random assortment of roles will already be covered before we even start to make weighted choices,
+		// so the roles we value will be different every time, and the resulting teams should end up much more varied overall!
+		
+		if (!firstDraftTeam.length && eligiblePokemon.filter(id => this.dex.data.Pokedex[id].copyData).length) {
+			// if a team started completely empty, I want the first Pokémon selected to be a completely random Evo 2 sub
+			let chosenRandomPokemon = this.sample(eligiblePokemon.filter(id => this.dex.data.Pokedex[id].copyData));
+			firstDraftTeam.push({
+				name: this.dex.data.Pokedex[chosenRandomPokemon].name,
+				species: this.dex.data.Pokedex[chosenRandomPokemon].name,
+				offeredSupport: this.dex.data.Pokedex[chosenRandomPokemon].randbats.offeredSupport,
+				requestedSupport: this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].requestedSupport,
+				acceptedSupport: this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].acceptedSupport,
+				coveredStabs: [],
+				remainingStabTypes: [],
+				remainingStabMoves: [],
+				// we also don't want to reroll this first pick later! the rest of the team can be built around it
+				doNotReroll: true,
+			});
+			eligiblePokemon = eligiblePokemon.filter(pokemon => pokemon !== chosenRandomPokemon);
+		}
+		
+		while (firstDraftTeam.length < 6 && eligiblePokemon.length) {
+			let eligiblePokemonThisStep = eligiblePokemon;
+			if (monotype && firstDraftTeam.length === 5) {
+				// the last Pokémon chosen for monotype can be any type!
 				// later, we'll force its Tera Type to match the team instead
 				let monotypeBypassEligiblePokemon = [];
-				if (monotype && (i === 5 - team.length)) {
+				if (monotype && (i === 6)) {
 					// figure out the full list of eligible Pokémon
 					// we don't want to overwrite eligiblePokemon because we'll still use it in the for loop after this one!
 					// instead, we can make a temporary list for just this step
@@ -3397,176 +3377,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						) monotypeBypassEligiblePokemon.push(id);
 					}
 				}
-				let eligiblePokemonThisStep = eligiblePokemon;
 				if (monotypeBypassEligiblePokemon.length) eligiblePokemonThisStep = monotypeBypassEligiblePokemon;
-
-				if (specialTerastallizedStateThisStep) { // regardless of the format, don't give more than one of these!
-					eligiblePokemonThisStep = eligiblePokemonThisStep.filter(id => !this.dex.data.Pokedex[id].forceTeraType);
-				}
-				
-				if (regulationb) {
-					// I realize I'm going to have to do a little more than this when we actually do Regulation B
-					// This section guarantees you don't go *over* the limit, but nothing is set up to guarantee you a Mega or two restricted Pokémon
-					// I don't actually know how I would even want to handle a singles Ubers format - it doesn't feel quite correct to force a full team of Ubers, does it?
-					// but I think for VGC, where you can only have 2 restricted Pokémon anyway, I'll probably want them to be the first two Pokémon generated every time
-					// Anyway, I'll come back to this when the format exists! This section unavoidably goes unused for now for obvious reasons
-					if (megaThisStep >= megaLimit) {
-						eligiblePokemonThisStep = eligiblePokemonThisStep.filter(id => !(this.dex.data.Pokedex[id].forme && this.dex.data.Pokedex[id].forme.includes("Mega")));
-					}
-					if (restrictedThisStep >= restrictedLimit) {
-						eligiblePokemonThisStep = eligiblePokemonThisStep.filter(id => !(this.dex.data.Pokedex[id].tags && (this.dex.data.Pokedex[id].tags.includes("Restricted Legendary") || this.dex.data.Pokedex[id].tags.includes("Mythical"))));
-					}
-					// On the other hand, there's no reason at all to force a special Terastallized state, so that one is fine how it is
-				}
-				
-				// Another thing: I need to filter which kinds of support are possible to ask for, now that I've established the pool of eligible Pokémon
-				for (const request of requestedSupportInGeneral) {
-					let possible = false;
-					for (const id of eligiblePokemonThisStep) {
-						if (this.dex.data.Pokedex[id].randbats.offeredSupport[request]) possible = true;
-					}
-					if (possible) requestedSupportThisStep.push(request);
-				}
-				// This is because I noticed the team generator prioritizing impossible goals a couple of times on monotype
-				// It makes a pretty small difference in most cases, but it can come up if a type has multiple options for one goal and no options at all for another goal
-
-				// Now let's see which of those attainable goals we want for this step!
-				if (requestedSupportThisStep.filter(request => (!offeredSupportInGeneral[request])).length) { // If possible, we want a role that's requested and not already covered
-					requestedSupportThisStep = requestedSupportThisStep.filter(request => (!offeredSupportInGeneral[request]));
-				} else { // Failing that, we want a role that's requested and only 1 Pokémon can potentially cover it so far
-					requestedSupportThisStep = requestedSupportThisStep.filter(request => (offeredSupportInGeneral[request] === 1));
-				}
-				// There's no next failsafe here, though - it's actually good if this still doesn't return anything!
-				// That means the team covered its bases as well as it could, so we'll get to skip the next step entirely
-				
-				console.log(resistancesThisStep);
-				console.log(`requested this step: ` + requestedSupportThisStep);
-
-				// If we have any requestedSupport at this point, we want to find offeredSupport that matches it
-				if (requestedSupportThisStep.length) {
-					// Score them by how many roles they can fill, but no more than 3
-					let maxScore = 0;
-					for (const id of eligiblePokemonThisStep) {
-						// species clause
-						if (teamNumbersThisStep.includes(this.dex.data.Pokedex[id].num)) continue;
-						
-						let score = 0;
-						for (const role of requestedSupportThisStep) if (this.dex.data.Pokedex[id].randbats.offeredSupport[role]) score++;
-						if (score > 3) score = 3;
-						if (score > maxScore) { // reset
-							currentStep = [];
-							maxScore = score;
-						}
-						if (score === maxScore) currentStep.push(id);
-					}
-				}
-				// The reason we're capping out at 3 is because the Pokémon will need rooms for STABs and stuff too!
-				// If we don't have a cap here, we're likely to pick one Pokémon that can theoretically fill any role very early...
-				// and then think we've covered our bases and ignore roles entirely for the rest of the process...
-				// only to find that the Pokémon can't cover more than a handful of roles and the rest of the team can't fill the gaps it left.
-				// That's also why we like getting at least one backup option for each role if we can!
-				// It's still possible to end up with a team that isn't perfect because of how this is set up,
-				// but I think there are enough failsafes in later steps that it should come up with something usable more often than not,
-				// and I want it to be open-ended enough to leave room for variety and fun options, too!
-				
-				if (!currentStep.length) currentStep = eligiblePokemonThisStep.filter(id => !teamNumbersThisStep.includes(this.dex.data.Pokedex[id].num));
-				
-				// Then, we'll try to look for anything with acceptedSupport that matches our offeredSupport
-				if (offeredSupportThisStep.length) {
-					let desiredSupport = [];
-					for (const id of currentStep) {
-						// species clause
-						if (teamNumbersThisStep.includes(this.dex.data.Pokedex[id].num)) continue;
-						
-						// Unlike before, I think just a yes or a no is fine
-						let accepted = false;
-						for (const role of offeredSupportThisStep) if (this.dex.data.Pokedex[id].randbats[format].acceptedSupport[role] && !acceptedSupportThisStep.includes(role)) accepted = true;
-						if (accepted === true) desiredSupport.push(id);
-					}
-					if (desiredSupport.length) currentStep = desiredSupport;
-				}
-	
-				// narrowing down: type synergy for requestedSupport
-				// // if we're doing requestedSupport for a specific Pokémon on the team (not a default), I'll want to prioritize defensive synergies with that Pokémon, not the whole team!
-				// // probably total up the weaknesses, then use that as a multiplier
-				// // (ex. if 2 Pokémon that requestedSupport Intimidate are both weak to Water, and 0 are weak to Fire,
-				// // then the Intimidators are scored with 2 points for a Water resist and 0 for a Fire resist)
-				// // it should go both ways I think - it's cooler for the Intimidator to have a weakness if several of the teammates it supports resist it, isn't it?
-				if (firstDraftTeam.length) {
-					console.log(`Current step: synergy resistances`);
-					let synergyResists = [];
-					let synergyResistMaxScore = 0;
-					for (const id of currentStep) {
-						let synergyResistScore = 0;
-						let membersRequestingSupport = [];
-						for (const offeredSupport in this.dex.data.Pokedex[id].randbats.offeredSupport) for (const pokemon of firstDraftTeam) if (pokemon.requestedSupport[offeredSupport] || pokemon.acceptedSupport[offeredSupport]) membersRequestingSupport.push(pokemon);
-						if (!membersRequestingSupport) continue;
-	
-						if (membersRequestingSupport.length) {
-							for (const type in types) {
-								if (this.dex.data.Pokedex[id].randbats.immunities[type] || (this.dex.data.Pokedex[id].randbats.resistances[type] && !this.dex.data.Pokedex[id].randbats.weaknesses[type])) {
-									// the Pokémon we're checking has a resistance, so give it points for each memberRequestingSupport that's weak to that type
-									for (const member in membersRequestingSupport) if (this.dex.species.get(member.species).randbats.weaknesses[type] && !this.dex.species.get(member.species).randbats.resistances[type]) synergyResistScore++;
-								} else if (this.dex.data.Pokedex[id].randbats.weaknesses[type] && !this.dex.data.Pokedex[id].randbats.resistances[type]) {
-									// the Pokémon we're checking has a weakness, so give it points for each memberRequestingSupport that resists that type
-									for (const member in membersRequestingSupport) if (this.dex.species.get(member.species).randbats.immunities[type] || (this.dex.species.get(member.species).randbats.resistances[type] && !this.dex.species.get(member.species).randbats.weaknesses[type])) synergyResistScore++;
-								}
-							}
-							if (synergyResistScore > synergyResistMaxScore) { // reset
-								synergyResists = [];
-								synergyResistMaxScore = synergyResistScore;
-								console.log(synergyResistMaxScore);
-							}
-							if (synergyResistScore === synergyResistMaxScore) synergyResists.push(id);
-						}
-					}
-					console.log(synergyResists);
-					if (synergyResists.length) currentStep = synergyResists;
-				}
-	
-				// narrowing down: offering resistances for the team as a whole
-				// // possible: replace with super effective STAB coverage for VGC?
-				let teamResists = [];
-				let teamResistMaxScore = 0;
-				for (const id of currentStep) {
-					let teamResistScore = 0;
-					for (const type of types) if (!resistancesThisStep.includes(type) && (this.dex.data.Pokedex[id].randbats.immunities[type] || (this.dex.data.Pokedex[id].randbats.resistances[type] && !this.dex.data.Pokedex[id].randbats.weaknesses[type]))) teamResistScore++;
-					if (teamResistScore > 5 && (i === 5 > team.length)) teamResistScore = 5;
-					// you don't need to cover *that* many every step, but the last step should try to cram in as many as possible
-					
-					if (teamResistScore > teamResistMaxScore) { // reset
-						teamResists = [];
-						teamResistMaxScore = teamResistScore;
-					}
-					if (teamResistScore === teamResistMaxScore) teamResists.push(id);
-				}
-				if (teamResists.length) currentStep = teamResists;
-				
-				// previously, if we had already covered an acceptedSupport, we didn't make it a priority to get it again - it's more important to narrow down by the other criteria
-				// if it's still an option now, though, let's definitely take it!
-				if (offeredSupportThisStep.length) {
-					// score them by how many roles they can fill, up to 3
-					let desiredSupport = [];
-					for (const id of currentStep) {
-						// species clause
-						if (teamNumbersThisStep.includes(this.dex.data.Pokedex[id].num)) continue;
-						
-						// for now, I think just a yes or a no is fine
-						let accepted = false;
-						for (const role of offeredSupportThisStep) if (this.dex.data.Pokedex[id].randbats[format].acceptedSupport[role]) accepted = true;
-						if (accepted === true) desiredSupport.push(id);
-					}
-					if (desiredSupport.length) currentStep = desiredSupport;
-				}
 			}
-			
-			// safety nets
-			if (!currentStep.length) currentStep = eligiblePokemonThisStep.filter(id => !teamNumbersThisStep.includes(this.dex.data.Pokedex[id].num));
-			if (!currentStep.length) currentStep = eligiblePokemon.filter(id => !teamNumbersThisStep.includes(this.dex.data.Pokedex[id].num));
-			if (!currentStep.length) continue;
-			
-			// and... now we get to choose a Pokémon!
-			let chosenRandomPokemon = this.sample(currentStep);
+			let chosenRandomPokemon = this.sample(currentStepEligiblePokemon);
 			firstDraftTeam.push({
 				name: this.dex.data.Pokedex[chosenRandomPokemon].name,
 				species: this.dex.data.Pokedex[chosenRandomPokemon].name,
@@ -3576,19 +3389,266 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				coveredStabs: [],
 				remainingStabTypes: [],
 				remainingStabMoves: [],
+				doNotReroll: null,
 			});
+			eligiblePokemon = eligiblePokemon.filter(pokemon => (pokemon !== chosenRandomPokemon && this.dex.species.get(pokemon).num !== this.dex.species.get(chosenRandomPokemon).num));
+		}
+
+		// Okay, now we know our format and whether or not we're playing LC,
+		// we have a completely-random selection for our initial team,
+		// and we can access the entire pool of eligiblePokemon and their randbats data
+		// Next, we should start evaluating what we have so far and what we need for a team
+
+		let baseRequestedSupport = [];
+		// These are a kind of default checklist for each format, but there will be more specific requests as team members are evaluated
+		if (format === "vgc") baseRequestedSupport = ['fakeout', 'priority', 'spread', 'speedcontrol', 'antitrickroom', 'physicalreduction', 'specialreduction'];
+		else baseRequestedSupport = ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff', 'contactpunish', 'electricimmune', 'groundimmune'];
+		
+		for (const draftTeamMember of firstDraftTeam) {
+			if (draftTeamMember.doNotReroll) continue;
+			
+			let currentStep = [];
+			
+			let requestedSupportInGeneral = [];
+			let offeredSupportInGeneral = {}; // this one is not just a list, but how many of each
+			
+			let requestedSupportThisStep = [];
+			let offeredSupportThisStep = [];
+			let acceptedSupportThisStep = [];
+			
+			let teamNumbersThisStep = [];
+			let resistancesThisStep = [];
+			
+			// other special limits
+			let specialTerastallizedStateThisStep = false;
+			let megaThisStep = 0;
+			let restrictedThisStep = 0;
+			
+			if (firstDraftTeam.length) {
+				for (const request of baseRequestedSupport) if (!requestedSupportInGeneral.includes(request)) requestedSupportInGeneral.push(request);
+				for (const pokemon of firstDraftTeam) {
+					if (pokemon === draftTeamMember) continue; // we're evaluating them against every *other* Pokémon
+					for (const requestedSupport in pokemon.requestedSupport) if (!requestedSupportInGeneral.includes(requestedSupport)) requestedSupportInGeneral.push(requestedSupport);
+					for (const offeredSupport in pokemon.offeredSupport) {
+						if (!offeredSupportThisStep.includes(offeredSupport)) offeredSupportThisStep.push(offeredSupport);
+						if (!offeredSupportInGeneral[offeredSupport]) offeredSupportInGeneral[offeredSupport] = 0;
+						offeredSupportInGeneral[offeredSupport]++;
+					}
+					for (const acceptedSupport in pokemon.acceptedSupport) if (!acceptedSupportThisStep.includes(acceptedSupport)) acceptedSupportThisStep.push(acceptedSupport);
+					if (this.dex.species.get(pokemon.species)) {
+						if (this.dex.species.get(pokemon.species).num) teamNumbersThisStep.push(this.dex.species.get(pokemon.species).num);
+						for (const type of types) if (!resistancesThisStep.includes(type) && (this.dex.species.get(pokemon.species).randbats.immunities[type] || (this.dex.species.get(pokemon.species).randbats.resistances[type] && !this.dex.species.get(pokemon.species).randbats.weaknesses[type]))) resistancesThisStep.push(type);
+
+						// special limits
+						if (this.dex.species.get(pokemon.species).forceTeraType) specialTerastallizedStateThisStep = true;
+						if (regulationb) {
+							if (this.dex.species.get(pokemon.species).forme && this.dex.species.get(pokemon.species).forme.includes("Mega")) megaThisStep++;
+							if (this.dex.species.get(pokemon.species).tags && (this.dex.species.get(pokemon.species).tags.includes("Restricted Legendary") || this.dex.species.get(pokemon.species).tags.includes("Mythical"))) restrictedThisStep++;
+						}
+					}
+				}
+			}
+
+			// one more setup thing: the last Pokémon chosen for monotype can be any type!
+			// later, we'll force its Tera Type to match the team instead
+			let monotypeBypassEligiblePokemon = [];
+			if (monotype && (i === 6)) {
+				// figure out the full list of eligible Pokémon
+				// we don't want to overwrite eligiblePokemon because we'll still use it in the for loop after this one!
+				// instead, we can make a temporary list for just this step
+				for (const id in this.dex.data.Pokedex) {
+					if (
+						this.dex.data.Pokedex[id].randbats && // in the format/has randbats data
+						!originalTeamSpecies.includes(id) && !originalTeamNumbers.includes(this.dex.data.Pokedex[id].num) && // species clause
+						!(this.dex.data.Pokedex[id].randbats[format] && this.dex.data.Pokedex[id].randbats[format].banned) && // not banned
+						!(this.dex.data.Pokedex[id].forceTeraType && !this.dex.data.Pokedex[id].randbats.battleOnly) && // if something has a special Terastallized state, don't separately count the base form as eligible
+						(this.dex.data.Pokedex[id].randbats.stage && this.dex.data.Pokedex[id].randbats.stage === stage) && // account for LC
+						(!this.dex.data.Pokedex[id].forceTeraType || this.dex.data.Pokedex[id].forceTeraType === monotype) // we want to force a Tera Type later
+					) monotypeBypassEligiblePokemon.push(id);
+				}
+			}
+			let eligiblePokemonThisStep = eligiblePokemon;
+			if (monotypeBypassEligiblePokemon.length) eligiblePokemonThisStep = monotypeBypassEligiblePokemon;
+
+			if (specialTerastallizedStateThisStep) { // regardless of the format, don't give more than one of these!
+				eligiblePokemonThisStep = eligiblePokemonThisStep.filter(id => !this.dex.data.Pokedex[id].forceTeraType);
+			}
+			
+			if (regulationb) {
+				// I realize I'm going to have to do a little more than this when we actually do Regulation B
+				// This section guarantees you don't go *over* the limit, but nothing is set up to guarantee you a Mega or two restricted Pokémon
+				// I don't actually know how I would even want to handle a singles Ubers format - it doesn't feel quite correct to force a full team of Ubers, does it?
+				// but I think for VGC, where you can only have 2 restricted Pokémon anyway, I'll probably want them to be the first two Pokémon generated every time
+				// Anyway, I'll come back to this when the format exists! This section unavoidably goes unused for now for obvious reasons
+				if (megaThisStep >= megaLimit) {
+					eligiblePokemonThisStep = eligiblePokemonThisStep.filter(id => !(this.dex.data.Pokedex[id].forme && this.dex.data.Pokedex[id].forme.includes("Mega")));
+				}
+				if (restrictedThisStep >= restrictedLimit) {
+					eligiblePokemonThisStep = eligiblePokemonThisStep.filter(id => !(this.dex.data.Pokedex[id].tags && (this.dex.data.Pokedex[id].tags.includes("Restricted Legendary") || this.dex.data.Pokedex[id].tags.includes("Mythical"))));
+				}
+				// On the other hand, there's no reason at all to force a special Terastallized state, so that one is fine how it is
+			}
+			
+			// Another thing: I need to filter which kinds of support are possible to ask for, now that I've established the pool of eligible Pokémon
+			for (const request of requestedSupportInGeneral) {
+				let possible = false;
+				for (const id of eligiblePokemonThisStep) {
+					if (this.dex.data.Pokedex[id].randbats.offeredSupport[request]) possible = true;
+				}
+				if (possible) requestedSupportThisStep.push(request);
+			}
+			// This is because I noticed the team generator prioritizing impossible goals a couple of times on monotype
+			// It makes a pretty small difference in most cases, but it can come up if a type has multiple options for one goal and no options at all for another goal
+
+			// Now let's see which of those attainable goals we want for this step!
+			if (requestedSupportThisStep.filter(request => (!offeredSupportInGeneral[request])).length) { // If possible, we want a role that's requested and not already covered
+				requestedSupportThisStep = requestedSupportThisStep.filter(request => (!offeredSupportInGeneral[request]));
+			} else { // Failing that, we want a role that's requested and only 1 Pokémon can potentially cover it so far
+				requestedSupportThisStep = requestedSupportThisStep.filter(request => (offeredSupportInGeneral[request] === 1));
+			}
+			// There's no next failsafe here, though - it's actually good if this still doesn't return anything!
+			// That means the team covered its bases as well as it could, so we'll get to skip the next step entirely
+			
+			console.log(resistancesThisStep);
+			console.log(`requested this step: ` + requestedSupportThisStep);
+
+			// If we have any requestedSupport at this point, we want to find offeredSupport that matches it
+			if (requestedSupportThisStep.length) {
+				// Score them by how many roles they can fill, but no more than 3
+				let maxScore = 0;
+				for (const id of eligiblePokemonThisStep) {
+					// species clause
+					if (teamNumbersThisStep.includes(this.dex.data.Pokedex[id].num)) continue;
+					
+					let score = 0;
+					for (const role of requestedSupportThisStep) if (this.dex.data.Pokedex[id].randbats.offeredSupport[role]) score++;
+					if (score > (requestedSupportThisStep.length + (i - 6))) score = (requestedSupportThisStep.length + (i - 6));
+					if (score > maxScore) { // reset
+						currentStep = [];
+						maxScore = score;
+					}
+					if (score === maxScore) currentStep.push(id);
+				}
+			}
+			// The reason we're capping out at 3 is because the Pokémon will need rooms for STABs and stuff too!
+			// If we don't have a cap here, we're likely to pick one Pokémon that can theoretically fill any role very early...
+			// and then think we've covered our bases and ignore roles entirely for the rest of the process...
+			// only to find that the Pokémon can't cover more than a handful of roles and the rest of the team can't fill the gaps it left.
+			// That's also why we like getting at least one backup option for each role if we can!
+			// It's still possible to end up with a team that isn't perfect because of how this is set up,
+			// but I think there are enough failsafes in later steps that it should come up with something usable more often than not,
+			// and I want it to be open-ended enough to leave room for variety and fun options, too!
+			
+			if (!currentStep.length) currentStep = eligiblePokemonThisStep.filter(id => !teamNumbersThisStep.includes(this.dex.data.Pokedex[id].num));
+			
+			// Then, we'll try to look for anything with acceptedSupport that matches our offeredSupport
+			if (offeredSupportThisStep.length) {
+				let desiredSupport = [];
+				for (const id of currentStep) {
+					// species clause
+					if (teamNumbersThisStep.includes(this.dex.data.Pokedex[id].num)) continue;
+					
+					// Unlike before, I think just a yes or a no is fine
+					let accepted = false;
+					for (const role of offeredSupportThisStep) if (this.dex.data.Pokedex[id].randbats[format].acceptedSupport[role] && !acceptedSupportThisStep.includes(role)) accepted = true;
+					if (accepted === true) desiredSupport.push(id);
+				}
+				if (desiredSupport.length) currentStep = desiredSupport;
+			}
+
+			// narrowing down: type synergy for requestedSupport
+			// // if we're doing requestedSupport for a specific Pokémon on the team (not a default), I'll want to prioritize defensive synergies with that Pokémon, not the whole team!
+			// // probably total up the weaknesses, then use that as a multiplier
+			// // (ex. if 2 Pokémon that requestedSupport Intimidate are both weak to Water, and 0 are weak to Fire,
+			// // then the Intimidators are scored with 2 points for a Water resist and 0 for a Fire resist)
+			// // it should go both ways I think - it's cooler for the Intimidator to have a weakness if several of the teammates it supports resist it, isn't it?
+			if (firstDraftTeam.length) {
+				console.log(`Current step: synergy resistances`);
+				let synergyResists = [];
+				let synergyResistMaxScore = 0;
+				for (const id of currentStep) {
+					let synergyResistScore = 0;
+					let membersRequestingSupport = [];
+					for (const offeredSupport in this.dex.data.Pokedex[id].randbats.offeredSupport) for (const pokemon of firstDraftTeam) if (pokemon.requestedSupport[offeredSupport] || pokemon.acceptedSupport[offeredSupport]) membersRequestingSupport.push(pokemon);
+					if (!membersRequestingSupport) continue;
+
+					if (membersRequestingSupport.length) {
+						for (const type in types) {
+							if (this.dex.data.Pokedex[id].randbats.immunities[type] || (this.dex.data.Pokedex[id].randbats.resistances[type] && !this.dex.data.Pokedex[id].randbats.weaknesses[type])) {
+								// the Pokémon we're checking has a resistance, so give it points for each memberRequestingSupport that's weak to that type
+								for (const member in membersRequestingSupport) if (this.dex.species.get(member.species).randbats.weaknesses[type] && !this.dex.species.get(member.species).randbats.resistances[type]) synergyResistScore++;
+							} else if (this.dex.data.Pokedex[id].randbats.weaknesses[type] && !this.dex.data.Pokedex[id].randbats.resistances[type]) {
+								// the Pokémon we're checking has a weakness, so give it points for each memberRequestingSupport that resists that type
+								for (const member in membersRequestingSupport) if (this.dex.species.get(member.species).randbats.immunities[type] || (this.dex.species.get(member.species).randbats.resistances[type] && !this.dex.species.get(member.species).randbats.weaknesses[type])) synergyResistScore++;
+							}
+						}
+						if (synergyResistScore > synergyResistMaxScore) { // reset
+							synergyResists = [];
+							synergyResistMaxScore = synergyResistScore;
+							console.log(synergyResistMaxScore);
+						}
+						if (synergyResistScore === synergyResistMaxScore) synergyResists.push(id);
+					}
+				}
+				console.log(synergyResists);
+				if (synergyResists.length) currentStep = synergyResists;
+			}
+
+			// narrowing down: offering resistances for the team as a whole
+			// // possible: replace with super effective STAB coverage for VGC?
+			let teamResists = [];
+			let teamResistMaxScore = 0;
+			for (const id of currentStep) {
+				let teamResistScore = 0;
+				for (const type of types) if (!resistancesThisStep.includes(type) && (this.dex.data.Pokedex[id].randbats.immunities[type] || (this.dex.data.Pokedex[id].randbats.resistances[type] && !this.dex.data.Pokedex[id].randbats.weaknesses[type]))) teamResistScore++;
+				if (teamResistScore > (18 - resistancesThisStep.length + i - 6)) teamResistScore = (18 - resistancesThisStep.length + i - 6);
+				// I hope I did this right? uh, the point is - it should be "good enough" to cover all but 5 types on the first member, all but 4 types on the second member, all but 3 types on the third member, and so on
+				
+				if (teamResistScore > teamResistMaxScore) { // reset
+					teamResists = [];
+					teamResistMaxScore = teamResistScore;
+				}
+				if (teamResistScore === teamResistMaxScore) teamResists.push(id);
+			}
+			if (teamResists.length) currentStep = teamResists;
+			
+			// previously, if we had already covered an acceptedSupport, we didn't make it a priority to get it again - it's more important to narrow down by the other criteria
+			// if it's still an option now, though, we might as well take it!
+			if (offeredSupportThisStep.length) {
+				let desiredSupport = [];
+				for (const id of currentStep) {
+					// species clause
+					if (teamNumbersThisStep.includes(this.dex.data.Pokedex[id].num)) continue;
+					
+					// for now, I think just a yes or a no is fine
+					let accepted = false;
+					for (const role of offeredSupportThisStep) if (this.dex.data.Pokedex[id].randbats[format].acceptedSupport[role]) accepted = true;
+					if (accepted === true) desiredSupport.push(id);
+				}
+				if (desiredSupport.length) currentStep = desiredSupport;
+			}
+			
+			// safety nets
+			if (!currentStep.length) currentStep = eligiblePokemonThisStep.filter(id => !teamNumbersThisStep.includes(this.dex.data.Pokedex[id].num));
+			if (!currentStep.length) currentStep = eligiblePokemon.filter(id => !teamNumbersThisStep.includes(this.dex.data.Pokedex[id].num));
+			if (!currentStep.length) continue;
+			
+			// and... now we get to choose a Pokémon!
+			let chosenRandomPokemon = this.sample(currentStep);
+			// we can replace the drafted team member accordingly
+			console.log(`Replaced ${draftTeamMember.name} with ${chosenRandomPokemon}`);
+			draftTeamMember = {
+				name: this.dex.data.Pokedex[chosenRandomPokemon].name,
+				species: this.dex.data.Pokedex[chosenRandomPokemon].name,
+				offeredSupport: this.dex.data.Pokedex[chosenRandomPokemon].randbats.offeredSupport,
+				requestedSupport: this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].requestedSupport,
+				acceptedSupport: this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].acceptedSupport,
+				coveredStabs: [],
+				remainingStabTypes: [],
+				remainingStabMoves: [],
+			};
 		}
 		console.log(firstDraftTeam);
-
-		// okay, now it gets the tiniest bit more complicated
-		// we're gonna do the same loop, iterating over however many species we just randomly selected, in the same order we selected them
-		// but this time, we have 5 other Pokémon for context - the idea is to revisit each individual slot as if it's the last one being picked
-		// this gives us a chance to maximize synergy, but also to recognize which roles came up more than we expected -
-		// maybe we chose a Pokémon for having Intimidate at the time, but now we have two other Intimidators, so we can look for other roles we need more
-		// the steps should be *pretty much* an exact copy of the above loop!
-		// one thing: this time, we need to pay more attention to offeredSupport/acceptedSupport pairings that are already being fulfilled; those should be considered urgent to keep!
-
-
 
 
 
