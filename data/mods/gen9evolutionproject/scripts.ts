@@ -3362,7 +3362,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// the last Pokémon chosen for monotype can be any type!
 				// later, we'll force its Tera Type to match the team instead
 				let monotypeBypassEligiblePokemon = [];
-				if (monotype && (i === 6)) {
+				if (monotype && (firstDraftTeam.length === 6)) {
 					// figure out the full list of eligible Pokémon
 					// we don't want to overwrite eligiblePokemon because we'll still use it in the for loop after this one!
 					// instead, we can make a temporary list for just this step
@@ -3403,8 +3403,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		// These are a kind of default checklist for each format, but there will be more specific requests as team members are evaluated
 		if (format === "vgc") baseRequestedSupport = ['fakeout', 'priority', 'spread', 'speedcontrol', 'antitrickroom', 'physicalreduction', 'specialreduction'];
 		else baseRequestedSupport = ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff', 'contactpunish', 'electricimmune', 'groundimmune'];
-		
+
+		let i = 0;
 		for (const draftTeamMember of firstDraftTeam) {
+			i++;
 			if (draftTeamMember.doNotReroll) continue;
 			
 			let currentStep = [];
