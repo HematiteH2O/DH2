@@ -3362,20 +3362,18 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// the last Pokémon chosen for monotype can be any type!
 				// later, we'll force its Tera Type to match the team instead
 				let monotypeBypassEligiblePokemon = [];
-				if (monotype && (firstDraftTeam.length === 6)) {
-					// figure out the full list of eligible Pokémon
-					// we don't want to overwrite eligiblePokemon because we'll still use it in the for loop after this one!
-					// instead, we can make a temporary list for just this step
-					for (const id in this.dex.data.Pokedex) {
-						if (
-							this.dex.data.Pokedex[id].randbats && // in the format/has randbats data
-							!originalTeamSpecies.includes(id) && !originalTeamNumbers.includes(this.dex.data.Pokedex[id].num) && // species clause
-							!(this.dex.data.Pokedex[id].randbats[format] && this.dex.data.Pokedex[id].randbats[format].banned) && // not banned
-							!(this.dex.data.Pokedex[id].forceTeraType && !this.dex.data.Pokedex[id].randbats.battleOnly) && // if something has a special Terastallized state, don't separately count the base form as eligible
-							(this.dex.data.Pokedex[id].randbats.stage && this.dex.data.Pokedex[id].randbats.stage === stage) && // account for LC
-							(!this.dex.data.Pokedex[id].forceTeraType || this.dex.data.Pokedex[id].forceTeraType === monotype) // we want to force a Tera Type later
-						) monotypeBypassEligiblePokemon.push(id);
-					}
+				// figure out the full list of eligible Pokémon
+				// we don't want to overwrite eligiblePokemon because we'll still use it in the for loop after this one!
+				// instead, we can make a temporary list for just this step
+				for (const id in this.dex.data.Pokedex) {
+					if (
+						this.dex.data.Pokedex[id].randbats && // in the format/has randbats data
+						!originalTeamSpecies.includes(id) && !originalTeamNumbers.includes(this.dex.data.Pokedex[id].num) && // species clause
+						!(this.dex.data.Pokedex[id].randbats[format] && this.dex.data.Pokedex[id].randbats[format].banned) && // not banned
+						!(this.dex.data.Pokedex[id].forceTeraType && !this.dex.data.Pokedex[id].randbats.battleOnly) && // if something has a special Terastallized state, don't separately count the base form as eligible
+						(this.dex.data.Pokedex[id].randbats.stage && this.dex.data.Pokedex[id].randbats.stage === stage) && // account for LC
+						(!this.dex.data.Pokedex[id].forceTeraType || this.dex.data.Pokedex[id].forceTeraType === monotype) // we want to force a Tera Type later
+					) monotypeBypassEligiblePokemon.push(id);
 				}
 				if (monotypeBypassEligiblePokemon.length) eligiblePokemonThisStep = monotypeBypassEligiblePokemon;
 			}
