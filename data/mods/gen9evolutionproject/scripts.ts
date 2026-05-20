@@ -4540,27 +4540,32 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					else if (loweredStat === 'spa') set.nature = 'Adamant';
 					else if (loweredStat === 'spd') set.nature = 'Naughty';
 					else if (loweredStat === 'spe') set.nature = 'Brave';
+					else console.log(`${set.name} had raised stat ${boostedStat} and lowered stat ${loweredStat}`);
 				} else if (boostedStat === 'def') {
 					if (loweredStat === 'atk') set.nature = 'Bold';
 					else if (loweredStat === 'spa') set.nature = 'Impish';
 					else if (loweredStat === 'spd') set.nature = 'Lax';
 					else if (loweredStat === 'spe') set.nature = 'Relaxed';
+					else console.log(`${set.name} had raised stat ${boostedStat} and lowered stat ${loweredStat}`);
 				} else if (boostedStat === 'spa') {
 					if (loweredStat === 'atk') set.nature = 'Modest';
 					else if (loweredStat === 'def') set.nature = 'Mild';
 					else if (loweredStat === 'spd') set.nature = 'Rash';
 					else if (loweredStat === 'spe') set.nature = 'Quiet';
+					else console.log(`${set.name} had raised stat ${boostedStat} and lowered stat ${loweredStat}`);
 				} else if (boostedStat === 'spd') {
 					if (loweredStat === 'atk') set.nature = 'Calm';
 					else if (loweredStat === 'def') set.nature = 'Gentle';
 					else if (loweredStat === 'spa') set.nature = 'Careful';
 					else if (loweredStat === 'spe') set.nature = 'Sassy';
+					else console.log(`${set.name} had raised stat ${boostedStat} and lowered stat ${loweredStat}`);
 				} else if (boostedStat === 'spe') {
 					if (loweredStat === 'atk') set.nature = 'Timid';
 					else if (loweredStat === 'def') set.nature = 'Hasty';
 					else if (loweredStat === 'spa') set.nature = 'Jolly';
 					else if (loweredStat === 'spd') set.nature = 'Naive';
-				} else console.log(`${set.name} had raised stat ${boostedStat} and lowered stat ${loweredStat}`);
+					else console.log(`${set.name} had raised stat ${boostedStat} and lowered stat ${loweredStat}`);
+				}
 			}
 
 			// Tera Types
