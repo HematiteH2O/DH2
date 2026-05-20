@@ -4371,7 +4371,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			if (!set.evs) set.evs = { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
 			let increment = 4;
 			if (format === 'vgc') increment = 8;
-			if (this.dex.species.get(set.species).randbats && this.dex.species.get(set.species).randbats.stage && this.dex.species.get(set.species).randbats.stage === 'LC') increment = 80;
+			if (stage === 'LC') increment = 80;
 
 			let evsLeft = (508 - (set.evs.hp + set.evs.atk + set.evs.def + set.evs.spa + set.evs.spd + set.evs.spe));
 			
