@@ -4368,7 +4368,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			if (!set.moves) set.moves = ["Protect"];
 			
 			// EVs
-			if (!set.evs) set.evs = { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
+			if (!set.evs) set.evs = { hp: 55, atk: 55, def: 55, spa: 55, spd: 55, spe: 55 }; // temporary test
 			let increment = 4;
 			if (format === 'vgc') increment = 8;
 			if (stage === 'LC') increment = 80;
@@ -4382,8 +4382,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				let multiple = 1;
 				if (increment === 80) multiple = 20; // for LC, we want each stat to be 5 more than a multiple of 20 (10 more for HP)
 				else if (increment === 4) multiple = 2; // for VGC, we want each stat to be 5 more than a multiple of 2 (10 more for HP)
+				
 				let statsToFix = { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
 				let statsPool = [];
+				
 				// first, we'll subtract EVs that aren't doing anything for us
 				for (const stat of ['hp', 'atk', 'def', 'spa', 'spd', 'spe']) {
 					if (!this.dex.species.get(set.species).baseStats[stat]) continue;
@@ -4427,7 +4429,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 				// finally, if any stat still has 0 investment, let's store a number for it to use for its first point of investment later
 				for (const stat of ['hp', 'atk', 'def', 'spa', 'spd', 'spe']) {
-					if (set.evs[stat] === 0) {
+					if (set.evs[stat] <= 0) {
 						if (!this.dex.species.get(set.species).baseStats[stat]) continue;
 						let statValue = this.dex.species.get(set.species).baseStats[stat] * 2 + 36;
 						statValue -= 5;
@@ -4531,7 +4533,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				set.evs.hp = set.firstPoint.hp;
 				evsLeft -= set.firstPoint.hp;
 			}
-			while ((evsLeft >= increment) && (set.evs.hp + increment <= 252)) { // only if you can increment Speed more *and* doing so will eventually hit your max Speed
+			while ((evsLeft >= increment) && (set.evs.hp + increment <= 252)) {
 				set.evs.hp += increment;
 				evsLeft -= increment;
 			}
