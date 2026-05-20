@@ -4569,6 +4569,14 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 			// Tera Types
 			if (!set.teraType) {
+				// let's identify types from four categories:
+				// - moves on the set that can get the boost to 60 BP from Tera
+				// - moves on the set that aren't already STAB
+				// - types that complement the Pokémon's defensive profile
+				// - types with utility the set is requesting: Fire for preventing burns, Grass for preventing redirection, Ghost for preventing Fake Out, etc.
+				// then, we should see which types appear in the most categories and sample from those
+
+				// failing that, just go with type 0 I guess--
 				set.teraType = this.dex.species.get(set.species).types[0];
 			}
 			
