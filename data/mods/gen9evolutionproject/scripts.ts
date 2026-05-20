@@ -4381,7 +4381,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			}
 
 			evsLeft = (508 - (set.evs.hp + set.evs.atk + set.evs.def + set.evs.spa + set.evs.spd + set.evs.spe));
-			if ((evsLeft > increment) && (set.roles && (set.roles.includes('physical') || set.roles.includes('special'))) {
+			if ((evsLeft >= increment) && (set.roles && (set.roles.includes('physical') || set.roles.includes('special')))) {
 				// second check: offenses
 				// be ready to make an exception for this.dex.moves.get(move).overrideOffensiveStat though
 				// we *probably* want these to be as high as we can get in that case
@@ -4407,7 +4407,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// let's not worry about stats that can't increase any more!
 				if (statsPool.length) statsPool = statsPool.filter(stat => (set.evs[stat] + increment <= 252));
 				
-				while (statsPool.length && evsLeft > increment && (set.evs['atk'] + set.evs['spa'] < 256)) {
+				while (statsPool.length && evsLeft >= increment && (set.evs['atk'] + set.evs['spa'] < 256)) {
 					// Now that we have our list of relevant "offensive" stats, we should calculate which one is the lowest, then increment it, then repeat
 					// To be honest, this is an arbitrary call, but... thinking about mixed attackers, they usually do 252 to their lower offense and 4 to their higher one, right?
 					// so I also decided to enforce a cap of 256 between Attack and Sp. Atk, and then stop focusing on offenses for this step
@@ -4444,7 +4444,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			// second check: Speed
 			// in general, Speed doesn't get any investment from this step; if something wanted Speed, it should probably have been assigned by an earlier fragment
 			// one exception: if it has a Choice Band or Choice Specs, isn't supposed to be min Speed, and can spare the EVs to be max Speed, it probably should be
-			if (evsLeft > increment && !(set.roles && set.roles.includes('minspeed')) && set.item && ['Choice Band', 'Choice Specs'].includes(set.item)) {
+			if (evsLeft >= increment && !(set.roles && set.roles.includes('minspeed')) && set.item && ['Choice Band', 'Choice Specs'].includes(set.item)) {
 				while ((set.evs.spe + evsLeft >= (252 - increment + 1)) && (set.evs.spe + increment <= 252)) { // only if you can increment Speed more *and* doing so will eventually hit your max Speed
 					set.evs.spe += increment;
 					evsLeft -= increment;
@@ -4453,10 +4453,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			
 			// final check: defenses
 			// I *think* we'll just keep raising whichever one is lowest by 4 at a time
-			while (evsLeft > increment) {
+			while (evsLeft >= increment) {
 				let statPool = ['hp', 'def', 'spd']; // let's not worry about stats that can't increase any more!
 				if (statsPool.length) statsPool = statsPool.filter(stat => (set.evs[stat] + increment <= 252));
-				while (statsPool.length && evsLeft > increment) {
+				while (statsPool.length && evsLeft >= increment) {
 					let minStats = [];
 					let minStat = null;
 					for (const stat of statsPool) {
@@ -4480,6 +4480,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						statsPool = statsPool.filter(stat => (set.evs[stat] + increment <= 252));
 					} else {
 						statsPool = [];
+						evsLeft = 0; // no point in continuing
 					}
 				}
 			}
