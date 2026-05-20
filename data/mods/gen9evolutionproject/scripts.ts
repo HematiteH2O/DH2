@@ -4528,12 +4528,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					}
 				}
 				if (set.roles && set.roles.includes('minspeed')) loweredStat = 'spe';
-				else if (!attackingStats.includes('atk')) {
-					loweredStat = 'atk';
-				}
-				else if (!attackingStats.includes('spa')) {
-					loweredStat = 'spa';
-				}
+				else if (!attackingStats.includes('atk')) loweredStat = 'atk';
+				else if (!attackingStats.includes('spa')) loweredStat = 'spa';
 				else if (set.evs.spe === 0) loweredStat = 'spe';
 				else if (set.evs.atk === 0 && !(set.roles && set.roles.includes('physical'))) loweredStat = 'atk';
 				else if (boostedStat === 'spd') loweredStat = 'def';
@@ -4564,7 +4560,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					else if (loweredStat === 'def') set.nature = 'Hasty';
 					else if (loweredStat === 'spa') set.nature = 'Jolly';
 					else if (loweredStat === 'spd') set.nature = 'Naive';
-				}
+				} else console.log(`${set.name} had raised stat ${boostedStat} and lowered stat ${loweredStat}`);
 			}
 
 			// Tera Types
