@@ -4372,12 +4372,70 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			let increment = 4;
 			if (format === 'vgc') increment = 8;
 			if (stage === 'LC') increment = 80;
+			set.firstPoint = { hp: increment, atk: increment, def: increment, spa: increment, spd: increment, spe: increment };
 
 			let evsLeft = (508 - (set.evs.hp + set.evs.atk + set.evs.def + set.evs.spa + set.evs.spd + set.evs.spe));
 			
-			// first check: for VGC and LC, I need to make sure none of the stats are outright incorrect
+			// first check: for VGC and LC, I need to account for the first point of each stat
+			// hope I'm doing this right jsmdfg
 			if (increment > 4) {
-				// ... okay I will come back to this aksjdhfg
+				let multiple = 1;
+				if (increment === 80) multiple = 20; // for LC, we want each stat to be 5 more than a multiple of 20 (10 more for HP)
+				else if (increment === 4) multiple = 2; // for VGC, we want each stat to be 5 more than a multiple of 2 (10 more for HP)
+				let statsToFix = { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
+				let statsPool = [];
+				// first, we'll subtract EVs that aren't doing anything for us
+				for (const stat of ['hp', 'atk', 'def', 'spa', 'spd', 'spe']) {
+					if (!this.dex.species.get(set.species).baseStats[stat]) continue;
+					let statValue = this.dex.species.get(set.species).baseStats[stat] * 2 + 36;
+					statValue -= 5;
+					if (stat === 'hp') statValue -= 5;
+					let correction = 4 * (statValue % multiple);
+					if (correction && set.evs[stat] > 0) {
+						statsToFix[stat] = set.evs[stat] - correction + increment;
+						set.evs[stat] -= correction;
+						if (set.evs[stat] < 0) set.evs[stat] = 0;
+					}
+				}
+				evsLeft = (508 - (set.evs.hp + set.evs.atk + set.evs.def + set.evs.spa + set.evs.spd + set.evs.spe));
+				
+				// then, we'll try to add them back one at a time, from lowest-commitment to highest
+				for (const stat of ['hp', 'atk', 'def', 'spa', 'spd', 'spe']) {
+					if (statsToFix[stat] > 0 && !(statsToFix[stat] > evsLeft)) statsPool.push(stat);
+				}
+				while (statsPool.length) {
+					let minStats = [];
+					let minStat = null;
+					for (const stat of statsPool) {
+						if (!minStat || minStat > statsToFix[stat]) {
+							// reset
+							minStats = [];
+							minStats.push(stat);
+							minStat = statsToFix[stat];
+						}
+						else if (minStat === statsToFix[stat]) minStats.push(stat);
+					}
+					if (minStats.length && !(minStat > evsLeft)) { // if it's possible to increment any of the stats...
+						let chosenStat = this.sample(minStats);
+						set.evs[chosenStat] += statsToFix[chosenStat];
+						evsLeft -= statsToFix[chosenStat];
+						statsPool = statsPool.filter(stat => stat !== chosenStat);
+					} else {
+						statsPool = [];
+					}
+				}
+
+				// finally, if any stat still has 0 investment, let's store a number for it to use for its first point of investment later
+				for (const stat of ['hp', 'atk', 'def', 'spa', 'spd', 'spe']) {
+					if (set.evs[stat] === 0) {
+						if (!this.dex.species.get(set.species).baseStats[stat]) continue;
+						let statValue = this.dex.species.get(set.species).baseStats[stat] * 2 + 36;
+						statValue -= 5;
+						if (stat === 'hp') statValue -= 5;
+						let correction = 4 * (statValue % multiple);
+						if (correction) set.firstPoint[stat] -= correction;
+					}
+				}
 			}
 
 			evsLeft = (508 - (set.evs.hp + set.evs.atk + set.evs.def + set.evs.spa + set.evs.spd + set.evs.spe));
@@ -4406,6 +4464,17 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 				// let's not worry about stats that can't increase any more!
 				if (statsPool.length) statsPool = statsPool.filter(stat => (set.evs[stat] + increment <= 252));
+				
+				// first point time
+				if (statsPool.length) {
+					for (const stat of statsPool) {
+						// these are all worth investing in
+						if (set.evs[stat] === 0 && set.firstPoint[stat] <= evsLeft) {
+							set.evs[stat] = set.firstPoint[stat];
+							evsLeft -= set.firstPoint[stat];
+						}
+					}
+				}
 				
 				while (statsPool.length && evsLeft >= increment && (set.evs['atk'] + set.evs['spa'] < 256)) {
 					// Now that we have our list of relevant "offensive" stats, we should calculate which one is the lowest, then increment it, then repeat
@@ -4444,48 +4513,51 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			// second check: Speed
 			// in general, Speed doesn't get any investment from this step; if something wanted Speed, it should probably have been assigned by an earlier fragment
 			// one exception: if it has a Choice Band or Choice Specs, isn't supposed to be min Speed, and can spare the EVs to be max Speed, it probably should be
-			if (evsLeft >= increment && !(set.roles && set.roles.includes('minspeed')) && set.item && ['Choice Band', 'Choice Specs'].includes(set.item)) {
+			if ((evsLeft >= increment || (set.evs.spe === 0 && evsLeft >= set.firstPoint.spe)) && !(set.roles && set.roles.includes('minspeed')) && set.item && ['Choice Band', 'Choice Specs'].includes(set.item)) {
+				if (set.evs.spe === 0 && set.firstPoint.spe <= evsLeft && evsLeft >= (252 - increment + 1)) {
+					set.evs.spe = set.firstPoint.spe;
+					evsLeft -= set.firstPoint.spe;
+				}
 				while ((set.evs.spe + evsLeft >= (252 - increment + 1)) && (set.evs.spe + increment <= 252)) { // only if you can increment Speed more *and* doing so will eventually hit your max Speed
 					set.evs.spe += increment;
 					evsLeft -= increment;
 				}
 			}
+
+			// third check: HP
+			// ideally, I want to set up fragments to optimize HP-to-defense ratios where there are specific benchmarks involved,
+			// but I think where there *aren't* any benchmarks, it's better to just prioritize HP in most cases
+			if (set.evs.hp === 0 && set.firstPoint.hp <= evsLeft) {
+				set.evs.hp = set.firstPoint.hp;
+				evsLeft -= set.firstPoint.hp;
+			}
+			while ((evsLeft >= increment) && (set.evs.hp + increment <= 252)) { // only if you can increment Speed more *and* doing so will eventually hit your max Speed
+				set.evs.hp += increment;
+				evsLeft -= increment;
+			}
 			
 			// final check: defenses
 			// I *think* we'll just keep raising whichever one is lowest by 4 at a time
-			while (evsLeft >= increment) {
-				let statsPool = ['hp', 'def', 'spd']; // let's not worry about stats that can't increase any more!
-				if (statsPool.length) statsPool = statsPool.filter(stat => (set.evs[stat] + increment <= 252));
-				while (statsPool.length && evsLeft >= increment) {
-					let minStats = [];
-					let minStat = null;
-					for (const stat of statsPool) {
-						// figuring out which one is lowest is easy here because we don't have HP
-						if (!this.dex.species.get(set.species).baseStats[stat]) continue;
-						// technically the level actually does matter here, so I can clean this up later, but... one thing at a time!
-						let statValue = ((this.dex.species.get(set.species).baseStats[stat] * 2 + 36 + (set.evs[stat]/4)));
-						if (stat === 'hp') statValue += 105;
-						if (!minStat || minStat > statValue) {
-							// reset
-							minStats = [];
-							minStats.push(stat);
-							minStat = statValue;
-						}
-						else if (minStat === statValue) minStats.push(stat);
-					}
-					if (minStats.length) {
-						let chosenStat = this.sample(minStats);
-						set.evs[chosenStat] += increment;
-						evsLeft -= increment;
-						statsPool = statsPool.filter(stat => (set.evs[stat] + increment <= 252));
-					} else {
-						statsPool = [];
-						evsLeft = 0; // no point in continuing
-					}
+			for (const stat of ['def', 'spd']) {
+				if (set.evs[stat] === 0 && set.firstPoint[stat] <= evsLeft) {
+					set.evs[stat] = set.firstPoint[stat];
+					evsLeft -= set.firstPoint[stat];
 				}
 			}
+			while (evsLeft >= increment) {
+				let defense = (this.dex.species.get(set.species).baseStats.def * 2 + 36 + (set.evs.def/4));
+				let spdef = (this.dex.species.get(set.species).baseStats.spd * 2 + 36 + (set.evs.spd/4));
+				if (spdef > defense && (set.evs['def'] + increment <= 252)) {
+					set.evs['def'] += increment;
+					evsLeft -= increment;
+				} else if (set.evs['spd'] + increment <= 252) {
+					set.evs['spd'] += increment;
+					evsLeft -= increment;
+				} else evsLeft = 0;
+			}
+			
 			// EVs should always be done now!
-
+			// and that gives us enough information to decide our nature, too
 			if (!set.nature) {
 				set.nature = '';
 				let boostedStat = null;
