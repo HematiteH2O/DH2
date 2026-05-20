@@ -4374,6 +4374,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			if (stage === 'LC') increment = 80;
 			set.firstPoint = { hp: increment, atk: increment, def: increment, spa: increment, spd: increment, spe: increment };
 
+			// quick thing: EVs should *always* be multiples of 4 at worst
+			for (const stat of ['hp', 'atk', 'def', 'spa', 'spd', 'spe']) if (set.evs[stat] % 4) set.evs[stat] -= set.evs[stat] % 4;
+			
 			let evsLeft = (508 - (set.evs.hp + set.evs.atk + set.evs.def + set.evs.spa + set.evs.spd + set.evs.spe));
 			
 			// first check: for VGC and LC, I need to account for the first point of each stat
