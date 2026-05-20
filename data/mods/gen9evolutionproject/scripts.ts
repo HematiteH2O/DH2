@@ -3524,7 +3524,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					
 					let score = 0;
 					for (const role of requestedSupportThisStep) if (this.dex.data.Pokedex[id].randbats.offeredSupport[role]) score++;
-					if (score > (requestedSupportThisStep.length + (i - 6))) score = (requestedSupportThisStep.length + (i - 6));
+					if (score > (requestedSupportThisStep.length + (teamPosition - 6))) score = (requestedSupportThisStep.length + (teamPosition - 6));
+					if (score < 0) score = 0;
 					if (score > maxScore) { // reset
 						currentStep = [];
 						maxScore = score;
@@ -3603,7 +3604,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			for (const id of currentStep) {
 				let teamResistScore = 0;
 				for (const type of types) if (!resistancesThisStep.includes(type) && (this.dex.data.Pokedex[id].randbats.immunities[type] || (this.dex.data.Pokedex[id].randbats.resistances[type] && !this.dex.data.Pokedex[id].randbats.weaknesses[type]))) teamResistScore++;
-				if (teamResistScore > (18 - resistancesThisStep.length + i - 6)) teamResistScore = (18 - resistancesThisStep.length + i - 6);
+				if (teamResistScore > (18 - resistancesThisStep.length + teamPosition - 6)) teamResistScore = (18 - resistancesThisStep.length + teamPosition - 6);
+				if (teamResistScore < 0) teamResistScore = 0;
 				// I hope I did this right? uh, the point is - it should be "good enough" to cover all but 5 types on the first member, all but 4 types on the second member, all but 3 types on the third member, and so on
 				
 				if (teamResistScore > teamResistMaxScore) { // reset
@@ -3639,7 +3641,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			let chosenRandomPokemon = this.sample(currentStep);
 			// we can replace the drafted team member accordingly
 			console.log(`Replaced ${draftTeamMember.name} with ${chosenRandomPokemon}`);
-			firstDraftTeam[draftTeamMember] = {
+			firstDraftTeam[teamPosition - 1] = {
 				name: this.dex.data.Pokedex[chosenRandomPokemon].name,
 				species: this.dex.data.Pokedex[chosenRandomPokemon].name,
 				offeredSupport: this.dex.data.Pokedex[chosenRandomPokemon].randbats.offeredSupport,
