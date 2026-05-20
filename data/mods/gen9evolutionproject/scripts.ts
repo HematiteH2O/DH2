@@ -4649,7 +4649,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				set.teraType = this.dex.species.get(set.species).types[0];
 			}
 			
-			if (!set.item && format !== 'vgc') set.item = 'Leftovers'; // VGC respects item clause
+			if (!set.item) {
+				if (stage === 'LC') set.item = 'Eviolite';
+				else if (format !== 'vgc') set.item = 'Leftovers'; // VGC respects item clause
+			}
 			if (!set.ability) set.ability = this.dex.species.get(set.species).abilities[0];
 			if (!set.happiness && set.hasBeenRandomized) set.happiness = 255;
 			if (set.hasBeenRandomized) set.level = setLevel;
