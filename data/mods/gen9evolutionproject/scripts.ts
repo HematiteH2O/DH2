@@ -4392,7 +4392,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// first, we'll subtract EVs that aren't doing anything for us
 				for (const stat of ['hp', 'atk', 'def', 'spa', 'spd', 'spe']) {
 					if (!this.dex.species.get(set.species).baseStats[stat]) continue;
-					let statValue = this.dex.species.get(set.species).baseStats[stat] * 2 + 36;
+					let statValue = this.dex.species.get(set.species).baseStats[stat] * 2 + 36 + (set.evs[stat] / 4);
 					statValue -= 5;
 					if (stat === 'hp') statValue -= 5;
 					let correction = 4 * (statValue % multiple);
