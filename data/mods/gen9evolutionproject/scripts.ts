@@ -4353,19 +4353,227 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				chosenFragment.eligible = false;
 			}
 		}
-		
+
+		// Since we made it this far, we're officially done with fragments! Yay
+		// Everything should be a lot simpler from here akjdfhg
+		// However, it's very likely that, when we get to this point, a set will have fewer than 508 EVs defined -
+		// even if it had fragments with EVs set, there's no guarantee that the combination of fragments totaled the exact right amount.
+		// We might even be missing an item or a Tera Type!
+		// The more set fragments I set up, the less this is going to matter; these are *just* the fallback!
+
+		// Items require consideration for the whole team, because of item clause
+
+		// EVs and Tera Types only require consideration for the individual set
 		for (const set of sets) {
+			if (!set.moves) set.moves = ["Protect"];
+			
+			// EVs
+			if (!set.evs) set.evs = { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
+			let increment = 4;
+			if (format === 'vgc') increment = 8;
+			if (this.dex.species.get(set.species).randbats && this.dex.species.get(set.species).randbats.stage && this.dex.species.get(set.species).randbats.stage === 'LC') increment = 80;
+
+			let evsLeft = (508 - (set.evs.hp + set.evs.atk + set.evs.def + set.evs.spa + set.evs.spd + set.evs.spe));
+			
+			// first check: for VGC and LC, I need to make sure none of the stats are outright incorrect
+			if (increment > 4) {
+				// ... okay I will come back to this aksjdhfg
+			}
+
+			evsLeft = (508 - (set.evs.hp + set.evs.atk + set.evs.def + set.evs.spa + set.evs.spd + set.evs.spe));
+			if ((evsLeft > increment) && (set.roles && (set.roles.includes('physical') || set.roles.includes('special'))) {
+				// second check: offenses
+				// be ready to make an exception for this.dex.moves.get(move).overrideOffensiveStat though
+				// we *probably* want these to be as high as we can get in that case
+				// if it has one of those roles, this Pokémon functions offensively, so we probably care about at least one of its attacking stats!
+				// however, it's possible to have the role 'physical' and actually be running Body Press, or the role 'special' and actually be running Wallow, for example
+				// so we should double-check which of our offenses we're actually using:
+				let statPool = [];
+				for (const move of set.moves) {
+					if (set.roles.includes('physical') && this.dex.moves.get(move).category === 'Physical' && move !== 'Foul Play') {
+						if (this.dex.moves.get(move).overrideOffensiveStat) {
+							if (!statsPool.includes(this.dex.moves.get(move).overrideOffensiveStat) statsPool.push(this.dex.moves.get(move).overrideOffensiveStat);
+						} else {
+							if (!statsPool.includes('atk')) statsPool.push('atk');
+						}
+					} else if (set.roles.includes('special') && this.dex.moves.get(move).category === 'Special') {
+						if (this.dex.moves.get(move).overrideOffensiveStat) {
+							if (!statsPool.includes(this.dex.moves.get(move).overrideOffensiveStat) statsPool.push(this.dex.moves.get(move).overrideOffensiveStat);
+						} else {
+							if (!statsPool.includes('spa')) statsPool.push('spa');
+						}
+					}
+				}
+				// let's not worry about stats that can't increase any more!
+				if (statsPool.length) statsPool = statsPool.filter(stat => (set.evs[stat] + increment <= 252));
+				
+				while (statsPool.length && evsLeft > increment && (set.evs['atk'] + set.evs['spa'] < 256)) {
+					// Now that we have our list of relevant "offensive" stats, we should calculate which one is the lowest, then increment it, then repeat
+					// To be honest, this is an arbitrary call, but... thinking about mixed attackers, they usually do 252 to their lower offense and 4 to their higher one, right?
+					// so I also decided to enforce a cap of 256 between Attack and Sp. Atk, and then stop focusing on offenses for this step
+					// This is only applicable to the fallback anyway, of course - if an earlier fragment gave a meaningful benchmark for one of those, that will have taken priority
+					// That said, I'm actually *not* going to apply the same cap to Defense and Sp. Def - there's really nothing wrong with 252 Def / 252 SpA for, like, Body Press/Meteor Beam or something, you know?
+					// This is still a little sloppy for now, but I can improve it later
+
+					let minStats = [];
+					let minStat = null;
+					for (const stat of statsPool) {
+						// figuring out which one is lowest is easy here because we don't have HP
+						if (!this.dex.species.get(set.species).baseStats[stat]) continue;
+						// we don't need to worry about the increments for this particular calculation
+						let statValue = ((this.dex.species.get(set.species).baseStats[stat] * 2 + 36 + (set.evs[stat]/4)));
+						if (!minStat || minStat > statValue) {
+							// reset
+							minStats = [];
+							minStats.push(stat);
+							minStat = statValue;
+						}
+						else if (minStat === statValue) minStats.push(stat);
+					}
+					if (minStats.length) {
+						let chosenStat = this.sample(minStats);
+						set.evs[chosenStat] += increment;
+						evsLeft -= increment;
+						statsPool = statsPool.filter(stat => (set.evs[stat] + increment <= 252));
+					} else {
+						statsPool = [];
+					}
+				}
+			}
+
+			// second check: Speed
+			// in general, Speed doesn't get any investment from this step; if something wanted Speed, it should probably have been assigned by an earlier fragment
+			// one exception: if it has a Choice Band or Choice Specs, isn't supposed to be min Speed, and can spare the EVs to be max Speed, it probably should be
+			if (evsLeft > increment && !(set.roles && set.roles.includes('minspeed')) && set.item && ['Choice Band', 'Choice Specs'].includes(set.item)) {
+				while ((set.evs.spe + evsLeft >= (252 - increment + 1)) && (set.evs.spe + increment <= 252)) { // only if you can increment Speed more *and* doing so will eventually hit your max Speed
+					set.evs.spe += increment;
+					evsLeft -= increment;
+				}
+			}
+			
+			// final check: defenses
+			// I *think* we'll just keep raising whichever one is lowest by 4 at a time
+			while (evsLeft > increment) {
+				let statPool = ['hp', 'def', 'spd']; // let's not worry about stats that can't increase any more!
+				if (statsPool.length) statsPool = statsPool.filter(stat => (set.evs[stat] + increment <= 252));
+				while (statsPool.length && evsLeft > increment) {
+					let minStats = [];
+					let minStat = null;
+					for (const stat of statsPool) {
+						// figuring out which one is lowest is easy here because we don't have HP
+						if (!this.dex.species.get(set.species).baseStats[stat]) continue;
+						// technically the level actually does matter here, so I can clean this up later, but... one thing at a time!
+						let statValue = ((this.dex.species.get(set.species).baseStats[stat] * 2 + 36 + (set.evs[stat]/4)));
+						if (stat === 'hp') statValue += 105;
+						if (!minStat || minStat > statValue) {
+							// reset
+							minStats = [];
+							minStats.push(stat);
+							minStat = statValue;
+						}
+						else if (minStat === statValue) minStats.push(stat);
+					}
+					if (minStats.length) {
+						let chosenStat = this.sample(minStats);
+						set.evs[chosenStat] += increment;
+						evsLeft -= increment;
+						statsPool = statsPool.filter(stat => (set.evs[stat] + increment <= 252));
+					} else {
+						statsPool = [];
+					}
+				}
+			}
+			// EVs should always be done now!
+
+			if (!set.nature) {
+				set.nature = '';
+				let boostedStat = null;
+				let loweredStat = null;
+				
+				// figuring out the best stat for the nature to raise
+				if (set.evs.spe + increment > 252) boostedStat = 'spe';
+				else {
+					let maxStats = [];
+					let maxStat = null;
+					for (const stat of ['atk', 'def', 'spa', 'spd']) {
+						if (!this.dex.species.get(set.species).baseStats[stat]) continue;
+						let statValue = ((this.dex.species.get(set.species).baseStats[stat] * 2 + 36 + (set.evs[stat]/4)));
+						if (!maxStat || maxStat > statValue) {
+							// reset
+							maxStats = [];
+							maxStats.push(stat);
+							maxStat = statValue;
+						}
+						else if (maxStat === statValue) maxStats.push(stat);
+					}
+					if (maxStats.length) boostedStat = this.sample(maxStats);
+				}
+
+				// figuring out a safe dump stat for the nature
+				let attackingStats = [];
+				for (const move of set.moves) {
+					if (this.dex.moves.get(move).category === 'Physical' && move !== 'Foul Play') {
+						if (this.dex.moves.get(move).overrideOffensiveStat) {
+							if (!attackingStats.includes(this.dex.moves.get(move).overrideOffensiveStat) attackingStats.push(this.dex.moves.get(move).overrideOffensiveStat);
+						} else {
+							if (!attackingStats.includes('atk')) attackingStats.push('atk');
+						}
+					} else if (this.dex.moves.get(move).category === 'Special') {
+						if (this.dex.moves.get(move).overrideOffensiveStat) {
+							if (!attackingStats.includes(this.dex.moves.get(move).overrideOffensiveStat) attackingStats.push(this.dex.moves.get(move).overrideOffensiveStat);
+						} else {
+							if (!attackingStats.includes('spa')) attackingStats.push('spa');
+						}
+					}
+				}
+				if (set.roles && set.roles.includes('minspeed')) loweredStat = 'spe';
+				else if (!attackingStats.includes('atk')) {
+					loweredStat = 'atk';
+				}
+				else if (!attackingStats.includes('spa')) {
+					loweredStat = 'spa';
+				}
+				else if (set.evs.spe === 0) loweredStat = 'spe';
+				else if (set.evs.atk === 0 && !(set.roles && set.roles.includes('physical'))) loweredStat = 'atk';
+				else if (boostedStat === 'spd') loweredStat = 'def';
+				else loweredStat = 'spd';
+
+				if (boostedStat === 'atk') {
+					if (loweredStat === 'def') set.nature = 'Lonely';
+					else if (loweredStat === 'spa') set.nature = 'Adamant';
+					else if (loweredStat === 'spd') set.nature = 'Naughty';
+					else if (loweredStat === 'spe') set.nature = 'Brave';
+				} else if (boostedStat === 'def') {
+					if (loweredStat === 'atk') set.nature = 'Bold';
+					else if (loweredStat === 'spa') set.nature = 'Impish';
+					else if (loweredStat === 'spd') set.nature = 'Lax';
+					else if (loweredStat === 'spe') set.nature = 'Relaxed';
+				} else if (boostedStat === 'spa') {
+					if (loweredStat === 'atk') set.nature = 'Modest';
+					else if (loweredStat === 'def') set.nature = 'Mild';
+					else if (loweredStat === 'spd') set.nature = 'Rash';
+					else if (loweredStat === 'spe') set.nature = 'Quiet';
+				} else if (boostedStat === 'spd') {
+					if (loweredStat === 'atk') set.nature = 'Calm';
+					else if (loweredStat === 'def') set.nature = 'Gentle';
+					else if (loweredStat === 'spa') set.nature = 'Careful';
+					else if (loweredStat === 'spe') set.nature = 'Sassy';
+				} else if (boostedStat === 'spe') {
+					if (loweredStat === 'atk') set.nature = 'Timid';
+					else if (loweredStat === 'def') set.nature = 'Hasty';
+					else if (loweredStat === 'spa') set.nature = 'Jolly';
+					else if (loweredStat === 'spd') set.nature = 'Naive';
+				}
+			}
+
+			// Tera Types
+			if (!set.teraType) {
+				set.teraType = this.dex.species.get(set.species).types[0];
+			}
+			
 			if (!set.item && format !== 'vgc') set.item = 'Leftovers'; // VGC respects item clause
 			if (!set.ability) set.ability = this.dex.species.get(set.species).abilities[0];
-			if (!set.moves) set.moves = ["Protect"];
-			if (!set.nature) set.nature = '';
-			if (
-				!set.evs || (
-					set.evs['hp'] === 0 && set.evs['atk'] === 0  && set.evs['def'] === 0 && set.evs['spa'] === 0 && set.evs['spd'] === 0 && set.evs['spe'] === 0
-				)
-			) set.evs = { hp: 4, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
 			if (!set.happiness && set.hasBeenRandomized) set.happiness = 255;
-			if (!set.teraType) set.teraType = this.dex.species.get(set.species).types[0];
 			if (set.hasBeenRandomized) set.level = setLevel;
 			if (!set.shiny && set.hasBeenRandomized) set.shiny = shiny; // clarifying: shiny is a variable we defined earlier, not the string "shiny"
 		}
