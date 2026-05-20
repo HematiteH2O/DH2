@@ -4368,7 +4368,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			if (!set.moves) set.moves = ["Protect"];
 			
 			// EVs
-			if (!set.evs) set.evs = { hp: 55, atk: 55, def: 55, spa: 55, spd: 55, spe: 55 }; // temporary test
+			if (!set.evs) set.evs = { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
 			let increment = 4;
 			if (format === 'vgc') increment = 8;
 			if (stage === 'LC') increment = 80;
@@ -4392,9 +4392,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// first, we'll subtract EVs that aren't doing anything for us
 				for (const stat of ['hp', 'atk', 'def', 'spa', 'spd', 'spe']) {
 					if (!this.dex.species.get(set.species).baseStats[stat]) continue;
-					let statValue = this.dex.species.get(set.species).baseStats[stat] * 2 + 36 + (set.evs[stat] / 4);
-					statValue -= 5;
-					if (stat === 'hp') statValue -= 5;
+					let statValue = this.dex.species.get(set.species).baseStats[stat] * 2 + 31 + (set.evs[stat] / 4);
 					let correction = 4 * (statValue % multiple);
 					if (correction && set.evs[stat] > 0) {
 						statsToFix[stat] = set.evs[stat] - correction + increment;
@@ -4434,9 +4432,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				for (const stat of ['hp', 'atk', 'def', 'spa', 'spd', 'spe']) {
 					if (set.evs[stat] <= 0) {
 						if (!this.dex.species.get(set.species).baseStats[stat]) continue;
-						let statValue = this.dex.species.get(set.species).baseStats[stat] * 2 + 36;
-						statValue -= 5;
-						if (stat === 'hp') statValue -= 5;
+						let statValue = this.dex.species.get(set.species).baseStats[stat] * 2 + 31;
 						let correction = 4 * (statValue % multiple);
 						if (correction) set.firstPoint[stat] -= correction;
 					}
