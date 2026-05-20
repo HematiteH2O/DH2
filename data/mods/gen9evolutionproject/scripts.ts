@@ -4515,13 +4515,13 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				for (const move of set.moves) {
 					if (this.dex.moves.get(move).category === 'Physical' && move !== 'Foul Play') {
 						if (this.dex.moves.get(move).overrideOffensiveStat) {
-							if (!attackingStats.includes(this.dex.moves.get(move).overrideOffensiveStat) attackingStats.push(this.dex.moves.get(move).overrideOffensiveStat);
+							if (!attackingStats.includes(this.dex.moves.get(move).overrideOffensiveStat)) attackingStats.push(this.dex.moves.get(move).overrideOffensiveStat);
 						} else {
 							if (!attackingStats.includes('atk')) attackingStats.push('atk');
 						}
 					} else if (this.dex.moves.get(move).category === 'Special') {
 						if (this.dex.moves.get(move).overrideOffensiveStat) {
-							if (!attackingStats.includes(this.dex.moves.get(move).overrideOffensiveStat) attackingStats.push(this.dex.moves.get(move).overrideOffensiveStat);
+							if (!attackingStats.includes(this.dex.moves.get(move).overrideOffensiveStat)) attackingStats.push(this.dex.moves.get(move).overrideOffensiveStat);
 						} else {
 							if (!attackingStats.includes('spa')) attackingStats.push('spa');
 						}
