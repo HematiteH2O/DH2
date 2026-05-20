@@ -4381,7 +4381,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			if (increment > 4) {
 				let multiple = 1;
 				if (increment === 80) multiple = 20; // for LC, we want each stat to be 5 more than a multiple of 20 (10 more for HP)
-				else if (increment === 4) multiple = 2; // for VGC, we want each stat to be 5 more than a multiple of 2 (10 more for HP)
+				else if (increment === 8) multiple = 2; // for VGC, we want each stat to be 5 more than a multiple of 2 (10 more for HP)
 				
 				let statsToFix = { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
 				let statsPool = [];
