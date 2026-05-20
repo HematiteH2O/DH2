@@ -3306,10 +3306,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 
 		
+		// TODO: iterate over existing team members' actual sets and adjust accordingly
 		// I would like to evaluate the base team members in more detail for their requestedSupport, offeredSupport and acceptedSupport, but...
 		// I'm not ready to do that just yet, so I'll leave them as their species defaults for now.
 		// I'll come back to this after I've gone over the main support list!
-		
+
 		if (team.length) {
 			for (const pokemon of team) {
 				pokemon.offeredSupport = this.dex.species.get(pokemon.species).randbats.offeredSupport;
@@ -3325,19 +3326,18 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		
 		// Now, we can start picking a first pass of team members
 		// For now, when we decide something, we should push it to firstDraftTeam, not to the team just yet; we'll get to build sets later!
-		// That said...
 		const firstDraftTeam = [];
 		if (team.length) for (const pokemon of team) firstDraftTeam.push(pokemon);
-		// ... it's still useful to have a copy that can track everything we need right away!
 
-		// This might look strange, but before we make any informed decisions, it will help us to come up with a *completely* random selection of 6 Pokémon
-		// Most of these will likely be replaced shortly with more "optimal" choices, so you wouldn't expect it to matter!
-		// but it's actually a valuable fix to a problem I was running into earlier:
-		// when we added Pokémon one at a time and based our choices on an incomplete team, it was common to keep adding the same Pokémon,
-		// because the selection ended up biased towards whatever could potentially fill the most roles in general when it assumed none of them were being filled
-		// Starting with a fully-random selection of 6 Pokémon and then gradually making it better means that a random assortment of roles will already be covered before we even start to make weighted choices,
-		// so the roles we value will be different every time, and the resulting teams should end up much more varied overall!
-		
+		// This next bit might look strange, but: before we make any informed decisions, it will help us to come up with a *completely* random selection of 6 Pokémon.
+		// Most of these will likely be replaced shortly with more "optimal" choices, so you wouldn't expect it to matter,
+		// but it's actually a really valuable fix to a problem I was running into earlier:
+		// when we added Pokémon one at a time and based our choices on an incomplete team,
+		// the selection ended up biased towards whatever could *potentially* fill the most different roles in *general,* because it assumed none of them were being filled
+		// which meant it kept picking the same few versatile Pokémon disproportionately often and then often warping the rest of the team around them.
+		// Starting with a fully-random selection of 6 Pokémon helps with that,
+		// because it essentially means that a random assortment of roles will already be covered.
+		// That way, when we do start to make weighted choices, the roles we value will be different every time, and the resulting teams end up much more varied overall!
 		if (!firstDraftTeam.length && eligiblePokemon.filter(id => this.dex.data.Pokedex[id].copyData).length) {
 			// if a team started completely empty, I want the first Pokémon selected to be a completely random Evo 2 sub
 			let chosenRandomPokemon = this.sample(eligiblePokemon.filter(id => this.dex.data.Pokedex[id].copyData));
@@ -3653,18 +3653,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		console.log(firstDraftTeam);
 
 
-
-		// TODO: fill in randbats data per species based on learnsets (the fun part!)
-		
-		// TODO: iterate over existing team members based on the same criteria
-		// // - identify which roles they already cover
-		// // - identify "requested support" (top-priority: something like Grassy Surge is mandatory if a Pokémon has a Grassy Seed)
-		// // - identify "accepted support" (gives bonus points when deciding between candidates for another role, but it's not its own step - something like any terrain for Aleon)
-		// this should be easy, but I want to do as much of the randbats data first because there's so much overlap
-
-		// TODO: second-pass "for" loop (almost just a copy-paste of the original at this point - just saving it for the end so I don't have to make a bunch of changes twice)
-
-		// WIP: set constructor
 
 		// outside the loop
 		let teamOfferedSupport = {};
