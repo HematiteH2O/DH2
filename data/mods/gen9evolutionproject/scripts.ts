@@ -4388,7 +4388,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// if it has one of those roles, this Pokémon functions offensively, so we probably care about at least one of its attacking stats!
 				// however, it's possible to have the role 'physical' and actually be running Body Press, or the role 'special' and actually be running Wallow, for example
 				// so we should double-check which of our offenses we're actually using:
-				let statPool = [];
+				let statsPool = [];
 				for (const move of set.moves) {
 					if (set.roles.includes('physical') && this.dex.moves.get(move).category === 'Physical' && move !== 'Foul Play') {
 						if (this.dex.moves.get(move).overrideOffensiveStat) {
@@ -4454,7 +4454,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			// final check: defenses
 			// I *think* we'll just keep raising whichever one is lowest by 4 at a time
 			while (evsLeft >= increment) {
-				let statPool = ['hp', 'def', 'spd']; // let's not worry about stats that can't increase any more!
+				let statsPool = ['hp', 'def', 'spd']; // let's not worry about stats that can't increase any more!
 				if (statsPool.length) statsPool = statsPool.filter(stat => (set.evs[stat] + increment <= 252));
 				while (statsPool.length && evsLeft >= increment) {
 					let minStats = [];
