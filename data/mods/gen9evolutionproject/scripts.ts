@@ -1944,8 +1944,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							// Gravity
 							if (!move.ohko && fragment.moveAccuracy <= 75 && moveid !== 'Blizzard') {
 								let modFragment = Utils.deepClone(fragment);
+								modFragment.format = 'vgc';
 								modFragment.moveAccuracy *= 5/3;
-								modFragment.singles.requestedSupport.push('gravity');
 								modFragment.vgc.requestedSupport.push('gravity');
 								alternateFragments.push(modFragment);
 							}
@@ -2647,11 +2647,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 									accept.push(fakeOutFragment);
 								}
 								// these ones shouldn't usually have backup setters just because they can
-								if (['sandstorm', 'snow', 'grassyterrain', 'mistyterrain'].includes(fieldeffect)) accept = [];
+								if (['sandstorm', 'snow', 'grassyterrain', 'mistyterrain'].includes(fieldeffect)) accept = null;
 								// in theory, I can expand on this list with more specific criteria for each field effect!
 								// but I don't know what I would do with most of them just yet
 
-								if (accept) {
+								if (accept && accept.length) {
 									for (const modFragment of accept) {
 										if (modFragment.movePriority > 0) {
 											if (!newMon.randbats.offeredSupport[`backup${fieldeffect}`]) newMon.randbats.offeredSupport[`backup${fieldeffect}`] = [];
