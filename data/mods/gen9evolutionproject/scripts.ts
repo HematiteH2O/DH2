@@ -4477,13 +4477,13 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					}
 				}
 				
-				while (statsPool.length && evsLeft >= increment && (set.evs['atk'] + set.evs['spa'] < 256)) {
+				while (statsPool.length && evsLeft >= increment && ((set.evs['atk'] + increment <= 252) && (set.evs['atk'] + increment <= 252)) {
 					// Now that we have our list of relevant "offensive" stats, we should calculate which one is the lowest, then increment it, then repeat
-					// To be honest, this is an arbitrary call, but... thinking about mixed attackers, they usually do 252 to their lower offense and 4 to their higher one, right?
-					// so I also decided to enforce a cap of 256 between Attack and Sp. Atk, and then stop focusing on offenses for this step
-					// This is only applicable to the fallback anyway, of course - if an earlier fragment gave a meaningful benchmark for one of those, that will have taken priority
-					// That said, I'm actually *not* going to apply the same cap to Defense and Sp. Def - there's really nothing wrong with 252 Def / 252 SpA for, like, Body Press/Meteor Beam or something, you know?
-					// This is still a little sloppy for now, but I can improve it later
+					// To be honest, this was an arbitrary call, but... thinking about mixed attackers, they usually do 252 to their lower offense and 4 to their higher one, right?
+					// so I decided to stop when either Attack or Sp. Atk hits 252 EVs, since the "first point" was just assigned
+					// This is only applicable to the fallback anyway, of course - if an earlier fragment gave a meaningful benchmark for one of those, that will have taken priority!
+					// That said, I'm actually *not* going to apply the same cap to Defense and Sp. Def -
+					// there's really nothing wrong with 252 Def / 252 SpA for, like, Body Press/Meteor Beam or something, you know?
 
 					let minStats = [];
 					let minStat = null;
@@ -4512,9 +4512,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			}
 
 			// second check: Speed
-			// in general, Speed doesn't get any investment from this step; if something wanted Speed, it should probably have been assigned by an earlier fragment
-			// one exception: if it has a Choice Band or Choice Specs, isn't supposed to be min Speed, and can spare the EVs to be max Speed, it probably should be
-			if ((evsLeft >= increment || (set.evs.spe === 0 && evsLeft >= set.firstPoint.spe)) && !(set.roles && set.roles.includes('minspeed')) && set.item && ['Choice Band', 'Choice Specs'].includes(set.item)) {
+			// if you *can* afford to max Speed, and you have an offensive role, you'll try to go all the way to the max;
+			// if you don't have room to max Speed, presumably you've Speed-crept what you could through your fragments, so we'll skip modifying Speed and jump to bulk!
+			if ((evsLeft >= increment || (set.evs.spe === 0 && evsLeft >= set.firstPoint.spe)) && set.roles && !set.roles.includes('minspeed') && (set.roles.includes('physical') || set.roles.includes('special'))) {
 				if (set.evs.spe === 0 && set.firstPoint.spe <= evsLeft && evsLeft >= (252 - increment + 1)) {
 					set.evs.spe = set.firstPoint.spe;
 					evsLeft -= set.firstPoint.spe;
