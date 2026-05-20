@@ -3312,9 +3312,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		
 		if (team.length) {
 			for (const pokemon of team) {
-				pokemon.requestedSupport = this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].requestedSupport;
-				pokemon.offeredSupport = this.dex.data.Pokedex[chosenRandomPokemon].randbats.offeredSupport;
-				pokemon.acceptedSupport = this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].acceptedSupport;
+				pokemon.requestedSupport = this.dex.data.Pokedex[pokemon.species].randbats[format].requestedSupport;
+				pokemon.offeredSupport = this.dex.data.Pokedex[pokemon.species].randbats.offeredSupport;
+				pokemon.acceptedSupport = this.dex.data.Pokedex[pokemon.species].randbats[format].acceptedSupport;
 				pokemon.coveredStabs = [];
 				pokemon.remainingStabTypes = [];
 				pokemon.remainingStabMoves = [];
