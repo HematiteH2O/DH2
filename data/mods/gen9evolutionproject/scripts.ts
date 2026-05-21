@@ -4465,7 +4465,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					}
 				}
 				
-				while (statsPool.length && evsLeft >= increment && ((set.evs['atk'] + increment <= 252) && (set.evs['atk'] + increment <= 252)) {
+				while (statsPool.length && evsLeft >= increment && ((set.evs['atk'] + increment <= 252) && (set.evs['atk'] + increment <= 252))) {
 					// Now that we have our list of relevant "offensive" stats, we should calculate which one is the lowest, then increment it, then repeat
 					// To be honest, this was an arbitrary call, but... thinking about mixed attackers, they usually do 252 to their lower offense and 4 to their higher one, right?
 					// so I decided to stop when either Attack or Sp. Atk hits 252 EVs, since the "first point" was just assigned
