@@ -4649,16 +4649,20 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					Fairy: 0,
 					Normal: 0,
 				};
+				let stellarCount = [];
 				for (const move of set.moves) {
 					const moveData = this.dex.moves.get(move);
 					// - moves on the set that can get the boost to 60 BP from Tera
 					if (
 						moveData.basePower && !(moveData.basePower >= 60 || (moveData.basePower >= 40 && set.ability === 'Technician') || moveData.basePower <= 1) &&
 						!(moveData.priority && moveData.priority > 0) && !moveData.multihit && moveData.name !== 'Weather Ball'
-					) teraTypes[move.type]++;
+					) teraTypes[moveData.type]++;
 					
 					// - moves on the set that aren't already STAB
-					if (moveData.category !== 'Status' && moveData.type !== 'Normal' && !this.dex.species.get(set.species).types.includes(moveData.type)) teraTypes[move.type]++;
+					if (moveData.category !== 'Status' && moveData.type !== 'Normal' && !this.dex.species.get(set.species).types.includes(moveData.type)) {
+						teraTypes[moveData.type]++;
+						if (!stellarCount.includes(moveData.type)) stellarCount.push(moveData.type);
+					}
 				}
 				
 				for (const type in teraTypes) {
@@ -4708,6 +4712,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				let maxScore = 0;
 				for (const type of validTeraTypes) if (teraTypes[type] > maxScore) maxScore = teraTypes[type];
 				if (validTeraTypes.filter((type) => (teraTypes[type] && teraTypes[type] >= (maxScore -1) && teraTypes[type] > 0)).length) validTeraTypes = validTeraTypes.filter((type) => (teraTypes[type] && teraTypes[type] >= (maxScore -1) && teraTypes[type] > 0));
+				if (stellarCount.length && stellarCount.length > 3) validTeraTypes.push('Stellar');
 				set.teraType = this.sample(validTeraTypes);
 			}
 			
