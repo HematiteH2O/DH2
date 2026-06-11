@@ -4693,6 +4693,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								if (this.dex.data.TypeChart[teraType.toLowerCase()].damageTaken[checkType] >= 2) { // the Tera Type has a resistance or immunity
 									teraTypes[teraType]++;
 								}
+								if (this.dex.data.TypeChart[teraType.toLowerCase()].damageTaken[checkType] === 1) { // the Tera Type is also weak to the type
+									teraTypes[teraType]--;
+								}
 							}
 							// - ... but it also helps if the Pokémon has an immunity or resistance Ability that cancels out one of the new type's weaknesses
 							if (
