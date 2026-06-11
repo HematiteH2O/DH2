@@ -4701,10 +4701,13 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 				
 				// we want to make sure this is pretty random-feeling, so... I'm leaning towards allowing for the second-highest score as well as the highest?
+				let validTeraTypes = [
+					'Fire', 'Water', 'Electric', 'Grass', 'Ice', 'Fighting', 'Poison', 'Ground', 'Flying', 'Psychic', 'Bug', 'Rock', 'Ghost', 'Dragon', 'Dark',
+					'Steel', 'Fairy', 'Normal',
+				];
 				let maxScore = 0;
-				for (const type of types) if (teraTypes[type] > maxScore) maxScore = teraTypes[type];
-				let validTeraTypes = types.filter((type) => (teraTypes[type] && teraTypes[type] >= (maxScore -1) && teraTypes[type] > 0));
-				if (!validTeraTypes) validTeraTypes = types;
+				for (const type of validTeraTypes) if (teraTypes[type] > maxScore) maxScore = teraTypes[type];
+				if (validTeraTypes.filter((type) => (teraTypes[type] && teraTypes[type] >= (maxScore -1) && teraTypes[type] > 0)).length) validTeraTypes = validTeraTypes.filter((type) => (teraTypes[type] && teraTypes[type] >= (maxScore -1) && teraTypes[type] > 0));
 				set.teraType = this.sample(validTeraTypes);
 			}
 			
