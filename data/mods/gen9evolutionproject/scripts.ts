@@ -4624,24 +4624,89 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 			}
 
+			if (!set.ability) set.ability = this.dex.species.get(set.species).abilities[0];
+			
 			// Tera Types
 			if (!set.teraType) {
-				// let's identify types from four categories:
-				// - moves on the set that can get the boost to 60 BP from Tera
-				// - moves on the set that aren't already STAB
-				// - types that complement the Pokémon's defensive profile
-				// - types with utility the set is requesting: Fire for preventing burns, Grass for preventing redirection, Ghost for preventing Fake Out, etc.
-				// then, we should see which types appear in the most categories and sample from those
+				// let's score types based on four categories:
+				let teraTypes = {
+					Fire: 0,
+					Water: 0,
+					Electric: 0,
+					Grass: 0,
+					Ice: 0,
+					Fighting: 0,
+					Poison: 0,
+					Ground: 0,
+					Flying: 0,
+					Psychic: 0,
+					Bug: 0,
+					Rock: 0,
+					Ghost: 0,
+					Dragon: 0,
+					Dark: 0,
+					Steel: 0,
+					Fairy: 0,
+					Normal: 0,
+				};
+				for (const move of set.moves) {
+					const moveData = this.dex.moves.get(move);
+					// - moves on the set that can get the boost to 60 BP from Tera
+					if (
+						moveData.basePower && !(moveData.basePower >= 60 || (moveData.basePower >= 40 && set.ability === 'Technician') || moveData.basePower <= 1) &&
+						!(moveData.priority && moveData.priority > 0) && !moveData.multihit
+					) teraTypes[move.type]++;
+					
+					// - moves on the set that aren't already STAB
+					if (moveData.category !== 'Status' && moveData.type !== 'Normal' && !this.dex.species.get(set.species).types.includes(moveData.type)) teraTypes[move.type]++;
+				}
+				
+				for (const type of teraTypes) {
+					// - types that complement the Pokémon's defensive profile:
+					// - this mostly means resistances to the Pokémon's weaknesses...
+					if (this.dex.species.get(set.species).randbats && this.dex.species.get(set.species).randbats.weaknesses) {
+						for (const weakness of this.dex.species.get(set.species).randbats.weaknesses) {
+							if (this.dex.species.get(set.species).randbats.resistances.includes(weakness) || this.dex.species.get(set.species).randbats.immunities.includes(weakness)) continue;
+							if (this.dex.data.TypeChart[type.toLowerCase()].damageTaken[weakness] >= 2) { // resistance or immunity
+								teraTypes[type]++;
+							}
+						}
+					}
+					// - ... but it also helps if the Pokémon has an immunity Ability that cancels out one of the new type's weaknesses
+					if (this.dex.species.get(set.species).randbats && this.dex.species.get(set.species).randbats.immunities) {
+						for (const immunity of this.dex.species.get(set.species).randbats.immunities) {
+							// we want immunity Abilities, not type immunities
+							if (this.dex.species.get(set.species).randbats.immunities[immunity] && this.dex.species.get(set.species).randbats.immunities[immunity].Ability && this.dex.species.get(set.species).randbats.immunities[immunity].Ability === set.ability) {
+								if (this.dex.data.TypeChart[type.toLowerCase()].damageTaken[immunity] === 1) { // weakness
+									teraTypes[type]++;
+								}
+							}
+						}
+					}
+					if (this.dex.species.get(set.species).randbats && this.dex.species.get(set.species).randbats.resistances) {
+						for (const resistance of this.dex.species.get(set.species).randbats.resistances) {
+							// we want immunity Abilities, not type immunities
+							if (this.dex.species.get(set.species).randbats.resistances[resistance] && this.dex.species.get(set.species).randbats.resistances[resistance].Ability && this.dex.species.get(set.species).randbats.resistances[resistance].Ability === set.ability) {
+								if (this.dex.data.TypeChart[type.toLowerCase()].damageTaken[resistance] === 1) { // weakness
+									teraTypes[type]++;
+								}
+							}
+						}
+					}
 
-				// failing that, just go with type 0 I guess--
-				set.teraType = this.dex.species.get(set.species).types[0];
+					// - types with utility the set is requesting: Fire for preventing burns, Grass for preventing redirection, Ghost for preventing Fake Out, etc.
+					if (set.roles) {
+						// nothing for now
+					}
+				}
+				
+				// we want to make sure this is pretty random-feeling, so... I'm leaning towards allowing for the second-highest score as well as the highest?
 			}
 			
 			if (!set.item) {
 				if (stage === 'LC') set.item = 'Eviolite';
 				else if (format !== 'vgc') set.item = 'Leftovers'; // VGC respects item clause
 			}
-			if (!set.ability) set.ability = this.dex.species.get(set.species).abilities[0];
 			if (!set.happiness && set.hasBeenRandomized) set.happiness = 255;
 			if (set.hasBeenRandomized) set.level = setLevel;
 			if (!set.shiny && set.hasBeenRandomized) set.shiny = shiny; // clarifying: shiny is a variable we defined earlier, not the string "shiny"
