@@ -4684,11 +4684,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								!(this.dex.species.get(set.species).randbats.resistances[checkType] && (
 									this.dex.species.get(set.species).randbats.resistances[checkType] === 'true' ||
 									(this.dex.species.get(set.species).randbats.resistances[checkType].Ability && this.dex.species.get(set.species).randbats.resistances[checkType].Ability.includes(set.ability))
-								) &&
+								)) &&
 								!(this.dex.species.get(set.species).randbats.immunities[checkType] && (
 									this.dex.species.get(set.species).randbats.immunities[checkType] === 'true' ||
 									(this.dex.species.get(set.species).randbats.immunities[checkType].Ability && this.dex.species.get(set.species).randbats.immunities[checkType].Ability.includes(set.ability))
-								)
+								))
 							) {
 								if (this.dex.data.TypeChart[teraType.toLowerCase()].damageTaken[checkType] >= 2) { // the Tera Type has a resistance or immunity
 									teraTypes[teraType]++;
