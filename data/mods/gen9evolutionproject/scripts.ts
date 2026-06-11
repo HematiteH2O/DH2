@@ -4662,7 +4662,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						
 						// - moves on the set that aren't already STAB
 						if (moveData.category !== 'Status' && !this.dex.species.get(set.species).types.includes(moveData.type)) {
-							if (!['Hidden Power', 'Judgment', 'Multi-Attack', 'Natural Gift', 'Revelation Dance', 'Struggle', 'Techno Blast', 'Terrain Pulse', 'Weather Ball'].includes(moveData.name)) teraTypes[moveData.type]++;
+							if (!['Hidden Power', 'Judgment', 'Multi-Attack', 'Natural Gift', 'Revelation Dance', 'Struggle', 'Techno Blast', 'Terrain Pulse', 'Weather Ball'].includes(moveData.name)) teraTypes[moveData.type] += 2;
 							if (!stellarCount.includes(moveData.type)) stellarCount.push(moveData.type);
 						}
 					}
@@ -4686,7 +4686,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							// we want immunity Abilities, not type immunities
 							if (this.dex.species.get(set.species).randbats.immunities[immunity] && this.dex.species.get(set.species).randbats.immunities[immunity].Ability && this.dex.species.get(set.species).randbats.immunities[immunity].Ability === set.ability) {
 								if (this.dex.data.TypeChart[type.toLowerCase()].damageTaken[immunity] === 1) { // weakness
-									teraTypes[type]++;
+									teraTypes[type] += 2;
 								}
 							}
 						}
@@ -4708,6 +4708,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					}
 				}
 				
+				console.log(set.species);
+				console.log(teraTypes);
+				
 				// we want to make sure this is pretty random-feeling, so... I'm leaning towards allowing for the second-highest score as well as the highest?
 				let validTeraTypes = [
 					'Fire', 'Water', 'Electric', 'Grass', 'Ice', 'Fighting', 'Poison', 'Ground', 'Flying', 'Psychic', 'Bug', 'Rock', 'Ghost', 'Dragon', 'Dark',
@@ -4717,6 +4720,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				for (const type of validTeraTypes) if (teraTypes[type] > maxScore) maxScore = teraTypes[type];
 				if (validTeraTypes.filter((type) => (teraTypes[type] && teraTypes[type] >= (maxScore -1) && teraTypes[type] > 0)).length) validTeraTypes = validTeraTypes.filter((type) => (teraTypes[type] && teraTypes[type] >= (maxScore -1) && teraTypes[type] > 0));
 				if (stellarCount.length && stellarCount.length > 3) validTeraTypes.push('Stellar');
+				console.log(maxScore);
+				console.log(validTeraTypes);
 				set.teraType = this.sample(validTeraTypes);
 			}
 			
