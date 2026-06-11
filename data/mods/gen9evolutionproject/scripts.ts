@@ -4628,7 +4628,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			
 			// Tera Types
 			if (!set.teraType) {
-				// let's score types based on four categories:
+				// first, we should score every type
 				let validTeraTypes = [
 					'Fire', 'Water', 'Electric', 'Grass', 'Ice', 'Fighting', 'Poison', 'Ground', 'Flying', 'Psychic', 'Bug', 'Rock', 'Ghost', 'Dragon', 'Dark',
 					'Steel', 'Fairy', 'Normal',
@@ -4654,6 +4654,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					Normal: 0,
 				};
 				let stellarCount = [];
+				
 				if (set.ability !== 'Normalize') {
 					for (const move of set.moves) {
 						const moveData = this.dex.moves.get(move);
@@ -4672,44 +4673,43 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					}
 					if (['Refrigerate', 'Aerilate', 'Pixilate', 'Galvanize', 'Dragonize'].includes(set.ability)) teraTypes.Normal = 0;
 				}
-				
-				for (const type of validTeraTypes) {
-					// - types that complement the Pokémon's defensive profile:
-					// - this mostly means resistances to the Pokémon's weaknesses...
-					if (this.dex.species.get(set.species).randbats && this.dex.species.get(set.species).randbats.weaknesses) {
-						for (const weakness in this.dex.species.get(set.species).randbats.weaknesses) {
-							if (this.dex.species.get(set.species).randbats.weaknesses[weakness] || this.dex.species.get(set.species).randbats.immunities[weakness]) continue;
-							if (this.dex.data.TypeChart[type.toLowerCase()].damageTaken[weakness] >= 2) { // resistance or immunity
-								teraTypes[type]++;
-							}
-						}
-					}
-					// - ... but it also helps if the Pokémon has an immunity Ability that cancels out one of the new type's weaknesses
-					if (this.dex.species.get(set.species).randbats && this.dex.species.get(set.species).randbats.immunities) {
-						for (const immunity in this.dex.species.get(set.species).randbats.immunities) {
-							// we want immunity Abilities, not type immunities
-							if (this.dex.species.get(set.species).randbats.immunities[immunity] && this.dex.species.get(set.species).randbats.immunities[immunity].Ability && this.dex.species.get(set.species).randbats.immunities[immunity].Ability === set.ability) {
-								if (this.dex.data.TypeChart[type.toLowerCase()].damageTaken[immunity] === 1) { // weakness
-									teraTypes[type] += 2;
-								}
-							}
-						}
-					}
-					if (this.dex.species.get(set.species).randbats && this.dex.species.get(set.species).randbats.resistances) {
-						for (const resistance in this.dex.species.get(set.species).randbats.resistances) {
-							// we want immunity Abilities, not type immunities
-							if (this.dex.species.get(set.species).randbats.resistances[resistance] && this.dex.species.get(set.species).randbats.resistances[resistance].Ability && this.dex.species.get(set.species).randbats.resistances[resistance].Ability === set.ability) {
-								if (this.dex.data.TypeChart[type.toLowerCase()].damageTaken[resistance] === 1) { // weakness
-									teraTypes[type]++;
-								}
-							}
-						}
-					}
 
-					// - types with utility the set is requesting: Fire for preventing burns, Grass for preventing redirection, Ghost for preventing Fake Out, etc.
-					if (set.roles) {
-						// nothing for now
+				if (this.dex.species.get(set.species).randbats) {
+					// - types that complement the Pokémon's defensive profile:
+					for (const teraType of validTeraTypes) {
+						for (const checkType of validTeraTypes) {
+							// - this mostly means resistances to the Pokémon's weaknesses...
+							if (
+								this.dex.species.get(set.species).randbats.weaknesses[checkType] &&
+								!(this.dex.species.get(set.species).randbats.resistances[checkType] && (
+									this.dex.species.get(set.species).randbats.resistances[checkType] === 'true' ||
+									(this.dex.species.get(set.species).randbats.resistances[checkType].Ability && this.dex.species.get(set.species).randbats.resistances[checkType].Ability.includes(set.ability))
+								) &&
+								!(this.dex.species.get(set.species).randbats.immunities[checkType] && (
+									this.dex.species.get(set.species).randbats.immunities[checkType] === 'true' ||
+									(this.dex.species.get(set.species).randbats.immunities[checkType].Ability && this.dex.species.get(set.species).randbats.immunities[checkType].Ability.includes(set.ability))
+								)
+							) {
+								if (this.dex.data.TypeChart[teraType.toLowerCase()].damageTaken[checkType] >= 2) { // the Tera Type has a resistance or immunity
+									teraTypes[teraType]++;
+								}
+							}
+							// - ... but it also helps if the Pokémon has an immunity or resistance Ability that cancels out one of the new type's weaknesses
+							if (
+								(this.dex.species.get(set.species).randbats.immunities[checkType] && this.dex.species.get(set.species).randbats.immunities[checkType].Ability && this.dex.species.get(set.species).randbats.immunities[checkType].Ability.contains(set.ability)) ||
+								(this.dex.species.get(set.species).randbats.resistances[checkType] && this.dex.species.get(set.species).randbats.resistances[checkType].Ability && this.dex.species.get(set.species).randbats.resistances[checkType].Ability.contains(set.ability))
+							) {
+								if (this.dex.data.TypeChart[teraType.toLowerCase()].damageTaken[checkType] === 1) { // the Tera Type has a weakness
+									teraTypes[teraType] += 2;
+								}
+							}
+						}
 					}
+				}
+
+				// - types with utility the set is requesting: Fire for preventing burns, Grass for preventing redirection, Ghost for preventing Fake Out, etc.
+				if (set.roles) {
+					// nothing for now
 				}
 				
 				console.log(set.species);
