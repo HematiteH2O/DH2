@@ -4696,8 +4696,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							}
 							// - ... but it also helps if the Pokémon has an immunity or resistance Ability that cancels out one of the new type's weaknesses
 							if (
-								(this.dex.species.get(set.species).randbats.immunities[checkType] && this.dex.species.get(set.species).randbats.immunities[checkType].Ability && this.dex.species.get(set.species).randbats.immunities[checkType].Ability.contains(set.ability)) ||
-								(this.dex.species.get(set.species).randbats.resistances[checkType] && this.dex.species.get(set.species).randbats.resistances[checkType].Ability && this.dex.species.get(set.species).randbats.resistances[checkType].Ability.contains(set.ability))
+								(this.dex.species.get(set.species).randbats.immunities[checkType] && this.dex.species.get(set.species).randbats.immunities[checkType].Ability && this.dex.species.get(set.species).randbats.immunities[checkType].Ability.includes(set.ability)) ||
+								(this.dex.species.get(set.species).randbats.resistances[checkType] && this.dex.species.get(set.species).randbats.resistances[checkType].Ability && this.dex.species.get(set.species).randbats.resistances[checkType].Ability.includes(set.ability))
 							) {
 								if (this.dex.data.TypeChart[teraType.toLowerCase()].damageTaken[checkType] === 1) { // the Tera Type has a weakness
 									teraTypes[teraType] += 2;
