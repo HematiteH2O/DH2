@@ -4654,18 +4654,18 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					// - moves on the set that can get the boost to 60 BP from Tera
 					if (
 						moveData.basePower && !(moveData.basePower >= 60 || (moveData.basePower >= 40 && set.ability === 'Technician') || moveData.basePower <= 1) &&
-						!(moveData.priority && moveData.priority > 0) && !moveData.multihit
+						!(moveData.priority && moveData.priority > 0) && !moveData.multihit && moveData.name !== 'Weather Ball'
 					) teraTypes[move.type]++;
 					
 					// - moves on the set that aren't already STAB
 					if (moveData.category !== 'Status' && moveData.type !== 'Normal' && !this.dex.species.get(set.species).types.includes(moveData.type)) teraTypes[move.type]++;
 				}
 				
-				for (const type of teraTypes) {
+				for (const type in teraTypes) {
 					// - types that complement the Pokémon's defensive profile:
 					// - this mostly means resistances to the Pokémon's weaknesses...
 					if (this.dex.species.get(set.species).randbats && this.dex.species.get(set.species).randbats.weaknesses) {
-						for (const weakness of this.dex.species.get(set.species).randbats.weaknesses) {
+						for (const weakness in this.dex.species.get(set.species).randbats.weaknesses) {
 							if (this.dex.species.get(set.species).randbats.resistances.includes(weakness) || this.dex.species.get(set.species).randbats.immunities.includes(weakness)) continue;
 							if (this.dex.data.TypeChart[type.toLowerCase()].damageTaken[weakness] >= 2) { // resistance or immunity
 								teraTypes[type]++;
@@ -4674,7 +4674,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					}
 					// - ... but it also helps if the Pokémon has an immunity Ability that cancels out one of the new type's weaknesses
 					if (this.dex.species.get(set.species).randbats && this.dex.species.get(set.species).randbats.immunities) {
-						for (const immunity of this.dex.species.get(set.species).randbats.immunities) {
+						for (const immunity in this.dex.species.get(set.species).randbats.immunities) {
 							// we want immunity Abilities, not type immunities
 							if (this.dex.species.get(set.species).randbats.immunities[immunity] && this.dex.species.get(set.species).randbats.immunities[immunity].Ability && this.dex.species.get(set.species).randbats.immunities[immunity].Ability === set.ability) {
 								if (this.dex.data.TypeChart[type.toLowerCase()].damageTaken[immunity] === 1) { // weakness
@@ -4684,7 +4684,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						}
 					}
 					if (this.dex.species.get(set.species).randbats && this.dex.species.get(set.species).randbats.resistances) {
-						for (const resistance of this.dex.species.get(set.species).randbats.resistances) {
+						for (const resistance in this.dex.species.get(set.species).randbats.resistances) {
 							// we want immunity Abilities, not type immunities
 							if (this.dex.species.get(set.species).randbats.resistances[resistance] && this.dex.species.get(set.species).randbats.resistances[resistance].Ability && this.dex.species.get(set.species).randbats.resistances[resistance].Ability === set.ability) {
 								if (this.dex.data.TypeChart[type.toLowerCase()].damageTaken[resistance] === 1) { // weakness
