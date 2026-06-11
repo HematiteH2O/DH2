@@ -4666,7 +4666,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					// - this mostly means resistances to the Pokémon's weaknesses...
 					if (this.dex.species.get(set.species).randbats && this.dex.species.get(set.species).randbats.weaknesses) {
 						for (const weakness in this.dex.species.get(set.species).randbats.weaknesses) {
-							if (this.dex.species.get(set.species).randbats.resistances.includes(weakness) || this.dex.species.get(set.species).randbats.immunities.includes(weakness)) continue;
+							if (this.dex.species.get(set.species).randbats.weaknesses[weakness] || this.dex.species.get(set.species).randbats.immunities[weakness]) continue;
 							if (this.dex.data.TypeChart[type.toLowerCase()].damageTaken[weakness] >= 2) { // resistance or immunity
 								teraTypes[type]++;
 							}
