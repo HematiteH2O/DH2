@@ -4650,19 +4650,23 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					Normal: 0,
 				};
 				let stellarCount = [];
-				for (const move of set.moves) {
-					const moveData = this.dex.moves.get(move);
-					// - moves on the set that can get the boost to 60 BP from Tera
-					if (
-						moveData.basePower && !(moveData.basePower >= 60 || (moveData.basePower >= 40 && set.ability === 'Technician') || moveData.basePower <= 1) &&
-						!(moveData.priority && moveData.priority > 0) && !moveData.multihit && moveData.name !== 'Weather Ball'
-					) teraTypes[moveData.type]++;
-					
-					// - moves on the set that aren't already STAB
-					if (moveData.category !== 'Status' && moveData.type !== 'Normal' && !this.dex.species.get(set.species).types.includes(moveData.type)) {
-						teraTypes[moveData.type]++;
-						if (!stellarCount.includes(moveData.type)) stellarCount.push(moveData.type);
+				if (set.ability !== 'Normalize') {
+					for (const move of set.moves) {
+						const moveData = this.dex.moves.get(move);
+						// - moves on the set that can get the boost to 60 BP from Tera
+						if (
+							moveData.basePower && !(moveData.basePower >= 60 || (moveData.basePower >= 40 && set.ability === 'Technician') || moveData.basePower <= 1) &&
+							!(moveData.priority && moveData.priority > 0) && !moveData.multihit &&
+							!['Hidden Power', 'Judgment', 'Multi-Attack', 'Natural Gift', 'Revelation Dance', 'Struggle', 'Techno Blast', 'Terrain Pulse', 'Weather Ball'].includes(moveData.name)
+						) teraTypes[moveData.type]++;
+						
+						// - moves on the set that aren't already STAB
+						if (moveData.category !== 'Status' && !this.dex.species.get(set.species).types.includes(moveData.type)) {
+							if (!['Hidden Power', 'Judgment', 'Multi-Attack', 'Natural Gift', 'Revelation Dance', 'Struggle', 'Techno Blast', 'Terrain Pulse', 'Weather Ball'].includes(moveData.name)) teraTypes[moveData.type]++;
+							if (!stellarCount.includes(moveData.type)) stellarCount.push(moveData.type);
+						}
 					}
+					if (['Refrigerate', 'Aerilate', 'Pixilate', 'Galvanize', 'Dragonize'].includes(set.ability)) teraTypes.Normal = 0;
 				}
 				
 				for (const type in teraTypes) {
