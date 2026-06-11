@@ -4629,6 +4629,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			// Tera Types
 			if (!set.teraType) {
 				// let's score types based on four categories:
+				let validTeraTypes = [
+					'Fire', 'Water', 'Electric', 'Grass', 'Ice', 'Fighting', 'Poison', 'Ground', 'Flying', 'Psychic', 'Bug', 'Rock', 'Ghost', 'Dragon', 'Dark',
+					'Steel', 'Fairy', 'Normal',
+				];
 				let teraTypes = {
 					Fire: 0,
 					Water: 0,
@@ -4669,7 +4673,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (['Refrigerate', 'Aerilate', 'Pixilate', 'Galvanize', 'Dragonize'].includes(set.ability)) teraTypes.Normal = 0;
 				}
 				
-				for (const type in teraTypes) {
+				for (const type of validTeraTypes) {
 					// - types that complement the Pokémon's defensive profile:
 					// - this mostly means resistances to the Pokémon's weaknesses...
 					if (this.dex.species.get(set.species).randbats && this.dex.species.get(set.species).randbats.weaknesses) {
@@ -4712,10 +4716,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				console.log(teraTypes);
 				
 				// we want to make sure this is pretty random-feeling, so... I'm leaning towards allowing for the second-highest score as well as the highest?
-				let validTeraTypes = [
-					'Fire', 'Water', 'Electric', 'Grass', 'Ice', 'Fighting', 'Poison', 'Ground', 'Flying', 'Psychic', 'Bug', 'Rock', 'Ghost', 'Dragon', 'Dark',
-					'Steel', 'Fairy', 'Normal',
-				];
 				let maxScore = 0;
 				for (const type of validTeraTypes) if (teraTypes[type] > maxScore) maxScore = teraTypes[type];
 				if (validTeraTypes.filter((type) => (teraTypes[type] && teraTypes[type] >= (maxScore -1) && teraTypes[type] > 0)).length) validTeraTypes = validTeraTypes.filter((type) => (teraTypes[type] && teraTypes[type] >= (maxScore -1) && teraTypes[type] > 0));
