@@ -4849,7 +4849,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						if (moveData.accuracy && moveData.accuracy <= 50 && set.ability !== 'No Guard') pushItems.push('Blunder Policy');
 						if (moveData.multihit) {
 							if (moveData.multiaccuracy) pushItems.push('Wide Lens');
-							else if (moveData.multihit === [2, 5]) pushItems.push('Loaded Dice');
+							else if (Array.isArray(moveData.multihit)) pushItems.push('Loaded Dice');
 							
 							if (moveData.flags['contact']) {
 								if (moveData.flags['punch']) pushItems.push('Punching Glove');
