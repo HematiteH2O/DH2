@@ -4864,7 +4864,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// Covert Cloak and Clear Amulet
 				if (format === 'vgc') {
 					if (set.roles && set.roles.includes('physical') && !set.roles.includes('antiintimidate')) {
-						if (set.roles.includes('physicalsetup') set.possibleItems.tier0.push('Clear Amulet');
+						if (set.roles.includes('physicalsetup')) set.possibleItems.tier0.push('Clear Amulet');
 						else set.possibleItems.tier2.push('Clear Amulet');
 					}
 					if (
@@ -4895,83 +4895,44 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					// if you aren't weak to Rock + are HP- or Defense-invested + resist at least two of Dark, Fighting and Bug, or resist one and have Regenerator?
 					if (
 						(set.evs.hp + set.evs.def) >= 248 && // must be HP or Defense-invested
+						
 						// must resist at least one of Dark, Fighting and Bug
 						(
 							(
-								!this.dex.species.get(set.species).randbats.weaknesses.Dark &&
-								((this.dex.species.get(set.species).randbats.resistances.Dark && (
+								this.dex.species.get(set.species).randbats.resistances.Dark && (
 									this.dex.species.get(set.species).randbats.resistances.Dark === 'true' ||
 									(this.dex.species.get(set.species).randbats.resistances.Dark.Ability && this.dex.species.get(set.species).randbats.resistances.Dark.Ability.includes(set.ability))
-								)) ||
-								(this.dex.species.get(set.species).randbats.immunities.Dark && (
-									this.dex.species.get(set.species).randbats.immunities.Dark === 'true' ||
-									(this.dex.species.get(set.species).randbats.immunities.Dark.Ability && this.dex.species.get(set.species).randbats.immunities.Dark.Ability.includes(set.ability))
-								)))
+								)
 							) || (
-								!this.dex.species.get(set.species).randbats.weaknesses.Fighting &&
-								((this.dex.species.get(set.species).randbats.resistances.Fighting && (
+								this.dex.species.get(set.species).randbats.resistances.Fighting && (
 									this.dex.species.get(set.species).randbats.resistances.Fighting === 'true' ||
 									(this.dex.species.get(set.species).randbats.resistances.Fighting.Ability && this.dex.species.get(set.species).randbats.resistances.Fighting.Ability.includes(set.ability))
-								)) ||
-								(this.dex.species.get(set.species).randbats.immunities.Fighting && (
-									this.dex.species.get(set.species).randbats.immunities.Fighting === 'true' ||
-									(this.dex.species.get(set.species).randbats.immunities.Fighting.Ability && this.dex.species.get(set.species).randbats.immunities.Fighting.Ability.includes(set.ability))
-								)))
+								)
 							) || (
-								!this.dex.species.get(set.species).randbats.weaknesses.Bug &&
-								((this.dex.species.get(set.species).randbats.resistances.Bug && (
+								this.dex.species.get(set.species).randbats.resistances.Bug && (
 									this.dex.species.get(set.species).randbats.resistances.Bug === 'true' ||
 									(this.dex.species.get(set.species).randbats.resistances.Bug.Ability && this.dex.species.get(set.species).randbats.resistances.Bug.Ability.includes(set.ability))
-								)) ||
-								(this.dex.species.get(set.species).randbats.immunities.Bug && (
-									this.dex.species.get(set.species).randbats.immunities.Bug === 'true' ||
-									(this.dex.species.get(set.species).randbats.immunities.Bug.Ability && this.dex.species.get(set.species).randbats.immunities.Bug.Ability.includes(set.ability))
-								)))
+								)
 							)
 						) &&
+						
 						// must not be weak to Stealth Rock
-						(['Regenerator', 'Magic Guard'].includes(set.ability) || !(
-							this.dex.species.get(set.species).randbats.weaknesses.Rock &&
-							!(this.dex.species.get(set.species).randbats.resistances.Rock && (
-								this.dex.species.get(set.species).randbats.resistances.Rock === 'true' ||
-								(this.dex.species.get(set.species).randbats.resistances.Rock.Ability && this.dex.species.get(set.species).randbats.resistances.Rock.Ability.includes(set.ability))
-							)) &&
-							!(this.dex.species.get(set.species).randbats.immunities.Rock && (
-								this.dex.species.get(set.species).randbats.immunities.Rock === 'true' ||
-								(this.dex.species.get(set.species).randbats.immunities.Rock.Ability && this.dex.species.get(set.species).randbats.immunities.Rock.Ability.includes(set.ability))
-							))
-						))
+						(['Regenerator', 'Magic Guard'].includes(set.ability) || !(this.dex.species.get(set.species).randbats.weaknesses.Rock))
 					) set.possibleItems.tier2.push('Rocky Helmet');
 				} else {
 					// if you have redirection?
+					if (set.roles.includes('redirection')) set.possibleItems.tier2.push('Rocky Helmet');
 				}
 				// Heavy-Duty Boots
 				if (format === 'singles' && set.ability !== 'Magic Guard') {
 					if (set.roles.includes('pivoting') || set.roles.includes('hazardcontrol')) {
 						if (
 							this.dex.species.get(set.species) && this.dex.species.get(set.species).randbats &&
-							this.dex.species.get(set.species).randbats.weaknesses.Rock || (
-								!(this.dex.species.get(set.species).randbats.resistances.Rock && (
-									this.dex.species.get(set.species).randbats.resistances.Rock === 'true' ||
-									(this.dex.species.get(set.species).randbats.resistances.Rock.Ability && this.dex.species.get(set.species).randbats.resistances.Rock.Ability.includes(set.ability))
-								)) &&
-								!(this.dex.species.get(set.species).randbats.immunities.Rock && (
-									this.dex.species.get(set.species).randbats.immunities.Rock === 'true' ||
-									(this.dex.species.get(set.species).randbats.immunities.Rock.Ability && this.dex.species.get(set.species).randbats.immunities.Rock.Ability.includes(set.ability))
-								))
-							)
+							this.dex.species.get(set.species).randbats.weaknesses.Rock
 						) set.possibleItems.tier0.push('Heavy-Duty Boots'); // if you're a pivot or hazard control and not Rock-resistant
 					} else if ( // if you're not a pivot or hazard control, but you're Rock-weak
 						this.dex.species.get(set.species) && this.dex.species.get(set.species).randbats &&
-						this.dex.species.get(set.species).randbats.weaknesses.Rock &&
-						!(this.dex.species.get(set.species).randbats.resistances.Rock && (
-							this.dex.species.get(set.species).randbats.resistances.Rock === 'true' ||
-							(this.dex.species.get(set.species).randbats.resistances.Rock.Ability && this.dex.species.get(set.species).randbats.resistances.Rock.Ability.includes(set.ability))
-						)) &&
-						!(this.dex.species.get(set.species).randbats.immunities.Rock && (
-							this.dex.species.get(set.species).randbats.immunities.Rock === 'true' ||
-							(this.dex.species.get(set.species).randbats.immunities.Rock.Ability && this.dex.species.get(set.species).randbats.immunities.Rock.Ability.includes(set.ability))
-						))
+						this.dex.species.get(set.species).randbats.weaknesses.Rock
 					) {
 						set.possibleItems.tier2.push('Heavy-Duty Boots');
 					}
