@@ -4826,6 +4826,156 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// tier 1 - somewhat context-specific items
 
 				// tier 2 - generic, good items; most likely to pull from here in general
+				// Leftovers / Black Sludge
+				if (format === 'singles') {
+					if (this.dex.species.get(set.species) && this.dex.species.get(set.species).types.includes('Poison')) set.possibleItems.tier2.push('Black Sludge');
+					else set.possibleItems.tier2.push('Leftovers');
+				}
+				// Sitrus / pinch berries on bulky users
+				if (format === 'vgc' && (set.evs.hp + set.evs.def + set.evs.spd) > 340) {
+					if (!['Bold', 'Modest', 'Calm', 'Timid'].includes(set.nature)) set.possibleItems.tier2.push('Figy Berry');
+					if (!['Lonely', 'Mild', 'Gentle', 'Hasty'].includes(set.nature)) set.possibleItems.tier2.push('Iapapa Berry');
+					if (!['Adamant', 'Impish', 'Careful', 'Jolly'].includes(set.nature)) set.possibleItems.tier2.push('Wiki Berry');
+					if (!['Naughty', 'Lax', 'Rash', 'Naive'].includes(set.nature)) set.possibleItems.tier2.push('Aguav Berry');
+					if (!['Brave', 'Relaxed', 'Quiet', 'Sassy'].includes(set.nature)) set.possibleItems.tier2.push('Mago Berry');
+				}
+				// Assault Vest and Choice items
+				let statusMoveCount = 0;
+				let drainMoveCount = 0;
+				let choiceItem = true;
+				for (const move of set.moves) {
+					if (!this.dex.moves.get(move)) continue;
+					if (this.dex.moves.get(move).category === 'Status' && move !== 'Me First') statusMoveCount++;
+					if (this.dex.moves.get(move).drain) drainMoveCount++;
+					if (this.dex.moves.get(move).category === 'Status' && ![
+						'Healing Wish', 'Lunar Dance', 'Memento', 'Parting Shot', 'Chilly Reception',
+						'Trick', 'Switcheroo', 'Bestow',
+						'Defog', 'Tidy Up',
+						'Nature Power', 'Sleep Talk',
+					].includes(move)) choiceItem = false;
+					if (['Fake Out', 'First Impression'].includes(move)) choiceItem = false;
+				}
+				if (!statusMoveCount) set.possibleItems.tier2.push('Assault Vest');
+				if (choiceItem && set.roles.includes('pivoting')) {
+					if (set.roles.includes('physical') && !set.roles.includes('special')) set.possibleItems.tier2.push('Choice Band');
+					if (set.roles.includes('special') && !set.roles.includes('physical')) set.possibleItems.tier2.push('Choice Specs');
+					if (set.evs.spe >= 248) set.possibleItems.tier2.push('Choice Scarf');
+				}
+				// Covert Cloak and Clear Amulet
+				if (format === 'vgc') {
+					if (set.roles && set.roles.includes('physical') && !set.roles.includes('antiintimidate')) {
+						if (set.roles.includes('physicalsetup') set.possibleItems.tier0.push('Clear Amulet');
+						else set.possibleItems.tier2.push('Clear Amulet');
+					}
+					if (
+						this.dex.species.get(set.species).randbats && !this.dex.species.get(set.species).randbats.types.includes('Ghost') && set.teraType !== 'Ghost' &&
+						!set.roles.includes('antipriority')
+					) {
+						if (set.roles.includes('speedcontrol') || set.roles.includes('trickroom')) set.possibleItems.tier0.push('Covert Cloak');
+						else set.possibleItems.tier2.push('Covert Cloak');
+					}
+				}
+				// Focus Sash
+				if ((set.evs.hp + set.evs.def + set.evs.spd) <= 16) {
+					if (format === 'vgc') {
+						if (set.evs.spe >= 248 || set.ability === 'Prankster') set.possibleItems.tier2.push('Focus Sash');
+					} else {
+						if (set.roles.includes('entryhazard') && statusMoveCount > 1) set.possibleItems.tier2.push('Focus Sash');
+					}
+				}
+				// Life Orb
+				if (set.roles.includes('physical') || set.roles.includes('special')) {
+					// fast, offensive Pokémon, preferably with some kind of recovery
+					if (['Magic Guard', 'Regenerator'].includes(set.ability)) {
+						set.possibleItems.tier0.push('Life Orb');
+					} else if (drainMoveCount) set.possibleItems.tier2.push('Life Orb');
+				}
+				// Rocky Helmet
+				if (format === 'singles') {
+					// if you aren't weak to Rock + are HP- or Defense-invested + resist at least two of Dark, Fighting and Bug, or resist one and have Regenerator?
+					if (
+						(set.evs.hp + set.evs.def) >= 248 && // must be HP or Defense-invested
+						// must resist at least one of Dark, Fighting and Bug
+						(
+							(
+								!this.dex.species.get(set.species).randbats.weaknesses.Dark &&
+								((this.dex.species.get(set.species).randbats.resistances.Dark && (
+									this.dex.species.get(set.species).randbats.resistances.Dark === 'true' ||
+									(this.dex.species.get(set.species).randbats.resistances.Dark.Ability && this.dex.species.get(set.species).randbats.resistances.Dark.Ability.includes(set.ability))
+								)) ||
+								(this.dex.species.get(set.species).randbats.immunities.Dark && (
+									this.dex.species.get(set.species).randbats.immunities.Dark === 'true' ||
+									(this.dex.species.get(set.species).randbats.immunities.Dark.Ability && this.dex.species.get(set.species).randbats.immunities.Dark.Ability.includes(set.ability))
+								)))
+							) || (
+								!this.dex.species.get(set.species).randbats.weaknesses.Fighting &&
+								((this.dex.species.get(set.species).randbats.resistances.Fighting && (
+									this.dex.species.get(set.species).randbats.resistances.Fighting === 'true' ||
+									(this.dex.species.get(set.species).randbats.resistances.Fighting.Ability && this.dex.species.get(set.species).randbats.resistances.Fighting.Ability.includes(set.ability))
+								)) ||
+								(this.dex.species.get(set.species).randbats.immunities.Fighting && (
+									this.dex.species.get(set.species).randbats.immunities.Fighting === 'true' ||
+									(this.dex.species.get(set.species).randbats.immunities.Fighting.Ability && this.dex.species.get(set.species).randbats.immunities.Fighting.Ability.includes(set.ability))
+								)))
+							) || (
+								!this.dex.species.get(set.species).randbats.weaknesses.Bug &&
+								((this.dex.species.get(set.species).randbats.resistances.Bug && (
+									this.dex.species.get(set.species).randbats.resistances.Bug === 'true' ||
+									(this.dex.species.get(set.species).randbats.resistances.Bug.Ability && this.dex.species.get(set.species).randbats.resistances.Bug.Ability.includes(set.ability))
+								)) ||
+								(this.dex.species.get(set.species).randbats.immunities.Bug && (
+									this.dex.species.get(set.species).randbats.immunities.Bug === 'true' ||
+									(this.dex.species.get(set.species).randbats.immunities.Bug.Ability && this.dex.species.get(set.species).randbats.immunities.Bug.Ability.includes(set.ability))
+								)))
+							)
+						) &&
+						// must not be weak to Stealth Rock
+						(['Regenerator', 'Magic Guard'].includes(set.ability) || !(
+							this.dex.species.get(set.species).randbats.weaknesses.Rock &&
+							!(this.dex.species.get(set.species).randbats.resistances.Rock && (
+								this.dex.species.get(set.species).randbats.resistances.Rock === 'true' ||
+								(this.dex.species.get(set.species).randbats.resistances.Rock.Ability && this.dex.species.get(set.species).randbats.resistances.Rock.Ability.includes(set.ability))
+							)) &&
+							!(this.dex.species.get(set.species).randbats.immunities.Rock && (
+								this.dex.species.get(set.species).randbats.immunities.Rock === 'true' ||
+								(this.dex.species.get(set.species).randbats.immunities.Rock.Ability && this.dex.species.get(set.species).randbats.immunities.Rock.Ability.includes(set.ability))
+							))
+						))
+					) set.possibleItems.tier2.push('Rocky Helmet');
+				} else {
+					// if you have redirection?
+				}
+				// Heavy-Duty Boots
+				if (format === 'singles' && set.ability !== 'Magic Guard') {
+					if (set.roles.includes('pivoting') || set.roles.includes('hazardcontrol')) {
+						if (
+							this.dex.species.get(set.species) && this.dex.species.get(set.species).randbats &&
+							this.dex.species.get(set.species).randbats.weaknesses.Rock || (
+								!(this.dex.species.get(set.species).randbats.resistances.Rock && (
+									this.dex.species.get(set.species).randbats.resistances.Rock === 'true' ||
+									(this.dex.species.get(set.species).randbats.resistances.Rock.Ability && this.dex.species.get(set.species).randbats.resistances.Rock.Ability.includes(set.ability))
+								)) &&
+								!(this.dex.species.get(set.species).randbats.immunities.Rock && (
+									this.dex.species.get(set.species).randbats.immunities.Rock === 'true' ||
+									(this.dex.species.get(set.species).randbats.immunities.Rock.Ability && this.dex.species.get(set.species).randbats.immunities.Rock.Ability.includes(set.ability))
+								))
+							)
+						) set.possibleItems.tier0.push('Heavy-Duty Boots'); // if you're a pivot or hazard control and not Rock-resistant
+					} else if ( // if you're not a pivot or hazard control, but you're Rock-weak
+						this.dex.species.get(set.species) && this.dex.species.get(set.species).randbats &&
+						this.dex.species.get(set.species).randbats.weaknesses.Rock &&
+						!(this.dex.species.get(set.species).randbats.resistances.Rock && (
+							this.dex.species.get(set.species).randbats.resistances.Rock === 'true' ||
+							(this.dex.species.get(set.species).randbats.resistances.Rock.Ability && this.dex.species.get(set.species).randbats.resistances.Rock.Ability.includes(set.ability))
+						)) &&
+						!(this.dex.species.get(set.species).randbats.immunities.Rock && (
+							this.dex.species.get(set.species).randbats.immunities.Rock === 'true' ||
+							(this.dex.species.get(set.species).randbats.immunities.Rock.Ability && this.dex.species.get(set.species).randbats.immunities.Rock.Ability.includes(set.ability))
+						))
+					) {
+						set.possibleItems.tier2.push('Heavy-Duty Boots');
+					}
+				}
 
 				// tier 3 - niche items
 
