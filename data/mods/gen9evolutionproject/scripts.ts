@@ -3313,6 +3313,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				pokemon.requestedSupport = this.dex.species.get(pokemon.species).randbats[format].requestedSupport;
 				pokemon.acceptedSupport = this.dex.species.get(pokemon.species).randbats[format].acceptedSupport;
 				pokemon.coveredStabs = [];
+				pokemon.attackingTypes = {};
 				pokemon.remainingStabTypes = [];
 				pokemon.remainingStabMoves = [];
 				
@@ -3344,6 +3345,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				requestedSupport: this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].requestedSupport,
 				acceptedSupport: this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].acceptedSupport,
 				coveredStabs: [],
+				attackingTypes: {},
 				remainingStabTypes: [],
 				remainingStabMoves: [],
 				// we also don't want to reroll this first pick later! the rest of the team can be built around it
@@ -3381,6 +3383,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				requestedSupport: this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].requestedSupport,
 				acceptedSupport: this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].acceptedSupport,
 				coveredStabs: [],
+				attackingTypes: {},
 				remainingStabTypes: [],
 				remainingStabMoves: [],
 				doNotReroll: null,
@@ -3642,6 +3645,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				requestedSupport: this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].requestedSupport,
 				acceptedSupport: this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].acceptedSupport,
 				coveredStabs: [],
+				attackingTypes: {},
 				remainingStabTypes: [],
 				remainingStabMoves: [],
 			};
@@ -3667,6 +3671,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 				if (randomized) set.hasBeenRandomized = true;
 				set.coveredStabs = [];
+				set.attackingTypes = {};
 				set.movePowers = {};
 				set.remainingStabTypes = [];
 				set.remainingStabMoves = [];
@@ -3918,6 +3923,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					// the fragment is already complete, so I should also check it off of the role tally and then delete it from the fragments list
 					if (fragment.role) {
 						console.log(`${fragment.fragmentPriority} (default) - ${fragment.pokemon.name} has completed ${fragment.role} (${fragment.baseMove ? fragment.baseMove : ' '})`);
+						if (fragment.moveBasePower && fragment.moveBasePower > 0) {
+							if (!fragment.pokemon.attackingTypes[fragment.moveType]) fragment.pokemon.attackingTypes[fragment.moveType] = [];
+							if (!fragment.pokemon.attackingTypes[fragment.moveType].includes(fragment.baseMove)) fragment.pokemon.attackingTypes[fragment.moveType].push(fragment.baseMove);
+						}
 						if (!['mainstab', 'protection', 'personal'].includes(fragment.role)) {
 							if (!teamOfferedSupport[fragment.role]) teamOfferedSupport[fragment.role] = [];
 							if (!teamOfferedSupport[fragment.role].includes(fragment.pokemon)) teamOfferedSupport[fragment.role].push(fragment.pokemon);
@@ -4318,6 +4327,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 				if (chosenFragment.role) {
 					console.log(`${chosenFragment.fragmentPriority}${chosenFragment.highpriority ? ' (highprio)' : ' '}${chosenFragment.buddycomplete ? ' (buddycomplete)' : ' '} - ${chosenFragment.pokemon.name} assigned ${chosenFragment.role} (${chosenFragment.baseMove ? chosenFragment.baseMove : ' '})`);
+					if (chosenFragment.moveBasePower && chosenFragment.moveBasePower > 0) {
+						if (!chosenFragment.pokemon.attackingTypes[chosenFragment.moveType]) chosenFragment.pokemon.attackingTypes[chosenFragment.moveType] = [];
+						if (!chosenFragment.pokemon.attackingTypes[chosenFragment.moveType].includes(chosenFragment.baseMove)) chosenFragment.pokemon.attackingTypes[chosenFragment.moveType].push(chosenFragment.baseMove);
+					}
 					if (!['mainstab', 'protection', 'personal'].includes(chosenFragment.role)) {
 						if (!teamOfferedSupport[chosenFragment.role]) teamOfferedSupport[chosenFragment.role] = [];
 						if (!teamOfferedSupport[chosenFragment.role].includes(chosenFragment.pokemon)) teamOfferedSupport[chosenFragment.role].push(chosenFragment.pokemon);
@@ -4374,7 +4387,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			if (set.moves.length > 1) {
 				
 				// first, sort by set.movePowers if applicable
-				console.log(set.movePowers);
 				let bpAltMoveOrder = [];
 				let failsafe = false;
 				while (bpAltMoveOrder.length < set.moves.length) {
@@ -4866,6 +4878,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (set.roles && set.roles.includes('physical') && !set.roles.includes('antiintimidate')) {
 						if (set.roles.includes('physicalsetup')) set.possibleItems.tier0.push('Clear Amulet');
 						else set.possibleItems.tier2.push('Clear Amulet');
+						// also setting White Herb for tier 3
+						set.possibleItems.tier3.push('White Herb');
 					}
 					if (
 						this.dex.species.get(set.species).randbats && !this.dex.species.get(set.species).randbats.types.includes('Ghost') && set.teraType !== 'Ghost' &&
@@ -4939,7 +4953,73 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 
 				// tier 3 - niche items
-
+				// type-boosting items
+				if (set.roles.includes('physical') || set.roles.includes('special')) {
+					if (set.attackingTypes.Fire && set.attackingTypes.Fire.length > 1) set.possibleItems.tier3.push('Charcoal');
+					if (set.attackingTypes.Fire && set.attackingTypes.Fire.length > 1) set.possibleItems.tier3.push('Flame Plate');
+					
+					if (set.attackingTypes.Water && set.attackingTypes.Water.length > 1) set.possibleItems.tier3.push('Mystic Water');
+					if (set.attackingTypes.Water && set.attackingTypes.Water.length > 1) set.possibleItems.tier3.push('Splash Plate');
+					if (set.attackingTypes.Water && set.attackingTypes.Water.length > 1) set.possibleItems.tier3.push('Wave Incense');
+					if (set.attackingTypes.Water && set.attackingTypes.Water.length > 1) set.possibleItems.tier3.push('Sea Incense');
+					
+					if (set.attackingTypes.Electric && set.attackingTypes.Electric.length > 1) set.possibleItems.tier3.push('Magnet');
+					if (set.attackingTypes.Electric && set.attackingTypes.Electric.length > 1) set.possibleItems.tier3.push('Zap Plate');
+					
+					if (set.attackingTypes.Grass && set.attackingTypes.Grass.length > 1) set.possibleItems.tier3.push('Miracle Seed');
+					if (set.attackingTypes.Grass && set.attackingTypes.Grass.length > 1) set.possibleItems.tier3.push('Meadow Plate');
+					if (set.attackingTypes.Grass && set.attackingTypes.Grass.length > 1) set.possibleItems.tier3.push('Rose Incense');
+					
+					if (set.attackingTypes.Ice && set.attackingTypes.Ice.length > 1) set.possibleItems.tier3.push('Never-Melt Ice');
+					if (set.attackingTypes.Ice && set.attackingTypes.Ice.length > 1) set.possibleItems.tier3.push('Icicle Plate');
+					
+					if (set.attackingTypes.Fighting && set.attackingTypes.Fighting.length > 1) set.possibleItems.tier3.push('Black Belt');
+					if (set.attackingTypes.Fighting && set.attackingTypes.Fighting.length > 1) set.possibleItems.tier3.push('Fist Plate');
+					
+					if (set.attackingTypes.Poison && set.attackingTypes.Poison.length > 1) set.possibleItems.tier3.push('Poison Barb');
+					if (set.attackingTypes.Poison && set.attackingTypes.Poison.length > 1) set.possibleItems.tier3.push('Toxic Plate');
+					
+					if (set.attackingTypes.Ground && set.attackingTypes.Ground.length > 1) set.possibleItems.tier3.push('Soft Sand');
+					if (set.attackingTypes.Ground && set.attackingTypes.Ground.length > 1) set.possibleItems.tier3.push('Earth Plate');
+					
+					if (set.attackingTypes.Flying && set.attackingTypes.Flying.length > 1) set.possibleItems.tier3.push('Sharp Beak');
+					if (set.attackingTypes.Flying && set.attackingTypes.Flying.length > 1) set.possibleItems.tier3.push('Sky Plate');
+					
+					if (set.attackingTypes.Psychic && set.attackingTypes.Psychic.length > 1) set.possibleItems.tier3.push('Twisted Spoon');
+					if (set.attackingTypes.Psychic && set.attackingTypes.Psychic.length > 1) set.possibleItems.tier3.push('Mind Plate');
+					if (set.attackingTypes.Psychic && set.attackingTypes.Psychic.length > 1) set.possibleItems.tier3.push('Odd Incense');
+					
+					if (set.attackingTypes.Bug && set.attackingTypes.Bug.length > 1) set.possibleItems.tier3.push('Silver Powder');
+					if (set.attackingTypes.Bug && set.attackingTypes.Bug.length > 1) set.possibleItems.tier3.push('Insect Plate');
+					
+					if (set.attackingTypes.Rock && set.attackingTypes.Rock.length > 1) set.possibleItems.tier3.push('Hard Stone');
+					if (set.attackingTypes.Rock && set.attackingTypes.Rock.length > 1) set.possibleItems.tier3.push('Stone Plate');
+					if (set.attackingTypes.Rock && set.attackingTypes.Rock.length > 1) set.possibleItems.tier3.push('Rock Incense');
+					
+					if (set.attackingTypes.Ghost && set.attackingTypes.Ghost.length > 1) set.possibleItems.tier3.push('Spell Tag');
+					if (set.attackingTypes.Ghost && set.attackingTypes.Ghost.length > 1) set.possibleItems.tier3.push('Spooky Plate');
+					
+					if (set.attackingTypes.Dragon && set.attackingTypes.Dragon.length > 1) set.possibleItems.tier3.push('Dragon Fang');
+					if (set.attackingTypes.Dragon && set.attackingTypes.Dragon.length > 1) set.possibleItems.tier3.push('Draco Plate');
+					
+					if (set.attackingTypes.Dark && set.attackingTypes.Dark.length > 1) set.possibleItems.tier3.push('Black Glasses');
+					if (set.attackingTypes.Dark && set.attackingTypes.Dark.length > 1) set.possibleItems.tier3.push('Dread Plate');
+					
+					if (set.attackingTypes.Steel && set.attackingTypes.Steel.length > 1) set.possibleItems.tier3.push('Metal Coat');
+					if (set.attackingTypes.Steel && set.attackingTypes.Steel.length > 1) set.possibleItems.tier3.push('Iron Plate');
+					
+					if (set.attackingTypes.Fairy && set.attackingTypes.Fairy.length > 1) set.possibleItems.tier3.push('Fairy Feather');
+					if (set.attackingTypes.Fairy && set.attackingTypes.Fairy.length > 1) set.possibleItems.tier3.push('Pixie Plate');
+					
+					if (set.attackingTypes.Normal && set.attackingTypes.Normal.length > 1) set.possibleItems.tier3.push('Silk Scarf');
+					if (set.attackingTypes.Normal && set.attackingTypes.Normal.length > 1) set.possibleItems.tier3.push('Normal Gem');
+	
+					// Expert Belt
+					let attackingTypes = 0;
+					for (const type in set.attackingTypes) attackingTypes++;
+					if (attackingTypes > 3) set.possibleItems.tier3.push('Expert Belt');
+				}
+				
 				// tier 4 - backup plans
 				if (!['Bold', 'Modest', 'Calm', 'Timid'].includes(set.nature)) set.possibleItems.tier4.push('Figy Berry');
 				if (!['Lonely', 'Mild', 'Gentle', 'Hasty'].includes(set.nature)) set.possibleItems.tier4.push('Iapapa Berry');
