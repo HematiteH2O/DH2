@@ -4834,6 +4834,77 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				
 				// push possible items to each tier
 				// tier 0 - extremely context-specific items
+				let pushItems = [];
+				let critMoves = 0;
+				let whiteHerb = false;
+				for (const move of set.moves) {
+					let moveData = this.dex.moves.get(move);
+					if (moveData) {
+						if (moveData.flags['sound'] && set.roles.includes('special')) pushItems.push('Throat Spray');
+						if (format === 'singles' && moveData.volatileStatus && moveData.volatileStatus === 'partiallytrapped') pushItems.push('Binding Band');
+						if (format === 'singles' && moveData.volatileStatus && moveData.volatileStatus === 'entanglement') {
+							pushItems.push('Binding Band');
+							pushItems.push('Shed Shell');
+						}
+						if (moveData.accuracy && moveData.accuracy <= 50 && set.ability !== 'No Guard') pushItems.push('Blunder Policy');
+						if (moveData.multihit) {
+							if (moveData.multiaccuracy) pushItems.push('Wide Lens');
+							else if (moveData.multihit === [2, 5]) pushItems.push('Loaded Dice');
+							
+							if (moveData.flags['contact']) {
+								if (moveData.flags['punch']) pushItems.push('Punching Glove');
+								else if (moveData.multihit === 10) pushItems.push('Protective Pads');
+							}
+						}
+						if (moveData.flags['charge'] && !['Electro Shot', 'Solar Beam', 'Solar Blade'].includes(moveData.name)) pushItems.push('Power Herb');
+						if (moveData.critRatio && moveData.critRatio === 2) critMoves++;
+						if (moveData.selfdestruct && moveData.selfdestruct === 'always') pushItems.push('Custap Berry');
+						if (moveData.self && moveData.self.boosts) {
+							for (const boost in moveData.self.boosts) if (moveData.self.boosts[boost] < 0) whiteHerb = true;
+						}
+					}
+				}
+				if (whiteHerb && set.ability !== 'Contrary') {
+					pushItems.push('White Herb');
+					if (
+						!set.roles.includes('pivoting') && !set.roles.includes('setup') &&
+						!(format === 'vgc' && !set.roles.includes('physical'))
+					) pushItems.push('Eject Pack');
+				}
+				if ((set.ability === 'Intimidate' && format === 'vgc') || set.moves.includes('Swagger')) pushItems.push('Mirror Herb');
+				if ((set.ability === 'Sturdy' || set.moves.includes('Endure')) && format === 'singles') {
+					if (set.roles.includes('entryhazard') pushItems.push('Custap Berry');
+					if (!set.roles.includes('speedsetup')) pushItems.push('Salac Berry');
+					if (set.roles.includes('speedsetup') || set.roles.includes('priority')) {
+						if (set.roles.includes('physical')) pushItems.push('Liechi Berry');
+						if (set.roles.includes('special')) pushItems.push('Petaya Berry');
+					} else {
+						pushItems.push('Red Card');
+					}
+				}
+				if (set.moves.includes('Endeavor')) pushItems.push('Custap Berry');
+				if (['Defiant', 'Guard Dog', 'Competitive'].includes(set.ability) && format === 'vgc') pushItems.push('Adrenaline Orb');
+				if (set.ability === 'Unburden' && set.moves.includes('Fake Out')) pushItems.push('Normal Gem');
+				if (critMoves > 1) {
+					pushItems.push('Scope Lens');
+					pushItems.push('Razor Claw');
+				}
+				if (set.moves.includes('Fling')) { // why would you have this assigned and not already have an item jsmdfg
+					if (
+						this.dex.species.get(set.species) && this.dex.species.get(set.species).randbats && this.dex.species.get(set.species).randbats.types.includes('Dark')
+					) pushItems.push('Iron Ball');
+					else pushItems.push('Light Ball');
+				}
+				if (set.moves.includes('Trick') || set.moves.includes('Switcheroo')) { // same as above--
+					if (set.ability === 'Magic Guard') pushItems.push('Sticky Barb');
+					else if (set.ability === 'Prankster') pushItems.push('Eject Button');
+					else {
+						pushItems.push('Ring Target');
+						pushItems.push('Iron Ball');
+						pushItems.push('Lagging Tail');
+					}
+				}
+				for (const item of pushItems) if (!set.possibleItems.tier0.includes(item)) set.possibleItems.tier0.push(item);
 
 				// this section was going to be tier 1 at first, but they ended up a bit more spread out
 				// these items are mostly based on type matchups!
@@ -4887,7 +4958,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						(this.dex.species.get(set.species).randbats.resistances.Rock || ['Magic Guard', 'Regenerator'].includes(set.ability))
 					) {
 						set.possibleItems.tier2.push('Air Balloon');
-					}
+					} else if (set.species === 'Rotom-Fan') set.possibleItems.tier2.push('Air Balloon'); // ONLY SOMETIMES but it's funny
 					// Absorb Bulb and Cell Battery
 					// For these, you want to resist the type, but *not* be immune to it
 					// Absorb Bulb also wants to be a special attacker, and Cell Battery wants to be a physical attacker
@@ -4938,7 +5009,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 				// Covert Cloak and Clear Amulet
 				if (format === 'vgc') {
-					if (set.roles && set.roles.includes('physical') && !set.roles.includes('antiintimidate')) {
+					if (
+						set.roles && set.roles.includes('physical') && !set.roles.includes('antiintimidate') &&
+						!['Clear Body', 'White Smoke', 'Full Metal Body'].includes(set.ability)
+					) {
 						if (set.roles.includes('physicalsetup')) set.possibleItems.tier0.push('Clear Amulet');
 						else set.possibleItems.tier2.push('Clear Amulet');
 						// also setting White Herb for tier 3
@@ -4946,14 +5020,14 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					}
 					if (
 						this.dex.species.get(set.species).randbats && !this.dex.species.get(set.species).randbats.types.includes('Ghost') && set.teraType !== 'Ghost' &&
-						!set.roles.includes('antipriority')
+						!set.roles.includes('antipriority') && set.ability !== 'Shield Dust'
 					) {
 						if (set.roles.includes('speedcontrol') || set.roles.includes('trickroom')) set.possibleItems.tier0.push('Covert Cloak');
 						else set.possibleItems.tier2.push('Covert Cloak');
 					}
 				}
 				// Focus Sash
-				if ((set.evs.hp + set.evs.def + set.evs.spd) <= 16) {
+				if (set.ability !== 'Sturdy' && (set.evs.hp + set.evs.def + set.evs.spd) <= 16) {
 					if (format === 'vgc') {
 						if (set.evs.spe >= 248 || set.ability === 'Prankster') set.possibleItems.tier2.push('Focus Sash');
 					} else {
@@ -4967,6 +5041,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						set.possibleItems.tier0.push('Life Orb');
 					} else if (drainMoveCount) set.possibleItems.tier2.push('Life Orb');
 				}
+				if (drainMoveCount && set.moves.includes('Leech Seed')) set.possibleItems.tier2.push('Big Root');
 				// Rocky Helmet
 				if (format === 'singles') {
 					// if you aren't weak to Rock + are HP- or Defense-invested + resist at least two of Dark, Fighting and Bug, or resist one and have Regenerator?
@@ -5095,8 +5170,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// FOR UNBURDEN
 				if (set.ability === 'Unburden') {
 					const unburdenItems = [
-						'Adrenaline Orb', 'Air Balloon', 'Berry Juice', 'Cell Battery', 'Electric Seed', 'Focus Sash', 'Grassy Seed', 'Luminous Moss', 'Mental Herb', 'Mirror Herb',
-						'Misty Seed', 'Normal Gem', 'Power Herb', 'Psychic Seed', 'Red Card', 'Snowball', 'Throat Spray', 'Weakness Policy', 'White Herb',
+						'Adrenaline Orb', 'Air Balloon', 'Berry Juice', 'Blunder Policy', 'Cell Battery', 'Electric Seed', 'Focus Sash', 'Grassy Seed', 'Luminous Moss', 'Mental Herb',
+						'Mirror Herb', 'Misty Seed', 'Normal Gem', 'Power Herb', 'Psychic Seed', 'Red Card', 'Snowball', 'Throat Spray', 'Weakness Policy', 'White Herb',
 					];
 					set.possibleItems.tier0 = set.possibleItems.tier0.filter((item) => (unburdenItems.includes(item)));
 					set.possibleItems.tier1 = set.possibleItems.tier1.filter((item) => (unburdenItems.includes(item)));
