@@ -4378,13 +4378,13 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				let bpAltMoveOrder = [];
 				let failsafe = false;
 				while (bpAltMoveOrder.length < set.moves.length) {
-					let maxMovePower = 'null';
+					let maxMovePower = 'undefined';
 					let movesCurrentStep = [];
 					for (const move of set.moves) {
 						if (bpAltMoveOrder.includes(this.dex.moves.get(move).name)) continue;
 						let movePower = 0;
 						if (set.movePowers[this.dex.moves.get(move).name]) movePower = set.movePowers[this.dex.moves.get(move).name];
-						if (movePower > maxMovePower || maxMovePower === 'null') {
+						if (movePower > maxMovePower || maxMovePower === 'undefined') {
 							// reset
 							maxMovePower = movePower;
 							movesCurrentStep = [];
@@ -4399,7 +4399,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				let prioAltMoveOrder = [];
 				failsafe = false;
 				while (bpAltMoveOrder.length && (prioAltMoveOrder.length < set.moves.length)) {
-					let maxMovePriority = 'null';
+					let maxMovePriority = 'undefined';
 					let movesCurrentStep = [];
 					for (const move of bpAltMoveOrder) {
 						if (prioAltMoveOrder.includes(this.dex.moves.get(move).name)) continue;
@@ -4410,7 +4410,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						if (this.dex.moves.get(move).category && this.dex.moves.get(move).category === 'Status') movePriority -=20;
 						// but pivoting and self-KO moves go last
 						if (this.dex.moves.get(move).selfSwitch || this.dex.moves.get(move).selfdestruct) movePriority = -40;
-						if (movePriority > maxMovePriority || maxMovePriority === 'null') {
+						if (movePriority > maxMovePriority || maxMovePriority === 'undefined') {
 							// reset
 							maxMovePriority = movePriority;
 							movesCurrentStep = [];
@@ -4809,6 +4809,81 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			// however, *from this step on,* I'm also going to enforce it for singles!
 			// that's because if we've made it this far, the set doesn't strictly need its item to function,
 			// so even in singles, it's fine to prioritize spicing things up and having fun with it!
+			
+			for (const set of setsWithoutItems) {
+				set.possibleItems = {
+					currentStep: [],
+					tier0: [],
+					tier1: [],
+					tier2: [],
+					tier3: [],
+					tier4: [],
+				};
+				
+				// push possible items to each tier
+				// tier 0 - extremely context-specific items
+
+				// tier 1 - somewhat context-specific items
+
+				// tier 2 - generic, good items; most likely to pull from here in general
+
+				// tier 3 - niche items
+
+				// tier 4 - backup plans
+				if (!['Bold', 'Modest', 'Calm', 'Timid'].includes(set.nature)) set.possibleItems.tier4.push('Figy Berry');
+				if (!['Lonely', 'Mild', 'Gentle', 'Hasty'].includes(set.nature)) set.possibleItems.tier4.push('Iapapa Berry');
+				if (!['Adamant', 'Impish', 'Careful', 'Jolly'].includes(set.nature)) set.possibleItems.tier4.push('Wiki Berry');
+				if (!['Naughty', 'Lax', 'Rash', 'Naive'].includes(set.nature)) set.possibleItems.tier4.push('Aguav Berry');
+				if (!['Brave', 'Relaxed', 'Quiet', 'Sassy'].includes(set.nature)) set.possibleItems.tier4.push('Mago Berry');
+				set.possibleItems.tier4.push('Sitrus Berry');
+			}
+
+			let forceBreak = false;
+			while (setsWithoutItems.length && !forceBreak) {
+				forceBreak = true; // as long as one item can be assigned, this will be set to false later
+				for (const set of setsWithoutItems) {
+					// filter by item clause
+					set.possibleItems.tier0 = set.possibleItems.tier0.filter((item) => (!itemsAlreadyUsed.includes(item)));
+					set.possibleItems.tier1 = set.possibleItems.tier1.filter((item) => (!itemsAlreadyUsed.includes(item)));
+					set.possibleItems.tier2 = set.possibleItems.tier2.filter((item) => (!itemsAlreadyUsed.includes(item)));
+					set.possibleItems.tier3 = set.possibleItems.tier3.filter((item) => (!itemsAlreadyUsed.includes(item)));
+					set.possibleItems.tier4 = set.possibleItems.tier4.filter((item) => (!itemsAlreadyUsed.includes(item)));
+
+					// find the highest tier possible for each set
+					set.possibleItems.currentStep = [];
+					if (set.possibleItems.tier0.length) set.possibleItems.currentStep = set.possibleItems.tier0;
+					else if (set.possibleItems.tier1.length) set.possibleItems.currentStep = set.possibleItems.tier1;
+					else if (set.possibleItems.tier2.length) set.possibleItems.currentStep = set.possibleItems.tier2;
+					else if (set.possibleItems.tier3.length) set.possibleItems.currentStep = set.possibleItems.tier3;
+					else if (set.possibleItems.tier4.length) set.possibleItems.currentStep = set.possibleItems.tier4;
+					if (set.possibleItems.currentStep.length > 0) forceBreak = false;
+				}
+				
+				// find which set has the smallest item pool
+				let itemPoolLength = 'undefined';
+				let setsThisStep = [];
+				for (const set of setsWithoutItems) {
+					if (
+						itemPoolLength === 'undefined' || (set.possibleItems.currentStep.length && set.possibleItems.currentStep.length < itemPoolLength)
+					) {
+						// reset
+						itemPoolLength = set.possibleItems.currentStep.length;
+						setsThisStep = [];
+					}
+					if (set.possibleItems.currentStep.length === itemPoolLength) setsThisStep.push(set);
+				}
+				
+				// assign it an item from that tier
+				if (itemPoolLength > 0 && setsThisStep) {
+					let setThisStep = this.sample(setsThisStep);
+					let itemThisStep = this.sample(setsThisStep.possibleItems.currentStep);
+					setThisStep.item = itemThisStep;
+					itemsAlreadyUsed.push(itemThisStep);
+				}
+
+				// remove anything with an item from setsWithoutItems
+				setsWithoutItems = setsWithoutItems.filter((set) => (!set.item));
+			}
 		}
 
 		// TODO: nickname check???
