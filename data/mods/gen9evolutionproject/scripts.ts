@@ -4873,7 +4873,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 				if ((set.ability === 'Intimidate' && format === 'vgc') || set.moves.includes('Swagger')) pushItems.push('Mirror Herb');
 				if ((set.ability === 'Sturdy' || set.moves.includes('Endure')) && format === 'singles') {
-					if (set.roles.includes('entryhazard') pushItems.push('Custap Berry');
+					if (set.roles.includes('entryhazard')) pushItems.push('Custap Berry');
 					if (!set.roles.includes('speedsetup')) pushItems.push('Salac Berry');
 					if (set.roles.includes('speedsetup') || set.roles.includes('priority')) {
 						if (set.roles.includes('physical')) pushItems.push('Liechi Berry');
