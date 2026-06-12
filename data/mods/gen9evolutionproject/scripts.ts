@@ -4867,7 +4867,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (whiteHerb && set.ability !== 'Contrary') {
 					pushItems.push('White Herb');
 					if (
-						!set.roles.includes('pivoting') && !set.roles.includes('setup') &&
+						!set.roles.includes('pivoting') && !set.roles.includes('setup') && !set.roles.includes('redirection') &&
 						!(format === 'vgc' && !set.roles.includes('physical'))
 					) pushItems.push('Eject Pack');
 				}
