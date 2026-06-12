@@ -4377,10 +4377,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			// purely cosmetic: let's reorder the set's moves
 			if (set.moves.length > 1) {
 				let bpAltMoveOrder = [];
-				let maxMovePower = 0;
 
 				// first, sort by set.movePowers if applicable
 				while (bpAltMoveOrder.length < set.moves.length) {
+					let maxMovePower = 0;
 					let backupAltMoveOrder = bpAltMoveOrder;
 					for (const move of set.moves) {
 						if (bpAltMoveOrder.includes(move)) continue;
@@ -4395,13 +4395,17 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							bpAltMoveOrder.push(move);
 						}
 					}
+					if (backupAltMoveOrder === bpAltMoveOrder) break; // loop failsafe
 				}
+				if (set.moves.filter((move) => (!bpAltMoveOrder.includes(move))).length) {
+					for (const move of set.moves.filter((move) => (!bpAltMoveOrder.includes(move)))) bpAltMoveOrder.push(move);
+				} // missing move failsafe
 				
 				// then sort by priority
 				let prioAltMoveOrder = [];
-				let maxMovePriority = 0;
 
 				while (prioAltMoveOrder.length < set.moves.length) {
+					let maxMovePriority = 0;
 					let backupAltMoveOrder = bpAltMoveOrder;
 					for (const move of bpAltMoveOrder) {
 						if (prioAltMoveOrder.includes(move)) continue;
@@ -4422,7 +4426,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							prioAltMoveOrder.push(move);
 						}
 					}
+					if (backupAltMoveOrder === prioAltMoveOrder) break; // loop failsafe
 				}
+				if (set.moves.filter((move) => (!prioAltMoveOrder.includes(move))).length) {
+					for (const move of set.moves.filter((move) => (!prioAltMoveOrder.includes(move)))) prioAltMoveOrder.push(move);
+				} // missing move failsafe
 				
 				set.moves = prioAltMoveOrder;
 			}
