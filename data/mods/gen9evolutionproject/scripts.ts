@@ -4378,6 +4378,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			if (set.moves.length > 1) {
 				
 				// first, sort by set.movePowers if applicable
+				console.log(set.movePowers);
 				let bpAltMoveOrder = [];
 				let failsafe = false;
 				while (bpAltMoveOrder.length < set.moves.length && !failsafe) {
@@ -4399,6 +4400,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (backupAltMoveOrder === bpAltMoveOrder) failsafe = true; // loop failsafe
 				}
 				if (set.moves.filter((move) => (!bpAltMoveOrder.includes(move))).length) {
+					console.log(`BP failsafe activated for ${set.name} - remaining moves:`);
+					console.log(set.moves.filter((move) => (!bpAltMoveOrder.includes(move))));
 					for (const move of set.moves.filter((move) => (!bpAltMoveOrder.includes(move)))) bpAltMoveOrder.push(move);
 				} // missing move failsafe
 				
@@ -4429,6 +4432,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (backupAltMoveOrder === prioAltMoveOrder) failsafe = true; // loop failsafe
 				}
 				if (bpAltMoveOrder.filter((move) => (!prioAltMoveOrder.includes(move))).length) {
+					console.log(`prio failsafe activated for ${set.name} - remaining moves:`);
+					console.log(bpAltMoveOrder.filter((move) => (!prioAltMoveOrder.includes(move))));
 					for (const move of bpAltMoveOrder.filter((move) => (!prioAltMoveOrder.includes(move)))) prioAltMoveOrder.push(move);
 				} // missing move failsafe
 				
@@ -4801,16 +4806,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					// nothing for now
 				}
 				
-				console.log(set.species);
-				console.log(teraTypes);
-				
 				// we want to make sure this is pretty random-feeling, so... I'm leaning towards allowing for the second-highest score as well as the highest?
 				let maxScore = 0;
 				for (const type of validTeraTypes) if (teraTypes[type] > maxScore) maxScore = teraTypes[type];
 				if (validTeraTypes.filter((type) => (teraTypes[type] && teraTypes[type] >= (maxScore -1) && teraTypes[type] > 0)).length) validTeraTypes = validTeraTypes.filter((type) => (teraTypes[type] && teraTypes[type] >= (maxScore -1) && teraTypes[type] > 0));
 				if (stellarCount.length && stellarCount.length > 3) validTeraTypes.push('Stellar');
-				console.log(maxScore);
-				console.log(validTeraTypes);
 				set.teraType = this.sample(validTeraTypes);
 			}
 			if (!set.happiness && set.hasBeenRandomized) set.happiness = 255;
