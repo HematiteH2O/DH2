@@ -4413,10 +4413,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						if (this.dex.moves.get(move).category && this.dex.moves.get(move).category === 'Status') movePriority -=20;
 						// but pivoting and self-KO moves go last
 						if (this.dex.moves.get(move).selfSwitch || this.dex.moves.get(move).selfdestruct) movePriority = -40;
-						if (movePriority > maxMovePriority) {
+						if (movePriority > maxMovePriority || maxMovePriority === 'null') {
 							// reset
 							maxMovePriority = movePriority;
-							prioAltMoveOrder = backupAltMoveOrder;
+							movesCurrentStep = [];
 						}
 						if (movePriority === maxMovePriority) {
 							movesCurrentStep.push(this.dex.moves.get(move).name);
