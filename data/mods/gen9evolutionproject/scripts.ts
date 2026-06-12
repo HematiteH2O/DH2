@@ -4825,8 +4825,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			for (const set of setsWithoutItems) {
 				set.possibleItems = {
 					currentStep: [],
-					consumable: [], // for Unburden
-					berry: [], // for Cheek Pouch or Belch
 					tier0: [],
 					tier1: [],
 					tier2: [],
@@ -4837,7 +4835,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// push possible items to each tier
 				// tier 0 - extremely context-specific items
 
-				// this section was going to be tier 1 but ended up a bit more spread out
+				// this section was going to be tier 1 at first, but they ended up a bit more spread out
 				// these items are mostly based on type matchups!
 				if (this.dex.species.get(set.species) && this.dex.species.get(set.species).randbats && this.dex.species.get(set.species).randbats.weaknesses) {
 					// actually, resist Berries are more fun in some situations than others, so I'm putting them in tiers all over the place
@@ -5093,6 +5091,30 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (!['Naughty', 'Lax', 'Rash', 'Naive'].includes(set.nature)) set.possibleItems.tier4.push('Aguav Berry');
 				if (!['Brave', 'Relaxed', 'Quiet', 'Sassy'].includes(set.nature)) set.possibleItems.tier4.push('Mago Berry');
 				set.possibleItems.tier4.push('Sitrus Berry');
+
+				// FOR UNBURDEN
+				if (set.ability === 'Unburden') {
+					const unburdenItems = [
+						'Adrenaline Orb', 'Air Balloon', 'Berry Juice', 'Cell Battery', 'Electric Seed', 'Focus Sash', 'Grassy Seed', 'Luminous Moss', 'Mental Herb', 'Mirror Herb',
+						'Misty Seed', 'Normal Gem', 'Power Herb', 'Psychic Seed', 'Red Card', 'Snowball', 'Throat Spray', 'Weakness Policy', 'White Herb',
+					];
+					set.possibleItems.tier0 = set.possibleItems.tier0.filter((item) => (unburdenItems.includes(item)));
+					set.possibleItems.tier1 = set.possibleItems.tier1.filter((item) => (unburdenItems.includes(item)));
+					set.possibleItems.tier2 = set.possibleItems.tier2.filter((item) => (unburdenItems.includes(item)));
+					set.possibleItems.tier3 = set.possibleItems.tier3.filter((item) => (unburdenItems.includes(item)));
+					set.possibleItems.tier4 = set.possibleItems.tier4.filter((item) => (unburdenItems.includes(item)));
+				}
+
+				// FOR CHEEK POUCH AND BELCH
+				if (
+					set.roles.includes('requireberry') || set.ability === 'Cheek Pouch' || set.moves.includes('Belch')
+				) {
+					set.possibleItems.tier0 = set.possibleItems.tier0.filter((item) => (this.dex.items.get(item).isBerry));
+					set.possibleItems.tier1 = set.possibleItems.tier1.filter((item) => (this.dex.items.get(item).isBerry));
+					set.possibleItems.tier2 = set.possibleItems.tier2.filter((item) => (this.dex.items.get(item).isBerry));
+					set.possibleItems.tier3 = set.possibleItems.tier3.filter((item) => (this.dex.items.get(item).isBerry));
+					set.possibleItems.tier4 = set.possibleItems.tier4.filter((item) => (this.dex.items.get(item).isBerry));
+				}
 			}
 
 			let forceBreak = false;
