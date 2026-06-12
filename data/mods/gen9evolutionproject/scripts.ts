@@ -4840,7 +4840,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				for (const move of set.moves) {
 					let moveData = this.dex.moves.get(move);
 					if (moveData) {
-						if (moveData.flags['sound'] && set.roles.includes('special')) pushItems.push('Throat Spray');
+						if (moveData.flags['sound'] && set.roles.includes('special') && !moveData.selfSwitch) pushItems.push('Throat Spray');
 						if (format === 'singles' && moveData.volatileStatus && moveData.volatileStatus === 'partiallytrapped') pushItems.push('Binding Band');
 						if (format === 'singles' && moveData.volatileStatus && moveData.volatileStatus === 'entanglement') {
 							pushItems.push('Binding Band');
@@ -4871,7 +4871,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						!(format === 'vgc' && !set.roles.includes('physical'))
 					) pushItems.push('Eject Pack');
 				}
-				if ((set.ability === 'Intimidate' && format === 'vgc') || set.moves.includes('Swagger')) pushItems.push('Mirror Herb');
+				if (set.roles.includes('physical') && ((set.ability === 'Intimidate' && format === 'vgc') || set.moves.includes('Swagger'))) pushItems.push('Mirror Herb');
 				if ((set.ability === 'Sturdy' || set.moves.includes('Endure')) && format === 'singles') {
 					if (set.roles.includes('entryhazard')) pushItems.push('Custap Berry');
 					if (!set.roles.includes('speedsetup')) pushItems.push('Salac Berry');
@@ -4883,7 +4883,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					}
 				}
 				if (set.moves.includes('Endeavor')) pushItems.push('Custap Berry');
-				if (['Defiant', 'Guard Dog', 'Competitive'].includes(set.ability) && format === 'vgc') pushItems.push('Adrenaline Orb');
+				if (['Defiant', 'Guard Dog', 'Competitive'].includes(set.ability) && set.evs.spe > 0 && format === 'vgc') pushItems.push('Adrenaline Orb');
 				if (set.ability === 'Unburden' && set.moves.includes('Fake Out')) pushItems.push('Normal Gem');
 				if (critMoves > 1) {
 					pushItems.push('Scope Lens');
