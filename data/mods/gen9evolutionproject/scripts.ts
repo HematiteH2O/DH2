@@ -3931,10 +3931,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						else if (fragment.role === 'mainstab' && fragment.moveType && !fragment.pokemon.coveredStabs.includes(fragment.moveType)) fragment.pokemon.coveredStabs.push(fragment.moveType);
 					}
 					if (fragment.baseMove) {
-						if (fragment.pokemon.movePowers[fragment.baseMove]) {
-							if (fragment.moveBasePower && fragment.moveBasePower > fragment.pokemon.movePowers[fragment.baseMove]) fragment.pokemon.movePowers[fragment.baseMove] = fragment.moveBasePower;
+						if (fragment.pokemon.movePowers[this.dex.moves.get(fragment.baseMove).name]) {
+							if (fragment.moveBasePower && fragment.moveBasePower > fragment.pokemon.movePowers[this.dex.moves.get(fragment.baseMove).name]) fragment.pokemon.movePowers[this.dex.moves.get(fragment.baseMove).name] = fragment.moveBasePower;
 						} else {
-							if (fragment.moveBasePower) fragment.pokemon.movePowers[fragment.baseMove] = fragment.moveBasePower;
+							if (fragment.moveBasePower) fragment.pokemon.movePowers[this.dex.moves.get(fragment.baseMove).name] = fragment.moveBasePower;
 						}
 					}
 					if (fragment.tags) { // I only define each fragment with one role, but sometimes - especially for the "buddy" property later - I think it could come in handy to give them more labels than that
@@ -4339,10 +4339,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					for (const avoid of chosenFragment.avoid) if (!chosenFragment.pokemon.avoid.includes(avoid)) chosenFragment.pokemon.avoid.push(avoid);
 				}
 				if (chosenFragment.baseMove) {
-					if (chosenFragment.pokemon.movePowers[chosenFragment.baseMove]) {
-						if (chosenFragment.moveBasePower && chosenFragment.moveBasePower > chosenFragment.pokemon.movePowers[chosenFragment.baseMove]) chosenFragment.pokemon.movePowers[chosenFragment.baseMove] = chosenFragment.moveBasePower;
+					if (chosenFragment.pokemon.movePowers[this.dex.moves.get(chosenFragment.baseMove).name]) {
+						if (chosenFragment.moveBasePower && chosenFragment.moveBasePower > chosenFragment.pokemon.movePowers[this.dex.moves.get(chosenFragment.baseMove).name]) chosenFragment.pokemon.movePowers[this.dex.moves.get(chosenFragment.baseMove).name] = chosenFragment.moveBasePower;
 					} else {
-						if (chosenFragment.moveBasePower) chosenFragment.pokemon.movePowers[chosenFragment.baseMove] = chosenFragment.moveBasePower;
+						if (chosenFragment.moveBasePower) chosenFragment.pokemon.movePowers[this.dex.moves.get(chosenFragment.baseMove).name] = chosenFragment.moveBasePower;
 					}
 				}
 				if (chosenFragment[format].acceptedSupport) for (const request of chosenFragment[format].acceptedSupport) {
@@ -4382,31 +4382,30 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				let bpAltMoveOrder = [];
 				let failsafe = false;
 				while (bpAltMoveOrder.length < set.moves.length) {
-					let maxMovePower = -1000;
-					let backupAltMoveOrder = bpAltMoveOrder;
+					let maxMovePower = 'null';
+					let movesCurrentStep = [];
 					for (const move of set.moves) {
-						if (bpAltMoveOrder.includes(move)) continue;
+						if (bpAltMoveOrder.includes(this.dex.moves.get(move).name)) continue;
 						let movePower = 0;
-						if (set.movePowers[move]) movePower = set.movePowers[move];
-						if (movePower > maxMovePower) {
+						if (set.movePowers[this.dex.moves.get(move).name]) movePower = set.movePowers[this.dex.moves.get(move).name];
+						if (movePower > maxMovePower || maxMovePower === 'null') {
 							// reset
 							maxMovePower = movePower;
-							bpAltMoveOrder = backupAltMoveOrder;
+							movesCurrentStep = [];
 						}
-						if (movePower === maxMovePower) {
-							bpAltMoveOrder.push(move);
-						}
+						if (movePower === maxMovePower) movesCurrentStep.push(this.dex.moves.get(move).name);
 					}
+					if (movesCurrentStep.length) for (const move of movesCurrentStep) bpAltMoveOrder.push(this.dex.moves.get(move).name);
 				}
 				
 				// then sort by priority
 				let prioAltMoveOrder = [];
 				failsafe = false;
 				while (prioAltMoveOrder.length < set.moves.length) {
-					let maxMovePriority = -1000;
-					let backupAltMoveOrder = prioAltMoveOrder;
+					let maxMovePriority = 'null';
+					let movesCurrentStep = [];
 					for (const move of bpAltMoveOrder) {
-						if (prioAltMoveOrder.includes(move)) continue;
+						if (prioAltMoveOrder.includes(this.dex.moves.get(move).name)) continue;
 						let movePriority = 0;
 						if (this.dex.moves.get(move).priority) movePriority = this.dex.moves.get(move).priority;
 						// exceptions:
@@ -4420,9 +4419,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							prioAltMoveOrder = backupAltMoveOrder;
 						}
 						if (movePriority === maxMovePriority) {
-							prioAltMoveOrder.push(move);
+							movesCurrentStep.push(this.dex.moves.get(move).name);
 						}
 					}
+					if (movesCurrentStep.length) for (const move of movesCurrentStep) prioAltMoveOrder.push(this.dex.moves.get(move).name);
 				}
 				
 				set.moves = prioAltMoveOrder;
