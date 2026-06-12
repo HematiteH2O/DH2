@@ -1773,8 +1773,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								alternateFragments.push(modFragment);
 							}
 							if (
-								fragment.baseMove === 'Weather Ball' &&
-								!(fragment.ability && ['Desolate Land', 'Drought', 'Mega Sol', 'Orichalcum Pulse'].includes(fragment.ability))
+								fragment.baseMove === 'Weather Ball' && fragment.moveType === 'Normal'
 							) {
 								let modFragment = Utils.deepClone(fragment);
 								modFragment.moveBasePower *= 3;
@@ -1796,8 +1795,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								alternateFragments.push(modFragment);
 							}
 							if (
-								fragment.baseMove === 'Weather Ball' &&
-								!(fragment.ability && ['Drizzle', 'Primordial Sea', 'Storm Chaser'].includes(fragment.ability))
+								fragment.baseMove === 'Weather Ball' && fragment.moveType === 'Normal'
 							) {
 								let modFragment = Utils.deepClone(fragment);
 								modFragment.moveBasePower *= 3;
@@ -1819,8 +1817,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 							// sand
 							if (
-								fragment.baseMove === 'Weather Ball' &&
-								!(fragment.ability && ['Sand Stream'].includes(fragment.ability))
+								fragment.baseMove === 'Weather Ball' && fragment.moveType === 'Normal'
 							) {
 								let modFragment = Utils.deepClone(fragment);
 								modFragment.moveBasePower *= 2;
@@ -1842,8 +1839,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								alternateFragments.push(modFragment);
 							}
 							if (
-								fragment.baseMove === 'Weather Ball' &&
-								!(fragment.ability && ['Snow Warning'].includes(fragment.ability))
+								fragment.baseMove === 'Weather Ball' && fragment.moveType === 'Normal'
 							) {
 								let modFragment = Utils.deepClone(fragment);
 								modFragment.moveBasePower *= 2;
@@ -1866,7 +1862,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								alternateFragments.push(modFragment);
 							}
 							if (
-								['Terrain Pulse', 'Nature Power'].includes(fragment.baseMove) && !(fragment.ability && ['Electric Surge', 'Hadron Engine'].includes(fragment.ability))
+								['Terrain Pulse', 'Nature Power'].includes(fragment.baseMove) && fragment.moveType === 'Normal'
 							) {
 								let modFragment = Utils.deepClone(fragment);
 								if (fragment.baseMove === 'Terrain Pulse') modFragment.moveBasePower *= 2;
@@ -1891,7 +1887,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								alternateFragments.push(modFragment);
 							}
 							if (
-								['Terrain Pulse', 'Nature Power'].includes(fragment.baseMove) && !(fragment.ability && ['Grassy Surge', 'Seed Sower'].includes(fragment.ability))
+								['Terrain Pulse', 'Nature Power'].includes(fragment.baseMove) && fragment.moveType === 'Normal'
 							) {
 								let modFragment = Utils.deepClone(fragment);
 								if (fragment.baseMove === 'Terrain Pulse') modFragment.moveBasePower *= 2;
@@ -1916,7 +1912,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								alternateFragments.push(modFragment);
 							}
 							if (
-								['Terrain Pulse', 'Nature Power'].includes(fragment.baseMove) && !(fragment.ability && ['Psychic Surge', 'Mega-Neural'].includes(fragment.ability))
+								['Terrain Pulse', 'Nature Power'].includes(fragment.baseMove) && fragment.moveType === 'Normal'
 							) {
 								let modFragment = Utils.deepClone(fragment);
 								if (fragment.baseMove === 'Terrain Pulse') modFragment.moveBasePower *= 2;
@@ -1930,7 +1926,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 							// Misty Terrain
 							if (
-								['Terrain Pulse', 'Nature Power'].includes(fragment.baseMove) && !(fragment.ability && ['Misty Surge'].includes(fragment.ability))
+								['Terrain Pulse', 'Nature Power'].includes(fragment.baseMove) && fragment.moveType === 'Normal'
 							) {
 								let modFragment = Utils.deepClone(fragment);
 								if (fragment.baseMove === 'Terrain Pulse') modFragment.moveBasePower *= 2;
@@ -4395,13 +4391,14 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						}
 						if (movePower === maxMovePower) movesCurrentStep.push(this.dex.moves.get(move).name);
 					}
-					if (movesCurrentStep.length) for (const move of movesCurrentStep) bpAltMoveOrder.push(this.dex.moves.get(move).name);
+					if (!movesCurrentStep.length) movesCurrentStep = set.moves;
+					for (const move of movesCurrentStep) if (!bpAltMoveOrder.includes(this.dex.moves.get(move).name)) bpAltMoveOrder.push(this.dex.moves.get(move).name);
 				}
 				
 				// then sort by priority
 				let prioAltMoveOrder = [];
 				failsafe = false;
-				while (prioAltMoveOrder.length < set.moves.length) {
+				while (bpAltMoveOrder.length && (prioAltMoveOrder.length < set.moves.length)) {
 					let maxMovePriority = 'null';
 					let movesCurrentStep = [];
 					for (const move of bpAltMoveOrder) {
@@ -4422,10 +4419,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							movesCurrentStep.push(this.dex.moves.get(move).name);
 						}
 					}
-					if (movesCurrentStep.length) for (const move of movesCurrentStep) prioAltMoveOrder.push(this.dex.moves.get(move).name);
+					if (!movesCurrentStep.length) movesCurrentStep = bpAltMoveOrder;
+					for (const move of movesCurrentStep) if (!prioAltMoveOrder.includes(this.dex.moves.get(move).name)) prioAltMoveOrder.push(this.dex.moves.get(move).name);
 				}
-				
-				set.moves = prioAltMoveOrder;
+
+				if (prioAltMoveOrder.length) set.moves = prioAltMoveOrder;
 			}
 			
 			if (set.item) {
