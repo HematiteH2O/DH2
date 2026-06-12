@@ -4376,10 +4376,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			
 			// purely cosmetic: let's reorder the set's moves
 			if (set.moves.length > 1) {
-				let bpAltMoveOrder = [];
-
+				
 				// first, sort by set.movePowers if applicable
-				while (bpAltMoveOrder.length < set.moves.length) {
+				let bpAltMoveOrder = [];
+				let failsafe = false;
+				while (bpAltMoveOrder.length < set.moves.length && !failsafe) {
 					let maxMovePower = 0;
 					let backupAltMoveOrder = bpAltMoveOrder;
 					for (const move of set.moves) {
@@ -4395,7 +4396,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							bpAltMoveOrder.push(move);
 						}
 					}
-					if (backupAltMoveOrder === bpAltMoveOrder) break; // loop failsafe
+					if (backupAltMoveOrder === bpAltMoveOrder) failsafe = true; // loop failsafe
 				}
 				if (set.moves.filter((move) => (!bpAltMoveOrder.includes(move))).length) {
 					for (const move of set.moves.filter((move) => (!bpAltMoveOrder.includes(move)))) bpAltMoveOrder.push(move);
@@ -4403,20 +4404,19 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				
 				// then sort by priority
 				let prioAltMoveOrder = [];
-
-				while (prioAltMoveOrder.length < set.moves.length) {
+				failsafe = false;
+				while (prioAltMoveOrder.length < set.moves.length && !failsafe) {
 					let maxMovePriority = 0;
-					let backupAltMoveOrder = bpAltMoveOrder;
+					let backupAltMoveOrder = prioAltMoveOrder;
 					for (const move of bpAltMoveOrder) {
 						if (prioAltMoveOrder.includes(move)) continue;
 						let movePriority = 0;
 						if (this.dex.moves.get(move).priority) movePriority = this.dex.moves.get(move).priority;
 						// exceptions:
-						if (movePriority === 4) movePriority = -8; // protection moves go last
-						if (movePriority === -7) movePriority = 7; // Trick Room goes first
-						if (
-							this.dex.moves.get(move).boosts && this.dex.moves.get(move).target && ['self', 'allies'].includes(this.dex.moves.get(move).target)
-						) movePriority = 2.5; // generally, self-setup moves belong before most attacks
+						// status moves go before most attacks
+						if (this.dex.moves.get(move).category && this.dex.moves.get(move).category === 'Status' && movePriority <= 2.5) movePriority = 2.5;
+						// pivoting and self-KO moves go last
+						if (this.dex.moves.get(move).selfSwitch || this.dex.moves.get(move).selfdestruct) movePriority = -10;
 						if (movePriority > maxMovePriority) {
 							// reset
 							maxMovePriority = movePriority;
@@ -4426,7 +4426,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							prioAltMoveOrder.push(move);
 						}
 					}
-					if (backupAltMoveOrder === prioAltMoveOrder) break; // loop failsafe
+					if (backupAltMoveOrder === prioAltMoveOrder) failsafe = true; // loop failsafe
 				}
 				if (set.moves.filter((move) => (!prioAltMoveOrder.includes(move))).length) {
 					for (const move of set.moves.filter((move) => (!prioAltMoveOrder.includes(move)))) prioAltMoveOrder.push(move);
