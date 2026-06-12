@@ -4846,7 +4846,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							pushItems.push('Binding Band');
 							pushItems.push('Shed Shell');
 						}
-						if (moveData.accuracy && moveData.accuracy <= 50 && set.ability !== 'No Guard') pushItems.push('Blunder Policy');
+						if (moveData.accuracy && (moveData.accuracy !== true) && moveData.accuracy <= 50 && set.ability !== 'No Guard') pushItems.push('Blunder Policy');
 						if (moveData.multihit) {
 							if (moveData.multiaccuracy) pushItems.push('Wide Lens');
 							else if (Array.isArray(moveData.multihit)) pushItems.push('Loaded Dice');
