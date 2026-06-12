@@ -4876,7 +4876,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// assign it an item from that tier
 				if (itemPoolLength > 0 && setsThisStep) {
 					let setThisStep = this.sample(setsThisStep);
-					let itemThisStep = this.sample(setsThisStep.possibleItems.currentStep);
+					let itemThisStep = this.sample(setThisStep.possibleItems.currentStep);
 					setThisStep.item = itemThisStep;
 					itemsAlreadyUsed.push(itemThisStep);
 				}
