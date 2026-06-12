@@ -4381,7 +4381,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				let bpAltMoveOrder = [];
 				let failsafe = false;
 				while (bpAltMoveOrder.length < set.moves.length && !failsafe) {
-					let maxMovePower = 0;
+					let maxMovePower = -1000;
 					let backupAltMoveOrder = bpAltMoveOrder;
 					for (const move of set.moves) {
 						if (bpAltMoveOrder.includes(move)) continue;
@@ -4406,17 +4406,17 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				let prioAltMoveOrder = [];
 				failsafe = false;
 				while (prioAltMoveOrder.length < set.moves.length && !failsafe) {
-					let maxMovePriority = 0;
+					let maxMovePriority = -1000;
 					let backupAltMoveOrder = prioAltMoveOrder;
 					for (const move of bpAltMoveOrder) {
 						if (prioAltMoveOrder.includes(move)) continue;
 						let movePriority = 0;
 						if (this.dex.moves.get(move).priority) movePriority = this.dex.moves.get(move).priority;
 						// exceptions:
-						// status moves go before most attacks
-						if (this.dex.moves.get(move).category && this.dex.moves.get(move).category === 'Status' && movePriority <= 2.5) movePriority = 2.5;
-						// pivoting and self-KO moves go last
-						if (this.dex.moves.get(move).selfSwitch || this.dex.moves.get(move).selfdestruct) movePriority = -10;
+						// most status moves go are pushed to the back
+						if (this.dex.moves.get(move).category && this.dex.moves.get(move).category === 'Status') movePriority -=20;
+						// but pivoting and self-KO moves go last
+						if (this.dex.moves.get(move).selfSwitch || this.dex.moves.get(move).selfdestruct) movePriority = -40;
 						if (movePriority > maxMovePriority) {
 							// reset
 							maxMovePriority = movePriority;
@@ -4428,8 +4428,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					}
 					if (backupAltMoveOrder === prioAltMoveOrder) failsafe = true; // loop failsafe
 				}
-				if (set.moves.filter((move) => (!prioAltMoveOrder.includes(move))).length) {
-					for (const move of set.moves.filter((move) => (!prioAltMoveOrder.includes(move)))) prioAltMoveOrder.push(move);
+				if (bpAltMoveOrder.filter((move) => (!prioAltMoveOrder.includes(move))).length) {
+					for (const move of bpAltMoveOrder.filter((move) => (!prioAltMoveOrder.includes(move)))) prioAltMoveOrder.push(move);
 				} // missing move failsafe
 				
 				set.moves = prioAltMoveOrder;
