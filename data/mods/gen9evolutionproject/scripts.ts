@@ -4825,6 +4825,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			for (const set of setsWithoutItems) {
 				set.possibleItems = {
 					currentStep: [],
+					consumable: [], // for Unburden
+					berry: [], // for Cheek Pouch or Belch
 					tier0: [],
 					tier1: [],
 					tier2: [],
@@ -4835,7 +4837,70 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// push possible items to each tier
 				// tier 0 - extremely context-specific items
 
-				// tier 1 - somewhat context-specific items
+				// this section was going to be tier 1 but ended up a bit more spread out
+				// these items are mostly based on type matchups!
+				if (this.dex.species.get(set.species) && this.dex.species.get(set.species).randbats && this.dex.species.get(set.species).randbats.weaknesses) {
+					// actually, resist Berries are more fun in some situations than others, so I'm putting them in tiers all over the place
+					const resistBerryTypes = [
+						'Fire', 'Water', 'Electric', 'Grass', 'Ice', 'Fighting', 'Poison', 'Ground', 'Flying', 'Psychic', 'Bug', 'Rock', 'Ghost', 'Dragon', 'Dark',
+						'Steel', 'Fairy',
+					];
+					for (const berryType of resistBerryTypes) {
+						let itemTier = 'tier2'; // start out at tier 2
+						let eligible = false;
+						if (!this.dex.species.get(set.species).randbats.weaknesses[berryType]) continue;
+						// if it's one of your weaknesses...
+						for (const coverageType of resistBerryTypes) {
+							if (!set.attackingTypes[coverageType]) continue; // and you have a coverage type...
+							// (... preferably not just one of your STABs...)
+							if (this.dex.species.get(set.species).randbats.types.includes[coverageType]) itemTier = 'tier3';
+							if (this.dex.data.TypeChart[berryType.toLowerCase()].damageTaken[coverageType] === 1) eligible = true; // that can hit it for SE
+						}
+						if (berryType === 'Dark') eligible = true; // ... or I guess if it's just a Dark weakness, because Colbur for Knock is kinda always viable
+						if (eligible) {
+							// give them a boost if your Tera Type is also weak to it
+							if (this.dex.data.TypeChart[(set.teraType).toLowerCase()].damageTaken[berryType] === 1) itemTier = 'tier1';
+							// and favor them a lot more in monotype!
+							if (monotype && (this.dex.data.TypeChart[monotype.toLowerCase()].damageTaken[berryType] === 1)) itemTier = 'tier0';
+
+							if (berryType === 'Fire') set.possibleItems[itemTier].push('Occa Berry');
+							if (berryType === 'Water') set.possibleItems[itemTier].push('Passho Berry');
+							if (berryType === 'Electric') set.possibleItems[itemTier].push('Wacan Berry');
+							if (berryType === 'Grass') set.possibleItems[itemTier].push('Rindo Berry');
+							if (berryType === 'Ice') set.possibleItems[itemTier].push('Yache Berry');
+							if (berryType === 'Fighting') set.possibleItems[itemTier].push('Chople Berry');
+							if (berryType === 'Poison') set.possibleItems[itemTier].push('Kebia Berry');
+							if (berryType === 'Ground') set.possibleItems[itemTier].push('Shuca Berry');
+							if (berryType === 'Flying') set.possibleItems[itemTier].push('Coba Berry');
+							if (berryType === 'Psychic') set.possibleItems[itemTier].push('Payapa Berry');
+							if (berryType === 'Bug') set.possibleItems[itemTier].push('Tanga Berry');
+							if (berryType === 'Rock') set.possibleItems[itemTier].push('Charti Berry');
+							if (berryType === 'Ghost') set.possibleItems[itemTier].push('Kasib Berry');
+							if (berryType === 'Dragon') set.possibleItems[itemTier].push('Haban Berry');
+							if (berryType === 'Dark') set.possibleItems[itemTier].push('Colbur Berry');
+							if (berryType === 'Steel') set.possibleItems[itemTier].push('Babiri Berry');
+							if (berryType === 'Fairy') set.possibleItems[itemTier].push('Roseli Berry');
+						}
+					}
+					// Air Balloon
+					if (
+						this.dex.species.get(set.species).randbats.weaknesses.Ground &&
+						!(this.dex.species.get(set.species).randbats.immunities.Ground && this.dex.species.get(set.species).randbats.immunities.Ground.Ability && this.dex.species.get(set.species).randbats.immunities.Ground.Ability.includes(set.ability))
+						(this.dex.species.get(set.species).randbats.resistances.Rock || ['Magic Guard', 'Regenerator'].includes(set.ability))
+					) {
+						set.possibleItems.tier2.push('Air Balloon');
+					}
+					// Absorb Bulb and Cell Battery
+					// For these, you want to resist the type, but *not* be immune to it
+					// Absorb Bulb also wants to be a special attacker, and Cell Battery wants to be a physical attacker
+					// // In VGC, resisting the type isn't as important, but Cell Battery holders ideally want to be para-immune
+					// // In VGC, you want a teammate that can side-proc the item
+					// (disregarding Snowball and Luminous Moss for now)
+
+					// Weakness Policy
+					// // In VGC, again, you want a teammate that can side-proc the item
+					// // In singles, you want high bulk, an offensive role, and Speed-boosting capability
+				}
 
 				// tier 2 - generic, good items; most likely to pull from here in general
 				// Leftovers / Black Sludge
@@ -4951,69 +5016,70 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						set.possibleItems.tier2.push('Heavy-Duty Boots');
 					}
 				}
-
-				// tier 3 - niche items
 				// type-boosting items
 				if (set.roles.includes('physical') || set.roles.includes('special')) {
-					if (set.attackingTypes.Fire && set.attackingTypes.Fire.length > 1) set.possibleItems.tier3.push('Charcoal');
-					if (set.attackingTypes.Fire && set.attackingTypes.Fire.length > 1) set.possibleItems.tier3.push('Flame Plate');
+					if (set.attackingTypes.Fire && set.attackingTypes.Fire.length > 1) set.possibleItems.tier2.push('Charcoal');
+					if (set.attackingTypes.Fire && set.attackingTypes.Fire.length > 1) set.possibleItems.tier2.push('Flame Plate');
 					
-					if (set.attackingTypes.Water && set.attackingTypes.Water.length > 1) set.possibleItems.tier3.push('Mystic Water');
-					if (set.attackingTypes.Water && set.attackingTypes.Water.length > 1) set.possibleItems.tier3.push('Splash Plate');
-					if (set.attackingTypes.Water && set.attackingTypes.Water.length > 1) set.possibleItems.tier3.push('Wave Incense');
-					if (set.attackingTypes.Water && set.attackingTypes.Water.length > 1) set.possibleItems.tier3.push('Sea Incense');
+					if (set.attackingTypes.Water && set.attackingTypes.Water.length > 1) set.possibleItems.tier2.push('Mystic Water');
+					if (set.attackingTypes.Water && set.attackingTypes.Water.length > 1) set.possibleItems.tier2.push('Splash Plate');
+					if (set.attackingTypes.Water && set.attackingTypes.Water.length > 1) set.possibleItems.tier2.push('Wave Incense');
+					if (set.attackingTypes.Water && set.attackingTypes.Water.length > 1) set.possibleItems.tier2.push('Sea Incense');
 					
-					if (set.attackingTypes.Electric && set.attackingTypes.Electric.length > 1) set.possibleItems.tier3.push('Magnet');
-					if (set.attackingTypes.Electric && set.attackingTypes.Electric.length > 1) set.possibleItems.tier3.push('Zap Plate');
+					if (set.attackingTypes.Electric && set.attackingTypes.Electric.length > 1) set.possibleItems.tier2.push('Magnet');
+					if (set.attackingTypes.Electric && set.attackingTypes.Electric.length > 1) set.possibleItems.tier2.push('Zap Plate');
 					
-					if (set.attackingTypes.Grass && set.attackingTypes.Grass.length > 1) set.possibleItems.tier3.push('Miracle Seed');
-					if (set.attackingTypes.Grass && set.attackingTypes.Grass.length > 1) set.possibleItems.tier3.push('Meadow Plate');
-					if (set.attackingTypes.Grass && set.attackingTypes.Grass.length > 1) set.possibleItems.tier3.push('Rose Incense');
+					if (set.attackingTypes.Grass && set.attackingTypes.Grass.length > 1) set.possibleItems.tier2.push('Miracle Seed');
+					if (set.attackingTypes.Grass && set.attackingTypes.Grass.length > 1) set.possibleItems.tier2.push('Meadow Plate');
+					if (set.attackingTypes.Grass && set.attackingTypes.Grass.length > 1) set.possibleItems.tier2.push('Rose Incense');
 					
-					if (set.attackingTypes.Ice && set.attackingTypes.Ice.length > 1) set.possibleItems.tier3.push('Never-Melt Ice');
-					if (set.attackingTypes.Ice && set.attackingTypes.Ice.length > 1) set.possibleItems.tier3.push('Icicle Plate');
+					if (set.attackingTypes.Ice && set.attackingTypes.Ice.length > 1) set.possibleItems.tier2.push('Never-Melt Ice');
+					if (set.attackingTypes.Ice && set.attackingTypes.Ice.length > 1) set.possibleItems.tier2.push('Icicle Plate');
 					
-					if (set.attackingTypes.Fighting && set.attackingTypes.Fighting.length > 1) set.possibleItems.tier3.push('Black Belt');
-					if (set.attackingTypes.Fighting && set.attackingTypes.Fighting.length > 1) set.possibleItems.tier3.push('Fist Plate');
+					if (set.attackingTypes.Fighting && set.attackingTypes.Fighting.length > 1) set.possibleItems.tier2.push('Black Belt');
+					if (set.attackingTypes.Fighting && set.attackingTypes.Fighting.length > 1) set.possibleItems.tier2.push('Fist Plate');
 					
-					if (set.attackingTypes.Poison && set.attackingTypes.Poison.length > 1) set.possibleItems.tier3.push('Poison Barb');
-					if (set.attackingTypes.Poison && set.attackingTypes.Poison.length > 1) set.possibleItems.tier3.push('Toxic Plate');
+					if (set.attackingTypes.Poison && set.attackingTypes.Poison.length > 1) set.possibleItems.tier2.push('Poison Barb');
+					if (set.attackingTypes.Poison && set.attackingTypes.Poison.length > 1) set.possibleItems.tier2.push('Toxic Plate');
 					
-					if (set.attackingTypes.Ground && set.attackingTypes.Ground.length > 1) set.possibleItems.tier3.push('Soft Sand');
-					if (set.attackingTypes.Ground && set.attackingTypes.Ground.length > 1) set.possibleItems.tier3.push('Earth Plate');
+					if (set.attackingTypes.Ground && set.attackingTypes.Ground.length > 1) set.possibleItems.tier2.push('Soft Sand');
+					if (set.attackingTypes.Ground && set.attackingTypes.Ground.length > 1) set.possibleItems.tier2.push('Earth Plate');
 					
-					if (set.attackingTypes.Flying && set.attackingTypes.Flying.length > 1) set.possibleItems.tier3.push('Sharp Beak');
-					if (set.attackingTypes.Flying && set.attackingTypes.Flying.length > 1) set.possibleItems.tier3.push('Sky Plate');
+					if (set.attackingTypes.Flying && set.attackingTypes.Flying.length > 1) set.possibleItems.tier2.push('Sharp Beak');
+					if (set.attackingTypes.Flying && set.attackingTypes.Flying.length > 1) set.possibleItems.tier2.push('Sky Plate');
 					
-					if (set.attackingTypes.Psychic && set.attackingTypes.Psychic.length > 1) set.possibleItems.tier3.push('Twisted Spoon');
-					if (set.attackingTypes.Psychic && set.attackingTypes.Psychic.length > 1) set.possibleItems.tier3.push('Mind Plate');
-					if (set.attackingTypes.Psychic && set.attackingTypes.Psychic.length > 1) set.possibleItems.tier3.push('Odd Incense');
+					if (set.attackingTypes.Psychic && set.attackingTypes.Psychic.length > 1) set.possibleItems.tier2.push('Twisted Spoon');
+					if (set.attackingTypes.Psychic && set.attackingTypes.Psychic.length > 1) set.possibleItems.tier2.push('Mind Plate');
+					if (set.attackingTypes.Psychic && set.attackingTypes.Psychic.length > 1) set.possibleItems.tier2.push('Odd Incense');
 					
-					if (set.attackingTypes.Bug && set.attackingTypes.Bug.length > 1) set.possibleItems.tier3.push('Silver Powder');
-					if (set.attackingTypes.Bug && set.attackingTypes.Bug.length > 1) set.possibleItems.tier3.push('Insect Plate');
+					if (set.attackingTypes.Bug && set.attackingTypes.Bug.length > 1) set.possibleItems.tier2.push('Silver Powder');
+					if (set.attackingTypes.Bug && set.attackingTypes.Bug.length > 1) set.possibleItems.tier2.push('Insect Plate');
 					
-					if (set.attackingTypes.Rock && set.attackingTypes.Rock.length > 1) set.possibleItems.tier3.push('Hard Stone');
-					if (set.attackingTypes.Rock && set.attackingTypes.Rock.length > 1) set.possibleItems.tier3.push('Stone Plate');
-					if (set.attackingTypes.Rock && set.attackingTypes.Rock.length > 1) set.possibleItems.tier3.push('Rock Incense');
+					if (set.attackingTypes.Rock && set.attackingTypes.Rock.length > 1) set.possibleItems.tier2.push('Hard Stone');
+					if (set.attackingTypes.Rock && set.attackingTypes.Rock.length > 1) set.possibleItems.tier2.push('Stone Plate');
+					if (set.attackingTypes.Rock && set.attackingTypes.Rock.length > 1) set.possibleItems.tier2.push('Rock Incense');
 					
-					if (set.attackingTypes.Ghost && set.attackingTypes.Ghost.length > 1) set.possibleItems.tier3.push('Spell Tag');
-					if (set.attackingTypes.Ghost && set.attackingTypes.Ghost.length > 1) set.possibleItems.tier3.push('Spooky Plate');
+					if (set.attackingTypes.Ghost && set.attackingTypes.Ghost.length > 1) set.possibleItems.tier2.push('Spell Tag');
+					if (set.attackingTypes.Ghost && set.attackingTypes.Ghost.length > 1) set.possibleItems.tier2.push('Spooky Plate');
 					
-					if (set.attackingTypes.Dragon && set.attackingTypes.Dragon.length > 1) set.possibleItems.tier3.push('Dragon Fang');
-					if (set.attackingTypes.Dragon && set.attackingTypes.Dragon.length > 1) set.possibleItems.tier3.push('Draco Plate');
+					if (set.attackingTypes.Dragon && set.attackingTypes.Dragon.length > 1) set.possibleItems.tier2.push('Dragon Fang');
+					if (set.attackingTypes.Dragon && set.attackingTypes.Dragon.length > 1) set.possibleItems.tier2.push('Draco Plate');
 					
-					if (set.attackingTypes.Dark && set.attackingTypes.Dark.length > 1) set.possibleItems.tier3.push('Black Glasses');
-					if (set.attackingTypes.Dark && set.attackingTypes.Dark.length > 1) set.possibleItems.tier3.push('Dread Plate');
+					if (set.attackingTypes.Dark && set.attackingTypes.Dark.length > 1) set.possibleItems.tier2.push('Black Glasses');
+					if (set.attackingTypes.Dark && set.attackingTypes.Dark.length > 1) set.possibleItems.tier2.push('Dread Plate');
 					
-					if (set.attackingTypes.Steel && set.attackingTypes.Steel.length > 1) set.possibleItems.tier3.push('Metal Coat');
-					if (set.attackingTypes.Steel && set.attackingTypes.Steel.length > 1) set.possibleItems.tier3.push('Iron Plate');
+					if (set.attackingTypes.Steel && set.attackingTypes.Steel.length > 1) set.possibleItems.tier2.push('Metal Coat');
+					if (set.attackingTypes.Steel && set.attackingTypes.Steel.length > 1) set.possibleItems.tier2.push('Iron Plate');
 					
-					if (set.attackingTypes.Fairy && set.attackingTypes.Fairy.length > 1) set.possibleItems.tier3.push('Fairy Feather');
-					if (set.attackingTypes.Fairy && set.attackingTypes.Fairy.length > 1) set.possibleItems.tier3.push('Pixie Plate');
+					if (set.attackingTypes.Fairy && set.attackingTypes.Fairy.length > 1) set.possibleItems.tier2.push('Fairy Feather');
+					if (set.attackingTypes.Fairy && set.attackingTypes.Fairy.length > 1) set.possibleItems.tier2.push('Pixie Plate');
 					
-					if (set.attackingTypes.Normal && set.attackingTypes.Normal.length > 1) set.possibleItems.tier3.push('Silk Scarf');
-					if (set.attackingTypes.Normal && set.attackingTypes.Normal.length > 1) set.possibleItems.tier3.push('Normal Gem');
-	
+					if (set.attackingTypes.Normal && set.attackingTypes.Normal.length > 1) set.possibleItems.tier2.push('Silk Scarf');
+					if (set.attackingTypes.Normal && set.attackingTypes.Normal.length > 1) set.possibleItems.tier2.push('Normal Gem');
+				}
+
+				// tier 3 - niche items
+				if (set.roles.includes('physical') || set.roles.includes('special')) {
 					// Expert Belt
 					let attackingTypes = 0;
 					for (const type in set.attackingTypes) attackingTypes++;
