@@ -4885,7 +4885,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					// Air Balloon
 					if (
 						this.dex.species.get(set.species).randbats.weaknesses.Ground &&
-						!(this.dex.species.get(set.species).randbats.immunities.Ground && this.dex.species.get(set.species).randbats.immunities.Ground.Ability && this.dex.species.get(set.species).randbats.immunities.Ground.Ability.includes(set.ability))
+						!(this.dex.species.get(set.species).randbats.immunities.Ground && this.dex.species.get(set.species).randbats.immunities.Ground.Ability && this.dex.species.get(set.species).randbats.immunities.Ground.Ability.includes(set.ability)) &&
 						(this.dex.species.get(set.species).randbats.resistances.Rock || ['Magic Guard', 'Regenerator'].includes(set.ability))
 					) {
 						set.possibleItems.tier2.push('Air Balloon');
