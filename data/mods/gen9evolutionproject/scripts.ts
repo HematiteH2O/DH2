@@ -3671,6 +3671,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 				if (randomized) set.hasBeenRandomized = true;
 				set.coveredStabs = [];
+				set.movePowers = {};
 				set.remainingStabTypes = [];
 				set.remainingStabMoves = [];
 				sets.push(set);
@@ -3928,6 +3929,13 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							if (!fragment.pokemon.roles.includes(fragment.role)) fragment.pokemon.roles.push(fragment.role);
 						}
 						else if (fragment.role === 'mainstab' && fragment.moveType && !fragment.pokemon.coveredStabs.includes(fragment.moveType)) fragment.pokemon.coveredStabs.push(fragment.moveType);
+					}
+					if (fragment.baseMove) {
+						if (fragment.pokemon.movePowers[fragment.baseMove]) {
+							if (fragment.moveBasePower && fragment.moveBasePower > fragment.pokemon.movePowers[fragment.baseMove]) fragment.pokemon.movePowers[fragment.baseMove] = fragment.moveBasePower;
+						} else {
+							if (fragment.moveBasePower) fragment.pokemon.movePowers[fragment.baseMove] = fragment.moveBasePower;
+						}
 					}
 					if (fragment.tags) { // I only define each fragment with one role, but sometimes - especially for the "buddy" property later - I think it could come in handy to give them more labels than that
 						if (!fragment.pokemon.roles) fragment.pokemon.roles = [];
@@ -4330,6 +4338,13 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (!chosenFragment.pokemon.avoid) chosenFragment.pokemon.avoid = [];
 					for (const avoid of chosenFragment.avoid) if (!chosenFragment.pokemon.avoid.includes(avoid)) chosenFragment.pokemon.avoid.push(avoid);
 				}
+				if (chosenFragment.baseMove) {
+					if (chosenFragment.pokemon.movePowers[chosenFragment.baseMove]) {
+						if (chosenFragment.moveBasePower && chosenFragment.moveBasePower > chosenFragment.pokemon.movePowers[chosenFragment.baseMove]) chosenFragment.pokemon.movePowers[chosenFragment.baseMove] = chosenFragment.moveBasePower;
+					} else {
+						if (chosenFragment.moveBasePower) chosenFragment.pokemon.movePowers[chosenFragment.baseMove] = chosenFragment.moveBasePower;
+					}
+				}
 				if (chosenFragment[format].acceptedSupport) for (const request of chosenFragment[format].acceptedSupport) {
 					if (!teamHighPrioRequestedSupport[request]) teamHighPrioRequestedSupport[request] = [];
 					teamHighPrioRequestedSupport[request].push(chosenFragment.pokemon);
@@ -4349,11 +4364,74 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		// We might even be missing an item or a Tera Type!
 		// The more set fragments I set up, the less this is going to matter; these are *just* the fallback!
 
-		// Items require consideration for the whole team, because of item clause
+		// Items require consideration for the whole team, because of item clause, so those will come later
+		let itemsAlreadyUsed = [];
+		let setsWithoutItems = [];
 
 		// EVs and Tera Types only require consideration for the individual set
 		for (const set of sets) {
+			// failsafes
 			if (!set.moves) set.moves = ["Protect"];
+			if (set.moves.length < 4 && !set.moves.includes('Protect')) set.moves.push('Protect');
+			
+			// purely cosmetic: let's reorder the set's moves
+			if (set.moves.length > 1) {
+				let bpAltMoveOrder = [];
+				let maxMovePower = 0;
+
+				// first, sort by set.movePowers if applicable
+				while (bpAltMoveOrder.length < set.moves.length) {
+					let backupAltMoveOrder = bpAltMoveOrder;
+					for (const move of set.moves) {
+						if (bpAltMoveOrder.includes(move)) continue;
+						let movePower = 0;
+						if (set.movePowers[move]) movePower = set.movePowers[move];
+						if (movePower > maxMovePower) {
+							// reset
+							maxMovePower = movePower;
+							bpAltMoveOrder = backupAltMoveOrder;
+						}
+						if (movePower === maxMovePower) {
+							bpAltMoveOrder.push(move);
+						}
+					}
+				}
+				
+				// then sort by priority
+				let prioAltMoveOrder = [];
+				let maxMovePriority = 0;
+
+				while (prioAltMoveOrder.length < set.moves.length) {
+					let backupAltMoveOrder = bpAltMoveOrder;
+					for (const move of bpAltMoveOrder) {
+						if (prioAltMoveOrder.includes(move)) continue;
+						let movePriority = 0;
+						if (this.dex.moves.get(move).priority) movePriority = this.dex.moves.get(move).priority;
+						// exceptions:
+						if (movePriority === 4) movePriority = -8; // protection moves go last
+						if (movePriority === -7) movePriority = 7; // Trick Room goes first
+						if (
+							this.dex.moves.get(move).boosts && this.dex.moves.get(move).target && ['self', 'allies'].includes(this.dex.moves.get(move).target)
+						) movePriority = 2.5; // generally, self-setup moves belong before most attacks
+						if (movePriority > maxMovePriority) {
+							// reset
+							maxMovePriority = movePriority;
+							prioAltMoveOrder = backupAltMoveOrder;
+						}
+						if (movePriority === maxMovePriority) {
+							prioAltMoveOrder.push(move);
+						}
+					}
+				}
+				
+				set.moves = prioAltMoveOrder;
+			}
+			
+			if (set.item) {
+				itemsAlreadyUsed.push(set.item);
+			} else {
+				setsWithoutItems.push(set);
+			}
 			
 			// EVs
 			if (!set.evs) set.evs = { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
@@ -4727,14 +4805,16 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				console.log(validTeraTypes);
 				set.teraType = this.sample(validTeraTypes);
 			}
-			
-			if (!set.item) {
-				if (stage === 'LC') set.item = 'Eviolite';
-				else if (format !== 'vgc') set.item = 'Leftovers'; // VGC respects item clause
-			}
 			if (!set.happiness && set.hasBeenRandomized) set.happiness = 255;
 			if (set.hasBeenRandomized) set.level = setLevel;
 			if (!set.shiny && set.hasBeenRandomized) set.shiny = shiny; // clarifying: shiny is a variable we defined earlier, not the string "shiny"
+		}
+		if (setsWithoutItems.length) {
+			// now we get to assign items to the remaining team members!
+			// in theory, item clause only needs to be enforced at all for VGC;
+			// however, *from this step on,* I'm also going to enforce it for singles!
+			// that's because if we've made it this far, the set doesn't strictly need its item to function,
+			// so even in singles, it's fine to prioritize spicing things up and having fun with it!
 		}
 
 		// TODO: nickname check???
