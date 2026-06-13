@@ -2765,9 +2765,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 										'honeclaws', 'workup',
 									].includes(moveid)
 								) { // you usually don't really want these if there are other options - unless they're a buddy move for some other reason
-									modFragment.score = -1;
+									modFragment.score = -3;
 								} else {
-									modFragment.score = 1;
+									// you also don't want these getting picked early, though; it's better if they usually only come up as a buddy move
+									modFragment.score = -1;
 								}
 	
 								// physical setup
@@ -2777,8 +2778,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 									].includes(moveid)
 								) {
 									modFragment.tags.push('physicalsetup');
+									
 									modFragment.avoid.push('special');
 									modFragment.avoid.push('physicalsetup');
+									modFragment.avoid.push('specialsetup');
+									
 									modFragment.buddy.roles.push('physical');
 								}
 	
@@ -2789,8 +2793,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 									].includes(moveid)
 								) {
 									modFragment.tags.push('specialsetup');
+									
 									modFragment.avoid.push('physical');
+									modFragment.avoid.push('physicalsetup');
 									if (moveid !== 'fierydance') modFragment.avoid.push('specialsetup');
+									
 									modFragment.buddy.roles.push('special');
 								}
 	
@@ -2804,7 +2811,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								
 								if (!newMon.randbats.offeredSupport.personal) newMon.randbats.offeredSupport.personal = [];
 								if (moveid === 'howl') {
-									// you don't really need priority or spread to be a good Howl user in VGC, and we don't want to push it to singles
+									// you don't really need priority or spread to be a good Howl user in VGC, and we don't want to push it to singles at all
 									modFragment.format = 'vgc';
 									newMon.randbats.offeredSupport.personal.push(modFragment);
 								} else if (moveid === 'bellydrum') {
