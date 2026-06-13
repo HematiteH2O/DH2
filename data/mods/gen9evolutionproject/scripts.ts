@@ -4382,7 +4382,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		for (const set of sets) {
 			// failsafes
 			if (!set.moves) set.moves = ["Protect"];
-			if (set.moves.length < 4 && !set.moves.includes('Protect')) set.moves.push('Protect');
+			if (
+				set.moves.length < 4 && !set.moves.includes('Protect') &&
+				this.dex.data.Learnsets[this.toID(set.species)].learnset.protect &&
+				!(set.item && ['Choice Band', 'Choice Specs', 'Choice Scarf', 'Assault Vest'].includes(set.item)) &&
+				!(set.ability && ['Gorilla Tactics'].includes(set.ability))
+			) set.moves.push('Protect');
 			
 			// purely cosmetic: let's reorder the set's moves
 			if (set.moves.length > 1) {
