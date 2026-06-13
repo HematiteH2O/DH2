@@ -2489,7 +2489,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							if ([
 								'taunt', 'encore', 'imprison',
 								'spore', 'sleeppowder',
-								'trickroom',
+								// 'trickroom', // okay, running Trick Room solely as anti-Trick Room feels weird when it happens
 								'roar', 'whirlwind', 'dragontail', 'circlethrow',
 							].includes(moveid)) {
 								let modFragment = Utils.deepClone(fragment);
