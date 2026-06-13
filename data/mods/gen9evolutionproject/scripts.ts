@@ -952,6 +952,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						if (!newMon.randbats.vgc.acceptedSupport.sand) newMon.randbats.vgc.acceptedSupport.sand = [];
 						newMon.randbats.vgc.acceptedSupport.sand.push('true');
 					}
+					if (newMon.types[0] === 'Grass' || (newMon.types[1] && newMon.types[1] === 'Grass')) newMon.randbats.offeredSupport.powderimmune = "true"; // Tera doesn't count
 	
 					// then I can start iterating over the movepool!
 					// but first...
@@ -5101,7 +5102,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						set.possibleItems.tier3.push('White Herb');
 					}
 					if (
-						this.dex.species.get(set.species).randbats && !this.dex.species.get(set.species).randbats.types.includes('Ghost') && set.teraType !== 'Ghost' &&
+						!(this.dex.species.get(set.species).randbats && this.dex.species.get(set.species).randbats.types.includes('Ghost')) && set.teraType !== 'Ghost' &&
 						!set.roles.includes('antipriority') && set.ability !== 'Shield Dust'
 					) {
 						if (set.roles.includes('speedcontrol') || set.roles.includes('trickroom')) set.possibleItems.tier0.push('Covert Cloak');
@@ -5109,15 +5110,57 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					}
 				}
 				// Mental Herb
-				if (format === 'vgc' && set.roles.includes('trickroom')) {
+				if (
+					format === 'vgc' && set.roles.includes('trickroom') && !['Oblivious', 'Good as Gold', 'Magic Bounce'].includes(set.ability) && !teamOfferedSupport.aromaveil
+				) {
 					if ( // higher priority if you're really not worried about Fake Out
 						(this.dex.species.get(set.species).randbats && this.dex.species.get(set.species).randbats.types.includes('Ghost')) ||
 						set.teraType === 'Ghost' || set.roles.includes('antipriority') || set.ability === 'Shield Dust' ||
 						teamOfferedSupport.psychicterrain
 					) {
-						set.possibleItems.tier0.push('Covert Cloak');
+						set.possibleItems.tier0.push('Mental Herb');
 					} else { // but still useful if not
 						set.possibleItems.tier2.push('Mental Herb');
+					}
+				}
+				// Safety Goggles
+				if ( // let's avoid complete redundancy at least
+					format === 'vgc' &&
+					!(this.dex.species.get(set.species).randbats && this.dex.species.get(set.species).randbats.types.includes('Grass')) && set.teraType !== 'Grass' &&
+					!set.roles.includes('sleepimmune') &&
+					![
+						'Overcoat', 'Good as Gold', 'Magic Bounce',
+						'Vital Spirit', 'Insomnia', 'Sweet Veil',
+					].includes(set.ability) &&
+					!teamOfferedSupport.antisleep && !teamOfferedSupport.electricterrain && !teamOfferedSupport.mistyterrain
+				) {
+					// but then there are a handful of different use cases
+					// the matchup with specific Spore users is relevant, but I don't think I can generalize that just yet; consider this a TODO for the threatlist mechanic
+					
+					// Okay, so top-priority Trick Room setters first...
+					// let's look at this the same way as Mental Herb: give Safety Goggles *much* higher priority if you're not afraid of priority
+					if (
+						set.roles.includes('trickroom') &&
+						((this.dex.species.get(set.species).randbats && this.dex.species.get(set.species).randbats.types.includes('Ghost')) ||
+						set.teraType === 'Ghost' || set.roles.includes('antipriority') || set.ability === 'Shield Dust' ||
+						teamOfferedSupport.psychicterrain)
+					) {
+						set.possibleItems.tier0.push('Safety Goggles');
+					} else { // but now we have a lot of other use cases
+						if (
+							// - has the move Trick Room, has its own redirection, or has the role 'antitrickroom' specifically through the move Taunt
+							set.roles.includes('trickroom') || set.roles.includes('redirection') || set.moves.includes('Taunt')
+						) {
+							set.possibleItems.tier2.push('Safety Goggles');
+						} else if (
+							// no other Spore immunity on the team (outside of Tera) AND
+							(!teamOfferedSupport.sleepimmune && !teamOfferedSupport.powderimmune) &&
+							// - is a bulky pivot, esp. with Intimidate and/or Fake Out
+							// - is strong a single-target attacker that already isn't concerned by Intimidate
+							((set.roles.includes('pivoting') && (set.roles.includes('fakeout') || set.roles.includes('intimidate'))) ||
+							(set.roles.includes('physical') && set.roles.includes('antiintimidate' && !set.roles.includes('spread'))))
+						) {
+						}
 					}
 				}
 				// Focus Sash
