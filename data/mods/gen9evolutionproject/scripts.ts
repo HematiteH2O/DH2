@@ -4454,7 +4454,66 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			if (set.item) {
 				itemsAlreadyUsed.push(set.item);
 			} else {
-				setsWithoutItems.push(set);
+				if (stage === 'LC' && format !== 'vgc') {
+					// not respecting item clause for LC, and keeping it pretty simple
+					// for LC, we want to do the item before EVs, not after
+
+					// Choice Scarf is the most specific, so let's test several criteria and only run with it if we meet all of them
+					let choiceScarf = true;
+					
+					// First: in vanilla LC, this is usually best if you're able to hit 14 or more Speed, since 21 outspeeds everything
+					// In Evo specifically, you would need 18 for a Scarf to outspeed Uraxys, but that's silly;
+					// I checked and 14 is still all you need for anything else
+					let maxSpeed = Math.floor((Math.floor((2 * this.dex.species.get(set.species).baseStats.spe + 31 + 63) / 20) + 5) * 1.1);
+					if (maxSpeed < 14 || maxSpeed >= 20) choiceScarf = false; // let's not Scarf anything that's already *that* fast...
+					
+					// let's also calculate how many EVs it takes to reach 14
+					// working backwards from the formula... to have 14 Speed in LC with a positive nature, you need (2 * base stat) + 31 + (EVs/4) >= 160
+					// or to do the same with a neutral nature, you need >= 180
+					// so let's solve for EVs:
+					let requiredEvsPositive = 4 * (129 - (2 * this.dex.species.get(set.species).baseStats.spe));
+					let requiredEvsNeutral = 4 * (149 - (2 * this.dex.species.get(set.species).baseStats.spe));
+					// we already checked if the max Speed was possible, but now we want to check if it's within the EV limit
+					if (set.evs && (set.evs.hp + set.evs.atk + set.evs.def + set.evs.spa + set.evs.spd + requiredEvsPositive) > 508) choiceScarf = false;
+					// if even a positive nature costs too many EVs, we can't do it!
+					// (of course, if we don't have any EVs assigned, this one is fine)
+
+					// with some exceptions, the only sets that can pull off a Choice Scarf have only attacking moves
+					for (const move of set.moves) {
+						if (!this.dex.moves.get(move)) continue;
+						if (this.dex.moves.get(move).category === 'Status' && ![
+							'Healing Wish', 'Lunar Dance', 'Memento', 'Parting Shot', 'Chilly Reception',
+							'Trick', 'Switcheroo', 'Bestow',
+							'Defog', 'Tidy Up',
+							'Nature Power', 'Sleep Talk',
+						].includes(move)) choiceScarf = false;
+						if (['Fake Out', 'First Impression'].includes(move)) choiceScarf = false;
+					}
+
+					// okay... if choiceScarf is still an option, let's go for it!
+					if (choiceScarf) {
+						set.item = 'Choice Scarf';
+						if (!set.evs) set.evs = { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
+						if (set.evs && (set.evs.hp + set.evs.atk + set.evs.def + set.evs.spa + set.evs.spd + requiredEvsNeutral) > 508) {
+							if (set.evs.spe < requiredEvsNeutral) set.evs.spe = requiredEvsNeutral;
+							set.forceSpeedNeutral = true; // look I'm improvising okay
+						} else {
+							if (set.evs.spe < requiredEvsPositive) set.evs.spe = requiredEvsPositive;
+							set.forceSpeedPositive = true;
+						}
+					} else if (
+						// offensive role
+						(set.roles.includes('physical') || set.roles.includes('special')) &&
+						// base 49 HP or lower
+						(this.dex.species.get(set.species) && this.dex.species.get(set.species).baseStats.hp <= 49) &&
+						// not relying on bulk investment for other fragments
+						!(set.evs && (set.evs.hp + set.evs.def + set.evs.spd) > 0)
+					) set.item = 'Life Orb';
+					else if (set.roles.includes('recovery') || set.ability === 'Regenerator') set.item = 'Eviolite';
+					else set.item = 'Berry Juice';
+				} else {
+					setsWithoutItems.push(set);
+				}
 			}
 			
 			// EVs
@@ -4655,7 +4714,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				let loweredStat = null;
 				
 				// figuring out the best stat for the nature to raise
-				if (set.evs.spe + increment > 252) boostedStat = 'spe';
+				if (set.forceSpeedPositive) boostedStat = 'spe';
+				else if (set.evs.spe + increment > 252 && !set.forceSpeedNeutral) boostedStat = 'spe';
 				else {
 					let maxStats = [];
 					let maxStat = null;
