@@ -698,7 +698,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 					let partialTeam = [];
 					for (const set of side.team) if (set && set.hasBeenRandomized) partialTeam.push(set);
 					this.add('showteam', side.id, Teams.pack(partialTeam));
-					this.add(`raw|<hr>`);
+					this.add(`raw|(This only includes Pokémon that were selected by the randomizer.<br>You can use the command <strong>!showteam</strong> if you want to share the whole team!)<hr>`);
 				}
 			}
 			
