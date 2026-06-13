@@ -4711,6 +4711,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					else if (loweredStat === 'spa') set.nature = 'Jolly';
 					else if (loweredStat === 'spd') set.nature = 'Naive';
 				}
+
+				// setting 0 IVs for certain stats
+				if (!set.ivs) set.ivs = { hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31 };
+				if (set.roles && set.roles.includes('minspeed')) set.ivs.spe = 0;
+				if (!attackingStats.includes('atk')) set.ivs.atk = 0;
 			}
 
 			if (!set.ability) set.ability = this.dex.species.get(set.species).abilities[0];
