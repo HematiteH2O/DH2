@@ -4962,7 +4962,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					pushItems.push('Terrain Extender');
 				} else if (
 					set.roles.includes('electricterrain') || set.roles.includes('grassyterrain') || set.roles.includes('mistyterrain') || set.roles.includes('psychicterrain') ||
-					set.roles.includes('backupelectricterrain') || set.roles.includes('backupgrassyterrain') || set.roles.includes('backupmistyterrain') || set.roles.includes('backuppsychicterrain') ||
+					set.roles.includes('backupelectricterrain') || set.roles.includes('backupgrassyterrain') || set.roles.includes('backupmistyterrain') || set.roles.includes('backuppsychicterrain')
 				) {
 					set.possibleItems.tier2.push('Terrain Extender');
 				}
