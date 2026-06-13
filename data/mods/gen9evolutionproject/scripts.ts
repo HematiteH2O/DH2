@@ -4681,7 +4681,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			) {
 				// edge case: Life Orb holders in LC that don't already have bulk investment want exactly 19 HP, if possible
 				if (!set.ivs) set.ivs = { hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31 };
-				set.ivs.hp = 99 - 2 * this.dex.species.get(set.species).baseStats.hp; // yay math
+				let targetHp = 99 - 2 * this.dex.species.get(set.species).baseStats.hp; // yay math
+				if (set.ivs.hp > targetHp) set.ivs.hp = targetHp;
 			} else {
 				// ideally, I want to set up fragments to optimize HP-to-defense ratios where there are specific benchmarks involved,
 				// but I think where there *aren't* any benchmarks, it's better to just prioritize HP in most cases
