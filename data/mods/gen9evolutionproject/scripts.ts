@@ -4675,15 +4675,24 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			}
 
 			// third check: HP
-			// ideally, I want to set up fragments to optimize HP-to-defense ratios where there are specific benchmarks involved,
-			// but I think where there *aren't* any benchmarks, it's better to just prioritize HP in most cases
-			if (set.evs.hp === 0 && set.firstPoint.hp <= evsLeft) {
-				set.evs.hp = set.firstPoint.hp;
-				evsLeft -= set.firstPoint.hp;
-			}
-			while ((evsLeft >= increment) && (set.evs.hp + increment <= 252)) {
-				set.evs.hp += increment;
-				evsLeft -= increment;
+			if (
+				stage === 'LC' && set.item && set.item === 'Life Orb' && (set.evs.hp + set.evs.def + set.evs.spd === 0) &&
+				this.dex.species.get(set.species) && this.dex.species.get(set.species).baseStats.hp <= 49
+			) {
+				// edge case: Life Orb holders in LC that don't already have bulk investment want exactly 19 HP, if possible
+				if (!set.ivs) set.ivs = { hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31 };
+				set.ivs.hp = 99 - 2 * this.dex.species.get(set.species).baseStats.hp; // yay math
+			} else {
+				// ideally, I want to set up fragments to optimize HP-to-defense ratios where there are specific benchmarks involved,
+				// but I think where there *aren't* any benchmarks, it's better to just prioritize HP in most cases
+				if (set.evs.hp === 0 && set.firstPoint.hp <= evsLeft) {
+					set.evs.hp = set.firstPoint.hp;
+					evsLeft -= set.firstPoint.hp;
+				}
+				while ((evsLeft >= increment) && (set.evs.hp + increment <= 252)) {
+					set.evs.hp += increment;
+					evsLeft -= increment;
+				}
 			}
 			
 			// final check: defenses
@@ -4788,7 +4797,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// setting 0 IVs for certain stats
 				if (!set.ivs) set.ivs = { hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31 };
 				if (set.roles && set.roles.includes('minspeed')) set.ivs.spe = 0;
-				if (!attackingStats.includes('atk')) set.ivs.atk = 0;
+				if (
+					!attackingStats.includes('atk') &&
+					!set.moves.includes('Assist') && !set.moves.includes('Copycat') && !set.moves.includes('Me First') &&
+					!set.moves.includes('Metronome') && !set.moves.includes('Mirror Move')
+				) set.ivs.atk = 0; // don't minimize Attack if you could potentially call a physical move (:
 			}
 
 			if (!set.ability) set.ability = this.dex.species.get(set.species).abilities[0];
