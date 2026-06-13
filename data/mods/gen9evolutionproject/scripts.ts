@@ -2398,7 +2398,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							// others are specialized, so you need one of each
 							if (
 								['kingsshield', 'breakingswipe', 'strengthsap'].includes(moveid) ||
-								(['bittermalice', 'chillingwater', 'lunge', 'tropkick'].includes(moveid) && fragment.moveBasePower > 80) ||
+								(['baddybad', 'bittermalice', 'chillingwater', 'lunge', 'tropkick'].includes(moveid) && fragment.moveBasePower > 80) ||
 								(['reflect', 'growl', 'charm', 'tickle', 'featherdance'].includes(moveid) && fragment.movePriority > 0)
 							) {
 								let modFragment = Utils.deepClone(fragment);
@@ -2418,7 +2418,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							}
 							if (
 								['snarl', 'strugglebug'].includes(moveid) ||
-								(['mysticalfire'].includes(moveid) && fragment.moveBasePower > 80) ||
+								(['glitzyglow', 'mysticalfire'].includes(moveid) && fragment.moveBasePower > 80) ||
 								(['lightscreen', 'eerieumpulse'].includes(moveid) && fragment.movePriority > 0)
 							) {
 								let modFragment = Utils.deepClone(fragment);
@@ -4842,6 +4842,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				let pushItems = [];
 				let critMoves = 0;
 				let whiteHerb = false;
+				let defBoost = false;
+				let overrideOffenseWithDefense = false;
+				let spdBoost = false;
+				let overrideOffenseWithSpDef = false;
 				for (const move of set.moves) {
 					let moveData = this.dex.moves.get(move);
 					if (moveData) {
@@ -4866,7 +4870,22 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						if (moveData.selfdestruct && moveData.selfdestruct === 'always') pushItems.push('Custap Berry');
 						if (moveData.self && moveData.self.boosts) {
 							for (const boost in moveData.self.boosts) if (moveData.self.boosts[boost] < 0) whiteHerb = true;
+							if (moveData.self.boosts.def && moveData.self.boosts.def > 0) defBoost = true;
+							if (moveData.self.boosts.spd && moveData.self.boosts.spd > 0) spdBoost = true;
 						}
+						if (moveData.secondary && moveData.secondary.self && moveData.secondary.self.boosts) {
+							for (const boost in moveData.secondary.self.boosts) if (moveData.secondary.self.boosts[boost] < 0) whiteHerb = true;
+							if (moveData.secondary.self.boosts.def && moveData.secondary.self.boosts.def > 0) defBoost = true;
+							if (moveData.secondary.self.boosts.spd && moveData.secondary.self.boosts.spd > 0) spdBoost = true;
+						}
+						if (moveData.overrideOffensiveStat) {
+							if (moveData.overrideOffensiveStat === 'def') overrideOffenseWithDefense = true;
+							if (moveData.overrideOffensiveStat === 'spd') overrideOffenseWithSpDef = true;
+						}
+						if (
+							(moveData.sideCondition && ['reflect', 'lightscreen', 'auroraveil'].includes(moveData.sideCondition)) ||
+							(moveData.self && moveData.self.sideCondition && ['reflect', 'lightscreen', 'auroraveil'].includes(moveData.self.sideCondition))
+						) pushItems.push('Light Clay');
 					}
 				}
 				if (whiteHerb && set.ability !== 'Contrary') {
@@ -4877,6 +4896,15 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					) pushItems.push('Eject Pack');
 				}
 				if (set.roles.includes('physical') && ((set.ability === 'Intimidate' && format === 'vgc') || set.moves.includes('Swagger'))) pushItems.push('Mirror Herb');
+				if (
+					(set.roles.includes('physical') && set.ability === 'Guts') ||
+					(!set.roles.includes('physical') && set.ability === 'Quick Feet') ||
+					(set.roles.includes('special') && set.ability === 'Flare Boost') ||
+					set.ability === 'Marvel Scale'
+				) pushItems.push('Flame Orb');
+				if (
+					set.roles.includes('physical') && ['Guts', 'Toxic Boost', 'Quick Feet'].includes(set.ability)
+				) pushItems.push('Toxic Orb');
 				if ((set.ability === 'Sturdy' || set.moves.includes('Endure')) && format === 'singles') {
 					if (set.roles.includes('entryhazard')) pushItems.push('Custap Berry');
 					if (!set.roles.includes('speedsetup')) pushItems.push('Salac Berry');
@@ -4908,6 +4936,55 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						pushItems.push('Iron Ball');
 						pushItems.push('Lagging Tail');
 					}
+				}
+				// Terrain seeds: they can be useful on pretty much anything,
+				// but it's even better if they go to a Pokémon that can make proper use of the defensive boost or one with Unburden, so we'll prioritize those
+				if (teamOfferedSupport.electricterrain) {
+					if (overrideOffenseWithDefense || spdBoost || set.ability === 'Unburden') pushItems.push('Electric Seed');
+					else set.possibleItems.tier2.push('Electric Seed');
+				}
+				if (teamOfferedSupport.grassyterrain) {
+					if (overrideOffenseWithDefense || spdBoost || set.ability === 'Unburden') pushItems.push('Grassy Seed');
+					else set.possibleItems.tier2.push('Grassy Seed');
+				}
+				if (teamOfferedSupport.mistyterrain) {
+					if (overrideOffenseWithSpDef || defBoost || set.ability === 'Unburden') pushItems.push('Misty Seed');
+					else set.possibleItems.tier2.push('Misty Seed');
+				}
+				if (teamOfferedSupport.psychicterrain) {
+					if (overrideOffenseWithSpDef || defBoost || set.ability === 'Unburden') pushItems.push('Psychic Seed');
+					else set.possibleItems.tier2.push('Psychic Seed');
+				}
+				// field effect extenders: top priority goes to manual setters if there are any, but they're also useful on autosetters
+				if (
+					set.moves.includes('Electric Terrain') || set.moves.includes('Grassy Terrain') || set.moves.includes('Misty Terrain') || set.moves.includes('Psychic Terrain')
+				) {
+					pushItems.push('Terrain Extender');
+				} else if (
+					set.roles.includes('electricterrain') || set.roles.includes('grassyterrain') || set.roles.includes('mistyterrain') || set.roles.includes('psychicterrain') ||
+					set.roles.includes('backupelectricterrain') || set.roles.includes('backupgrassyterrain') || set.roles.includes('backupmistyterrain') || set.roles.includes('backuppsychicterrain') ||
+				) {
+					set.possibleItems.tier2.push('Terrain Extender');
+				}
+				if (set.moves.includes('Sunny Day')) {
+					pushItems.push('Heat Rock');
+				} else if (set.roles.includes('sun') || set.roles.includes('backupsun')) {
+					set.possibleItems.tier2.push('Heat Rock');
+				}
+				if (set.moves.includes('Rain Dance')) {
+					pushItems.push('Damp Rock');
+				} else if (set.roles.includes('rain') || set.roles.includes('backuprain')) {
+					set.possibleItems.tier2.push('Damp Rock');
+				}
+				if (set.moves.includes('Sandstorm')) {
+					pushItems.push('Smooth Rock');
+				} else if (set.roles.includes('sand') || set.roles.includes('backupsand')) {
+					set.possibleItems.tier2.push('Smooth Rock');
+				}
+				if (set.moves.includes('Snowscape') || set.moves.includes('Hail')) { // Chilly Reception does not imply a need for this
+					pushItems.push('Icy Rock');
+				} else if (set.roles.includes('snow') || set.roles.includes('backupsnow')) {
+					set.possibleItems.tier2.push('Icy Rock');
 				}
 				for (const item of pushItems) if (!set.possibleItems.tier0.includes(item)) set.possibleItems.tier0.push(item);
 
@@ -5031,6 +5108,18 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						else set.possibleItems.tier2.push('Covert Cloak');
 					}
 				}
+				// Mental Herb
+				if (format === 'vgc' && set.roles.includes('trickroom')) {
+					if ( // higher priority if you're really not worried about Fake Out
+						(this.dex.species.get(set.species).randbats && this.dex.species.get(set.species).randbats.types.includes('Ghost')) ||
+						set.teraType === 'Ghost' || set.roles.includes('antipriority') || set.ability === 'Shield Dust' ||
+						teamOfferedSupport.psychicterrain
+					) {
+						set.possibleItems.tier0.push('Covert Cloak');
+					} else { // but still useful if not
+						set.possibleItems.tier2.push('Mental Herb');
+					}
+				}
 				// Focus Sash
 				if (set.ability !== 'Sturdy' && (set.evs.hp + set.evs.def + set.evs.spd) <= 16) {
 					if (format === 'vgc') {
@@ -5093,6 +5182,15 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					) {
 						set.possibleItems.tier2.push('Heavy-Duty Boots');
 					}
+				}
+				// Eject Button
+				if (
+					(set.roles.includes('redirection') || this.dex.abilities.get(set.ability).onEmergencyExit)
+				) {
+					set.possibleItems.tier2.push('Red Card');
+					if (
+						format !== 'singles' || ['Regenerator', 'Magic Guard'].includes(set.ability) || !(this.dex.species.get(set.species).randbats.weaknesses.Rock)
+					) set.possibleItems.tier2.push('Eject Button');
 				}
 				// type-boosting items
 				if (set.roles.includes('physical') || set.roles.includes('special')) {
