@@ -5077,35 +5077,37 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					else set.possibleItems.tier2.push('Psychic Seed');
 				}
 				// field effect extenders: top priority goes to manual setters if there are any, but they're also useful on autosetters
-				if (
-					set.moves.includes('Electric Terrain') || set.moves.includes('Grassy Terrain') || set.moves.includes('Misty Terrain') || set.moves.includes('Psychic Terrain')
-				) {
-					pushItems.push('Terrain Extender');
-				} else if (
-					set.roles.includes('electricterrain') || set.roles.includes('grassyterrain') || set.roles.includes('mistyterrain') || set.roles.includes('psychicterrain') ||
-					set.roles.includes('backupelectricterrain') || set.roles.includes('backupgrassyterrain') || set.roles.includes('backupmistyterrain') || set.roles.includes('backuppsychicterrain')
-				) {
-					set.possibleItems.tier2.push('Terrain Extender');
-				}
-				if (set.moves.includes('Sunny Day')) {
-					pushItems.push('Heat Rock');
-				} else if (set.roles.includes('sun') || set.roles.includes('backupsun')) {
-					set.possibleItems.tier2.push('Heat Rock');
-				}
-				if (set.moves.includes('Rain Dance')) {
-					pushItems.push('Damp Rock');
-				} else if (set.roles.includes('rain') || set.roles.includes('backuprain')) {
-					set.possibleItems.tier2.push('Damp Rock');
-				}
-				if (set.moves.includes('Sandstorm')) {
-					pushItems.push('Smooth Rock');
-				} else if (set.roles.includes('sand') || set.roles.includes('backupsand')) {
-					set.possibleItems.tier2.push('Smooth Rock');
-				}
-				if (set.moves.includes('Snowscape') || set.moves.includes('Hail')) { // Chilly Reception does not imply a need for this
-					pushItems.push('Icy Rock');
-				} else if (set.roles.includes('snow') || set.roles.includes('backupsnow')) {
-					set.possibleItems.tier2.push('Icy Rock');
+				if (format === 'singles') {
+					if (
+						set.moves.includes('Electric Terrain') || set.moves.includes('Grassy Terrain') || set.moves.includes('Misty Terrain') || set.moves.includes('Psychic Terrain')
+					) {
+						pushItems.push('Terrain Extender');
+					} else if (
+						set.roles.includes('electricterrain') || set.roles.includes('grassyterrain') || set.roles.includes('mistyterrain') || set.roles.includes('psychicterrain') ||
+						set.roles.includes('backupelectricterrain') || set.roles.includes('backupgrassyterrain') || set.roles.includes('backupmistyterrain') || set.roles.includes('backuppsychicterrain')
+					) {
+						set.possibleItems.tier2.push('Terrain Extender');
+					}
+					if (set.moves.includes('Sunny Day')) {
+						pushItems.push('Heat Rock');
+					} else if (set.roles.includes('sun') || set.roles.includes('backupsun')) {
+						set.possibleItems.tier2.push('Heat Rock');
+					}
+					if (set.moves.includes('Rain Dance')) {
+						pushItems.push('Damp Rock');
+					} else if (set.roles.includes('rain') || set.roles.includes('backuprain')) {
+						set.possibleItems.tier2.push('Damp Rock');
+					}
+					if (set.moves.includes('Sandstorm')) {
+						pushItems.push('Smooth Rock');
+					} else if (set.roles.includes('sand') || set.roles.includes('backupsand')) {
+						set.possibleItems.tier2.push('Smooth Rock');
+					}
+					if (set.moves.includes('Snowscape') || set.moves.includes('Hail')) { // Chilly Reception does not imply a need for this
+						pushItems.push('Icy Rock');
+					} else if (set.roles.includes('snow') || set.roles.includes('backupsnow')) {
+						set.possibleItems.tier2.push('Icy Rock');
+					}
 				}
 				// species-specific items
 				if (this.dex.species.get(set.species).evos && this.dex.species.get(set.species).evos.length) set.possibleItems.tier0.push('Eviolite');
