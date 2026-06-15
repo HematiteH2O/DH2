@@ -4970,7 +4970,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				for (const move of set.moves) {
 					let moveData = this.dex.moves.get(move);
 					if (moveData) {
-						if (moveData.flags['sound'] && set.roles.includes('special') && !moveData.selfSwitch && !(move.priority && move.priority < 0)) pushItems.push('Throat Spray');
+						if (moveData.flags['sound'] && set.roles.includes('special') && !moveData.selfSwitch && !(moveData.priority && moveData.priority < 0)) pushItems.push('Throat Spray');
 						if (format === 'singles' && moveData.volatileStatus && moveData.volatileStatus === 'partiallytrapped') pushItems.push('Binding Band');
 						if (format === 'singles' && moveData.volatileStatus && moveData.volatileStatus === 'entanglement') {
 							pushItems.push('Binding Band');
