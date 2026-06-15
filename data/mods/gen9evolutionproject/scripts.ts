@@ -1895,9 +1895,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 
 				const makeFragment = (instructions: AnyObject) => {
+					const fragment = instructions.fragment;
+					const moveChecks = instructions.moveChecks;
+					const fragmentMods = instructions.fragmentMods;
+					const offeredSupport = instructions.offeredSupport;
 					// moveChecks are criteria to make sure the fragment is eligible
-					if (instructions.moveChecks) {
-						const moveChecks = instructions.moveChecks;
+					if (moveChecks) {
 						if (moveChecks.moves) {
 							if (Array.isArray(moveChecks.moves) && !moveChecks.moves.includes(fragment.baseMove)) return;
 							else if (moveChecks.moves !== fragment.baseMove) return;
@@ -1907,19 +1910,19 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					
 					// fragmentResults are changes to make to the fragment before we do that
 					let modFragments = [];
-					if (instructions.fragmentMods) {
+					if (fragmentMods) {
 						// nothing yet
 					}
 					
 					// offeredSupport is where to put the fragment if we accept it
-					if (instructions.offeredSupport) {
+					if (offeredSupport) {
 						if (modFragments.length) {
-							for (const modFragment of modFragments) for (const support of instructions.offeredSupport) {
+							for (const modFragment of modFragments) for (const support of offeredSupport) {
 								if (!newMon.randbats.offeredSupport[support]) newMon.randbats.offeredSupport[support] = [];
 								newMon.randbats.offeredSupport[support].push(modFragment);
 							}
 						} else {
-							for (const support of instructions.offeredSupport) {
+							for (const support of offeredSupport) {
 								if (!newMon.randbats.offeredSupport[support]) newMon.randbats.offeredSupport[support] = [];
 								newMon.randbats.offeredSupport[support].push(fragment);
 							}
