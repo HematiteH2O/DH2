@@ -783,6 +783,14 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						// push fragments
 						let fragment = {
 							ability: ability,
+							singles: {
+								requestedSupport: [],
+								acceptedSupport: [],
+							},
+							vgc: {
+								requestedSupport: [],
+								acceptedSupport: [],
+							},
 							fragmentPriority: 4,
 						};
 						newMon.randbats.offeredSupport[`${(immunity).toLowerCase()}immune`].push(fragment);
@@ -798,6 +806,14 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						// push fragments
 						let fragment = {
 							ability: ability,
+							singles: {
+								requestedSupport: [],
+								acceptedSupport: [],
+							},
+							vgc: {
+								requestedSupport: [],
+								acceptedSupport: [],
+							},
 							fragmentPriority: 4,
 						};
 						newMon.randbats.offeredSupport[`${(resistance).toLowerCase()}resist`].push(fragment);
@@ -3061,29 +3077,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 			}
 		}
-		
-		// Right now, we'll call randbatsInitialize for every Pokémon in the Evo 2 dex
-		// After species selection, we'll call randbatsInitialize again, this time for just the Pokémon on the player's team
-		// That way, we can safely ensure that every Pokémon we actually need to look at is properly initialized - even if players are using custom rulesets with Pokémon we wouldn't normally care about
-		for (const id in this.dex.data.Pokedex) {
-			// the real randbats setup only needs to take place Pokémon you can bring to an Evo game
-			if (
-				this.dex.data.FormatsData[id] && this.dex.data.FormatsData[id].tier &&
-				(this.dex.data.FormatsData[id].tier === "Evo!" || this.dex.data.FormatsData[id].tier === "(Prevo)")
-			) {
-				randbatsInitialize(id);
-				// banlists
-				if ([
-					'toxapex', 'noivernvariant', 'chandelure', 'corviknight', 'darmanitan', 'darmanitangalar', 'excadrill', 'hawlucha', 'garchomp', 'velocinobi',
-					'dragonite', 'tapukoko', 'tapulele', 'tapubulu', 'tapufini', 'zacian', 'zaciancrowned', 'zamazenta', 'zamazentacrowned', 'deoxys',
-					'deoxysattack', 'deoxysdefense', 'deoxysspeed',
-				].includes(id)) this.dex.data.Pokedex[id].randbats.singles.banned = true;
-				if ([
-					'dragonite', 'tapukoko', 'tapulele', 'tapubulu', 'tapufini', 'zacian', 'zaciancrowned', 'zamazenta', 'zamazentacrowned', 'deoxys',
-					'deoxysattack', 'deoxysdefense', 'deoxysspeed',
-				].includes(id)) this.dex.data.Pokedex[id].randbats.vgc.banned = true;
-			}
-		}
 
 		let originalTeamSpecies = [];
 		let originalTeamNumbers = [];
@@ -3109,6 +3102,40 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		
 		let shiny = false;
 		if (!team.length && this.randomChance(1, 100)) shiny = true; // for fun, the whole team will be Shiny 1% of the time
+		
+		// Now, we'll call randbatsInitialize for every Pokémon in the Evo 2 dex
+		// After species selection, we'll call randbatsInitialize again, this time for just the Pokémon on the player's team
+		// That way, we can safely ensure that every Pokémon we actually need to look at is properly initialized - even if players are using custom rulesets with Pokémon we wouldn't normally care about
+		if (stage === 'LC') {
+			for (const id in this.dex.data.Pokedex) {
+				if (
+					this.dex.data.FormatsData[id] && this.dex.data.FormatsData[id].tier &&
+					['Pokémon of the Day!', 'Evo!', '(Prevo)'].includes(this.dex.data.FormatsData[id].tier) &&
+					(newMon.evos && newMon.evos.length && !newMon.prevo && !['mareanie'].includes(id))
+				) {
+					randbatsInitialize(id);
+				}
+			}
+		} else {
+			for (const id in this.dex.data.Pokedex) {
+				if (
+					this.dex.data.FormatsData[id] && this.dex.data.FormatsData[id].tier &&
+					(['Pokémon of the Day!', 'Evo!'].includes(this.dex.data.FormatsData[id].tier) || ['porygon2', 'accelgor'].includes(id))
+				) {
+					randbatsInitialize(id);
+					// banlists
+					if ([
+						'toxapex', 'noivernvariant', 'chandelure', 'corviknight', 'darmanitan', 'darmanitangalar', 'excadrill', 'hawlucha', 'garchomp', 'velocinobi',
+						'dragonite', 'tapukoko', 'tapulele', 'tapubulu', 'tapufini', 'zacian', 'zaciancrowned', 'zamazenta', 'zamazentacrowned', 'deoxys',
+						'deoxysattack', 'deoxysdefense', 'deoxysspeed',
+					].includes(id)) this.dex.data.Pokedex[id].randbats.singles.banned = true;
+					if ([
+						'dragonite', 'tapukoko', 'tapulele', 'tapubulu', 'tapufini', 'zacian', 'zaciancrowned', 'zamazenta', 'zamazentacrowned', 'deoxys',
+						'deoxysattack', 'deoxysdefense', 'deoxysspeed',
+					].includes(id)) this.dex.data.Pokedex[id].randbats.vgc.banned = true;
+				}
+			}
+		}
 
 
 		
