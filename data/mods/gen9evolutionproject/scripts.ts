@@ -13,7 +13,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 	// GENERATING FAKEMON
 	
 	init() {
-		console.log(`Evo start`);
 		let customList = [];
 		let dexNo = -1;
 		const notm = ['terablast', 'hiddenpower']; // certain moves don't count TMs
@@ -107,7 +106,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		this.modData('FormatsData', customList[random1]).tier = "Pokémon of the Day!";
 		this.modData('FormatsData', customList[random2]).tier = "Pokémon of the Day!";
 		this.modData('FormatsData', customList[random3]).tier = "Pokémon of the Day!";
-		console.log(`Evo end`);
 	},
 	
 	win(side?: SideID | '' | Side | null) { // modded to cue end-of-battle messages
@@ -3346,6 +3344,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		if (!firstDraftTeam.length && eligiblePokemon.filter(id => this.dex.data.Pokedex[id].copyData).length) {
 			// if a team started completely empty, I want the first Pokémon selected to be a completely random Evo 2 sub
 			let chosenRandomPokemon = this.sample(eligiblePokemon.filter(id => this.dex.data.Pokedex[id].copyData));
+			// TROUBLESHOOTING - REPLACE
+			chosenRandomPokemon = 'Overchill-Zen';
 			firstDraftTeam.push({
 				name: this.dex.data.Pokedex[chosenRandomPokemon].name,
 				species: this.dex.data.Pokedex[chosenRandomPokemon].name,
@@ -3515,9 +3515,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			}
 			// There's no next failsafe here, though - it's actually good if this still doesn't return anything!
 			// That means the team covered its bases as well as it could, so we'll get to skip the next step entirely
-			
-			console.log(resistancesThisStep);
-			console.log(`requested this step: ` + requestedSupportThisStep);
 
 			// If we have any requestedSupport at this point, we want to find offeredSupport that matches it
 			if (requestedSupportThisStep.length) {
@@ -3571,7 +3568,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			// // then the Intimidators are scored with 2 points for a Water resist and 0 for a Fire resist)
 			// // it should go both ways I think - it's cooler for the Intimidator to have a weakness if several of the teammates it supports resist it, isn't it?
 			if (firstDraftTeam.length) {
-				console.log(`Current step: synergy resistances`);
 				let synergyResists = [];
 				let synergyResistMaxScore = 0;
 				for (const id of currentStep) {
@@ -3593,12 +3589,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						if (synergyResistScore > synergyResistMaxScore) { // reset
 							synergyResists = [];
 							synergyResistMaxScore = synergyResistScore;
-							console.log(synergyResistMaxScore);
 						}
 						if (synergyResistScore === synergyResistMaxScore) synergyResists.push(id);
 					}
 				}
-				console.log(synergyResists);
 				if (synergyResists.length) currentStep = synergyResists;
 			}
 
@@ -4385,6 +4379,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		let itemsAlreadyUsed = [];
 		let setsWithoutItems = [];
 
+		console.log(sets);
 		// EVs and Tera Types only require consideration for the individual set
 		for (const set of sets) {
 			// failsafes
@@ -4836,7 +4831,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						) * (boostedStat === 'spe' ? 1.1 : ((loweredStat === 'spe' ? 0.9 : 1)))
 					),
 				};
-				console.log(set.exactStats);
 			}
 
 			if (!set.ability) set.ability = this.dex.species.get(set.species).abilities[0];
