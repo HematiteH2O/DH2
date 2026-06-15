@@ -646,7 +646,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 		const randbatsInitialize = (id: string) => { // this is a function so it can be called later as needed
 			if (!this.dex.data.Pokedex[this.toID(id)]) return false;
-			const newMon = this.dex.data.Pokedex[id];
+			const newMon = this.dex.data.Pokedex[this.toID(id)];
 			if (newMon.randbatsInitialized) return;
 			
 			newMon.randbats = {
