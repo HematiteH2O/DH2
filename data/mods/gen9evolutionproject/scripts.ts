@@ -1894,7 +1894,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					}
 				}
 
-				const makeFragment = (instructions: AnyObject) = {
+				const makeFragment = (instructions: AnyObject) => {
 					// moveChecks are criteria to make sure the fragment is eligible
 					if (instructions.moveChecks) {
 						moveChecks = instructions.moveChecks;
