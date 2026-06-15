@@ -3159,7 +3159,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (
 					this.dex.data.FormatsData[id] && this.dex.data.FormatsData[id].tier &&
 					['Pokémon of the Day!', 'Evo!', '(Prevo)'].includes(this.dex.data.FormatsData[id].tier) &&
-					(newMon.evos && newMon.evos.length && !newMon.prevo && !['mareanie'].includes(id))
+					(this.dex.data.FormatsData[id].evos && this.dex.data.FormatsData[id].evos.length && !this.dex.data.FormatsData[id].prevo && !['mareanie'].includes(id))
 				) {
 					randbatsInitialize(id);
 				}
