@@ -5163,11 +5163,22 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					// Air Balloon
 					if (
 						this.dex.species.get(set.species).randbats.weaknesses.Ground &&
-						!(this.dex.species.get(set.species).randbats.immunities.Ground && this.dex.species.get(set.species).randbats.immunities.Ground.Ability && this.dex.species.get(set.species).randbats.immunities.Ground.Ability.includes(set.ability)) &&
+						!(this.dex.species.get(set.species).randbats.immunities.Ground && !(this.dex.species.get(set.species).randbats.immunities.Ground.Ability || this.dex.species.get(set.species).randbats.immunities.Ground.Ability.includes(set.ability))) &&
 						(this.dex.species.get(set.species).randbats.resistances.Rock || ['Magic Guard', 'Regenerator'].includes(set.ability))
 					) {
 						set.possibleItems.tier2.push('Air Balloon');
 					} else if (set.species === 'Rotom-Fan') set.possibleItems.tier2.push('Air Balloon'); // ONLY SOMETIMES but it's funny
+					// Utility Umbrella I guess???
+					if (
+						(teamOfferedSupport.sun && !teamRequestedSupport.sun.includes(set) && !set.roles.includes('sun') && !set.roles.includes('backupsun') && !(
+							this.dex.species.get(set.species).randbats.resistances.Fire === 'true' ||
+							(this.dex.species.get(set.species).randbats.resistances.Fire.Ability && this.dex.species.get(set.species).randbats.resistances.Fire.Ability.includes(set.ability))
+						)) ||
+						(teamOfferedSupport.rain && !teamRequestedSupport.rain.includes(set) && !set.roles.includes('rain') && !set.roles.includes('backuprain') && !(
+							this.dex.species.get(set.species).randbats.resistances.Water === 'true' ||
+							(this.dex.species.get(set.species).randbats.resistances.Water.Ability && this.dex.species.get(set.species).randbats.resistances.Water.Ability.includes(set.ability))
+						))
+					) set.possibleItems.tier2.push('Utility Umbrella');
 					// Absorb Bulb and Cell Battery
 					// For these, you want to resist the type, but *not* be immune to it
 					// Absorb Bulb also wants to be a special attacker, and Cell Battery wants to be a physical attacker
