@@ -4803,6 +4803,40 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					!set.moves.includes('Assist') && !set.moves.includes('Copycat') && !set.moves.includes('Me First') &&
 					!set.moves.includes('Metronome') && !set.moves.includes('Mirror Move')
 				) set.ivs.atk = 0; // don't minimize Attack if you could potentially call a physical move (:
+
+				// okay and one more thing:
+				// some items will want to calculate exact stats, but it's way easier if I do that here because I still have natures stored
+				set.exactStats = {
+					hp: Math.floor(
+						(this.dex.species.get(set.species).baseStats.atk * 2 + set.ivs.atk + set.evs.atk/4) * (setLevel / 100) + setLevel + 10
+					),
+					atk: Math.floor(
+						Math.floor(
+							(this.dex.species.get(set.species).baseStats.atk * 2 + set.ivs.atk + set.evs.atk/4) * (setLevel / 100) + 5
+						) * (boostedStat === 'atk' ? 1.1 : ((loweredStat === 'atk' ? 0.9 : 1)))
+					),
+					def: Math.floor(
+						Math.floor(
+							(this.dex.species.get(set.species).baseStats.def * 2 + set.ivs.def + set.evs.def/4) * (setLevel / 100) + 5
+						) * (boostedStat === 'def' ? 1.1 : ((loweredStat === 'def' ? 0.9 : 1)))
+					),
+					spa: Math.floor(
+						Math.floor(
+							(this.dex.species.get(set.species).baseStats.spa * 2 + set.ivs.spa + set.evs.spa/4) * (setLevel / 100) + 5
+						) * (boostedStat === 'spa' ? 1.1 : ((loweredStat === 'spa' ? 0.9 : 1)))
+					),
+					spd: Math.floor(
+						Math.floor(
+							(this.dex.species.get(set.species).baseStats.spd * 2 + set.ivs.spd + set.evs.spd/4) * (setLevel / 100) + 5
+						) * (boostedStat === 'spd' ? 1.1 : ((loweredStat === 'spd' ? 0.9 : 1)))
+					),
+					spe: Math.floor(
+						Math.floor(
+							(this.dex.species.get(set.species).baseStats.spe * 2 + set.ivs.spe + set.evs.spe/4) * (setLevel / 100) + 5
+						) * (boostedStat === 'spe' ? 1.1 : ((loweredStat === 'spe' ? 0.9 : 1)))
+					),
+				};
+				console.log(set.exactStats);
 			}
 
 			if (!set.ability) set.ability = this.dex.species.get(set.species).abilities[0];
