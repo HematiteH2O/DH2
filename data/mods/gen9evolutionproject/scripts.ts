@@ -716,19 +716,19 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			// finally, account for Abilities
 			const abilityWeakness = (ability: string, type: string) => {
 				if (!newMon.randbats.abilities.includes(ability)) return;
-				if (!newMon.randbats.weaknesses[type]) newMon.randbats.weaknesses[type] = {Ability: ability};
+				if (!newMon.randbats.weaknesses[type]) newMon.randbats.weaknesses[type] = {Ability: [ability]};
 				else if (newMon.randbats.weaknesses[type].Ability) newMon.randbats.weaknesses[type].Ability.push(ability);
 			}
 			const abilityResistance = (ability: string, type: string) => {
 				if (!newMon.randbats.abilities.includes(ability)) return;
-				if (!newMon.randbats.resistances[type]) newMon.randbats.resistances[type] = {Ability: ability};
+				if (!newMon.randbats.resistances[type]) newMon.randbats.resistances[type] = {Ability: [ability]};
 				else if (newMon.randbats.resistances[type].Ability) newMon.randbats.resistances[type].Ability.push(ability);
 			}
 			const abilityImmunity = (ability: string, type: string) => {
 				if (!newMon.randbats.abilities.includes(ability)) return;
-				if (!newMon.randbats.resistances[type]) newMon.randbats.resistances[type] = {Ability: ability};
+				if (!newMon.randbats.resistances[type]) newMon.randbats.resistances[type] = {Ability: [ability]};
 				else if (newMon.randbats.resistances[type].Ability) newMon.randbats.resistances[type].Ability.push(ability);
-				if (!newMon.randbats.immunities[type]) newMon.randbats.immunities[type] = {Ability: ability};
+				if (!newMon.randbats.immunities[type]) newMon.randbats.immunities[type] = {Ability: [ability]};
 				else if (newMon.randbats.immunities[type].Ability) newMon.randbats.immunities[type].Ability.push(ability);
 			}
 			
