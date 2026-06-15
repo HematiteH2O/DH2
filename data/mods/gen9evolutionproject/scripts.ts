@@ -1894,7 +1894,32 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					}
 				}
 
+				const makeFragment = (fragment: AnyObject, moveChecks: AnyObject, offeredSupport: string[], fragmentResults: AnyObject) = {
+					// moveChecks are criteria to make sure the fragment is eligible
+					if (moveChecks) {
+						if (moveChecks.moves) {
+							if (Array.isArray(moveChecks.moves) && !moveChecks.moves.includes(fragment.baseMove)) return;
+							else if (moveChecks.moves !== fragment.baseMove) return;
+						}
+						if (moveChecks.priority && fragment.movePriority < moveChecks.priority) return;
+					}
+					
+					// fragmentResults are changes to make to the fragment before we do that
+					let modFragment = Utils.deepClone(fragment);
+					if (fragmentResults) {
+						// nothing yet
+					}
+					
+					// offeredSupport is where to put the fragment if we accept it
+					if (offeredSupport) {
+						for (const support of offeredSupport) {
+							if (!newMon.randbats.offeredSupport[support]) newMon.randbats.offeredSupport[support] = [];
+							newMon.randbats.offeredSupport[support].push(modFragment);
+						}
+					}
+				}
 				for (const fragment of fragments) {
+					makeFragment(fragment, {moves: ['Fake Out', 'Mat Block']}, ['fakeout']);
 
 				// general / STAB
 					// okay, the STAB categories are obviously way unfinished - I'm gonna come back to this
@@ -2006,10 +2031,13 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					
 				// VGC:
 					// Fake Out
+					// okay I'm trying something with this in the makeFragment function so let's see if that works
+					/*
 					if (fragment.moves.includes('Fake Out') || fragment.moves.includes('Mat Block')) {
 						if (!newMon.randbats.offeredSupport.fakeout) newMon.randbats.offeredSupport.fakeout = [];
 						newMon.randbats.offeredSupport.fakeout.push(fragment);
 					}
+					*/
 					// priority
 					if (fragment.movePriority > 0 && !['upperhand', 'feint'].includes(moveid)) {
 						// those two are cool and all, but they do *not* count as being a team's priority user jsdfngh
