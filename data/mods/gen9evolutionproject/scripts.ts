@@ -4970,7 +4970,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				for (const move of set.moves) {
 					let moveData = this.dex.moves.get(move);
 					if (moveData) {
-						if (moveData.flags['sound'] && set.roles.includes('special') && !moveData.selfSwitch) pushItems.push('Throat Spray');
+						if (moveData.flags['sound'] && set.roles.includes('special') && !moveData.selfSwitch && !(move.priority && move.priority < 0)) pushItems.push('Throat Spray');
 						if (format === 'singles' && moveData.volatileStatus && moveData.volatileStatus === 'partiallytrapped') pushItems.push('Binding Band');
 						if (format === 'singles' && moveData.volatileStatus && moveData.volatileStatus === 'entanglement') {
 							pushItems.push('Binding Band');
@@ -5108,7 +5108,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					set.possibleItems.tier2.push('Icy Rock');
 				}
 				// species-specific items
-				if (this.dex.species.get(set.species).evos) set.possibleItems.tier0.push('Eviolite');
+				if (this.dex.species.get(set.species).evos && this.dex.species.get(set.species).evos.length) set.possibleItems.tier0.push('Eviolite');
 				// ... actually yeah that's the only one I guess
 				// it doesn't feel correct at all to push for something like Soul Dew on Latios and Latias,
 				// and something like Thick Club is more likely to be outright guaranteed by an earlier fragment
@@ -5191,6 +5191,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					// // In VGC, resisting the type isn't as important, but Cell Battery holders ideally want to be para-immune
 					// // In VGC, you want a teammate that can side-proc the item
 					// (disregarding Snowball and Luminous Moss for now)
+					// Well... at least in the context of this section and not fragments, I think I'm going to make these VGC-only;
+					// they're realistically not as fun to encounter in singles even if they technically have use cases
 
 					// Weakness Policy
 					// // In VGC, again, you want a teammate that can side-proc the item
