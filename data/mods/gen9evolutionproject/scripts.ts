@@ -888,7 +888,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					moves: ['Trick Room'],
 					tags: ['minspeed'],
 				});
-				viableVgcSupport = true;
 			}
 			const pickyVgcSupport = {};
 			
