@@ -1,4 +1,3 @@
-// recoding a little at a time
 import { Pokemon, EffectState } from '../../../sim/pokemon';
 import { Teams } from '../../../sim/teams';
 import { Utils } from '../../../lib/utils';
@@ -645,2563 +644,2444 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		// This used to be in init(), but that meant it was getting called for each player every battle *anyway*
 		// Even though it's weird to be doing a bunch of dex initialization in getTeam(), this setup is effectively minimizing how often it gets called
 
-		for (const id in this.dex.data.Pokedex) {
-			if (!(this.dex.data.Pokedex[id].randbatsInitialized)) {
-				const newMon = this.dex.data.Pokedex[id];
-				
-				// for safety later, the bare-minimum randbats initialization should happen for every Pokémon, in case the player brings something unexpected
-				newMon.randbats = {
-					name: newMon.name, // for console.logging convenience
-					types: [],
-					abilities: [],
-					viableStabs: [],
-					offeredSupport: {},
-					singles: {
-						requestedSupport: {},
-						acceptedSupport: {},
-					},
-					vgc: {
-						requestedSupport: {},
-						acceptedSupport: {},
-					},
-					weaknesses: {},
-					resistances: {},
-					immunities: {},
-				};
-				newMon.randbatsInitialized = true;
-	
-				// the real randbats setup only needs to take place Pokémon you can bring to an Evo game
-				if (
-					this.dex.data.FormatsData[id] && this.dex.data.FormatsData[id].tier &&
-					(this.dex.data.FormatsData[id].tier === "Evo!" || this.dex.data.FormatsData[id].tier === "(Prevo)")
-				) {
-					// banlists
-					if ([
-						'toxapex', 'noivernvariant', 'chandelure', 'corviknight', 'darmanitan', 'darmanitangalar', 'excadrill', 'hawlucha', 'garchomp', 'velocinobi',
-						'dragonite', 'tapukoko', 'tapulele', 'tapubulu', 'tapufini', 'zacian', 'zaciancrowned', 'zamazenta', 'zamazentacrowned', 'deoxys',
-						'deoxysattack', 'deoxysdefense', 'deoxysspeed',
-					].includes(id)) newMon.randbats.singles.banned = true;
-					if ([
-						'dragonite', 'tapukoko', 'tapulele', 'tapubulu', 'tapufini', 'zacian', 'zaciancrowned', 'zamazenta', 'zamazentacrowned', 'deoxys',
-						'deoxysattack', 'deoxysdefense', 'deoxysspeed',
-					].includes(id)) newMon.randbats.vgc.banned = true;
-					if (newMon.randbats.singles.banned && newMon.randbats.vgc.banned) continue;
-					
-					if (this.dex.data.FormatsData[id].tier === "Evo!" || ['porygon2', 'accelgor'].includes(id)) newMon.randbats.stage = 'Evo';
-					else if (newMon.evos && newMon.evos.length && !newMon.prevo && !['mareanie'].includes(id)) newMon.randbats.stage = 'LC';
-	
-					// basic information
-					newMon.randbats.types.push(newMon.types[0]);
-					if (newMon.types[1]) newMon.randbats.types.push(newMon.types[1]);
-					newMon.randbats.abilities.push(newMon.abilities[0]);
-					if (newMon.abilities[1]) newMon.randbats.abilities.push(newMon.abilities[1]);
-					if (newMon.abilities['H']) newMon.randbats.abilities.push(newMon.abilities['H']);
-					if (newMon.abilities['S']) newMon.randbats.abilities.push(newMon.abilities['S']);
-					if (newMon.battleOnly) {
-						if (newMon.requiredAbility) {
-							newMon.randbats.abilities.push(newMon.requiredAbility);
-						} else {
-							let baseMon = this.dex.species.get(newMon.battleOnly);
-							newMon.randbats.abilities.push(baseMon.abilities[0]);
-							if (baseMon.abilities[1]) newMon.randbats.abilities.push(baseMon.abilities[1]);
-							if (baseMon.abilities['H']) newMon.randbats.abilities.push(baseMon.abilities['H']);
-							if (baseMon.abilities['S']) newMon.randbats.abilities.push(baseMon.abilities['S']);
-						}
-					}
-	
-					// type matchups
-					let weaknesses = [];
-					let resistances = [];
-					let immunities = [];
-					let types = [
-						'Fire', 'Water', 'Electric', 'Grass', 'Ice', 'Fighting', 'Poison', 'Ground', 'Flying', 'Psychic', 'Bug', 'Rock', 'Ghost', 'Dragon', 'Dark',
-						'Steel', 'Fairy', 'Normal',
-					];
-					for (const type1 of newMon.randbats.types) {
-						// fill in weaknesses and resistances by type first
-						for (const type of types) {
-							if (this.dex.data.TypeChart[type1.toLowerCase()].damageTaken[type] === 1 && !weaknesses.includes(type)) { // weakness
-								weaknesses.push(type);
-							} else if (this.dex.data.TypeChart[type1.toLowerCase()].damageTaken[type] === 2 && !resistances.includes(type)) { // resistance
-								resistances.push(type);
-							} else if (this.dex.data.TypeChart[type1.toLowerCase()].damageTaken[type] === 3 && !immunities.includes(type)) { // immunity
-								immunities.push(type);
-							}
-						}
-					}
-					// then let them cancel out
-					for (const type of weaknesses) {
-						if (!resistances.includes(type) && !immunities.includes(type)) newMon.randbats.weaknesses[type] = "true";
-					}
-					for (const type of resistances) {
-						if (!weaknesses.includes(type) || immunities.includes(type)) newMon.randbats.resistances[type] = "true";
-						// immunities are just better resistances, so they might as well still count
-					}
-					for (const type of immunities) {
-						newMon.randbats.immunities[type] = "true";
-						newMon.randbats.resistances[type] = "true";
-					}
-					// finally, account for Abilities
-					for (const ability of newMon.randbats.abilities) {
-						
-						// weaknesses
-						if (['Dry Skin', 'Fluffy'].includes(ability)) {
-							// *technically* Dry Skin isn't a full weakness, but I want to count it as such here
-							if (!newMon.randbats.weaknesses['Fire']) {
-								newMon.randbats.weaknesses['Fire'] = {Ability: [ability]};
-							} else if (newMon.randbats.weaknesses['Fire'].Ability) newMon.randbats.weaknesses['Fire'].Ability.push(ability);
-						}
-						
-						// resistances
-						if (['Drizzle', 'Heatproof', 'Thick Fat', 'Water Bubble'].includes(ability)) {
-							if (!newMon.randbats.resistances['Fire']) {
-								newMon.randbats.resistances['Fire'] = {Ability: [ability]};
-							} else if (newMon.randbats.resistances['Fire'].Ability) newMon.randbats.resistances['Fire'].Ability.push(ability);
-						}
-						if (['Drought', 'Orichalcum Pulse', 'Storm Chaser'].includes(ability)) {
-							if (!newMon.randbats.resistances['Water']) {
-								newMon.randbats.resistances['Water'] = {Ability: [ability]};
-							} else if (newMon.randbats.resistances['Water'].Ability) newMon.randbats.resistances['Water'].Ability.push(ability);
-						}
-						if (['Storm Chaser'].includes(ability)) {
-							if (!newMon.randbats.resistances['Electric']) {
-								newMon.randbats.resistances['Electric'] = {Ability: [ability]};
-							} else if (newMon.randbats.resistances['Electric'].Ability) newMon.randbats.resistances['Electric'].Ability.push(ability);
-							if (!newMon.randbats.resistances['Flying']) {
-								newMon.randbats.resistances['Flying'] = {Ability: [ability]};
-							} else if (newMon.randbats.resistances['Flying'].Ability) newMon.randbats.resistances['Flying'].Ability.push(ability);
-						}
-						if (['Thick Fat'].includes(ability)) {
-							if (!newMon.randbats.resistances['Ice']) {
-								newMon.randbats.resistances['Ice'] = {Ability: [ability]};
-							} else if (newMon.randbats.resistances['Ice'].Ability) newMon.randbats.resistances['Ice'].Ability.push(ability);
-						}
-						if (['Martial Master'].includes(ability)) {
-							if (!newMon.randbats.resistances['Fighting']) {
-								newMon.randbats.resistances['Fighting'] = {Ability: [ability]};
-							} else if (newMon.randbats.resistances['Fighting'].Ability) newMon.randbats.resistances['Fighting'].Ability.push(ability);
-						}
-						if (['Rust Control'].includes(ability)) {
-							if (!newMon.randbats.resistances['Poison']) {
-								newMon.randbats.resistances['Poison'] = {Ability: [ability]};
-							} else if (newMon.randbats.resistances['Poison'].Ability) newMon.randbats.resistances['Poison'].Ability.push(ability);
-							if (!newMon.randbats.resistances['Ground']) {
-								newMon.randbats.resistances['Ground'] = {Ability: [ability]};
-							} else if (newMon.randbats.resistances['Ground'].Ability) newMon.randbats.resistances['Ground'].Ability.push(ability);
-						}
-						if (['Pollen Basket'].includes(ability)) {
-							if (!newMon.randbats.resistances['Bug']) {
-								newMon.randbats.resistances['Bug'] = {Ability: [ability]};
-							} else if (newMon.randbats.resistances['Bug'].Ability) newMon.randbats.resistances['Bug'].Ability.push(ability);
-						}
-						if (['High Climber'].includes(ability)) {
-							if (!newMon.randbats.resistances['Rock']) {
-								newMon.randbats.resistances['Rock'] = {Ability: [ability]};
-							} else if (newMon.randbats.resistances['Rock'].Ability) newMon.randbats.resistances['Rock'].Ability.push(ability);
-						}
-						if (['Purifying Salt', 'Spiritual'].includes(ability)) {
-							if (!newMon.randbats.resistances['Ghost']) {
-								newMon.randbats.resistances['Ghost'] = {Ability: [ability]};
-							} else if (newMon.randbats.resistances['Ghost'].Ability) newMon.randbats.resistances['Ghost'].Ability.push(ability);
-						}
-						if (['Misty Surge'].includes(ability) && !newMon.randbats.types.includes('Flying')) {
-							if (!newMon.randbats.resistances['Dragon']) {
-								newMon.randbats.resistances['Dragon'] = {Ability: [ability]};
-							} else if (newMon.randbats.resistances['Dragon'].Ability) newMon.randbats.resistances['Dragon'].Ability.push(ability);
-						}
-						if (['Cheap Tricks'].includes(ability)) {
-							if (!newMon.randbats.resistances['Dark']) {
-								newMon.randbats.resistances['Dark'] = {Ability: [ability]};
-							} else if (newMon.randbats.resistances['Dark'].Ability) newMon.randbats.resistances['Dark'].Ability.push(ability);
-						}
-						if (['Directing Traffic'].includes(ability)) {
-							if (!newMon.randbats.resistances['Normal']) {
-								newMon.randbats.resistances['Normal'] = {Ability: [ability]};
-							} else if (newMon.randbats.resistances['Normal'].Ability) newMon.randbats.resistances['Normal'].Ability.push(ability);
-						}
-						if (['Patch Note'].includes(ability)) {
-							for (const type of types) {
-								if (this.dex.data.TypeChart[type.toLowerCase()].damageTaken[newMon.types[0]] === 1) {
-									if (!newMon.randbats.resistances[type]) {
-										newMon.randbats.resistances[type] = {Ability: [ability]};
-									} else if (newMon.randbats.resistances[type].Ability) newMon.randbats.resistances[type].Ability.push(ability);
-								}
-							}
-						}
-						
-						// immunities
-						if (['Flash Fire', 'Primordial Sea', 'Well-Baked Body'].includes(ability)) {
-							if (!newMon.randbats.resistances['Fire']) {
-								newMon.randbats.resistances['Fire'] = {Ability: [ability]};
-							} else if (newMon.randbats.resistances['Fire'].Ability) newMon.randbats.resistances['Fire'].Ability.push(ability);
-							if (!newMon.randbats.immunities['Fire']) {
-								newMon.randbats.immunities['Fire'] = {Ability: [ability]};
-							} else if (newMon.randbats.immunities['Fire'].Ability) newMon.randbats.immunities['Fire'].Ability.push(ability);
-						}
-						if (['Desolate Land', 'Dry Skin', 'Storm Drain', 'Water Absorb'].includes(ability)) {
-							if (!newMon.randbats.resistances['Water']) {
-								newMon.randbats.resistances['Water'] = {Ability: [ability]};
-							} else if (newMon.randbats.resistances['Water'].Ability) newMon.randbats.resistances['Water'].Ability.push(ability);
-							if (!newMon.randbats.immunities['Water']) {
-								newMon.randbats.immunities['Water'] = {Ability: [ability]};
-							} else if (newMon.randbats.immunities['Water'].Ability) newMon.randbats.immunities['Water'].Ability.push(ability);
-						}
-						if (['Lightning Rod', 'Motor Drive', 'Volt Absorb'].includes(ability)) {
-							if (!newMon.randbats.resistances['Electric']) {
-								newMon.randbats.resistances['Electric'] = {Ability: [ability]};
-							} else if (newMon.randbats.resistances['Electric'].Ability) newMon.randbats.resistances['Electric'].Ability.push(ability);
-							if (!newMon.randbats.immunities['Electric']) {
-								newMon.randbats.immunities['Electric'] = {Ability: [ability]};
-							} else if (newMon.randbats.immunities['Electric'].Ability) newMon.randbats.immunities['Electric'].Ability.push(ability);
-						}
-						if (['Sap Sipper'].includes(ability)) {
-							if (!newMon.randbats.resistances['Grass']) {
-								newMon.randbats.resistances['Grass'] = {Ability: [ability]};
-							} else if (newMon.randbats.resistances['Grass'].Ability) newMon.randbats.resistances['Grass'].Ability.push(ability);
-							if (!newMon.randbats.immunities['Grass']) {
-								newMon.randbats.immunities['Grass'] = {Ability: [ability]};
-							} else if (newMon.randbats.immunities['Grass'].Ability) newMon.randbats.immunities['Grass'].Ability.push(ability);
-						}
-						if (['Centrifuge', 'Earth Eater', 'Levitate'].includes(ability)) {
-							if (!newMon.randbats.resistances['Ground']) {
-								newMon.randbats.resistances['Ground'] = {Ability: [ability]};
-							} else if (newMon.randbats.resistances['Ground'].Ability) newMon.randbats.resistances['Ground'].Ability.push(ability);
-							if (!newMon.randbats.immunities['Ground']) {
-								newMon.randbats.immunities['Ground'] = {Ability: [ability]};
-							} else if (newMon.randbats.immunities['Ground'].Ability) newMon.randbats.immunities['Ground'].Ability.push(ability);
-						}
-						if (['Divinated Protection'].includes(ability)) {
-							if (!newMon.randbats.resistances['Ghost']) {
-								newMon.randbats.resistances['Ghost'] = {Ability: [ability]};
-							} else if (newMon.randbats.resistances['Ghost'].Ability) newMon.randbats.resistances['Ghost'].Ability.push(ability);
-							if (!newMon.randbats.immunities['Ghost']) {
-								newMon.randbats.immunities['Ghost'] = {Ability: [ability]};
-							} else if (newMon.randbats.immunities['Ghost'].Ability) newMon.randbats.immunities['Ghost'].Ability.push(ability);
-						}
-						if (['Wonder Guard'].includes(ability)) { // nothing has it but just for completion
-							for (const type of types) {
-								if (!newMon.randbats.weaknesses[type] || newMon.randbats.resistances[type] || newMon.randbats.immunities[type]) {
-									if (!newMon.randbats.resistances[type]) {
-										newMon.randbats.resistances[type] = {Ability: [ability]};
-									} else if (newMon.randbats.resistances[type].Ability) newMon.randbats.resistances[type].Ability.push(ability);
-									if (!newMon.randbats.immunities[type]) {
-										newMon.randbats.immunities[type] = {Ability: [ability]};
-									} else if (newMon.randbats.immunities[type].Ability) newMon.randbats.immunities[type].Ability.push(ability);
-								}
-							}
-						}
-						
-					}
-					
-					// ex. newMon.randbats.offeredSupport.groundimmune
-					for (const immunity in newMon.randbats.immunities) {
-						if (newMon.randbats.immunities[immunity].Ability && newMon.randbats.immunities[immunity].Ability.length) {
-							newMon.randbats.offeredSupport[`${(immunity).toLowerCase()}immune`] = [];
-							for (const ability of newMon.randbats.immunities[immunity].Ability) {
-								// push fragments
-								let fragment = {
-									ability: ability,
-									singles: {
-										requestedSupport: [],
-										acceptedSupport: [],
-									},
-									vgc: {
-										requestedSupport: [],
-										acceptedSupport: [],
-									},
-									fragmentPriority: 4,
-								};
-								newMon.randbats.offeredSupport[`${(immunity).toLowerCase()}immune`].push(fragment);
-							}
-						} else newMon.randbats.offeredSupport[`${(immunity).toLowerCase()}immune`] = newMon.randbats.immunities[immunity];
-					}
-	
-					for (const resistance in newMon.randbats.resistances) { // if I don't end up needing this, I'll just delete it
-						if (newMon.randbats.weaknesses[resistance]) continue;
-						if (newMon.randbats.resistances[resistance].Ability && newMon.randbats.resistances[resistance].Ability.length) {
-							newMon.randbats.offeredSupport[`${(resistance).toLowerCase()}resist`] = [];
-							for (const ability of newMon.randbats.resistances[resistance].Ability) {
-								// push fragments
-								let fragment = {
-									ability: ability,
-									singles: {
-										requestedSupport: [],
-										acceptedSupport: [],
-									},
-									vgc: {
-										requestedSupport: [],
-										acceptedSupport: [],
-									},
-									fragmentPriority: 4,
-								};
-								newMon.randbats.offeredSupport[`${(resistance).toLowerCase()}resist`].push(fragment);
-							}
-						} else newMon.randbats.offeredSupport[`${(resistance).toLowerCase()}resist`] = newMon.randbats.resistances[resistance];
-					}
+		const randbatsInitialize = (id: string) => { // this is a function so it can be called later as needed
+			if (!this.dex.data.Pokedex[this.toID(id)]) return false;
+			const newMon = this.dex.data.Pokedex[id];
+			if (newMon.randbatsInitialized) return;
+			
+			newMon.randbats = {
+				name: newMon.name, // for console.logging convenience
+				types: [],
+				abilities: [],
+				viableStabs: [],
+				offeredSupport: {},
+				singles: {
+					requestedSupport: {},
+					acceptedSupport: {},
+				},
+				vgc: {
+					requestedSupport: {},
+					acceptedSupport: {},
+				},
+				weaknesses: {},
+				resistances: {},
+				immunities: {},
+			};
+			
+			if (this.dex.data.FormatsData[id].tier === "Evo!" || ['porygon2', 'accelgor'].includes(id)) newMon.randbats.stage = 'Evo';
+			else if (newMon.evos && newMon.evos.length && !newMon.prevo && !['mareanie'].includes(id)) newMon.randbats.stage = 'LC';
 
-					if (newMon.randbats.types.includes('Ice')) {
-						if (!newMon.randbats.singles.acceptedSupport.snow) newMon.randbats.singles.acceptedSupport.snow = [];
-						newMon.randbats.singles.acceptedSupport.snow.push('true');
-						if (!newMon.randbats.vgc.acceptedSupport.snow) newMon.randbats.vgc.acceptedSupport.snow = [];
-						newMon.randbats.vgc.acceptedSupport.snow.push('true');
-					}
-					if (newMon.randbats.types.includes('Rock')) {
-						if (!newMon.randbats.singles.acceptedSupport.sand) newMon.randbats.singles.acceptedSupport.sand = [];
-						newMon.randbats.singles.acceptedSupport.sand.push('true');
-						if (!newMon.randbats.vgc.acceptedSupport.sand) newMon.randbats.vgc.acceptedSupport.sand = [];
-						newMon.randbats.vgc.acceptedSupport.sand.push('true');
-					}
-					if (newMon.types[0] === 'Grass' || (newMon.types[1] && newMon.types[1] === 'Grass')) newMon.randbats.offeredSupport.powderimmune = "true"; // Tera doesn't count
-	
-					// then I can start iterating over the movepool!
-					// but first...
-					if (!newMon.randbats.stage || (newMon.randbats.singles.banned && newMon.randbats.vgc.banned)) continue;
-					// ... don't bother with any more randbats data if it's not eligible to be chosen anyway!
-					
-					let learnset = this.dex.data.Learnsets[id].learnset;
-					if (newMon.baseSpecies && newMon.baseSpecies === 'Rotom') learnset = this.dex.data.Learnsets.rotom.learnset;
-					// going to handle their form-specific moves separately; this is fine for here!
-					if (!learnset) continue;
-	
-					// we need to initialize this for certain kinds of Speed-reliant support in VGC
-					let viableVgcSupport = false;
-					let vgcSupportSubfragments = [];
-					if (newMon.baseStats.spe > 102) { // unboosted Speed cutoff: Garchomp
-						vgcSupportSubfragments.push({
-							default: true,
-						});
-						viableVgcSupport = true;
-					} else if (newMon.baseStats.spe > 72) { // +1 Speed cutoff: Aleon
-						if (newMon.randbats.abilities.includes('Speed Boost')) {
-							vgcSupportSubfragments.push({
-								ability: 'Speed Boost',
-							});
-							viableVgcSupport = true;
-						}
-						if (newMon.randbats.abilities.includes('Noble Potential')) {
-							vgcSupportSubfragments.push({
-								ability: 'Noble Potential',
-							});
-							viableVgcSupport = true;
-						}
-						if (newMon.randbats.abilities.includes('Quark Drive')) {
-							vgcSupportSubfragments.push({
-								ability: 'Quark Drive',
-								requestedSupport: ['electricterrain'],
-								avoid: ['boosterenergy'],
-							});
-							vgcSupportSubfragments.push({
-								ability: 'Quark Drive',
-								item: 'Booster Energy',
-								tags: ['boosterenergy'],
-							});
-						}
-						if (newMon.randbats.abilities.includes('Protosynthesis')) {
-							vgcSupportSubfragments.push({
-								ability: 'Protosynthesis',
-								requestedSupport: ['sun'],
-								avoid: ['boosterenergy'],
-							});
-							vgcSupportSubfragments.push({
-								ability: 'Protosynthesis',
-								item: 'Booster Energy',
-								tags: ['boosterenergy'],
-							});
-							viableVgcSupport = true;
-						}
-					} else if (newMon.baseStats.spe > 41) { // +2 Speed cutoff: Aleon
-						if (newMon.randbats.abilities.includes('Chlorophyll')) {
-							vgcSupportSubfragments.push({
-								ability: 'Chlorophyll',
-								requestedSupport: ['sun'],
-							});
-							viableVgcSupport = true;
-						}
-						else if (newMon.randbats.abilities.includes('Swift Swim')) {
-							vgcSupportSubfragments.push({
-								ability: 'Swift Swim',
-								requestedSupport: ['rain'],
-							});
-							viableVgcSupport = true;
-						}
-						else if (newMon.randbats.abilities.includes('Sand Rush')) {
-							vgcSupportSubfragments.push({
-								ability: 'Sand Rush',
-								requestedSupport: ['sand'],
-							});
-							viableVgcSupport = true;
-						}
-						else if (newMon.randbats.abilities.includes('Slush Rush')) {
-							vgcSupportSubfragments.push({
-								ability: 'Slush Rush',
-								requestedSupport: ['snow'],
-							});
-							viableVgcSupport = true;
-						}
-						else if (newMon.randbats.abilities.includes('Unburden')) {
-							vgcSupportSubfragments.push({
-								ability: 'Unburden',
-								item: 'Grassy Seed',
-								requestedSupport: ['grassyterrain'],
-							});
-							vgcSupportSubfragments.push({
-								ability: 'Unburden',
-								item: 'Electric Seed',
-								requestedSupport: ['electricterrain'],
-							});
-							vgcSupportSubfragments.push({
-								ability: 'Unburden',
-								item: 'Misty Seed',
-								requestedSupport: ['mistyterrain'],
-							});
-							vgcSupportSubfragments.push({
-								ability: 'Unburden',
-								item: 'Psychic Seed',
-								requestedSupport: ['psychicterrain'],
-							});
-							viableVgcSupport = true;
-						}
-					}
-					if (newMon.baseStats.spe < 66 && learnset.trickroom && learnset.trickroom.length) {
-						vgcSupportSubfragments.push({
-							moves: ['Trick Room'],
-							tags: ['minspeed'],
-						});
-						viableVgcSupport = true;
-					}
-					const pickyVgcSupport = {};
-					
-					for (const moveid in learnset) {
-						if (!learnset[moveid].length) continue;
-						// *rudimentary* LC set legality:
-						if (newMon.randbats.stage === 'LC' && newMon.gender && ['M', 'N'].includes(newMon.gender) && !['golett', 'bronzor'].includes(id)) {
-							// A handful of Pokémon need to worry about levels in LC
-							// For Bronzor, this affects Extrasensory, Feint Attack, Heal Block and Psywave; for Golett, it affects Dynamic Punch, Hammer Arm, Magnitude and Shadow Punch...
-							// ... but they learned all of those moves in Gen VII, so they get them anyway by Heart Scale! I checked and these are legal sets
-							// That means that as of now, this is actually only for the four Riboxys babies
-							// but I'll try to keep it future-proof just in case!
-							let lcLearnset = learnset[moveid].filter(
-								(method) => (!method.includes('L'))
-							);
-							if (!lcLearnset.length) { // if you can learn it a way other than level-up, it's already fine
-								let lcLevelLearned = false;
-								// parseInt(source.substr(2)) < parseInt(levelLearned)
-								for (const source of learnset[moveid]) if (parseInt(source.substr(2)) < 5) lcLevelLearned = true;
-								if (!lcLevelLearned) continue; // if you can only learn it by level, and only by a level after 5, continue
-							}
-						}
-						
-						let move = this.dex.data.Moves[moveid];
-						let basePower = move.basePower;
-	
-						// some moves like Grass Knot have misleading base powers to begin with, so
-						// TODO: list and override them here
-						// at a glance, ctrl + F basePowerCallback is a good way to do this
-						switch (moveid) {
-							case 'Grass Knot':
-								basePower = 60; // some of these are gonna be arbitrary :'D
-								break;
-							case 'Nature Power':
-								basePower = 80;
-								moveCategory = 'Special';
-								break;
-						}
-						// I notice the Acrobatics fragment is gonna take some special attention, but one thing at a time
-	
-						let fragments = [];
-						let baseFragment = {
+			// basic information
+			newMon.randbats.types.push(newMon.types[0]);
+			if (newMon.types[1]) newMon.randbats.types.push(newMon.types[1]);
+			
+			newMon.randbats.abilities.push(newMon.abilities[0]);
+			if (newMon.abilities[1]) newMon.randbats.abilities.push(newMon.abilities[1]);
+			if (newMon.abilities['H']) newMon.randbats.abilities.push(newMon.abilities['H']);
+			if (newMon.abilities['S']) newMon.randbats.abilities.push(newMon.abilities['S']);
+			if (newMon.battleOnly) {
+				if (newMon.requiredAbility) {
+					newMon.randbats.abilities.push(newMon.requiredAbility);
+				} else {
+					let baseMon = this.dex.species.get(newMon.battleOnly);
+					newMon.randbats.abilities.push(baseMon.abilities[0]);
+					if (baseMon.abilities[1]) newMon.randbats.abilities.push(baseMon.abilities[1]);
+					if (baseMon.abilities['H']) newMon.randbats.abilities.push(baseMon.abilities['H']);
+					if (baseMon.abilities['S']) newMon.randbats.abilities.push(baseMon.abilities['S']);
+				}
+			}
+
+			// type matchups
+			const weaknesses = [];
+			const resistances = [];
+			const immunities = [];
+			const types = [
+				'Fire', 'Water', 'Electric', 'Grass', 'Ice', 'Fighting', 'Poison', 'Ground', 'Flying', 'Psychic', 'Bug', 'Rock', 'Ghost', 'Dragon', 'Dark', 'Steel', 'Fairy', 'Normal',
+				'psn', 'tox', 'brn', 'par', 'slp', 'frz', 'powder', // (these are ones I expect to use later; I'm not expecting Prankster or trapping immunity to come up, and weather is handled separately)
+			];
+			for (const type1 of newMon.randbats.types) {
+				// fill in weaknesses and resistances by type first
+				for (const type of types) {
+					if (this.dex.data.TypeChart[type1.toLowerCase()].damageTaken[type] === 1 && !weaknesses.includes(type)) weaknesses.push(type);
+					else if (this.dex.data.TypeChart[type1.toLowerCase()].damageTaken[type] === 2 && !resistances.includes(type)) resistances.push(type);
+					else if (this.dex.data.TypeChart[type1.toLowerCase()].damageTaken[type] === 3 && !immunities.includes(type)) immunities.push(type);
+				}
+			}
+			// then let them cancel out
+			for (const type of weaknesses) if (!resistances.includes(type) && !immunities.includes(type)) newMon.randbats.weaknesses[type] = "true";
+			for (const type of resistances) if (!weaknesses.includes(type) || immunities.includes(type)) newMon.randbats.resistances[type] = "true";
+			// immunities are just better resistances, so they might as well still count
+			for (const type of immunities) newMon.randbats.immunities[type] = "true";
+			
+			// finally, account for Abilities
+			const abilityWeakness = (ability: string, type: string) => {
+				if (!newMon.randbats.abilities.includes(ability)) return;
+				if (!newMon.randbats.weaknesses[type]) newMon.randbats.weaknesses[type] = {Ability: ability};
+				else if (newMon.randbats.weaknesses[type].Ability) newMon.randbats.weaknesses[type].Ability.push(ability);
+			}
+			const abilityResistance = (ability: string, type: string) => {
+				if (!newMon.randbats.abilities.includes(ability)) return;
+				if (!newMon.randbats.resistances[type]) newMon.randbats.resistances[type] = {Ability: ability};
+				else if (newMon.randbats.resistances[type].Ability) newMon.randbats.resistances[type].Ability.push(ability);
+			}
+			const abilityImmunity = (ability: string, type: string) => {
+				if (!newMon.randbats.abilities.includes(ability)) return;
+				if (!newMon.randbats.resistances[type]) newMon.randbats.resistances[type] = {Ability: ability};
+				else if (newMon.randbats.resistances[type].Ability) newMon.randbats.resistances[type].Ability.push(ability);
+				if (!newMon.randbats.immunities[type]) newMon.randbats.immunities[type] = {Ability: ability};
+				else if (newMon.randbats.immunities[type].Ability) newMon.randbats.immunities[type].Ability.push(ability);
+			}
+			
+			abilityWeakness('Dry Skin', 'Fire');
+			abilityWeakness('Fluffy', 'Fire');
+			abilityResistance('Drizzle', 'Fire');
+			abilityResistance('Heatproof', 'Fire');
+			abilityResistance('Thick Fat', 'Fire');
+			abilityResistance('Thick Fat', 'Ice');
+			abilityResistance('Water Bubble', 'Fire');
+			abilityResistance('Drought', 'Water');
+			abilityResistance('Orichalcum Pulse', 'Water');
+			abilityResistance('Purifying Salt', 'Ghost');
+			abilityImmunity('Flash Fire', 'Fire');
+			abilityImmunity('Primordial Sea', 'Fire');
+			abilityImmunity('Well-Baked Body', 'Fire');
+			abilityImmunity('Desolate Land', 'Water');
+			abilityImmunity('Dry Skin', 'Water');
+			abilityImmunity('Storm Drain', 'Water');
+			abilityImmunity('Water Absorb', 'Water');
+			abilityImmunity('Lightning Rod', 'Electric');
+			abilityImmunity('Motor Drive', 'Electric');
+			abilityImmunity('Volt Absorb', 'Electric');
+			abilityImmunity('Sap Sipper', 'Grass');
+			abilityImmunity('Earth Eater', 'Ground');
+			abilityImmunity('Levitate', 'Ground');
+			// TODO: status and powder immunities
+			if (!newMon.randbats.types.includes('Flying')) abilityResistance('Misty Surge', 'Dragon');
+			if (newMon.abilities.includes('Wonder Guard')) for (const type of types) if (!newMon.randbats.weaknesses[type]) abilityImmunity('Wonder Guard', type);
+			
+			// Evo customs
+			abilityResistance('Storm Chaser', 'Water');
+			abilityResistance('Storm Chaser', 'Electric');
+			abilityResistance('Storm Chaser', 'Flying');
+			abilityResistance('Martial Master', 'Fighting');
+			abilityResistance('Rust Control', 'Poison');
+			abilityResistance('Rust Control', 'Ground');
+			abilityResistance('Pollen Basket', 'Bug');
+			abilityResistance('High Climber', 'Rock');
+			abilityResistance('Spiritual', 'Ghost');
+			abilityResistance('Cheap Tricks', 'Dark');
+			abilityResistance('Directing Traffic', 'Normal');
+			abilityImmunity('Centrifuge', 'Ground');
+			abilityImmunity('Divinated Protection', 'Psychic');
+			if (newMon.abilities.includes('Patch Note')) for (const type of types) if (this.dex.data.TypeChart[type.toLowerCase()].damageTaken[newMon.types[0]] === 1) abilityResistance('Patch Note', type);
+
+			// now, we're going to turn some of these into offeredSupport like 'groundimmune'
+			for (const immunity in newMon.randbats.immunities) {
+				if (newMon.randbats.immunities[immunity].Ability && newMon.randbats.immunities[immunity].Ability.length) {
+					newMon.randbats.offeredSupport[`${(immunity).toLowerCase()}immune`] = [];
+					for (const ability of newMon.randbats.immunities[immunity].Ability) {
+						// push fragments
+						let fragment = {
+							ability: ability,
+							fragmentPriority: 4,
 						};
-						fragments.push(baseFragment);
-	
-						// some moves need copies in case of multiple Abilities
-						const noModifyType = [
-							'hiddenpower', 'judgment', 'multiattack', 'naturalgift', 'revelationdance', 'struggle', 'technoblast', 'terrainpulse', 'weatherball',
-						];
-						for (const ability of newMon.randbats.abilities) {
-							let modifier = 1; // for Orichalcum Pulse and Hadron Engine later
-							switch (ability) {
-								case 'Adaptability':
-									if (newMon.randbats.types.includes(move.type) && !['terrainpulse', 'weatherball'].includes(moveid)) {
-										let modFragment = {
-											ability: ability,
-											moveBasePower: basePower * 4/3,
-										};
-										fragments.push(modFragment);
-									}
-									break;
-								case 'Aerilate':
-									if (move.type === 'Normal' && basePower && !noModifyType.includes(moveid)) {
-										baseFragment.avoid = ['Aerilate']; // impossible to have an Aerilate-boosted Flying move and an actual Normal-type move on the same set
-										let modFragment = {
-											ability: ability,
-											tags: ['Aerilate'],
-											moveType: 'Flying',
-											moveBasePower: basePower * 1.2,
-										};
-										fragments.push(modFragment);
-									}
-									break;
-								case 'Awakening':
-									if (move.type === 'Fighting' && basePower) {
-										let modFragment = {
-											ability: ability,
-											moveBasePower: basePower * 1.5,
-										};
-										fragments.push(modFragment);
-									}
-									break;
-								case 'Calcify':
-									if (move.type === 'Rock' && basePower) {
-										let modFragment = {
-											ability: ability,
-											moveBasePower: basePower * 1.3,
-										};
-										fragments.push(modFragment);
-									}
-									break;
-								case 'Canopy':
-									if (move.type === 'Grass' && basePower) {
-										let modFragment = {
-											ability: ability,
-											moveBasePower: basePower * 1.3,
-										};
-										fragments.push(modFragment);
-									}
-									break;
-								case 'Desolate Land':
-								case 'Drought':
-								case 'Mega Sol':
-								case 'Orichalcum Pulse':
-									if (ability === 'Orichalcum Pulse' && move.category === 'Physical') modifier = 4/3;
-									if (move.type === 'Fire' && basePower) {
-										let modFragment = {
-											ability: ability,
-											moveBasePower: basePower * 1.5 * modifier,
-										};
-										fragments.push(modFragment);
-									} else if (moveid === 'weatherball') {
-										let modFragment = {
-											ability: ability,
-											moveType: 'Fire',
-											moveBasePower: 150,
-										};
-										fragments.push(modFragment);
-									} else if (modifier > 1) {
-										let modFragment = {
-											ability: ability,
-											moveBasePower: basePower * modifier,
-										};
-										fragments.push(modFragment);
-									}
-									break;
-								case 'Dragonize':
-									if (move.type === 'Normal' && basePower && !noModifyType.includes(moveid)) {
-										baseFragment.avoid = ['Dragonize'];
-										let modFragment = {
-											ability: ability,
-											tags: ['Dragonize'],
-											moveType: 'Dragon',
-											moveBasePower: basePower * 1.2,
-										};
-										fragments.push(modFragment);
-									}
-									break;
-								case `Dragon's Maw`:
-									if (move.type === 'Dragon' && basePower) {
-										let modFragment = {
-											ability: ability,
-											moveBasePower: basePower * 1.5,
-										};
-										fragments.push(modFragment);
-									}
-									break;
-								case 'Drizzle':
-								case 'Primordial Sea':
-								case 'Storm Chaser':
-									if (move.type === 'Water' && basePower) {
-										let modFragment = {
-											ability: ability,
-											moveBasePower: basePower * 1.5,
-										};
-										fragments.push(modFragment);
-									}
-									if (['hurricane', 'thunder', 'bleakwindstorm', 'wildboltstorm', 'sandsearstorm'].includes(moveid)) {
-										// today I learned Springtide Storm is not affected by rain
-										let modFragment = {
-											ability: ability,
-											moveAccuracy: 100,
-										};
-										fragments.push(modFragment);
-									}
-									if (moveid === 'weatherball') {
-										let modFragment = {
-											ability: ability,
-											moveType: 'Water',
-											moveBasePower: 150,
-										};
-										fragments.push(modFragment);
-									}
-									break;
-								case 'Electric Surge':
-								case 'Hadron Engine':
-									if (ability === 'Hadron Engine' && move.category === 'Special') modifier = 4/3;
-									if (!newMon.randbats.types.includes('Flying')) {
-										if (move.type === 'Electric' && basePower) {
-											let modFragment = {
-												ability: ability,
-												moveBasePower: basePower * 1.3 * modifier,
-											};
-											if (moveid === 'Rising Voltage') modFragment.moveBasePower *= 2;
-											fragments.push(modFragment);
-										} else if (moveid === 'terrainpulse') {
-											let modFragment = {
-												ability: ability,
-												moveType: 'Electric',
-												moveBasePower: 100 * 1.3 * modifier,
-											};
-											fragments.push(modFragment);
-										} else if (moveid === 'naturepower') {
-											let modFragment = {
-												ability: ability,
-												moveType: 'Electric',
-												moveBasePower: 90 * 1.3 * modifier,
-											};
-											fragments.push(modFragment);
-										} else if (modifier > 1) {
-											let modFragment = {
-												ability: ability,
-												moveBasePower: basePower * modifier,
-											};
-											fragments.push(modFragment);
-										}
-									}
-									break;
-								case 'Flower Gift':
-									if (move.category === 'Physical') {
-										let modFragment = {
-											ability: ability,
-											moveBasePower: basePower * 1.5,
-											singles: {
-												acceptedSupport: [],
-												requestedSupport: ['sun'],
-											},
-											vgc: {
-												acceptedSupport: [],
-												requestedSupport: ['sun'],
-											},
-										};
-										fragments.push(modFragment);
-									}
-									break;
-								case 'Frozen Focus':
-									if (move.category === 'Special') {
-										let modFragment = {
-											ability: ability,
-											moveBasePower: basePower * 1.5,
-											singles: {
-												acceptedSupport: [],
-												requestedSupport: ['snow'],
-											},
-											vgc: {
-												acceptedSupport: [],
-												requestedSupport: ['snow'],
-											},
-										};
-										fragments.push(modFragment);
-									}
-									break;
-								case 'Gale Wings':
-									if (move.type === 'Flying') {
-										let modFragment = {
-											ability: ability,
-											movePriority: move.priority + 1,
-										};
-										fragments.push(modFragment);
-									}
-									break;
-								case 'Galvanize':
-									if (move.type === 'Normal' && basePower && !noModifyType.includes(moveid)) {
-										baseFragment.avoid = ['Galvanize'];
-										let modFragment = {
-											ability: ability,
-											tags: ['Galvanize'],
-											moveType: 'Electric',
-											moveBasePower: basePower * 1.2,
-										};
-										fragments.push(modFragment);
-									}
-									break;
-								case 'Grassy Surge':
-								case 'Seed Sower':
-									if (!newMon.randbats.types.includes('Flying')) {
-										if (move.type === 'Grass' && basePower) {
-											let modFragment = {
-												ability: ability,
-												moveBasePower: basePower * 1.3,
-											};
-											if (moveid === 'Grassy Glide') modFragment.priority = 1;
-											fragments.push(modFragment);
-										}
-										if (moveid === 'terrainpulse') {
-											let modFragment = {
-												ability: ability,
-												moveType: 'Grass',
-												moveBasePower: 130,
-											};
-											fragments.push(modFragment);
-										}
-										if (moveid === 'naturepower') {
-											let modFragment = {
-												ability: ability,
-												moveType: 'Grass',
-												moveBasePower: 90 * 1.3,
-											};
-											fragments.push(modFragment);
-										}
-									}
-									break;
-								case 'Huge Power':
-								case 'Pure Power':
-									if (move.category === 'Physical') {
-										let modFragment = {
-											ability: ability,
-											moveBasePower: basePower * 2,
-										};
-										fragments.push(modFragment);
-									}
-									break;
-								case 'Hustle':
-									if (move.category === 'Physical') {
-										let modFragment = {
-											ability: ability,
-											moveBasePower: basePower * 2,
-											moveAccuracy: basePower * 0.8,
-										};
-										fragments.push(modFragment);
-									}
-									break;
-								case 'Iron Fist':
-									if (move.flags['punch'] && basePower) {
-										let modFragment = {
-											ability: ability,
-											moveBasePower: basePower * 1.2,
-										};
-										fragments.push(modFragment);
-									}
-									break;
-								case 'Mega Launcher':
-									if (move.flags['pulse'] && basePower) {
-										let modFragment = {
-											ability: ability,
-											moveBasePower: basePower * 1.5,
-										};
-										fragments.push(modFragment);
-									}
-									break;
-								case 'Mega-Neural':
-								case 'Psychic Surge':
-									if (!newMon.randbats.types.includes('Flying')) {
-										if (move.type === 'Psychic' && basePower) {
-											let modFragment = {
-												ability: ability,
-												moveBasePower: basePower * 1.3,
-											};
-											if (moveid === 'Expanding Force') modFragment.moveBasePower *= 1.5;
-											fragments.push(modFragment);
-										}
-										if (moveid === 'terrainpulse') {
-											let modFragment = {
-												ability: ability,
-												moveType: 'Psychic',
-												moveBasePower: 130,
-											};
-											fragments.push(modFragment);
-										}
-										if (moveid === 'naturepower') {
-											let modFragment = {
-												ability: ability,
-												moveType: 'Psychic',
-												moveBasePower: 90 * 1.3,
-											};
-											fragments.push(modFragment);
-										}
-									}
-									break;
-								case 'Merciless':
-									if (move.category !== 'Status' && !move.willCrit) {
-										let modFragment = {
-											ability: ability,
-											moveBasePower: basePower * 1.5,
-											singles: {
-												acceptedSupport: [],
-												requestedSupport: ['poison'],
-											},
-											vgc: {
-												acceptedSupport: [],
-												requestedSupport: ['poison'],
-											},
-										};
-										fragments.push(modFragment);
-									}
-									break;
-								case 'Misty Surge':
-									if (!newMon.randbats.types.includes('Flying')) {
-										if (moveid === 'terrainpulse') {
-											let modFragment = {
-												ability: ability,
-												moveType: 'Fairy',
-												moveBasePower: 100,
-											};
-											fragments.push(modFragment);
-										}
-										if (moveid === 'naturepower') {
-											let modFragment = {
-												ability: ability,
-												moveType: 'Fairy',
-												moveBasePower: 95,
-											};
-											fragments.push(modFragment);
-										}
-									}
-									break;
-								case 'Normalize':
-									if (basePower && !noModifyType.includes(moveid)) {
-										baseFragment.avoid = ['Normalize'];
-										let modFragment = {
-											ability: ability,
-											tags: ['Normalize'],
-											moveType: 'Normal',
-											moveBasePower: basePower * 1.2,
-										};
-										fragments.push(modFragment);
-									}
-									break;
-								case 'Permafrost':
-									if (basePower && !noModifyType.includes(moveid)) {
-										baseFragment.avoid = ['Permafrost'];
-										let modFragment = {
-											ability: ability,
-											tags: ['Permafrost'],
-											moveType: 'Ice',
-											moveBasePower: basePower * 1.2,
-										};
-										fragments.push(modFragment);
-									}
-									break;
-								case 'Pixilate':
-									if (move.type === 'Normal' && basePower && !noModifyType.includes(moveid)) {
-										baseFragment.avoid = ['Pixilate'];
-										let modFragment = {
-											ability: ability,
-											tags: ['Pixilate'],
-											moveType: 'Fairy',
-											moveBasePower: basePower * 1.2,
-										};
-										fragments.push(modFragment);
-									}
-									break;
-								case 'Prankster':
-									if (move.category === 'Status') {
-										let modFragment = {
-											ability: ability,
-											movePriority: move.priority + 1,
-										};
-										fragments.push(modFragment);
-									}
-									break;
-								case 'Punk Rock':
-									if (move.flags['sound'] && basePower) {
-										let modFragment = {
-											ability: ability,
-											moveBasePower: basePower * 1.3,
-										};
-										fragments.push(modFragment);
-									}
-									break;
-								case 'Reckless':
-									if (move.recoil && basePower) {
-										let modFragment = {
-											ability: ability,
-											moveBasePower: basePower * 1.2,
-										};
-										fragments.push(modFragment);
-									}
-									break;
-								case 'Refrigerate':
-									if (move.type === 'Normal' && basePower && !noModifyType.includes(moveid)) {
-										baseFragment.avoid = ['Refrigerate'];
-										let modFragment = {
-											ability: ability,
-											tags: ['Refrigerate'],
-											moveType: 'Ice',
-											moveBasePower: basePower * 1.2,
-										};
-										fragments.push(modFragment);
-									}
-									break;
-								case 'Rocky Payload':
-									if (move.type === 'Rock' && basePower) {
-										let modFragment = {
-											ability: ability,
-											moveBasePower: basePower * 1.5,
-										};
-										fragments.push(modFragment);
-									}
-									break;
-								case 'Sand Stream':
-								case 'Sand Spit':
-									if (moveid === 'weatherball') {
-										let modFragment = {
-											ability: ability,
-											moveType: 'Rock',
-											moveBasePower: 100,
-										};
-										fragments.push(modFragment);
-									}
-									break;
-								case 'Sand Force':
-									if (['Rock', 'Ground', 'Steel'].includes(move.type) && basePower) {
-										let modFragment = {
-											ability: ability,
-											moveBasePower: basePower * 1.2,
-											singles: {
-												requestedSupport: ['sand'],
-											},
-											vgc: {
-												requestedSupport: ['sand'],
-											},
-										};
-										fragments.push(modFragment);
-									}
-									break;
-								case 'Sharpness':
-									if (move.flags['slicing'] && basePower) {
-										let modFragment = {
-											ability: ability,
-											moveBasePower: basePower * 1.5,
-										};
-										fragments.push(modFragment);
-									}
-									break;
-								case 'Sheer Force': // gonna have to make an exception for this in some utility categories
-									if ((move.secondaries || move.hasSheerForce) && basePower) {
-										let modFragment = {
-											ability: ability,
-											moveBasePower: basePower * 1.3,
-										};
-										fragments.push(modFragment);
-									}
-									break;
-								case 'Snow Warning':
-									if (moveid === 'weatherball') {
-										let modFragment = {
-											ability: ability,
-											moveType: 'Ice',
-											moveBasePower: 100,
-										};
-										fragments.push(modFragment);
-									}
-									if (moveid === 'blizzard') {
-										let modFragment = {
-											ability: ability,
-											moveAccuracy: 100,
-										};
-										fragments.push(modFragment);
-									}
-									break;
-								case 'Solar Power':
-									if (move.category === 'Special') {
-										let modFragment = {
-											ability: ability,
-											moveBasePower: basePower * 1.5,
-											singles: {
-												acceptedSupport: [],
-												requestedSupport: ['sun'],
-											},
-											vgc: {
-												acceptedSupport: [],
-												requestedSupport: ['sun'],
-											},
-										};
-										fragments.push(modFragment);
-									}
-									break;
-								case 'Steelworker':
-								case 'Steely Spirit':
-									if (move.type === 'Steel' && basePower) {
-										let modFragment = {
-											ability: ability,
-											moveBasePower: basePower * 1.5,
-										};
-										fragments.push(modFragment);
-									}
-									break;
-								case 'Strong Jaw':
-									if (move.flags['bite'] && basePower) {
-										let modFragment = {
-											ability: ability,
-											moveBasePower: basePower * 1.5,
-										};
-										fragments.push(modFragment);
-									}
-									break;
-								case 'Technician':
-									if (basePower && basePower <= 60) {
-										let modFragment = {
-											ability: ability,
-											moveBasePower: basePower * 1.5,
-										};
-										fragments.push(modFragment);
-									}
-									break;
-								case 'Tough Claws':
-									if (move.flags['contact'] && basePower) {
-										let modFragment = {
-											ability: ability,
-											moveBasePower: basePower * 1.3,
-										};
-										fragments.push(modFragment);
-									}
-									break;
-								case 'Transistor':
-									if (move.type === 'Electric' && basePower) {
-										let modFragment = {
-											ability: ability,
-											moveBasePower: basePower * 1.3,
-										};
-										fragments.push(modFragment);
-									}
-									break;
-								case 'Triage':
-									if (move.flags['heal']) {
-										let modFragment = {
-											ability: ability,
-											movePriority: move.priority + 3,
-										};
-										fragments.push(modFragment);
-									}
-									break;
-								case 'Water Bubble':
-									if (move.type === 'Water' && basePower) {
-										let modFragment = {
-											ability: ability,
-											moveBasePower: basePower * 2,
-										};
-										fragments.push(modFragment);
-									}
-									break;
-							}
-						}
-						
-						// fill in default information
-						let alternateFragments = [];
-						for (const fragment of fragments) {
-							if (!fragment.baseMove) fragment.baseMove = move.name;
-							if (!fragment.moves) fragment.moves = [move.name];
-							
-							if (!fragment.singles) fragment.singles = {};
-							if (!fragment.singles.requestedSupport) fragment.singles.requestedSupport = [];
-							if (!fragment.singles.acceptedSupport) fragment.singles.acceptedSupport = [];
-							if (!fragment.vgc) fragment.vgc = {};
-							if (!fragment.vgc.requestedSupport) fragment.vgc.requestedSupport = [];
-							if (!fragment.vgc.acceptedSupport) fragment.vgc.acceptedSupport = [];
-							
-							if (!fragment.moveType) fragment.moveType = move.type;
-							if (!fragment.moveBasePower) fragment.moveBasePower = basePower;
-							if (!fragment.moveCategory) fragment.moveCategory = move.category;
-							if (!fragment.movePriority) fragment.movePriority = move.priority;
-							if (!fragment.moveAccuracy) fragment.moveAccuracy = move.accuracy;
-	
-							if (!fragment.fragmentPriority) fragment.fragmentPriority = 4;
-							
-							// support requirements before any context
-							if (moveid === 'risingvoltage' && !['Electric Surge', 'Hadron Engine'].includes(fragment.ability)) {
-								fragment.moveBasePower *= 2;
-								fragment.singles.requestedSupport.push('electricterrain');
-								fragment.vgc.requestedSupport.push('electricterrain');
-								// can still work with Ground immunity
-							}
-							if (moveid === 'expandingforce' && !['Mega-Neural', 'Psychic Surge'].includes(fragment.ability)) {
-								fragment.moveBasePower *= 1.5;
-								fragment.singles.requestedSupport.push('psychicterrain');
-								fragment.vgc.requestedSupport.push('psychicterrain');
-								if (!fragment.avoid) fragment.avoid = [];
-								fragment.avoid.push('groundimmune');
-							}
-							if (moveid === 'grassyglide'  && !['Grassy Surge', 'Seed Sower'].includes(fragment.ability)) {
-								fragment.movePriority += 1;
-								fragment.singles.requestedSupport.push('grassyterrain');
-								fragment.vgc.requestedSupport.push('grassyterrain');
-								if (!fragment.avoid) fragment.avoid = [];
-								fragment.avoid.push('groundimmune');
-							}
-							// Misty Explosion doesn't actually want Misty Terrain support
-							if (['solarbeam', 'solarblade', 'growth'].includes(moveid) && !(fragment.ability && ['Desolate Land', 'Drought', 'Mega Sol', 'Orichalcum Pulse'].includes(fragment.ability))) {
-								fragment.singles.requestedSupport.push('sun');
-								fragment.vgc.requestedSupport.push('sun');
-							}
-							if (['synthesis', 'moonlight', 'morningsun'].includes(moveid) && !(fragment.ability && ['Desolate Land', 'Drought', 'Mega Sol', 'Orichalcum Pulse'].includes(fragment.ability))) {
-								fragment.singles.acceptedSupport.push('sun');
-								fragment.vgc.acceptedSupport.push('sun');
-							}
-							if (['electroshot'].includes(moveid) && !(fragment.ability && ['Drizzle', 'Primordial Sea', 'Storm Chaser'].includes(fragment.ability))) {
-								fragment.singles.requestedSupport.push('rain');
-								fragment.vgc.requestedSupport.push('rain');
-							}
-							if (['shoreup'].includes(moveid) && !(fragment.ability && ['Sand Stream'].includes(fragment.ability))) {
-								fragment.singles.acceptedSupport.push('sand');
-								fragment.vgc.acceptedSupport.push('sand');
-							}
-							if (['auroraveil'].includes(moveid) && !(fragment.ability && ['Snow Warning'].includes(fragment.ability))) {
-								fragment.singles.requestedSupport.push('snow');
-								fragment.vgc.requestedSupport.push('snow');
-							}
-							if (['shaveoff'].includes(moveid) && !(fragment.ability && ['Snow Warning'].includes(fragment.ability))) {
-								fragment.singles.acceptedSupport.push('snow');
-								fragment.vgc.acceptedSupport.push('snow');
-							}
+						newMon.randbats.offeredSupport[`${(immunity).toLowerCase()}immune`].push(fragment);
+					}
+				} else newMon.randbats.offeredSupport[`${(immunity).toLowerCase()}immune`] = newMon.randbats.immunities[immunity];
+			}
 
-							// sun
-							if (
-								(fragment.moveType === 'Fire' || fragment.baseMove === 'Hydro Steam') &&
-								!(fragment.ability && ['Desolate Land', 'Drought', 'Mega Sol', 'Orichalcum Pulse'].includes(fragment.ability))
-							) {
-								let modFragment = Utils.deepClone(fragment);
-								modFragment.moveBasePower *= 1.5;
-								modFragment.singles.requestedSupport.push('sun');
-								modFragment.vgc.requestedSupport.push('sun');
-								alternateFragments.push(modFragment);
-							}
-							if (
-								fragment.baseMove === 'Weather Ball' && fragment.moveType === 'Normal'
-							) {
-								let modFragment = Utils.deepClone(fragment);
-								modFragment.moveBasePower *= 3;
-								modFragment.moveType = 'Fire';
-								modFragment.singles.requestedSupport.push('sun');
-								modFragment.vgc.requestedSupport.push('sun');
-								alternateFragments.push(modFragment);
-							}
+			for (const resistance in newMon.randbats.resistances) { // if I don't end up needing this, I'll just delete it
+				if (newMon.randbats.weaknesses[resistance]) continue;
+				if (newMon.randbats.resistances[resistance].Ability && newMon.randbats.resistances[resistance].Ability.length) {
+					newMon.randbats.offeredSupport[`${(resistance).toLowerCase()}resist`] = [];
+					for (const ability of newMon.randbats.resistances[resistance].Ability) {
+						// push fragments
+						let fragment = {
+							ability: ability,
+							fragmentPriority: 4,
+						};
+						newMon.randbats.offeredSupport[`${(resistance).toLowerCase()}resist`].push(fragment);
+					}
+				} else newMon.randbats.offeredSupport[`${(resistance).toLowerCase()}resist`] = newMon.randbats.resistances[resistance];
+			}
 
-							// rain
-							if (
-								(fragment.moveType === 'Water') &&
-								!(fragment.ability && ['Drizzle', 'Primordial Sea', 'Storm Chaser'].includes(fragment.ability))
-							) {
-								let modFragment = Utils.deepClone(fragment);
-								modFragment.moveBasePower *= 1.5;
-								modFragment.singles.requestedSupport.push('rain');
-								modFragment.vgc.requestedSupport.push('rain');
-								alternateFragments.push(modFragment);
-							}
-							if (
-								fragment.baseMove === 'Weather Ball' && fragment.moveType === 'Normal'
-							) {
-								let modFragment = Utils.deepClone(fragment);
-								modFragment.moveBasePower *= 3;
-								modFragment.moveType = 'Water';
-								modFragment.singles.requestedSupport.push('rain');
-								modFragment.vgc.requestedSupport.push('rain');
-								alternateFragments.push(modFragment);
-							}
-							if (
-								['Thunder', 'Hurricane', 'Bleakwind Storm', 'Wildbolt Storm', 'Sandsear Storm'].includes(fragment.baseMove) &&
-								!(fragment.ability && ['Drizzle', 'Primordial Sea', 'Storm Chaser'].includes(fragment.ability))
-							) {
-								let modFragment = Utils.deepClone(fragment);
-								modFragment.moveAccuracy = 100;
-								modFragment.singles.requestedSupport.push('rain');
-								modFragment.vgc.requestedSupport.push('rain');
-								alternateFragments.push(modFragment);
-							}
+			// some innate properties of types
+			if (newMon.randbats.types.includes('Ice')) {
+				newMon.randbats.singles.acceptedSupport.snow = ["true"];
+				newMon.randbats.vgc.acceptedSupport.snow = ["true"];
+			}
+			if (newMon.randbats.types.includes('Rock')) {
+				newMon.randbats.singles.acceptedSupport.sand = ["true"];
+				newMon.randbats.vgc.acceptedSupport.sand = ["true"];
+			}
 
-							// sand
-							if (
-								fragment.baseMove === 'Weather Ball' && fragment.moveType === 'Normal'
-							) {
-								let modFragment = Utils.deepClone(fragment);
-								modFragment.moveBasePower *= 2;
-								modFragment.moveType = 'Rock';
-								modFragment.singles.requestedSupport.push('sand');
-								modFragment.vgc.requestedSupport.push('sand');
-								alternateFragments.push(modFragment);
-							}
+			// no I can start iterating over the movepool!
+			
+			let learnset = this.dex.data.Learnsets[id].learnset;
+			if (newMon.baseSpecies && newMon.baseSpecies === 'Rotom') learnset = this.dex.data.Learnsets.rotom.learnset;
+			// going to handle their form-specific moves separately; this is fine for here!
+			if (!learnset) continue;
 
-							// snow
-							if (
-								fragment.baseMove === 'Blizzard' &&
-								!(fragment.ability && ['Snow Warning'].includes(fragment.ability))
-							) {
-								let modFragment = Utils.deepClone(fragment);
-								modFragment.moveAccuracy = 100;
-								modFragment.singles.requestedSupport.push('snow');
-								modFragment.vgc.requestedSupport.push('snow');
-								alternateFragments.push(modFragment);
-							}
-							if (
-								fragment.baseMove === 'Weather Ball' && fragment.moveType === 'Normal'
-							) {
-								let modFragment = Utils.deepClone(fragment);
-								modFragment.moveBasePower *= 2;
-								modFragment.moveType = 'Ice';
-								modFragment.singles.requestedSupport.push('snow');
-								modFragment.vgc.requestedSupport.push('snow');
-								alternateFragments.push(modFragment);
-							}
+			// we need to initialize this for certain kinds of Speed-reliant support in VGC
+			let viableVgcSupport = false;
+			let vgcSupportSubfragments = [];
+			if (newMon.baseStats.spe > 102) { // unboosted Speed cutoff: Garchomp
+				vgcSupportSubfragments.push({
+					default: true,
+				});
+				viableVgcSupport = true;
+			} else if (newMon.baseStats.spe > 72) { // +1 Speed cutoff: Aleon
+				if (newMon.randbats.abilities.includes('Speed Boost')) {
+					vgcSupportSubfragments.push({
+						ability: 'Speed Boost',
+					});
+					viableVgcSupport = true;
+				}
+				if (newMon.randbats.abilities.includes('Noble Potential')) {
+					vgcSupportSubfragments.push({
+						ability: 'Noble Potential',
+					});
+					viableVgcSupport = true;
+				}
+				if (newMon.randbats.abilities.includes('Quark Drive')) {
+					vgcSupportSubfragments.push({
+						ability: 'Quark Drive',
+						requestedSupport: ['electricterrain'],
+						avoid: ['boosterenergy'],
+					});
+					vgcSupportSubfragments.push({
+						ability: 'Quark Drive',
+						item: 'Booster Energy',
+						tags: ['boosterenergy'],
+					});
+				}
+				if (newMon.randbats.abilities.includes('Protosynthesis')) {
+					vgcSupportSubfragments.push({
+						ability: 'Protosynthesis',
+						requestedSupport: ['sun'],
+						avoid: ['boosterenergy'],
+					});
+					vgcSupportSubfragments.push({
+						ability: 'Protosynthesis',
+						item: 'Booster Energy',
+						tags: ['boosterenergy'],
+					});
+					viableVgcSupport = true;
+				}
+			} else if (newMon.baseStats.spe > 41) { // +2 Speed cutoff: Aleon
+				if (newMon.randbats.abilities.includes('Chlorophyll')) {
+					vgcSupportSubfragments.push({
+						ability: 'Chlorophyll',
+						requestedSupport: ['sun'],
+					});
+					viableVgcSupport = true;
+				}
+				else if (newMon.randbats.abilities.includes('Swift Swim')) {
+					vgcSupportSubfragments.push({
+						ability: 'Swift Swim',
+						requestedSupport: ['rain'],
+					});
+					viableVgcSupport = true;
+				}
+				else if (newMon.randbats.abilities.includes('Sand Rush')) {
+					vgcSupportSubfragments.push({
+						ability: 'Sand Rush',
+						requestedSupport: ['sand'],
+					});
+					viableVgcSupport = true;
+				}
+				else if (newMon.randbats.abilities.includes('Slush Rush')) {
+					vgcSupportSubfragments.push({
+						ability: 'Slush Rush',
+						requestedSupport: ['snow'],
+					});
+					viableVgcSupport = true;
+				}
+				else if (newMon.randbats.abilities.includes('Unburden')) {
+					vgcSupportSubfragments.push({
+						ability: 'Unburden',
+						item: 'Grassy Seed',
+						requestedSupport: ['grassyterrain'],
+					});
+					vgcSupportSubfragments.push({
+						ability: 'Unburden',
+						item: 'Electric Seed',
+						requestedSupport: ['electricterrain'],
+					});
+					vgcSupportSubfragments.push({
+						ability: 'Unburden',
+						item: 'Misty Seed',
+						requestedSupport: ['mistyterrain'],
+					});
+					vgcSupportSubfragments.push({
+						ability: 'Unburden',
+						item: 'Psychic Seed',
+						requestedSupport: ['psychicterrain'],
+					});
+					viableVgcSupport = true;
+				}
+			}
+			if (newMon.baseStats.spe < 66 && learnset.trickroom && learnset.trickroom.length) {
+				vgcSupportSubfragments.push({
+					moves: ['Trick Room'],
+					tags: ['minspeed'],
+				});
+				viableVgcSupport = true;
+			}
+			const pickyVgcSupport = {};
+			
+			for (const moveid in learnset) {
+				if (!learnset[moveid].length) continue;
+				// *rudimentary* LC set legality:
+				if (newMon.randbats.stage === 'LC' && newMon.gender && ['M', 'N'].includes(newMon.gender) && !['golett', 'bronzor'].includes(id)) {
+					// A handful of Pokémon need to worry about levels in LC
+					// For Bronzor, this affects Extrasensory, Feint Attack, Heal Block and Psywave; for Golett, it affects Dynamic Punch, Hammer Arm, Magnitude and Shadow Punch...
+					// ... but they learned all of those moves in Gen VII, so they get them anyway by Heart Scale! I checked and these are legal sets
+					// That means that as of now, this is actually only for the four Riboxys babies
+					// but I'll try to keep it future-proof just in case!
+					let lcLearnset = learnset[moveid].filter(
+						(method) => (!method.includes('L'))
+					);
+					if (!lcLearnset.length) { // if you can learn it a way other than level-up, it's already fine
+						let lcLevelLearned = false;
+						// parseInt(source.substr(2)) < parseInt(levelLearned)
+						for (const source of learnset[moveid]) if (parseInt(source.substr(2)) < 5) lcLevelLearned = true;
+						if (!lcLevelLearned) continue; // if you can only learn it by level, and only by a level after 5, continue
+					}
+				}
+				
+				let move = this.dex.data.Moves[moveid];
+				let basePower = move.basePower;
 
-							// Electric Terrain
-							if (
-								fragment.moveType === 'Electric' && !(fragment.ability && ['Electric Surge', 'Hadron Engine'].includes(fragment.ability))
-							) {
-								let modFragment = Utils.deepClone(fragment);
-								modFragment.moveBasePower *= 1.3;
-								modFragment.singles.requestedSupport.push('electricterrain');
-								modFragment.vgc.requestedSupport.push('electricterrain');
-								if (!modFragment.avoid) modFragment.avoid = [];
-								modFragment.avoid.push('groundimmune');
-								alternateFragments.push(modFragment);
-							}
-							if (
-								['Terrain Pulse', 'Nature Power'].includes(fragment.baseMove) && fragment.moveType === 'Normal'
-							) {
-								let modFragment = Utils.deepClone(fragment);
-								if (fragment.baseMove === 'Terrain Pulse') modFragment.moveBasePower *= 2;
-								if (fragment.baseMove === 'Nature Power') modFragment.moveBasePower *= (9 / 8);
-								modFragment.moveBasePower *= 1.3;
-								modFragment.moveType = 'Electric';
-								modFragment.singles.requestedSupport.push('electricterrain');
-								modFragment.vgc.requestedSupport.push('electricterrain');
-								alternateFragments.push(modFragment);
-							}
+				// some moves like Grass Knot have misleading base powers to begin with, so
+				// TODO: list and override them here
+				// at a glance, ctrl + F basePowerCallback is a good way to do this
+				switch (moveid) {
+					case 'Grass Knot':
+						basePower = 60; // some of these are gonna be arbitrary :'D
+						break;
+					case 'Nature Power':
+						basePower = 80;
+						moveCategory = 'Special';
+						break;
+				}
+				// I notice the Acrobatics fragment is gonna take some special attention, but one thing at a time
 
-							// Grassy Terrain
-							if (
-								fragment.moveType === 'Grass' && !(fragment.ability && ['Grassy Surge', 'Seed Sower'].includes(fragment.ability))
-							) {
-								let modFragment = Utils.deepClone(fragment);
-								modFragment.moveBasePower *= 1.3;
-								modFragment.singles.requestedSupport.push('grassyterrain');
-								modFragment.vgc.requestedSupport.push('grassyterrain');
-								if (!modFragment.avoid) modFragment.avoid = [];
-								modFragment.avoid.push('groundimmune');
-								alternateFragments.push(modFragment);
-							}
-							if (
-								['Terrain Pulse', 'Nature Power'].includes(fragment.baseMove) && fragment.moveType === 'Normal'
-							) {
-								let modFragment = Utils.deepClone(fragment);
-								if (fragment.baseMove === 'Terrain Pulse') modFragment.moveBasePower *= 2;
-								if (fragment.baseMove === 'Nature Power') modFragment.moveBasePower *= (9 / 8);
-								modFragment.moveBasePower *= 1.3;
-								modFragment.moveType = 'Grass';
-								modFragment.singles.requestedSupport.push('grassyterrain');
-								modFragment.vgc.requestedSupport.push('grassyterrain');
-								alternateFragments.push(modFragment);
-							}
-							
-							// Psychic Terrain
-							if (
-								fragment.moveType === 'Psychic' && !(fragment.ability && ['Psychic Surge', 'Mega-Neural'].includes(fragment.ability))
-							) {
-								let modFragment = Utils.deepClone(fragment);
-								modFragment.moveBasePower *= 1.3;
-								modFragment.singles.requestedSupport.push('psychicterrain');
-								modFragment.vgc.requestedSupport.push('psychicterrain');
-								if (!modFragment.avoid) modFragment.avoid = [];
-								modFragment.avoid.push('groundimmune');
-								alternateFragments.push(modFragment);
-							}
-							if (
-								['Terrain Pulse', 'Nature Power'].includes(fragment.baseMove) && fragment.moveType === 'Normal'
-							) {
-								let modFragment = Utils.deepClone(fragment);
-								if (fragment.baseMove === 'Terrain Pulse') modFragment.moveBasePower *= 2;
-								if (fragment.baseMove === 'Nature Power') modFragment.moveBasePower *= (9 / 8);
-								modFragment.moveBasePower *= 1.3;
-								modFragment.moveType = 'Psychic';
-								modFragment.singles.requestedSupport.push('psychicterrain');
-								modFragment.vgc.requestedSupport.push('psychicterrain');
-								alternateFragments.push(modFragment);
-							}
+				let fragments = [];
+				let baseFragment = {
+				};
+				fragments.push(baseFragment);
 
-							// Misty Terrain
-							if (
-								['Terrain Pulse', 'Nature Power'].includes(fragment.baseMove) && fragment.moveType === 'Normal'
-							) {
-								let modFragment = Utils.deepClone(fragment);
-								if (fragment.baseMove === 'Terrain Pulse') modFragment.moveBasePower *= 2;
-								if (fragment.baseMove === 'Nature Power') modFragment.moveBasePower *= (95 / 80);
-								modFragment.moveType = 'Fairy';
-								modFragment.singles.requestedSupport.push('mistyterrain');
-								modFragment.vgc.requestedSupport.push('mistyterrain');
-								alternateFragments.push(modFragment);
-							}
-
-							// Gravity
-							if (!move.ohko && fragment.moveAccuracy <= 75 && moveid !== 'Blizzard') {
-								let modFragment = Utils.deepClone(fragment);
-								modFragment.format = 'vgc';
-								modFragment.moveAccuracy *= 5/3;
-								modFragment.vgc.requestedSupport.push('gravity');
-								alternateFragments.push(modFragment);
-							}
-							/*
-							// in theory, Gravity helps with Ground moves, but in practice, ... uhhhh these make way too many teams ask for Gravity sjkdfhg
-							if (fragment.moveType === 'Ground' && fragment.moveBasePower && fragment.baseMove !== 'Thousand Arrows') {
-								fragment.singles.acceptedSupport.push('gravity');
-								fragment.vgc.acceptedSupport.push('gravity');
-							}
-							*/
-
-							// poison
-							if (
-								['Venoshock', 'Barb Barrage', 'Hex', 'Infernal Parade'].includes(fragment.baseMove) &&
-								!(fragment.ability && fragment.ability === 'Technician')
-							) {
-								let modFragment = Utils.deepClone(fragment);
-								if (fragment.tags && (fragment.tags.includes('poison') || (['Hex', 'Infernal Parade'].includes(fragment.baseMove) && fragment.tags.includes('status')))) {
-									modFragment.singles.acceptedSupport.push('poison');
-									modFragment.vgc.acceptedSupport.push('poison');
-								} else {
-									modFragment.moveBasePower *= 2;
-									modFragment.singles.requestedSupport.push('poison');
-									modFragment.vgc.requestedSupport.push('poison');
-								}
-								alternateFragments.push(modFragment);
-							}
-							
-							if (newMon.randbats.types.includes(fragment.moveType) && fragment.moveBasePower) fragment.stab = true;
-							// I usually think in terms of regular base powers,
-							// so it's more intuitive for me to divide for lack of STAB than to multiply for STAB:
-							if (!fragment.stab) fragment.moveBasePower /= 1.5;
-							
-							// interested in accounting for base stats (as modifiers to base power) before continuing
-							// let's say the following steps' base powers are standardized around ~100 base Attack/SpA with 252 EVs
-							// so if the actual stat is more or less than that, the base power should be scaled accoridngly
-							if (newMon.randbats.stage && newMon.randbats.stage === 'LC') {
-								// okay let's say more like base 85 here aksjdfh
-								if (fragment.moveCategory === 'Physical') fragment.moveBasePower *= ((Math.floor((newMon.baseStats.atk*2+94)/20)+5)/18);
-								if (fragment.moveCategory === 'Special') fragment.moveBasePower *= ((Math.floor((newMon.baseStats.spa*2+94)/20)+5)/18);
-							} else {
-								if (fragment.moveCategory === 'Physical') fragment.moveBasePower *= ((newMon.baseStats.atk*2+99)/299);
-								if (fragment.moveCategory === 'Special') fragment.moveBasePower *= ((newMon.baseStats.spa*2+99)/299);
-							}
-						}
-						if (alternateFragments) for (const fragment of alternateFragments) {
-							
-							if (newMon.randbats.types.includes(fragment.moveType) && fragment.moveBasePower) fragment.stab = true;
-							// I usually think in terms of regular base powers,
-							// so it's more intuitive for me to divide for lack of STAB than to multiply for STAB:
-							if (!fragment.stab) fragment.moveBasePower /= 1.5;
-							
-							// interested in accounting for base stats (as modifiers to base power) before continuing
-							// let's say the following steps' base powers are standardized around ~100 base Attack/SpA with 252 EVs
-							// so if the actual stat is more or less than that, the base power should be scaled accoridngly
-							if (newMon.randbats.stage && newMon.randbats.stage === 'LC') {
-								// okay let's say more like base 85 here aksjdfh
-								if (fragment.moveCategory === 'Physical') fragment.moveBasePower *= ((Math.floor((newMon.baseStats.atk*2+94)/20)+5)/18);
-								if (fragment.moveCategory === 'Special') fragment.moveBasePower *= ((Math.floor((newMon.baseStats.spa*2+94)/20)+5)/18);
-							} else {
-								if (fragment.moveCategory === 'Physical') fragment.moveBasePower *= ((newMon.baseStats.atk*2+99)/299);
-								if (fragment.moveCategory === 'Special') fragment.moveBasePower *= ((newMon.baseStats.spa*2+99)/299);
-							}
-							
-							fragments.push(fragment);
-							
-							if (fragment.stab && newMon.randbats.abilities.includes('Adaptability') && !fragment.ability) {
-								let modFragment = Utils.deepClone(fragment);
-								modFragment.moveBasePower *= 4/3;
-								modFragment.ability = 'Adaptability';
+				// some moves need copies in case of multiple Abilities
+				const noModifyType = [
+					'hiddenpower', 'judgment', 'multiattack', 'naturalgift', 'revelationdance', 'struggle', 'technoblast', 'terrainpulse', 'weatherball',
+				];
+				for (const ability of newMon.randbats.abilities) {
+					let modifier = 1; // for Orichalcum Pulse and Hadron Engine later
+					switch (ability) {
+						case 'Adaptability':
+							if (newMon.randbats.types.includes(move.type) && !['terrainpulse', 'weatherball'].includes(moveid)) {
+								let modFragment = {
+									ability: ability,
+									moveBasePower: basePower * 4/3,
+								};
 								fragments.push(modFragment);
 							}
-						}
-	
-						for (const fragment of fragments) {
-	
-						// general / STAB
-							// okay, the STAB categories are obviously way unfinished - I'm gonna come back to this
-							const unsafeStabs = [
-								// This list isn't any kind of penalty!
-								// Any move with over 95% accuracy*, provided it is also *not* on this list, will be considered "drawback-free" for later purposes
-								// That means anything that could be considered to have a drawback at all should be here!
-	
-								// some moves with less than 100% accuracy should still be included, in case modifiers make it relevant
-								// (for instance, Compound Eyes doesn't make Head Smash drawback-free, but it does for Stone Edge)
-	
-								// some moves, like Electro Shot and Solar Blade, are only considered valid at all if they have the appropriate support -
-								// so they *should* be considered drawback-free if they make it to a point where it matters!
-								
-								// (*some things are over 95 but less than 100 because of modifiers like Compound Eyes or Wide Lens, but I'm choosing for those to count as drawback-free!)
-								
-								'flareblitz', 'ragingfury', 'vcreate', 'armorcannon', 'burnup', 'overheat', 'eruption', 'shelltrap',
-								'wavecrash', 'waterspout',
-								'wildcharge', 'supercellslam', 'doubleshock', 'volttackle', 'thunderclap',
-								'woodhammer', 'petaldance', 'leafstorm',
-								'icehammer',
-								'reversal', 'vitalthrow', 'hammerarm', 'jumpkick', 'axekick', 'closecombat', 'superpower', 'highjumpkick', 'focuspunch',
-								'headlongrush',
-								'skydrop', 'beakblast', 'bravebird', 'dragonascent',
-								'psychoboost',
-								'firstimpression',
-								'headsmash',
-								'phantomforce', 'poltergeist', 'shadowforce',
-								'scaleshot', 'dragontail', 'glaiverush', 'outrage', 'clangingscales', 'dracometeor', 'dragonenergy',
-								'suckerpunch', 'jawlock', 'foulplay', 'hyperspacefury',
-								'hardpress', 'spinout', 'steelroller', 'gigatonhammer', 'makeitrain',
-								'fleurcannon',
-								'crushgrip', 'flail', 'naturalgift', 'fakeout', 'takedown', 'doubleedge', 'headcharge', 'thrash', 'wringout',
-								
-								'renewingring', 'entanglement', 'slimecannon',
-							];
-							const rejectStabs = [
-								// moves that generally shouldn't be treated as a *main* attacking or coverage move at all, regardless of BP
-								// plenty of these can come up later as "personal" picks, though!
-								'inferno', 'blastburn', 'mindblown',
-								'dive', 'hydrocannon',
-								'zapcannon',
-								'chloroblast', 'frenzyplant',
-								'sheercold',
-								'counter', 'seismictoss', 'upperhand', 'dynamicpunch', 'meteorassault', 'finalgambit',
-								'belch',
-								'magnitude', 'fissure', 'dig',
-								'skyattack', // intentionally leaving Bounce and Fly in because they are a main STAB in some cases
-								'mirrorcoat', 'psywave', 'dreameater', 'futuresight', 'synchronoise', 'prismaticlaser',
-								'rockwrecker',
-								'roaroftime', 'eternabeam',
-								'beatup', 'comeuppance', 'ruination', 'fling',
-								'metalburst', 'doomdesire', 'steelbeam',
-								'naturesmadness', 'mistyexplosion',
-								'bide', 'endeavor', 'guillotine', 'horndrill', 'present', 'superfang', 'falseswipe', 'holdback', 'skullbash', 'lastresort', 'gigaimpact', 'selfdestruct', 'explosion', 'sonicboom', 'spitup', 'trumpcard', 'snore', 'razorwind', 'hyperbeam',
-							];
-							if (
-								!rejectStabs.includes(moveid) ||
-								(['dynamicpunch', 'inferno', 'zapcannon'].includes(moveid) && fragment.accuracy && fragment.accuracy === 100) ||
-								(['mindblown', 'chloroblast', 'steelbeam'].includes(moveid) && fragment.ability && fragment.ability === 'Magic Guard')
-							) {
-								// this allows for non-STAB moves if they're as strong as a STAB anyway, but I set the bar a little higher for now
-								// this will sometimes be the case for moves like Shiftry's Double-Edge or Repehk's Weather Ball!
-								// later on, I should be ready to check for how many unique types of "STABs" are covered;
-								// if there are at least 2 types in viableStabs, then the set should try to have viableStabs of any 2 types
-								
-								let modFragment = Utils.deepClone(fragment);
-								if (
-									(!modFragment.moveAccuracy || modFragment.moveAccuracy > 95) &&
-									(!unsafeStabs.includes(moveid) ||
-									 (['flareblitz', 'wavecrash', 'wildcharge', 'volttackle', 'woodhammer', 'headsmash', 'takedown', 'doubleedge', 'headcharge'].includes(moveid) && fragment.ability && ['Rock Head', 'Magic Guard'].includes(fragment.ability)) ||
-									 (['mindblown', 'chloroblast', 'supercellslam', 'jumpkick', 'highjumpkick', 'steelbeam'].includes(moveid) && fragment.ability && ['Magic Guard'].includes(fragment.ability)) ||
-									 (['vcreate', 'armorcannon', 'overheat', 'leafstorm', 'icehammer', 'hammerarm', 'axekick', 'closecombat', 'superpower', 'headlongrush', 'dragonascent', 'psychoboost', 'clangingscales', 'dracometeor', 'hyperspacefury', 'spinout', 'makeitrain', 'fleurcannon'].includes(moveid) && fragment.ability && ['Contrary'].includes(fragment.ability))
-									)
-								) {
-									modFragment.singles.safeStab = true;
-									if (move.target !== 'allAdjacent') modFragment.vgc.safeStab = true;
-									modFragment.weight = 2;
-								}
-								if (!fragment.stab && !fragment.teraType) modFragment.teraType = fragment.moveType;
-								if (!modFragment.tags) modFragment.tags = [];
-								if (!move.overrideOffensiveStat && !modFragment.tags.includes(`${(move.category).toLowerCase()}`)) modFragment.tags.push(`${(move.category).toLowerCase()}`);
-								if (fragment.moveAccuracy < 80 || move.multiaccuracy) {
-									modFragment.tags.push('inaccurate');
-									if (!modFragment.buddy) modFragment.buddy = {};
-									if (!modFragment.buddy.roles) modFragment.buddy.roles = [];
-									modFragment.buddy.roles.push('accuracyboost');
-								}
-								if (fragment.moveAccuracy <= 75) modFragment.score = -1; // this gets bypassed if something like Hone Claws or Coil is rolled
-								if (
-									(fragment.stab && fragment.moveBasePower >= 80) ||
-									(fragment.moveType !== 'Normal' && fragment.moveBasePower >= 90) ||
-									fragment.moveBasePower >= 120
-								) {
-									newMon.randbats.viableStabs.push(modFragment);
-									// stop giving random things Double-Edge!! I know it has good BP :sob:
-									// (the >= 120 preserves *really* strong cases like non-STAB Punk Rock Boomburst, but otherwise, it has to at least be a coverage type if it's not STAB)
-								}
-								if (fragment.moveBasePower >= 120 && !fragment.item) {
-									let modFragment2 = Utils.deepClone(modFragment);
-									// this will be a good threshold for choice item sets... I think
-									if (!newMon.randbats.offeredSupport.choicebreaker) newMon.randbats.offeredSupport.choicebreaker = [];
-									modFragment2.item = (fragment.moveCategory === 'Physical' ? 'Choice Band' : 'Choice Specs');
-									if (!modFragment2.avoid) modFragment2.avoid = [];
-									modFragment2.avoid.push('speedsetup');
-									newMon.randbats.offeredSupport.choicebreaker.push(modFragment2);
+							break;
+						case 'Aerilate':
+							if (move.type === 'Normal' && basePower && !noModifyType.includes(moveid)) {
+								baseFragment.avoid = ['Aerilate']; // impossible to have an Aerilate-boosted Flying move and an actual Normal-type move on the same set
+								let modFragment = {
+									ability: ability,
+									tags: ['Aerilate'],
+									moveType: 'Flying',
+									moveBasePower: basePower * 1.2,
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case 'Awakening':
+							if (move.type === 'Fighting' && basePower) {
+								let modFragment = {
+									ability: ability,
+									moveBasePower: basePower * 1.5,
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case 'Calcify':
+							if (move.type === 'Rock' && basePower) {
+								let modFragment = {
+									ability: ability,
+									moveBasePower: basePower * 1.3,
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case 'Canopy':
+							if (move.type === 'Grass' && basePower) {
+								let modFragment = {
+									ability: ability,
+									moveBasePower: basePower * 1.3,
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case 'Desolate Land':
+						case 'Drought':
+						case 'Mega Sol':
+						case 'Orichalcum Pulse':
+							if (ability === 'Orichalcum Pulse' && move.category === 'Physical') modifier = 4/3;
+							if (move.type === 'Fire' && basePower) {
+								let modFragment = {
+									ability: ability,
+									moveBasePower: basePower * 1.5 * modifier,
+								};
+								fragments.push(modFragment);
+							} else if (moveid === 'weatherball') {
+								let modFragment = {
+									ability: ability,
+									moveType: 'Fire',
+									moveBasePower: 150,
+								};
+								fragments.push(modFragment);
+							} else if (modifier > 1) {
+								let modFragment = {
+									ability: ability,
+									moveBasePower: basePower * modifier,
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case 'Dragonize':
+							if (move.type === 'Normal' && basePower && !noModifyType.includes(moveid)) {
+								baseFragment.avoid = ['Dragonize'];
+								let modFragment = {
+									ability: ability,
+									tags: ['Dragonize'],
+									moveType: 'Dragon',
+									moveBasePower: basePower * 1.2,
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case `Dragon's Maw`:
+							if (move.type === 'Dragon' && basePower) {
+								let modFragment = {
+									ability: ability,
+									moveBasePower: basePower * 1.5,
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case 'Drizzle':
+						case 'Primordial Sea':
+						case 'Storm Chaser':
+							if (move.type === 'Water' && basePower) {
+								let modFragment = {
+									ability: ability,
+									moveBasePower: basePower * 1.5,
+								};
+								fragments.push(modFragment);
+							}
+							if (['hurricane', 'thunder', 'bleakwindstorm', 'wildboltstorm', 'sandsearstorm'].includes(moveid)) {
+								// today I learned Springtide Storm is not affected by rain
+								let modFragment = {
+									ability: ability,
+									moveAccuracy: 100,
+								};
+								fragments.push(modFragment);
+							}
+							if (moveid === 'weatherball') {
+								let modFragment = {
+									ability: ability,
+									moveType: 'Water',
+									moveBasePower: 150,
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case 'Electric Surge':
+						case 'Hadron Engine':
+							if (ability === 'Hadron Engine' && move.category === 'Special') modifier = 4/3;
+							if (!newMon.randbats.types.includes('Flying')) {
+								if (move.type === 'Electric' && basePower) {
+									let modFragment = {
+										ability: ability,
+										moveBasePower: basePower * 1.3 * modifier,
+									};
+									if (moveid === 'Rising Voltage') modFragment.moveBasePower *= 2;
+									fragments.push(modFragment);
+								} else if (moveid === 'terrainpulse') {
+									let modFragment = {
+										ability: ability,
+										moveType: 'Electric',
+										moveBasePower: 100 * 1.3 * modifier,
+									};
+									fragments.push(modFragment);
+								} else if (moveid === 'naturepower') {
+									let modFragment = {
+										ability: ability,
+										moveType: 'Electric',
+										moveBasePower: 90 * 1.3 * modifier,
+									};
+									fragments.push(modFragment);
+								} else if (modifier > 1) {
+									let modFragment = {
+										ability: ability,
+										moveBasePower: basePower * modifier,
+									};
+									fragments.push(modFragment);
 								}
 							}
-							
-						// VGC:
-							// Fake Out
-							if (fragment.moves.includes('Fake Out') || fragment.moves.includes('Mat Block')) {
-								if (!newMon.randbats.offeredSupport.fakeout) newMon.randbats.offeredSupport.fakeout = [];
-								newMon.randbats.offeredSupport.fakeout.push(fragment);
+							break;
+						case 'Flower Gift':
+							if (move.category === 'Physical') {
+								let modFragment = {
+									ability: ability,
+									moveBasePower: basePower * 1.5,
+									singles: {
+										acceptedSupport: [],
+										requestedSupport: ['sun'],
+									},
+									vgc: {
+										acceptedSupport: [],
+										requestedSupport: ['sun'],
+									},
+								};
+								fragments.push(modFragment);
 							}
-							// priority
-							if (fragment.movePriority > 0 && !['upperhand', 'feint'].includes(moveid)) {
-								// those two are cool and all, but they do *not* count as being a team's priority user jsdfngh
-								if (fragment.moveBasePower > 40 || ['assist', 'copycat', 'mefirst', 'metronome', 'mirrormove', 'naturepower'].includes(moveid)) {
-									if (!newMon.randbats.offeredSupport.priority) newMon.randbats.offeredSupport.priority = [];
-									// this was initially a sample to test the score feature, but I think it's a good idea to keep it this way:
-									// if you have multiple candidates for priority users, the strongest one is picked first
-									let modFragment = Utils.deepClone(fragment);
-									if (['firstimpression', 'fakeout'].includes(moveid)) {
-										if (!modFragment.avoid) modFragment.avoid = [];
-										modFragment.avoid.push('physicalsetup');
-										modFragment.avoid.push('speedsetup');
-									}
-									modFragment.score = fragment.moveBasePower;
-									
-									if (!modFragment.tags) modFragment.tags = [];
-									if (!move.overrideOffensiveStat && !modFragment.tags.includes(`${(move.category).toLowerCase()}`)) modFragment.tags.push(`${(move.category).toLowerCase()}`);
-									if (fragment.moveAccuracy < 80 || move.multiaccuracy) {
-										modFragment.tags.push('inaccurate');
-										if (!modFragment.buddy) modFragment.buddy = {};
-										if (!modFragment.buddy.roles) modFragment.buddy.roles = [];
-										modFragment.buddy.roles.push('accuracyboost');
-									}
+							break;
+						case 'Frozen Focus':
+							if (move.category === 'Special') {
+								let modFragment = {
+									ability: ability,
+									moveBasePower: basePower * 1.5,
+									singles: {
+										acceptedSupport: [],
+										requestedSupport: ['snow'],
+									},
+									vgc: {
+										acceptedSupport: [],
+										requestedSupport: ['snow'],
+									},
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case 'Gale Wings':
+							if (move.type === 'Flying') {
+								let modFragment = {
+									ability: ability,
+									movePriority: move.priority + 1,
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case 'Galvanize':
+							if (move.type === 'Normal' && basePower && !noModifyType.includes(moveid)) {
+								baseFragment.avoid = ['Galvanize'];
+								let modFragment = {
+									ability: ability,
+									tags: ['Galvanize'],
+									moveType: 'Electric',
+									moveBasePower: basePower * 1.2,
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case 'Grassy Surge':
+						case 'Seed Sower':
+							if (!newMon.randbats.types.includes('Flying')) {
+								if (move.type === 'Grass' && basePower) {
+									let modFragment = {
+										ability: ability,
+										moveBasePower: basePower * 1.3,
+									};
+									if (moveid === 'Grassy Glide') modFragment.priority = 1;
+									fragments.push(modFragment);
+								}
+								if (moveid === 'terrainpulse') {
+									let modFragment = {
+										ability: ability,
+										moveType: 'Grass',
+										moveBasePower: 130,
+									};
+									fragments.push(modFragment);
+								}
+								if (moveid === 'naturepower') {
+									let modFragment = {
+										ability: ability,
+										moveType: 'Grass',
+										moveBasePower: 90 * 1.3,
+									};
+									fragments.push(modFragment);
+								}
+							}
+							break;
+						case 'Huge Power':
+						case 'Pure Power':
+							if (move.category === 'Physical') {
+								let modFragment = {
+									ability: ability,
+									moveBasePower: basePower * 2,
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case 'Hustle':
+							if (move.category === 'Physical') {
+								let modFragment = {
+									ability: ability,
+									moveBasePower: basePower * 2,
+									moveAccuracy: basePower * 0.8,
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case 'Iron Fist':
+							if (move.flags['punch'] && basePower) {
+								let modFragment = {
+									ability: ability,
+									moveBasePower: basePower * 1.2,
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case 'Mega Launcher':
+							if (move.flags['pulse'] && basePower) {
+								let modFragment = {
+									ability: ability,
+									moveBasePower: basePower * 1.5,
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case 'Mega-Neural':
+						case 'Psychic Surge':
+							if (!newMon.randbats.types.includes('Flying')) {
+								if (move.type === 'Psychic' && basePower) {
+									let modFragment = {
+										ability: ability,
+										moveBasePower: basePower * 1.3,
+									};
+									if (moveid === 'Expanding Force') modFragment.moveBasePower *= 1.5;
+									fragments.push(modFragment);
+								}
+								if (moveid === 'terrainpulse') {
+									let modFragment = {
+										ability: ability,
+										moveType: 'Psychic',
+										moveBasePower: 130,
+									};
+									fragments.push(modFragment);
+								}
+								if (moveid === 'naturepower') {
+									let modFragment = {
+										ability: ability,
+										moveType: 'Psychic',
+										moveBasePower: 90 * 1.3,
+									};
+									fragments.push(modFragment);
+								}
+							}
+							break;
+						case 'Merciless':
+							if (move.category !== 'Status' && !move.willCrit) {
+								let modFragment = {
+									ability: ability,
+									moveBasePower: basePower * 1.5,
+									singles: {
+										acceptedSupport: [],
+										requestedSupport: ['poison'],
+									},
+									vgc: {
+										acceptedSupport: [],
+										requestedSupport: ['poison'],
+									},
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case 'Misty Surge':
+							if (!newMon.randbats.types.includes('Flying')) {
+								if (moveid === 'terrainpulse') {
+									let modFragment = {
+										ability: ability,
+										moveType: 'Fairy',
+										moveBasePower: 100,
+									};
+									fragments.push(modFragment);
+								}
+								if (moveid === 'naturepower') {
+									let modFragment = {
+										ability: ability,
+										moveType: 'Fairy',
+										moveBasePower: 95,
+									};
+									fragments.push(modFragment);
+								}
+							}
+							break;
+						case 'Normalize':
+							if (basePower && !noModifyType.includes(moveid)) {
+								baseFragment.avoid = ['Normalize'];
+								let modFragment = {
+									ability: ability,
+									tags: ['Normalize'],
+									moveType: 'Normal',
+									moveBasePower: basePower * 1.2,
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case 'Permafrost':
+							if (basePower && !noModifyType.includes(moveid)) {
+								baseFragment.avoid = ['Permafrost'];
+								let modFragment = {
+									ability: ability,
+									tags: ['Permafrost'],
+									moveType: 'Ice',
+									moveBasePower: basePower * 1.2,
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case 'Pixilate':
+							if (move.type === 'Normal' && basePower && !noModifyType.includes(moveid)) {
+								baseFragment.avoid = ['Pixilate'];
+								let modFragment = {
+									ability: ability,
+									tags: ['Pixilate'],
+									moveType: 'Fairy',
+									moveBasePower: basePower * 1.2,
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case 'Prankster':
+							if (move.category === 'Status') {
+								let modFragment = {
+									ability: ability,
+									movePriority: move.priority + 1,
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case 'Punk Rock':
+							if (move.flags['sound'] && basePower) {
+								let modFragment = {
+									ability: ability,
+									moveBasePower: basePower * 1.3,
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case 'Reckless':
+							if (move.recoil && basePower) {
+								let modFragment = {
+									ability: ability,
+									moveBasePower: basePower * 1.2,
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case 'Refrigerate':
+							if (move.type === 'Normal' && basePower && !noModifyType.includes(moveid)) {
+								baseFragment.avoid = ['Refrigerate'];
+								let modFragment = {
+									ability: ability,
+									tags: ['Refrigerate'],
+									moveType: 'Ice',
+									moveBasePower: basePower * 1.2,
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case 'Rocky Payload':
+							if (move.type === 'Rock' && basePower) {
+								let modFragment = {
+									ability: ability,
+									moveBasePower: basePower * 1.5,
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case 'Sand Stream':
+						case 'Sand Spit':
+							if (moveid === 'weatherball') {
+								let modFragment = {
+									ability: ability,
+									moveType: 'Rock',
+									moveBasePower: 100,
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case 'Sand Force':
+							if (['Rock', 'Ground', 'Steel'].includes(move.type) && basePower) {
+								let modFragment = {
+									ability: ability,
+									moveBasePower: basePower * 1.2,
+									singles: {
+										requestedSupport: ['sand'],
+									},
+									vgc: {
+										requestedSupport: ['sand'],
+									},
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case 'Sharpness':
+							if (move.flags['slicing'] && basePower) {
+								let modFragment = {
+									ability: ability,
+									moveBasePower: basePower * 1.5,
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case 'Sheer Force': // gonna have to make an exception for this in some utility categories
+							if ((move.secondaries || move.hasSheerForce) && basePower) {
+								let modFragment = {
+									ability: ability,
+									moveBasePower: basePower * 1.3,
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case 'Snow Warning':
+							if (moveid === 'weatherball') {
+								let modFragment = {
+									ability: ability,
+									moveType: 'Ice',
+									moveBasePower: 100,
+								};
+								fragments.push(modFragment);
+							}
+							if (moveid === 'blizzard') {
+								let modFragment = {
+									ability: ability,
+									moveAccuracy: 100,
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case 'Solar Power':
+							if (move.category === 'Special') {
+								let modFragment = {
+									ability: ability,
+									moveBasePower: basePower * 1.5,
+									singles: {
+										acceptedSupport: [],
+										requestedSupport: ['sun'],
+									},
+									vgc: {
+										acceptedSupport: [],
+										requestedSupport: ['sun'],
+									},
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case 'Steelworker':
+						case 'Steely Spirit':
+							if (move.type === 'Steel' && basePower) {
+								let modFragment = {
+									ability: ability,
+									moveBasePower: basePower * 1.5,
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case 'Strong Jaw':
+							if (move.flags['bite'] && basePower) {
+								let modFragment = {
+									ability: ability,
+									moveBasePower: basePower * 1.5,
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case 'Technician':
+							if (basePower && basePower <= 60) {
+								let modFragment = {
+									ability: ability,
+									moveBasePower: basePower * 1.5,
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case 'Tough Claws':
+							if (move.flags['contact'] && basePower) {
+								let modFragment = {
+									ability: ability,
+									moveBasePower: basePower * 1.3,
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case 'Transistor':
+							if (move.type === 'Electric' && basePower) {
+								let modFragment = {
+									ability: ability,
+									moveBasePower: basePower * 1.3,
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case 'Triage':
+							if (move.flags['heal']) {
+								let modFragment = {
+									ability: ability,
+									movePriority: move.priority + 3,
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case 'Water Bubble':
+							if (move.type === 'Water' && basePower) {
+								let modFragment = {
+									ability: ability,
+									moveBasePower: basePower * 2,
+								};
+								fragments.push(modFragment);
+							}
+							break;
+					}
+				}
+				
+				// fill in default information
+				let alternateFragments = [];
+				for (const fragment of fragments) {
+					if (!fragment.baseMove) fragment.baseMove = move.name;
+					if (!fragment.moves) fragment.moves = [move.name];
+					
+					if (!fragment.singles) fragment.singles = {};
+					if (!fragment.singles.requestedSupport) fragment.singles.requestedSupport = [];
+					if (!fragment.singles.acceptedSupport) fragment.singles.acceptedSupport = [];
+					if (!fragment.vgc) fragment.vgc = {};
+					if (!fragment.vgc.requestedSupport) fragment.vgc.requestedSupport = [];
+					if (!fragment.vgc.acceptedSupport) fragment.vgc.acceptedSupport = [];
+					
+					if (!fragment.moveType) fragment.moveType = move.type;
+					if (!fragment.moveBasePower) fragment.moveBasePower = basePower;
+					if (!fragment.moveCategory) fragment.moveCategory = move.category;
+					if (!fragment.movePriority) fragment.movePriority = move.priority;
+					if (!fragment.moveAccuracy) fragment.moveAccuracy = move.accuracy;
 
-									if ((move.category === 'Physical' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'def')) {
-										if (!modFragment.vgc) modFragment.vgc = {};
-										if (!modFragment.vgc.acceptedSupport) modFragment.vgc.acceptedSupport = [];
-										if (!modFragment.vgc.acceptedSupport.includes('defensereduction')) modFragment.vgc.acceptedSupport.push('defensereduction');
-									}
-									if ((move.category === 'Special' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'spd')) {
-										if (!modFragment.vgc) modFragment.vgc = {};
-										if (!modFragment.vgc.acceptedSupport) modFragment.vgc.acceptedSupport = [];
-										if (!modFragment.vgc.acceptedSupport.includes('spdefreduction')) modFragment.vgc.acceptedSupport.push('spdefreduction');
-									}
-
-									// we don't want several of the same type on the same set
-									modFragment.tags.push(`${(modFragment.moveType).toLowerCase()}priority`);
-									if (!modFragment.avoid) modFragment.avoid = [];
-									modFragment.avoid.push(`${(modFragment.moveType).toLowerCase()}priority`);
-									
-									newMon.randbats.offeredSupport.priority.push(modFragment);
-								} else if (fragment.moveBasePower && (fragment.moveBasePower *1.5 > 40) && !fragment.stab && !fragment.teraType && fragment.moveType !== 'Normal') {
-									// push to "personal" for some last-pick set filler
-									if (!newMon.randbats.offeredSupport.personal) newMon.randbats.offeredSupport.personal = [];
-									let modFragment = Utils.deepClone(fragment);
-									if (['firstimpression', 'fakeout'].includes(moveid)) {
-										if (!modFragment.avoid) modFragment.avoid = [];
-										modFragment.avoid.push('physicalsetup');
-										modFragment.avoid.push('speedsetup');
-									}
-									if (!modFragment.tags) modFragment.tags = [];
-									if (!move.overrideOffensiveStat && !modFragment.tags.includes(`${(move.category).toLowerCase()}`)) modFragment.tags.push(`${(move.category).toLowerCase()}`);
-									if (fragment.moveAccuracy < 80 || move.multiaccuracy) {
-										modFragment.tags.push('inaccurate');
-										if (!modFragment.buddy) modFragment.buddy = {};
-										if (!modFragment.buddy.roles) modFragment.buddy.roles = [];
-										modFragment.buddy.roles.push('accuracyboost');
-									}
-
-									if ((move.category === 'Physical' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'def')) {
-										if (!modFragment.vgc) modFragment.vgc = {};
-										if (!modFragment.vgc.acceptedSupport) modFragment.vgc.acceptedSupport = [];
-										if (!modFragment.vgc.acceptedSupport.includes('defensereduction')) modFragment.vgc.acceptedSupport.push('defensereduction');
-									}
-									if ((move.category === 'Special' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'spd')) {
-										if (!modFragment.vgc) modFragment.vgc = {};
-										if (!modFragment.vgc.acceptedSupport) modFragment.vgc.acceptedSupport = [];
-										if (!modFragment.vgc.acceptedSupport.includes('spdefreduction')) modFragment.vgc.acceptedSupport.push('spdefreduction');
-									}
-									modFragment.teraType = fragment.moveType;
-
-									// we don't want several of the same type on the same set
-									modFragment.tags.push(`${(modFragment.moveType).toLowerCase()}priority`);
-									if (!modFragment.avoid) modFragment.avoid = [];
-									modFragment.avoid.push(`${(modFragment.moveType).toLowerCase()}priority`);
-									
-									newMon.randbats.offeredSupport.personal.push(modFragment);
-								}
-							}
-							// spread
-							if ((move.target === 'allAdjacentFoes' || moveid === 'expandingforce') && fragment.moveBasePower > 80 && fragment.moveAccuracy >= 90 && moveid !== 'razorwind') {
-								if (!newMon.randbats.offeredSupport.spread) newMon.randbats.offeredSupport.spread = [];
-								let modFragment = Utils.deepClone(fragment);
-								modFragment.score = fragment.moveBasePower;
-									
-								if (!modFragment.tags) modFragment.tags = [];
-								if (!move.overrideOffensiveStat && !modFragment.tags.includes(`${(move.category).toLowerCase()}`)) modFragment.tags.push(`${(move.category).toLowerCase()}`);
-								if (fragment.moveAccuracy < 80 || move.multiaccuracy) {
-									modFragment.tags.push('inaccurate');
-									if (!modFragment.buddy) modFragment.buddy = {};
-									if (!modFragment.buddy.roles) modFragment.buddy.roles = [];
-									modFragment.buddy.roles.push('accuracyboost');
-								}
-
-								if ((move.category === 'Physical' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'def')) {
-									if (!modFragment.vgc) modFragment.vgc = {};
-									if (!modFragment.vgc.acceptedSupport) modFragment.vgc.acceptedSupport = [];
-									if (!modFragment.vgc.acceptedSupport.includes('defensereduction')) modFragment.vgc.acceptedSupport.push('defensereduction');
-								}
-								if ((move.category === 'Special' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'spd')) {
-									if (!modFragment.vgc) modFragment.vgc = {};
-									if (!modFragment.vgc.acceptedSupport) modFragment.vgc.acceptedSupport = [];
-									if (!modFragment.vgc.acceptedSupport.includes('spdefreduction')) modFragment.vgc.acceptedSupport.push('spdefreduction');
-								}
-
-								// we don't want several of the same type on the same set
-								modFragment.tags.push(`${(modFragment.moveType).toLowerCase()}spread`);
-								if (!modFragment.avoid) modFragment.avoid = [];
-								modFragment.avoid.push(`${(modFragment.moveType).toLowerCase()}spread`);
-								
-								newMon.randbats.offeredSupport.spread.push(modFragment);
-							}
-							if (move.target === 'allAdjacent' && !move.selfdestruct && moveid !== 'synchronoise') {
-								let modFragment = Utils.deepClone(fragment);
-								modFragment.score = fragment.moveBasePower;
-								
-								// seems like we're getting a *lot* of options for these on almost every team, so let's limit ourselves to one of these per Pokémon!
-								if (!modFragment.tags) modFragment.tags = [];
-								if (!modFragment.tags.includes('allyspread')) modFragment.tags.push('allyspread');
-								if (!modFragment.avoid) modFragment.avoid = [];
-								if (!modFragment.avoid.includes('allyspread')) modFragment.avoid.push('allyspread');
-								// in testing so far, some sets have been getting *too* excited about ally immunities and filling up with several spread moves like this,
-								// which is bad, because ally synergies are given the highest priority -
-								// if we let them take every possible option for these, they run out of room for important things quickly!
-
-								// we don't want several of the same type on the same set
-								modFragment.tags.push(`${(modFragment.moveType).toLowerCase()}spread`);
-								modFragment.avoid.push(`${(modFragment.moveType).toLowerCase()}spread`);
-								
-								// ones that we can use as a main spread should be strong!
-								if (fragment.moveBasePower > 80 && fragment.moveAccuracy >= 90) {
-									if (!modFragment.tags) modFragment.tags = [];
-									if (!move.overrideOffensiveStat && !modFragment.tags.includes(`${(move.category).toLowerCase()}`)) modFragment.tags.push(`${(move.category).toLowerCase()}`);
-									if (fragment.moveAccuracy < 80 || move.multiaccuracy) {
-										modFragment.tags.push('inaccurate');
-										if (!modFragment.buddy) modFragment.buddy = {};
-										if (!modFragment.buddy.roles) modFragment.buddy.roles = [];
-										modFragment.buddy.roles.push('accuracyboost');
-									}
-
-									modFragment.vgc.requestedSupport.push(`${(fragment.moveType).toLowerCase()}immune`); // ex. "electricimmune"
-									if (!newMon.randbats.offeredSupport.spread) newMon.randbats.offeredSupport.spread = [];
-									newMon.randbats.offeredSupport.spread.push(modFragment);
-								}
-								
-								// but we can drop the BP requirement if it's just to enable ally Abilities, like Lightning Rod
-								// these supports will be called, for example, "sideelectric" or "sideelectricnopara"
-								if (moveid === 'discharge') { // mostly for Cell Battery
-									if (!newMon.randbats.offeredSupport[`side${(fragment.moveType).toLowerCase()}nopara`]) newMon.randbats.offeredSupport[`side${(fragment.moveType).toLowerCase()}nopara`] = [];
-									newMon.randbats.offeredSupport[`side${(fragment.moveType).toLowerCase()}nopara`].push(modFragment);
-								} else {
-									if (!newMon.randbats.offeredSupport[`side${(fragment.moveType).toLowerCase()}`]) newMon.randbats.offeredSupport[`side${(fragment.moveType).toLowerCase()}`] = [];
-									newMon.randbats.offeredSupport[`side${(fragment.moveType).toLowerCase()}`].push(modFragment);
-								}
-							}
-							if ([
-								'tailwind', 'stickyweb', 'silktrap',
-								'cottonspore', 'stringshot', 'scaryface', 'venomdrench',
-								'electroweb', 'icywind', 'glaciate', // Bulldoze will receive special handling elsewhere because it doesn't work for every team
-								'thunderwave', 'nuzzle', 'glare', 'stunspore',
-								'syrupbomb', 'tarshot', 'quash',
-							].includes(moveid) ||
-								 ([
-									 'lowsweep', 'mudshot', 'drumbeating', 'pounce',
-								 ].includes(moveid) && fragment.moveBasePower > 80)
-							) {
-								let modFragment = Utils.deepClone(fragment);
-								if (!modFragment.avoid) modFragment.avoid = [];
-								modFragment.avoid.push('speedcontrol');
-								
-								// if (['cottonspore', 'stringshot', 'scaryface'].includes(moveid)) {
-								// actually, I want to be more charitable here - Cotton Spore and String Shot are really good moves and shouldn't be rejected like this
-								if (['scaryface'].includes(moveid)) {
-									if (!modFragment.tags) modFragment.tags = [];
-									modFragment.tags.push('statusdebuffmove');
-									modFragment.avoid.push('statusdebuffmove');
-								}
-								if (moveid === 'venomdrench') modFragment.vgc.requestedSupport.push('poison');
-								
-								if (modFragment.movePriority > 0) {
-										if (!newMon.randbats.offeredSupport.speedcontrol) newMon.randbats.offeredSupport.speedcontrol = [];
-										newMon.randbats.offeredSupport.speedcontrol.push(modFragment);
-								} else {
-									if (!pickyVgcSupport.speedcontrol) pickyVgcSupport.speedcontrol = [];
-									pickyVgcSupport.speedcontrol.push(modFragment);
-								}
-							}
-							if (moveid === 'trickroom') {
-								let modFragment = Utils.deepClone(fragment);
-								if (!modFragment.tags) modFragment.tags = [];
-								modFragment.tags.push('backuptrickroom');
-								modFragment.tags.push('minspeed');
-								modFragment.singles.requestedSupport.push('backuptrickroom');
-								modFragment.vgc.acceptedSupport.push('backuptrickroom');
-								
-								if (!newMon.randbats.offeredSupport.trickroom) newMon.randbats.offeredSupport.trickroom = [];
-								newMon.randbats.offeredSupport.trickroom.push(modFragment);
-							}
-							if (moveid === 'gravity') {
-								// I think this is getting overused,
-								// so I might want it to request some kind of support that limits its scope to more specific abusers
-								if (!pickyVgcSupport.gravity) pickyVgcSupport.gravity = [];
-								pickyVgcSupport.gravity.push(fragment);
-							}
-							if (['poisongas', 'mortalspin', 'toxicspikes'].includes(moveid)) {
-								let modFragment = Utils.deepClone(fragment);
-								if (moveid === 'poisongas') modFragment.format = 'vgc';
-								if (moveid === 'toxicspikes') modFragment.format = 'singles';
-
-								if (modFragment.movePriority > 0 || moveid === 'mortalspin') {
-									if (!newMon.randbats.offeredSupport.poison) newMon.randbats.offeredSupport.poison = [];
-									newMon.randbats.offeredSupport.poison.push(modFragment);
-								} else {
-									if (!pickyVgcSupport.poison) pickyVgcSupport.poison = [];
-									pickyVgcSupport.poison.push(modFragment);
-								}
-							}
-							if (moveid === 'round') {
-								if (fragment.moveBasePower >= 80) {
-									let modFragment = Utils.deepClone(fragment);
-									modFragment.format = 'vgc';
-									modFragment.vgc.requestedSupport.push('round');
-									if (!newMon.randbats.offeredSupport.round) newMon.randbats.offeredSupport.round = [];
-									newMon.randbats.offeredSupport.round.push(modFragment);
-								}
-								if (fragment.moveBasePower >= 70) {
-									let modFragment = Utils.deepClone(fragment);
-									modFragment.format = 'vgc';
-									if (!pickyVgcSupport.round) pickyVgcSupport.round = [];
-									pickyVgcSupport.round.push(modFragment);
-								}
-							}
-	
-							// some moves cover both physicalreduction and specialreduction at once
-							if (
-								(['auroraveil',
-								'followme', 'ragepowder',
-								'shadowbox', 'partingshot',
-								'nobleroar', 'venomdrench',
-								'grasswhistle', 'hypnosis', 'lovelykiss', 'sing', 'sleeppowder', 'spore', 'yawn'
-							].includes(moveid) && !(fragment.moveAccuracy && fragment.moveAccuracy < 70)) ||
-								(['nobleroar', 'tearfullook'].includes(moveid) && fragment.movePriority > 0)
-							) {
-								let modFragment = Utils.deepClone(fragment);
-								if (['nobleroar'].includes(moveid)) {
-									if (!modFragment.tags) modFragment.tags = [];
-									modFragment.tags.push('statusdebuffmove');
-									if (!modFragment.avoid) modFragment.avoid = [];
-									modFragment.avoid.push('statusdebuffmove');
-								}
-								if (moveid === 'venomdrench') modFragment.vgc.requestedSupport.push('poison');
-								if (modFragment.movePriority > 0) {
-									if (!newMon.randbats.offeredSupport.physicalreduction) newMon.randbats.offeredSupport.physicalreduction = [];
-									newMon.randbats.offeredSupport.physicalreduction.push(modFragment);
-									if (!newMon.randbats.offeredSupport.specialreduction) newMon.randbats.offeredSupport.specialreduction = [];
-									newMon.randbats.offeredSupport.specialreduction.push(modFragment);
-								} else {
-									if (!pickyVgcSupport.physicalreduction) pickyVgcSupport.physicalreduction = [];
-									pickyVgcSupport.physicalreduction.push(modFragment);
-									if (!pickyVgcSupport.specialreduction) pickyVgcSupport.specialreduction = [];
-									pickyVgcSupport.specialreduction.push(modFragment);
-								}
-							}
-							// others are specialized, so you need one of each
-							if (
-								['kingsshield', 'breakingswipe', 'strengthsap'].includes(moveid) ||
-								(['baddybad', 'bittermalice', 'chillingwater', 'lunge', 'tropkick'].includes(moveid) && fragment.moveBasePower > 80) ||
-								(['reflect', 'growl', 'charm', 'tickle', 'featherdance'].includes(moveid) && fragment.movePriority > 0)
-							) {
-								let modFragment = Utils.deepClone(fragment);
-								if (['growl', 'charm', 'tickle', 'featherdance'].includes(moveid)) {
-									if (!modFragment.tags) modFragment.tags = [];
-									modFragment.tags.push('statusdebuffmove');
-									if (!modFragment.avoid) modFragment.avoid = [];
-									modFragment.avoid.push('statusdebuffmove');
-								}
-								if (modFragment.movePriority > 0) {
-									if (!newMon.randbats.offeredSupport.physicalreduction) newMon.randbats.offeredSupport.physicalreduction = [];
-									newMon.randbats.offeredSupport.physicalreduction.push(modFragment);
-								} else {
-									if (!pickyVgcSupport.physicalreduction) pickyVgcSupport.physicalreduction = [];
-									pickyVgcSupport.physicalreduction.push(modFragment);
-								}
-							}
-							if (
-								['snarl', 'strugglebug'].includes(moveid) ||
-								(['glitzyglow', 'mysticalfire'].includes(moveid) && fragment.moveBasePower > 80) ||
-								(['lightscreen', 'eerieumpulse'].includes(moveid) && fragment.movePriority > 0)
-							) {
-								let modFragment = Utils.deepClone(fragment);
-								if (['eerieimpulse'].includes(moveid)) {
-									if (!modFragment.tags) modFragment.tags = [];
-									modFragment.tags.push('statusdebuffmove');
-									if (!modFragment.avoid) modFragment.avoid = [];
-									modFragment.avoid.push('statusdebuffmove');
-								}
-								if (modFragment.movePriority > 0) {
-									if (!newMon.randbats.offeredSupport.specialreduction) newMon.randbats.offeredSupport.specialreduction = [];
-									newMon.randbats.offeredSupport.specialreduction.push(modFragment);
-								} else {
-									if (!pickyVgcSupport.specialreduction) pickyVgcSupport.specialreduction = [];
-									pickyVgcSupport.specialreduction.push(modFragment);
-								}
-							}
-							
-							// somewhat rudimentary handling of protection for VGC
-							if ((move.stallingMove && moveid !== 'endure') || ['fakeout', 'substitute', 'quickguard', 'wideguard'].includes(moveid)) {
-								let modFragment = Utils.deepClone(fragment);
-								
-								modFragment.format = 'vgc'; // forcibly skip these fragments for singles!
-								
-								if (!modFragment.avoid) modFragment.avoid = [];
-								modFragment.avoid.push('protection');
-								modFragment.avoid.push('redirection');
-								
-								if (['fakeout'].includes(moveid)) modFragment.score = 4;
-								else if (!['substitute', 'protect', 'detect'].includes(moveid)) modFragment.score = 3;
-								else if (moveid === 'detect') modFragment.score = 2;
-								else if (moveid === 'protect') modFragment.score = 1;
-								else if (moveid === 'substitute') {
-									modFragment.score = 0; // never use unless its buddy role is checked off
-									if (!modFragment.buddy) modFragment.buddy = {};
-									if (!modFragment.buddy.roles) modFragment.buddy.roles = [];
-									if (newMon.randbats.types.includes('Ghost')) {
-										modFragment.buddy.roles.push('setup');
-									} else {
-										modFragment.buddy.roles.push('physicalsetup'); // it makes sense in my head okay
-									}
-								}
-								// I don't really want these to replace Protect 100% of the time, but it's nice to have a random chance of them for now:
-								else if (['quickguard', 'wideguard'].includes(moveid)) {
-									modFragment.bypassScore = true;
-									modFragment.unique = true;
-								}
-								else modFragment.score = 5; // the unique protection clones are the best
-								
-								if (!newMon.randbats.offeredSupport.protection) newMon.randbats.offeredSupport.protection = [];
-								newMon.randbats.offeredSupport.protection.push(modFragment);
-							}
-	
-							// now we're getting into stuff that not every team will request by default, so I'll also have to establish what teams request them, or just setting them up does nothing!
-							// redirection
-							if (['allyswitch', 'followme', 'ragepowder'].includes(moveid)) {
-								if (!newMon.randbats.offeredSupport.redirection) newMon.randbats.offeredSupport.redirection = [];
-								newMon.randbats.offeredSupport.redirection.push(fragment);
-							}
-							// move disruption
-							if (['taunt', 'torment', 'encore', 'disable', 'skydrop', 'psychicnoise', 'upperhand', 'imprison'].includes(moveid)) {
-								// TODO: these *are not* all interchangeable and should be divided further
-								if (!newMon.randbats.offeredSupport.disruption) newMon.randbats.offeredSupport.disruption = [];
-								newMon.randbats.offeredSupport.disruption.push(fragment);
-							}
-							// anti-Trick Room
-							if ([
-								'taunt', 'encore', 'imprison',
-								'spore', 'sleeppowder',
-								// 'trickroom', // okay, running Trick Room solely as anti-Trick Room feels weird when it happens
-								'roar', 'whirlwind', 'dragontail', 'circlethrow',
-							].includes(moveid)) {
-								let modFragment = Utils.deepClone(fragment);
-								let role = 'antitrickroom';
-								if (moveid === 'imprison') {
-									if (learnset.trickroom && learnset.trickroom.length) modFragment.moves.push('Trick Room');
-									else if (learnset.protect && learnset.protect.length) {
-										modFragment.moves.push('Protect');
-										role = 'antiprotect';
-									} else role = null;
-								}
-								if (role) {
-									if (!newMon.randbats.offeredSupport[role]) newMon.randbats.offeredSupport[role] = [];
-									newMon.randbats.offeredSupport[role].push(modFragment);
-								}
-							}
-							// fixed damage
-							if ([
-								'destinybond', 'counter', 'mirrorcoat', 'metalburst', 'comeuppance', 'endeavor',
-								'superfang', 'naturesmadness', 'ruination'
-							].includes(moveid)) {
-								// TODO: these *are not* all interchangeable and should be divided further
-								if (!newMon.randbats.offeredSupport.fixeddamage) newMon.randbats.offeredSupport.fixeddamage = [];
-								newMon.randbats.offeredSupport.fixeddamage.push(fragment);
-							}
-							// damage support
-							// physical
-							if (
-								[
-									'howl', 'coaching', 'decorate', 'helpinghand',
-									'leer', 'screech', 'obstruct', 'octolock', 'spicyextract', 'tickle',
-									'firelash', 'gravapple', 'thunderouskick'
-								].includes(moveid) ||
-								(['crushclaw', 'razorshell', 'triplearrows'].includes(moveid) && ((!fragment.ability && newMon.randbats.abilities.includes('Serene Grace')) || (fragment.ability && fragment.ability === 'Serene Grace')))
-							) {
-								let modFragment = Utils.deepClone(fragment);
-								if (['leer', 'screech', 'octolock', 'spicyextract', 'tickle'].includes(moveid)) {
-									if (!modFragment.tags) modFragment.tags = [];
-									modFragment.tags.push('statusdebuffmove');
-									if (!modFragment.avoid) modFragment.avoid = [];
-									modFragment.avoid.push('statusdebuffmove');
-								}
-								if ((['crushclaw', 'razorshell', 'triplearrows'].includes(moveid) && !fragment.ability && newMon.randbats.abilities.includes('Serene Grace'))) modFragment.ability = 'Serene Grace';
-								
-								// to be viable, many of these need priority, naturally high Speed, or an Ability that boosts Speed
-								// I have set up a way to generalize that, since it comes up for a lot of other kinds of support
-								if (modFragment.movePriority > 0 || modFragment.baseMove === 'Octolock') {
-										if (!newMon.randbats.offeredSupport.defensereduction) newMon.randbats.offeredSupport.defensereduction = [];
-										newMon.randbats.offeredSupport.defensereduction.push(modFragment);
-								} else {
-									if (!pickyVgcSupport.defensereduction) pickyVgcSupport.defensereduction = [];
-									pickyVgcSupport.defensereduction.push(modFragment);
-								}
-							}
-							// special
-							if (
-								[
-									'decorate', 'helpinghand',
-									'faketears', 'metalsound', 'octolock',
-									'acidspray', 'appleacid', 'luminacrash'
-								].includes(moveid) ||
-								(['lusterpurge', 'seedflare'].includes(moveid) && ((!fragment.ability && newMon.randbats.abilities.includes('Serene Grace')) || (fragment.ability && fragment.ability === 'Serene Grace')))
-							) {
-								let modFragment = Utils.deepClone(fragment);
-								if (['faketears', 'metalsound', 'octolock'].includes(moveid)) {
-									if (!modFragment.tags) modFragment.tags = [];
-									modFragment.tags.push('statusdebuffmove');
-									if (!modFragment.avoid) modFragment.avoid = [];
-									modFragment.avoid.push('statusdebuffmove');
-								}
-								if ((['lusterpurge', 'seedflare'].includes(moveid) && !fragment.ability && newMon.randbats.abilities.includes('Serene Grace'))) modFragment.ability = 'Serene Grace';
-								
-								// to be viable, many of these need priority, naturally high Speed, or an Ability that boosts Speed
-								// I have set up a way to generalize that, since it comes up for a lot of other kinds of support
-								if (modFragment.movePriority > 0 || modFragment.baseMove === 'Octolock') {
-									if (!newMon.randbats.offeredSupport.spdefreduction) newMon.randbats.offeredSupport.spdefreduction = [];
-									newMon.randbats.offeredSupport.spdefreduction.push(modFragment);
-								} else {
-									if (!pickyVgcSupport.spdefreduction) pickyVgcSupport.spdefreduction = [];
-									pickyVgcSupport.spdefreduction.push(modFragment);
-								}
-							}
-							// side healing
-							if (
-								[
-									'healpulse', 'floralhealing', 'pollenpuff',
-									'lifedew', 'junglehealing', 'lunarblessing',
-									'revivalblessing',
-								].includes(moveid)
-							) {
-								if (!newMon.randbats.offeredSupport.sidehealing) newMon.randbats.offeredSupport.sidehealing = [];
-								newMon.randbats.offeredSupport.sidehealing.push(fragment);
-							}
-							// momentum
-							if (
-								[
-									'uturn', 'voltswitch', 'flipturn',
-									'batonpass', 'teleport', 'chillyreception', 'partingshot',
-								].includes(moveid)
-							) {
-								let modFragment = Utils.deepClone(fragment);
-								if (moveid === 'batonpass') modFragment.format = 'vgc'; // banned in singles
-								if (!newMon.randbats.offeredSupport.pivoting) newMon.randbats.offeredSupport.pivoting = [];
-								newMon.randbats.offeredSupport.pivoting.push(modFragment);
-								// TODO: also counts as "personal" with tag "momentum" and probably some buddy fragments
-							}
-							// backup field effect setting
-							if (
-								[
-									'sunnyday', 'raindance', 'sandstorm', 'hail', 'snowscape', 'chillyreception',
-									'electricterrain', 'psychicterrain', 'grassyterrain', 'mistyterrain',
-								].includes(moveid)
-							) {
-								let accept = [];
-								let fieldeffect = moveid;
-								
-								switch (moveid) {
-									// offeredSupport
-									case 'sunnyday':
-										fieldeffect = 'sun';
-										break;
-									case 'raindance':
-										fieldeffect = 'rain';
-										break;
-									case 'sandstorm':
-										fieldeffect = 'sand';
-										break;
-									case 'hail':
-									case 'snowscape':
-									case 'chillyreception':
-										fieldeffect = 'snow';
-										break;
-								}
-
-								// usually, you want the backup setter to provide some other support as well - especially something that would make it a good lead
-								// and there are some other characteristics that can depend on the field effect itself!
-								// so...
-								if (learnset.tailwind && learnset.tailwind.length) {
-									let tailwindFragment = Utils.deepClone(fragment);
-									tailwindFragment.moves.push('Tailwind');
-									if (!tailwindFragment.tags) tailwindFragment.tags = [];
-									tailwindFragment.tags.push('speedcontrol');
-									tailwindFragment.format = 'vgc';
-									accept.push(tailwindFragment);
-								}
-								if (learnset.fakeout && learnset.fakeout.length) {
-									let fakeOutFragment = Utils.deepClone(fragment);
-									fakeOutFragment.moves.push('Fake Out');
-									if (!fakeOutFragment.tags) fakeOutFragment.tags = [];
-									fakeOutFragment.tags.push('fakeout');
-									fakeOutFragment.format = 'vgc';
-									accept.push(fakeOutFragment);
-								}
-								// these ones shouldn't usually have backup setters just because they can
-								if (['sandstorm', 'snow', 'grassyterrain', 'mistyterrain'].includes(fieldeffect)) accept = null;
-								// in theory, I can expand on this list with more specific criteria for each field effect!
-								// but I don't know what I would do with most of them just yet
-
-								if (accept && accept.length) {
-									for (const modFragment of accept) {
-										if (modFragment.movePriority > 0) {
-											if (!newMon.randbats.offeredSupport[`backup${fieldeffect}`]) newMon.randbats.offeredSupport[`backup${fieldeffect}`] = [];
-											newMon.randbats.offeredSupport[`backup${fieldeffect}`].push(modFragment);
-										} else {
-											if (!pickyVgcSupport[`backup${fieldeffect}`]) pickyVgcSupport[`backup${fieldeffect}`] = [];
-											pickyVgcSupport[`backup${fieldeffect}`].push(modFragment);
-										}
-									}
-								}
-							}
-							
-							// setup
-							// Speed-boosting setup
-							if (
-								[
-									'clangoroussoul', 'shellsmash', 'filletaway', 'noretreat', // mixed setup
-									'dragondance', 'shiftgear', 'tidyup', 'victorydance', // physical setup
-									'quiverdance', 'geomancy', // special setup
-	
-									'rapidspin', // "mixed" Speed-boosting attacks
-									'flamecharge', 'aquastep', 'scaleshot', 'trailblaze', // physical Speed-boosting attacks
-									'esperwing', // special Speed-boosting attacks
-								].includes(moveid)
-							) {
-								let modFragment = Utils.deepClone(fragment);
-	
-								if (!modFragment.tags) modFragment.tags = [];
-								modFragment.tags.push('speedsetup');
-								if (['dragondance', 'shiftgear', 'tidyup', 'victorydance'].includes(moveid)) modFragment.tags.push('physicalsetup');
-								if (['quiverdance', 'geomancy'].includes(moveid)) modFragment.tags.push('specialsetup');
-								
-								if (!modFragment.avoid) modFragment.avoid = [];
-								if ([
-									'dragondance', 'shiftgear', 'victorydance',
-									'flamecharge', 'aquastep', 'scaleshot', 'trailblaze',
-								].includes(moveid)) modFragment.avoid.push('special');
-								if ([
-									'quiverdance', 'geomancy',
-									'esperwing',
-								].includes(moveid)) modFragment.avoid.push('physical');
-								modFragment.avoid.push('speedsetup'); // redundant to have more than one of these on the same set
-								
-								if (!modFragment.buddy) modFragment.buddy = {};
-								if (!modFragment.buddy.roles) modFragment.buddy.roles = [];
-								if ([
-									'dragondance', 'shiftgear', 'victorydance',
-									'flamecharge', 'aquastep', 'scaleshot', 'trailblaze',
-								].includes(moveid)) modFragment.buddy.roles.push('physical');
-								if ([
-									'quiverdance', 'geomancy',
-									'esperwing',
-								].includes(moveid)) modFragment.buddy.roles.push('special');
-								if (['flamecharge', 'aquastep', 'scaleshot', 'trailblaze'].includes(moveid)) modFragment.buddy.roles.push('physicalsetup');
-								if (['esperwing'].includes(moveid)) modFragment.buddy.roles.push('specialsetup');
-	
-								modFragment.score = 3; // the ones that count as offensive setup should outcompete other setup moves
-								
-								if (!newMon.randbats.offeredSupport.personal) newMon.randbats.offeredSupport.personal = [];
-								newMon.randbats.offeredSupport.personal.push(modFragment);
-							}
-							// offensive setup
-							if (
-								[
-									'growth', 'workup',
-									'bellydrum', 'bulkup', 'coil', 'curse', 'honeclaws', 'howl', 'poweruppunch', 'swordsdance',
-									'calmmind', 'chargebeam', 'electroshot', 'fierydance', 'meteorbeam', 'mysticalpower', 'nastyplot', 'tailglow', 'takeheart', 'torchsong',
-								].includes(moveid)
-							) {
-								let modFragment = Utils.deepClone(fragment);
-	
-								if (!modFragment.tags) modFragment.tags = [];
-								if (!modFragment.avoid) modFragment.avoid = [];
-								if (!modFragment.buddy) modFragment.buddy = {};
-								if (!modFragment.buddy.roles) modFragment.buddy.roles = [];
-	
-								// hard-coding notes:
-								// Belly Drum should require Sitrus and might want to require a priority move even in singles (?)
-								// Curse doesn't count for Ghost-types but probably has more specific requirements in general
-								// Hone Claws requires Triple Axel or a similar inaccurate move
-								// Work Up should only be for sets that are already mixed
-	
-								// some moves have individual exceptions
-								if (moveid === 'workup') {
-									modFragment.tags.push('physicalsetup');
-									modFragment.tags.push('specialsetup');
-									modFragment.avoid.push('physicalsetup');
-									modFragment.avoid.push('specialsetup');
-									modFragment.buddy.roles.push('physical');
-									modFragment.buddy.roles.push('special');
-								}
-								if (moveid === 'bellydrum') {
-									if (!modFragment.item) modFragment.item = 'Sitrus Berry';
-								}
-								if (moveid === 'growth') {
-									// already requested sun support earlier
-									modFragment.tags.push('physicalsetup');
-									modFragment.tags.push('specialsetup');
-									modFragment.avoid.push('physicalsetup');
-									modFragment.avoid.push('specialsetup');
-								}
-								if (moveid === 'honeclaws') {
-									modFragment.buddy.roles.push('inaccurate');
-									modFragment.tags.push('accuracyboost');
-									modFragment.avoid.push('accuracyboost');
-								}
-								if (moveid === 'coil') {
-									modFragment.tags.push('accuracyboost');
-									modFragment.avoid.push('accuracyboost');
-								}
-								if (
-									[
-										'poweruppunch', 'chargebeam',
-										'honeclaws', 'workup',
-									].includes(moveid)
-								) { // you usually don't really want these if there are other options - unless they're a buddy move for some other reason
-									modFragment.score = -3;
-								} else {
-									// you also don't want these getting picked early, though; it's better if they usually only come up as a buddy move
-									modFragment.score = -1;
-								}
-	
-								// physical setup
-								if (
-									[
-										'bellydrum', 'bulkup', 'coil', 'curse', 'honeclaws', 'howl', 'poweruppunch', 'swordsdance',
-									].includes(moveid)
-								) {
-									modFragment.tags.push('physicalsetup');
-									
-									modFragment.avoid.push('special');
-									modFragment.avoid.push('physicalsetup');
-									modFragment.avoid.push('specialsetup');
-									
-									modFragment.buddy.roles.push('physical');
-								}
-	
-								// special setup
-								if (
-									[
-										'calmmind', 'chargebeam', 'electroshot', 'fierydance', 'meteorbeam', 'mysticalpower', 'nastyplot', 'tailglow', 'takeheart', 'torchsong',
-									].includes(moveid)
-								) {
-									modFragment.tags.push('specialsetup');
-									
-									modFragment.avoid.push('physical');
-									modFragment.avoid.push('physicalsetup');
-									if (moveid !== 'fierydance') modFragment.avoid.push('specialsetup');
-									
-									modFragment.buddy.roles.push('special');
-								}
-	
-								let modFragmentPrioVGC = Utils.deepClone(modFragment);
-								modFragmentPrioVGC.format = 'vgc';
-								modFragmentPrioVGC.buddy.roles.push('priority');
-								let modFragmentSpreadVGC = Utils.deepClone(modFragment);
-								modFragmentSpreadVGC.format = 'vgc';
-								modFragmentSpreadVGC.buddy.roles.push('spread');
-								modFragment.format = 'singles';
-								
-								if (!newMon.randbats.offeredSupport.personal) newMon.randbats.offeredSupport.personal = [];
-								if (moveid === 'howl') {
-									// you don't really need priority or spread to be a good Howl user in VGC, and we don't want to push it to singles at all
-									modFragment.format = 'vgc';
-									newMon.randbats.offeredSupport.personal.push(modFragment);
-								} else if (moveid === 'bellydrum') {
-									modFragment.buddy.roles.push('priority');
-									newMon.randbats.offeredSupport.personal.push(modFragment);
-									newMon.randbats.offeredSupport.personal.push(modFragmentPrioVGC);
-								} else if (moveid === 'curse') {
-									if (!newMon.randbats.types.includes('Ghost')) { // completely ignore the setup version of Curse if you're Ghost-type
-										// normally, singles Pokémon will avoid Curse if they have Bulk Up as an option
-										if (!learnset.bulkup) newMon.randbats.offeredSupport.personal.push(modFragment);
-										// but if you have something else tagged "minspeed" anyway, go for it!
-										let modFragmentCurseSlow = Utils.deepClone(modFragment);
-										modFragmentCurseSlow.buddy.roles.push('minspeed');
-										newMon.randbats.offeredSupport.personal.push(modFragmentCurseSlow);
-										// this is to get it paired with things like Gyro Ball
-	
-										// for VGC, it's not necessarily worse than Bulk Up, so I won't make that check
-										// but there are plenty situations when sets will be labeled minspeed, so it's still good to do that part:
-										modFragmentPrioVGC.buddy.roles.push('minspeed');
-										modFragmentSpreadVGC.buddy.roles.push('minspeed');
-										newMon.randbats.offeredSupport.personal.push(modFragmentPrioVGC);
-										newMon.randbats.offeredSupport.personal.push(modFragmentSpreadVGC);
-									}
-								} else {
-									newMon.randbats.offeredSupport.personal.push(modFragment);
-									newMon.randbats.offeredSupport.personal.push(modFragmentPrioVGC);
-									newMon.randbats.offeredSupport.personal.push(modFragmentSpreadVGC);
-								}
-							}
-						
-						// singles-only:
-							// Knock Off
-							if (fragment.moves.includes('Knock Off')) {
-								if (!newMon.randbats.offeredSupport.knockoff) newMon.randbats.offeredSupport.knockoff = [];
-								newMon.randbats.offeredSupport.knockoff.push(fragment);
-							}
-							// damaging entry hazards - Sticky Web and Toxic Spikes will probably be handled differently
-							if (['ceaselessedge', 'spikes', 'stealthrock', 'stoneaxe'].includes(moveid)) {
-								if (!newMon.randbats.offeredSupport.entryhazard) newMon.randbats.offeredSupport.entryhazard = [];
-								newMon.randbats.offeredSupport.entryhazard.push(fragment);
-							}
-							// hazard control
-							if (['defog', 'mortalspin', 'rapidspin', 'tidyup'].includes(moveid)) {
-								if (!newMon.randbats.offeredSupport.hazardcontrol) newMon.randbats.offeredSupport.hazardcontrol = [];
-								newMon.randbats.offeredSupport.hazardcontrol.push(fragment);
-							}
-						}
-							
-							// Upper Hand and team-supported Grassy Glide need their own cases and were *not* included in priority
-							// Venom Drench is also neat
+					if (!fragment.fragmentPriority) fragment.fragmentPriority = 4;
+					
+					// support requirements before any context
+					if (moveid === 'risingvoltage' && !['Electric Surge', 'Hadron Engine'].includes(fragment.ability)) {
+						fragment.moveBasePower *= 2;
+						fragment.singles.requestedSupport.push('electricterrain');
+						fragment.vgc.requestedSupport.push('electricterrain');
+						// can still work with Ground immunity
+					}
+					if (moveid === 'expandingforce' && !['Mega-Neural', 'Psychic Surge'].includes(fragment.ability)) {
+						fragment.moveBasePower *= 1.5;
+						fragment.singles.requestedSupport.push('psychicterrain');
+						fragment.vgc.requestedSupport.push('psychicterrain');
+						if (!fragment.avoid) fragment.avoid = [];
+						fragment.avoid.push('groundimmune');
+					}
+					if (moveid === 'grassyglide'  && !['Grassy Surge', 'Seed Sower'].includes(fragment.ability)) {
+						fragment.movePriority += 1;
+						fragment.singles.requestedSupport.push('grassyterrain');
+						fragment.vgc.requestedSupport.push('grassyterrain');
+						if (!fragment.avoid) fragment.avoid = [];
+						fragment.avoid.push('groundimmune');
+					}
+					// Misty Explosion doesn't actually want Misty Terrain support
+					if (['solarbeam', 'solarblade', 'growth'].includes(moveid) && !(fragment.ability && ['Desolate Land', 'Drought', 'Mega Sol', 'Orichalcum Pulse'].includes(fragment.ability))) {
+						fragment.singles.requestedSupport.push('sun');
+						fragment.vgc.requestedSupport.push('sun');
+					}
+					if (['synthesis', 'moonlight', 'morningsun'].includes(moveid) && !(fragment.ability && ['Desolate Land', 'Drought', 'Mega Sol', 'Orichalcum Pulse'].includes(fragment.ability))) {
+						fragment.singles.acceptedSupport.push('sun');
+						fragment.vgc.acceptedSupport.push('sun');
+					}
+					if (['electroshot'].includes(moveid) && !(fragment.ability && ['Drizzle', 'Primordial Sea', 'Storm Chaser'].includes(fragment.ability))) {
+						fragment.singles.requestedSupport.push('rain');
+						fragment.vgc.requestedSupport.push('rain');
+					}
+					if (['shoreup'].includes(moveid) && !(fragment.ability && ['Sand Stream'].includes(fragment.ability))) {
+						fragment.singles.acceptedSupport.push('sand');
+						fragment.vgc.acceptedSupport.push('sand');
+					}
+					if (['auroraveil'].includes(moveid) && !(fragment.ability && ['Snow Warning'].includes(fragment.ability))) {
+						fragment.singles.requestedSupport.push('snow');
+						fragment.vgc.requestedSupport.push('snow');
+					}
+					if (['shaveoff'].includes(moveid) && !(fragment.ability && ['Snow Warning'].includes(fragment.ability))) {
+						fragment.singles.acceptedSupport.push('snow');
+						fragment.vgc.acceptedSupport.push('snow');
 					}
 
-					// okay, now the VGC support that was picky about Speed can get sorted properly into offeredSupport
-					for (const offeredSupport in pickyVgcSupport) {
-						for (const fragment of pickyVgcSupport[offeredSupport]) {
-							let supportFragments = [];
-							for (const subfragment of vgcSupportSubfragments) {
-								let modFragment = Utils.deepClone(fragment);
-								let accept = true;
-								if (subfragment.ability) {
-									if (modFragment.ability && modFragment.ability !== subfragment.ability) accept = false;
-									modFragment.ability = subfragment.ability;
-								}
-								if (subfragment.item) {
-									if (modFragment.item && modFragment.item !== subfragment.item) accept = false;
-									modFragment.item = subfragment.item;
-								}
-								if (subfragment.teraType) {
-									if (modFragment.teraType && modFragment.teraType !== subfragment.teraType) accept = false;
-									modFragment.teraType = subfragment.teraType;
-								}
-								if (subfragment.tags) {
-									if (!modFragment.tags) modFragment.tags = [];
-									for (const tag of subfragment.tags) if (!modFragment.tags.includes(tag)) modFragment.tags.push(tag);
-									if (modFragment.avoid) {
-										for (const avoid of modFragment.avoid) if (modFragment.tags.includes(avoid)) accept = false;
-									}
-								}
-								if (subfragment.moves) {
-									if (!modFragment.moves) modFragment.moves = [];
-									for (const move of subfragment.moves) if (!modFragment.moves.includes(move)) modFragment.moves.push(move);
-									if (modFragment.moves.length > 4) accept = false;
-								}
-								if (subfragment.requestedSupport) {
-									if (!modFragment.vgc.requestedSupport) modFragment.vgc.requestedSupport = [];
-									for (const requestedSupport of subfragment.requestedSupport) {
-										if (offeredSupport === requestedSupport) accept = false;
-										if (offeredSupport === `backup${requestedSupport}`) accept = false;
-										// I don't want, for example, the fastest Swift Swim user on the team to be pressured to run Rain Dance simply to support its own Drizzle user
-										// backup rain setters should be things like Pranskter users, not rain abusers!
-										if (!modFragment.vgc.requestedSupport.includes(requestedSupport)) modFragment.vgc.requestedSupport.push(requestedSupport);
-									}
-								}
-								if (subfragment.evs) {
-									if (!modFragment.evs) modFragment.evs = subfragment.evs;
-									if (subfragment.evs.hp > modFragment.evs.hp) modFragment.evs.hp = subfragment.evs.hp;
-									if (subfragment.evs.atk > modFragment.evs.atk) modFragment.evs.atk = subfragment.evs.atk;
-									if (subfragment.evs.def > modFragment.evs.def) modFragment.evs.def = subfragment.evs.def;
-									if (subfragment.evs.spa > modFragment.evs.spa) modFragment.evs.spa = subfragment.evs.spa;
-									if (subfragment.evs.spd > modFragment.evs.spd) modFragment.evs.spd = subfragment.evs.spd;
-									if (subfragment.evs.spe > modFragment.evs.spe) modFragment.evs.spe = subfragment.evs.spe;
-									if (modFragment.evs.hp + modFragment.evs.atk + modFragment.evs.def + modFragment.evs.spa + modFragment.evs.spd + modFragment.evs.spe > 508) accept = false;
-								}
-								if (accept) supportFragments.push(modFragment);
-							}
-							if (supportFragments.length) {
-								if (!newMon.randbats.offeredSupport[offeredSupport]) newMon.randbats.offeredSupport[offeredSupport] = [];
-								for (const supportFragment of supportFragments) newMon.randbats.offeredSupport[offeredSupport].push(supportFragment);
-							}
-						}
-					}
-	
-					// okay I'm gonna have to figure out exactly how an individual fragment's support requests count
-					
-					// I think after I get through the whole movepool, and there's an *entire category* of offeredSupport where *every* fragment is requesting support,
-					// the Pokémon loses that offeredSupport category, and every fragment gets pushed into acceptedSupport instead
-					// (a common example might be Grass-types where Grassy Glide is the only priority they're offering)
-					
-					// but if we have an offeredSupport category where some options are always available while others have requestedSupport,
-					// then the category continues to exist,
-					// and all of the fragments requesting support additionally get pushed to the acceptedSupport for the species to make it more likely to come up
-					// but - obviously - if the support just never comes up during species selection, there are still contingencies in the category
-	
-					// from there, the individual fragments' requestedSupports only need to be checked again during set construction, after the whole team is done
-					// and obviously ones with support available are favored, but ones with requestedSupport missing are completely ignored
-					
-					for (const fragment of newMon.randbats.viableStabs) {
+					// sun
+					if (
+						(fragment.moveType === 'Fire' || fragment.baseMove === 'Hydro Steam') &&
+						!(fragment.ability && ['Desolate Land', 'Drought', 'Mega Sol', 'Orichalcum Pulse'].includes(fragment.ability))
+					) {
 						let modFragment = Utils.deepClone(fragment);
-						modFragment.mainstab = true;
+						modFragment.moveBasePower *= 1.5;
+						modFragment.singles.requestedSupport.push('sun');
+						modFragment.vgc.requestedSupport.push('sun');
+						alternateFragments.push(modFragment);
+					}
+					if (
+						fragment.baseMove === 'Weather Ball' && fragment.moveType === 'Normal'
+					) {
+						let modFragment = Utils.deepClone(fragment);
+						modFragment.moveBasePower *= 3;
+						modFragment.moveType = 'Fire';
+						modFragment.singles.requestedSupport.push('sun');
+						modFragment.vgc.requestedSupport.push('sun');
+						alternateFragments.push(modFragment);
+					}
+
+					// rain
+					if (
+						(fragment.moveType === 'Water') &&
+						!(fragment.ability && ['Drizzle', 'Primordial Sea', 'Storm Chaser'].includes(fragment.ability))
+					) {
+						let modFragment = Utils.deepClone(fragment);
+						modFragment.moveBasePower *= 1.5;
+						modFragment.singles.requestedSupport.push('rain');
+						modFragment.vgc.requestedSupport.push('rain');
+						alternateFragments.push(modFragment);
+					}
+					if (
+						fragment.baseMove === 'Weather Ball' && fragment.moveType === 'Normal'
+					) {
+						let modFragment = Utils.deepClone(fragment);
+						modFragment.moveBasePower *= 3;
+						modFragment.moveType = 'Water';
+						modFragment.singles.requestedSupport.push('rain');
+						modFragment.vgc.requestedSupport.push('rain');
+						alternateFragments.push(modFragment);
+					}
+					if (
+						['Thunder', 'Hurricane', 'Bleakwind Storm', 'Wildbolt Storm', 'Sandsear Storm'].includes(fragment.baseMove) &&
+						!(fragment.ability && ['Drizzle', 'Primordial Sea', 'Storm Chaser'].includes(fragment.ability))
+					) {
+						let modFragment = Utils.deepClone(fragment);
+						modFragment.moveAccuracy = 100;
+						modFragment.singles.requestedSupport.push('rain');
+						modFragment.vgc.requestedSupport.push('rain');
+						alternateFragments.push(modFragment);
+					}
+
+					// sand
+					if (
+						fragment.baseMove === 'Weather Ball' && fragment.moveType === 'Normal'
+					) {
+						let modFragment = Utils.deepClone(fragment);
+						modFragment.moveBasePower *= 2;
+						modFragment.moveType = 'Rock';
+						modFragment.singles.requestedSupport.push('sand');
+						modFragment.vgc.requestedSupport.push('sand');
+						alternateFragments.push(modFragment);
+					}
+
+					// snow
+					if (
+						fragment.baseMove === 'Blizzard' &&
+						!(fragment.ability && ['Snow Warning'].includes(fragment.ability))
+					) {
+						let modFragment = Utils.deepClone(fragment);
+						modFragment.moveAccuracy = 100;
+						modFragment.singles.requestedSupport.push('snow');
+						modFragment.vgc.requestedSupport.push('snow');
+						alternateFragments.push(modFragment);
+					}
+					if (
+						fragment.baseMove === 'Weather Ball' && fragment.moveType === 'Normal'
+					) {
+						let modFragment = Utils.deepClone(fragment);
+						modFragment.moveBasePower *= 2;
+						modFragment.moveType = 'Ice';
+						modFragment.singles.requestedSupport.push('snow');
+						modFragment.vgc.requestedSupport.push('snow');
+						alternateFragments.push(modFragment);
+					}
+
+					// Electric Terrain
+					if (
+						fragment.moveType === 'Electric' && !(fragment.ability && ['Electric Surge', 'Hadron Engine'].includes(fragment.ability))
+					) {
+						let modFragment = Utils.deepClone(fragment);
+						modFragment.moveBasePower *= 1.3;
+						modFragment.singles.requestedSupport.push('electricterrain');
+						modFragment.vgc.requestedSupport.push('electricterrain');
+						if (!modFragment.avoid) modFragment.avoid = [];
+						modFragment.avoid.push('groundimmune');
+						alternateFragments.push(modFragment);
+					}
+					if (
+						['Terrain Pulse', 'Nature Power'].includes(fragment.baseMove) && fragment.moveType === 'Normal'
+					) {
+						let modFragment = Utils.deepClone(fragment);
+						if (fragment.baseMove === 'Terrain Pulse') modFragment.moveBasePower *= 2;
+						if (fragment.baseMove === 'Nature Power') modFragment.moveBasePower *= (9 / 8);
+						modFragment.moveBasePower *= 1.3;
+						modFragment.moveType = 'Electric';
+						modFragment.singles.requestedSupport.push('electricterrain');
+						modFragment.vgc.requestedSupport.push('electricterrain');
+						alternateFragments.push(modFragment);
+					}
+
+					// Grassy Terrain
+					if (
+						fragment.moveType === 'Grass' && !(fragment.ability && ['Grassy Surge', 'Seed Sower'].includes(fragment.ability))
+					) {
+						let modFragment = Utils.deepClone(fragment);
+						modFragment.moveBasePower *= 1.3;
+						modFragment.singles.requestedSupport.push('grassyterrain');
+						modFragment.vgc.requestedSupport.push('grassyterrain');
+						if (!modFragment.avoid) modFragment.avoid = [];
+						modFragment.avoid.push('groundimmune');
+						alternateFragments.push(modFragment);
+					}
+					if (
+						['Terrain Pulse', 'Nature Power'].includes(fragment.baseMove) && fragment.moveType === 'Normal'
+					) {
+						let modFragment = Utils.deepClone(fragment);
+						if (fragment.baseMove === 'Terrain Pulse') modFragment.moveBasePower *= 2;
+						if (fragment.baseMove === 'Nature Power') modFragment.moveBasePower *= (9 / 8);
+						modFragment.moveBasePower *= 1.3;
+						modFragment.moveType = 'Grass';
+						modFragment.singles.requestedSupport.push('grassyterrain');
+						modFragment.vgc.requestedSupport.push('grassyterrain');
+						alternateFragments.push(modFragment);
+					}
+					
+					// Psychic Terrain
+					if (
+						fragment.moveType === 'Psychic' && !(fragment.ability && ['Psychic Surge', 'Mega-Neural'].includes(fragment.ability))
+					) {
+						let modFragment = Utils.deepClone(fragment);
+						modFragment.moveBasePower *= 1.3;
+						modFragment.singles.requestedSupport.push('psychicterrain');
+						modFragment.vgc.requestedSupport.push('psychicterrain');
+						if (!modFragment.avoid) modFragment.avoid = [];
+						modFragment.avoid.push('groundimmune');
+						alternateFragments.push(modFragment);
+					}
+					if (
+						['Terrain Pulse', 'Nature Power'].includes(fragment.baseMove) && fragment.moveType === 'Normal'
+					) {
+						let modFragment = Utils.deepClone(fragment);
+						if (fragment.baseMove === 'Terrain Pulse') modFragment.moveBasePower *= 2;
+						if (fragment.baseMove === 'Nature Power') modFragment.moveBasePower *= (9 / 8);
+						modFragment.moveBasePower *= 1.3;
+						modFragment.moveType = 'Psychic';
+						modFragment.singles.requestedSupport.push('psychicterrain');
+						modFragment.vgc.requestedSupport.push('psychicterrain');
+						alternateFragments.push(modFragment);
+					}
+
+					// Misty Terrain
+					if (
+						['Terrain Pulse', 'Nature Power'].includes(fragment.baseMove) && fragment.moveType === 'Normal'
+					) {
+						let modFragment = Utils.deepClone(fragment);
+						if (fragment.baseMove === 'Terrain Pulse') modFragment.moveBasePower *= 2;
+						if (fragment.baseMove === 'Nature Power') modFragment.moveBasePower *= (95 / 80);
+						modFragment.moveType = 'Fairy';
+						modFragment.singles.requestedSupport.push('mistyterrain');
+						modFragment.vgc.requestedSupport.push('mistyterrain');
+						alternateFragments.push(modFragment);
+					}
+
+					// Gravity
+					if (!move.ohko && fragment.moveAccuracy <= 75 && moveid !== 'Blizzard') {
+						let modFragment = Utils.deepClone(fragment);
+						modFragment.format = 'vgc';
+						modFragment.moveAccuracy *= 5/3;
+						modFragment.vgc.requestedSupport.push('gravity');
+						alternateFragments.push(modFragment);
+					}
+					/*
+					// in theory, Gravity helps with Ground moves, but in practice, ... uhhhh these make way too many teams ask for Gravity sjkdfhg
+					if (fragment.moveType === 'Ground' && fragment.moveBasePower && fragment.baseMove !== 'Thousand Arrows') {
+						fragment.singles.acceptedSupport.push('gravity');
+						fragment.vgc.acceptedSupport.push('gravity');
+					}
+					*/
+
+					// poison
+					if (
+						['Venoshock', 'Barb Barrage', 'Hex', 'Infernal Parade'].includes(fragment.baseMove) &&
+						!(fragment.ability && fragment.ability === 'Technician')
+					) {
+						let modFragment = Utils.deepClone(fragment);
+						if (fragment.tags && (fragment.tags.includes('poison') || (['Hex', 'Infernal Parade'].includes(fragment.baseMove) && fragment.tags.includes('status')))) {
+							modFragment.singles.acceptedSupport.push('poison');
+							modFragment.vgc.acceptedSupport.push('poison');
+						} else {
+							modFragment.moveBasePower *= 2;
+							modFragment.singles.requestedSupport.push('poison');
+							modFragment.vgc.requestedSupport.push('poison');
+						}
+						alternateFragments.push(modFragment);
+					}
+					
+					if (newMon.randbats.types.includes(fragment.moveType) && fragment.moveBasePower) fragment.stab = true;
+					// I usually think in terms of regular base powers,
+					// so it's more intuitive for me to divide for lack of STAB than to multiply for STAB:
+					if (!fragment.stab) fragment.moveBasePower /= 1.5;
+					
+					// interested in accounting for base stats (as modifiers to base power) before continuing
+					// let's say the following steps' base powers are standardized around ~100 base Attack/SpA with 252 EVs
+					// so if the actual stat is more or less than that, the base power should be scaled accoridngly
+					if (newMon.randbats.stage && newMon.randbats.stage === 'LC') {
+						// okay let's say more like base 85 here aksjdfh
+						if (fragment.moveCategory === 'Physical') fragment.moveBasePower *= ((Math.floor((newMon.baseStats.atk*2+94)/20)+5)/18);
+						if (fragment.moveCategory === 'Special') fragment.moveBasePower *= ((Math.floor((newMon.baseStats.spa*2+94)/20)+5)/18);
+					} else {
+						if (fragment.moveCategory === 'Physical') fragment.moveBasePower *= ((newMon.baseStats.atk*2+99)/299);
+						if (fragment.moveCategory === 'Special') fragment.moveBasePower *= ((newMon.baseStats.spa*2+99)/299);
+					}
+				}
+				if (alternateFragments) for (const fragment of alternateFragments) {
+					
+					if (newMon.randbats.types.includes(fragment.moveType) && fragment.moveBasePower) fragment.stab = true;
+					// I usually think in terms of regular base powers,
+					// so it's more intuitive for me to divide for lack of STAB than to multiply for STAB:
+					if (!fragment.stab) fragment.moveBasePower /= 1.5;
+					
+					// interested in accounting for base stats (as modifiers to base power) before continuing
+					// let's say the following steps' base powers are standardized around ~100 base Attack/SpA with 252 EVs
+					// so if the actual stat is more or less than that, the base power should be scaled accoridngly
+					if (newMon.randbats.stage && newMon.randbats.stage === 'LC') {
+						// okay let's say more like base 85 here aksjdfh
+						if (fragment.moveCategory === 'Physical') fragment.moveBasePower *= ((Math.floor((newMon.baseStats.atk*2+94)/20)+5)/18);
+						if (fragment.moveCategory === 'Special') fragment.moveBasePower *= ((Math.floor((newMon.baseStats.spa*2+94)/20)+5)/18);
+					} else {
+						if (fragment.moveCategory === 'Physical') fragment.moveBasePower *= ((newMon.baseStats.atk*2+99)/299);
+						if (fragment.moveCategory === 'Special') fragment.moveBasePower *= ((newMon.baseStats.spa*2+99)/299);
+					}
+					
+					fragments.push(fragment);
+					
+					if (fragment.stab && newMon.randbats.abilities.includes('Adaptability') && !fragment.ability) {
+						let modFragment = Utils.deepClone(fragment);
+						modFragment.moveBasePower *= 4/3;
+						modFragment.ability = 'Adaptability';
+						fragments.push(modFragment);
+					}
+				}
+
+				for (const fragment of fragments) {
+
+				// general / STAB
+					// okay, the STAB categories are obviously way unfinished - I'm gonna come back to this
+					const unsafeStabs = [
+						// This list isn't any kind of penalty!
+						// Any move with over 95% accuracy*, provided it is also *not* on this list, will be considered "drawback-free" for later purposes
+						// That means anything that could be considered to have a drawback at all should be here!
+
+						// some moves with less than 100% accuracy should still be included, in case modifiers make it relevant
+						// (for instance, Compound Eyes doesn't make Head Smash drawback-free, but it does for Stone Edge)
+
+						// some moves, like Electro Shot and Solar Blade, are only considered valid at all if they have the appropriate support -
+						// so they *should* be considered drawback-free if they make it to a point where it matters!
 						
+						// (*some things are over 95 but less than 100 because of modifiers like Compound Eyes or Wide Lens, but I'm choosing for those to count as drawback-free!)
+						
+						'flareblitz', 'ragingfury', 'vcreate', 'armorcannon', 'burnup', 'overheat', 'eruption', 'shelltrap',
+						'wavecrash', 'waterspout',
+						'wildcharge', 'supercellslam', 'doubleshock', 'volttackle', 'thunderclap',
+						'woodhammer', 'petaldance', 'leafstorm',
+						'icehammer',
+						'reversal', 'vitalthrow', 'hammerarm', 'jumpkick', 'axekick', 'closecombat', 'superpower', 'highjumpkick', 'focuspunch',
+						'headlongrush',
+						'skydrop', 'beakblast', 'bravebird', 'dragonascent',
+						'psychoboost',
+						'firstimpression',
+						'headsmash',
+						'phantomforce', 'poltergeist', 'shadowforce',
+						'scaleshot', 'dragontail', 'glaiverush', 'outrage', 'clangingscales', 'dracometeor', 'dragonenergy',
+						'suckerpunch', 'jawlock', 'foulplay', 'hyperspacefury',
+						'hardpress', 'spinout', 'steelroller', 'gigatonhammer', 'makeitrain',
+						'fleurcannon',
+						'crushgrip', 'flail', 'naturalgift', 'fakeout', 'takedown', 'doubleedge', 'headcharge', 'thrash', 'wringout',
+						
+						'renewingring', 'entanglement', 'slimecannon',
+					];
+					const rejectStabs = [
+						// moves that generally shouldn't be treated as a *main* attacking or coverage move at all, regardless of BP
+						// plenty of these can come up later as "personal" picks, though!
+						'inferno', 'blastburn', 'mindblown',
+						'dive', 'hydrocannon',
+						'zapcannon',
+						'chloroblast', 'frenzyplant',
+						'sheercold',
+						'counter', 'seismictoss', 'upperhand', 'dynamicpunch', 'meteorassault', 'finalgambit',
+						'belch',
+						'magnitude', 'fissure', 'dig',
+						'skyattack', // intentionally leaving Bounce and Fly in because they are a main STAB in some cases
+						'mirrorcoat', 'psywave', 'dreameater', 'futuresight', 'synchronoise', 'prismaticlaser',
+						'rockwrecker',
+						'roaroftime', 'eternabeam',
+						'beatup', 'comeuppance', 'ruination', 'fling',
+						'metalburst', 'doomdesire', 'steelbeam',
+						'naturesmadness', 'mistyexplosion',
+						'bide', 'endeavor', 'guillotine', 'horndrill', 'present', 'superfang', 'falseswipe', 'holdback', 'skullbash', 'lastresort', 'gigaimpact', 'selfdestruct', 'explosion', 'sonicboom', 'spitup', 'trumpcard', 'snore', 'razorwind', 'hyperbeam',
+					];
+					if (
+						!rejectStabs.includes(moveid) ||
+						(['dynamicpunch', 'inferno', 'zapcannon'].includes(moveid) && fragment.accuracy && fragment.accuracy === 100) ||
+						(['mindblown', 'chloroblast', 'steelbeam'].includes(moveid) && fragment.ability && fragment.ability === 'Magic Guard')
+					) {
+						// this allows for non-STAB moves if they're as strong as a STAB anyway, but I set the bar a little higher for now
+						// this will sometimes be the case for moves like Shiftry's Double-Edge or Repehk's Weather Ball!
+						// later on, I should be ready to check for how many unique types of "STABs" are covered;
+						// if there are at least 2 types in viableStabs, then the set should try to have viableStabs of any 2 types
+						
+						let modFragment = Utils.deepClone(fragment);
+						if (
+							(!modFragment.moveAccuracy || modFragment.moveAccuracy > 95) &&
+							(!unsafeStabs.includes(moveid) ||
+							 (['flareblitz', 'wavecrash', 'wildcharge', 'volttackle', 'woodhammer', 'headsmash', 'takedown', 'doubleedge', 'headcharge'].includes(moveid) && fragment.ability && ['Rock Head', 'Magic Guard'].includes(fragment.ability)) ||
+							 (['mindblown', 'chloroblast', 'supercellslam', 'jumpkick', 'highjumpkick', 'steelbeam'].includes(moveid) && fragment.ability && ['Magic Guard'].includes(fragment.ability)) ||
+							 (['vcreate', 'armorcannon', 'overheat', 'leafstorm', 'icehammer', 'hammerarm', 'axekick', 'closecombat', 'superpower', 'headlongrush', 'dragonascent', 'psychoboost', 'clangingscales', 'dracometeor', 'hyperspacefury', 'spinout', 'makeitrain', 'fleurcannon'].includes(moveid) && fragment.ability && ['Contrary'].includes(fragment.ability))
+							)
+						) {
+							modFragment.singles.safeStab = true;
+							if (move.target !== 'allAdjacent') modFragment.vgc.safeStab = true;
+							modFragment.weight = 2;
+						}
+						if (!fragment.stab && !fragment.teraType) modFragment.teraType = fragment.moveType;
+						if (!modFragment.tags) modFragment.tags = [];
+						if (!move.overrideOffensiveStat && !modFragment.tags.includes(`${(move.category).toLowerCase()}`)) modFragment.tags.push(`${(move.category).toLowerCase()}`);
+						if (fragment.moveAccuracy < 80 || move.multiaccuracy) {
+							modFragment.tags.push('inaccurate');
+							if (!modFragment.buddy) modFragment.buddy = {};
+							if (!modFragment.buddy.roles) modFragment.buddy.roles = [];
+							modFragment.buddy.roles.push('accuracyboost');
+						}
+						if (fragment.moveAccuracy <= 75) modFragment.score = -1; // this gets bypassed if something like Hone Claws or Coil is rolled
+						if (
+							(fragment.stab && fragment.moveBasePower >= 80) ||
+							(fragment.moveType !== 'Normal' && fragment.moveBasePower >= 90) ||
+							fragment.moveBasePower >= 120
+						) {
+							newMon.randbats.viableStabs.push(modFragment);
+							// stop giving random things Double-Edge!! I know it has good BP :sob:
+							// (the >= 120 preserves *really* strong cases like non-STAB Punk Rock Boomburst, but otherwise, it has to at least be a coverage type if it's not STAB)
+						}
+						if (fragment.moveBasePower >= 120 && !fragment.item) {
+							let modFragment2 = Utils.deepClone(modFragment);
+							// this will be a good threshold for choice item sets... I think
+							if (!newMon.randbats.offeredSupport.choicebreaker) newMon.randbats.offeredSupport.choicebreaker = [];
+							modFragment2.item = (fragment.moveCategory === 'Physical' ? 'Choice Band' : 'Choice Specs');
+							if (!modFragment2.avoid) modFragment2.avoid = [];
+							modFragment2.avoid.push('speedsetup');
+							newMon.randbats.offeredSupport.choicebreaker.push(modFragment2);
+						}
+					}
+					
+				// VGC:
+					// Fake Out
+					if (fragment.moves.includes('Fake Out') || fragment.moves.includes('Mat Block')) {
+						if (!newMon.randbats.offeredSupport.fakeout) newMon.randbats.offeredSupport.fakeout = [];
+						newMon.randbats.offeredSupport.fakeout.push(fragment);
+					}
+					// priority
+					if (fragment.movePriority > 0 && !['upperhand', 'feint'].includes(moveid)) {
+						// those two are cool and all, but they do *not* count as being a team's priority user jsdfngh
+						if (fragment.moveBasePower > 40 || ['assist', 'copycat', 'mefirst', 'metronome', 'mirrormove', 'naturepower'].includes(moveid)) {
+							if (!newMon.randbats.offeredSupport.priority) newMon.randbats.offeredSupport.priority = [];
+							// this was initially a sample to test the score feature, but I think it's a good idea to keep it this way:
+							// if you have multiple candidates for priority users, the strongest one is picked first
+							let modFragment = Utils.deepClone(fragment);
+							if (['firstimpression', 'fakeout'].includes(moveid)) {
+								if (!modFragment.avoid) modFragment.avoid = [];
+								modFragment.avoid.push('physicalsetup');
+								modFragment.avoid.push('speedsetup');
+							}
+							modFragment.score = fragment.moveBasePower;
+							
+							if (!modFragment.tags) modFragment.tags = [];
+							if (!move.overrideOffensiveStat && !modFragment.tags.includes(`${(move.category).toLowerCase()}`)) modFragment.tags.push(`${(move.category).toLowerCase()}`);
+							if (fragment.moveAccuracy < 80 || move.multiaccuracy) {
+								modFragment.tags.push('inaccurate');
+								if (!modFragment.buddy) modFragment.buddy = {};
+								if (!modFragment.buddy.roles) modFragment.buddy.roles = [];
+								modFragment.buddy.roles.push('accuracyboost');
+							}
+
+							if ((move.category === 'Physical' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'def')) {
+								if (!modFragment.vgc) modFragment.vgc = {};
+								if (!modFragment.vgc.acceptedSupport) modFragment.vgc.acceptedSupport = [];
+								if (!modFragment.vgc.acceptedSupport.includes('defensereduction')) modFragment.vgc.acceptedSupport.push('defensereduction');
+							}
+							if ((move.category === 'Special' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'spd')) {
+								if (!modFragment.vgc) modFragment.vgc = {};
+								if (!modFragment.vgc.acceptedSupport) modFragment.vgc.acceptedSupport = [];
+								if (!modFragment.vgc.acceptedSupport.includes('spdefreduction')) modFragment.vgc.acceptedSupport.push('spdefreduction');
+							}
+
+							// we don't want several of the same type on the same set
+							modFragment.tags.push(`${(modFragment.moveType).toLowerCase()}priority`);
+							if (!modFragment.avoid) modFragment.avoid = [];
+							modFragment.avoid.push(`${(modFragment.moveType).toLowerCase()}priority`);
+							
+							newMon.randbats.offeredSupport.priority.push(modFragment);
+						} else if (fragment.moveBasePower && (fragment.moveBasePower *1.5 > 40) && !fragment.stab && !fragment.teraType && fragment.moveType !== 'Normal') {
+							// push to "personal" for some last-pick set filler
+							if (!newMon.randbats.offeredSupport.personal) newMon.randbats.offeredSupport.personal = [];
+							let modFragment = Utils.deepClone(fragment);
+							if (['firstimpression', 'fakeout'].includes(moveid)) {
+								if (!modFragment.avoid) modFragment.avoid = [];
+								modFragment.avoid.push('physicalsetup');
+								modFragment.avoid.push('speedsetup');
+							}
+							if (!modFragment.tags) modFragment.tags = [];
+							if (!move.overrideOffensiveStat && !modFragment.tags.includes(`${(move.category).toLowerCase()}`)) modFragment.tags.push(`${(move.category).toLowerCase()}`);
+							if (fragment.moveAccuracy < 80 || move.multiaccuracy) {
+								modFragment.tags.push('inaccurate');
+								if (!modFragment.buddy) modFragment.buddy = {};
+								if (!modFragment.buddy.roles) modFragment.buddy.roles = [];
+								modFragment.buddy.roles.push('accuracyboost');
+							}
+
+							if ((move.category === 'Physical' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'def')) {
+								if (!modFragment.vgc) modFragment.vgc = {};
+								if (!modFragment.vgc.acceptedSupport) modFragment.vgc.acceptedSupport = [];
+								if (!modFragment.vgc.acceptedSupport.includes('defensereduction')) modFragment.vgc.acceptedSupport.push('defensereduction');
+							}
+							if ((move.category === 'Special' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'spd')) {
+								if (!modFragment.vgc) modFragment.vgc = {};
+								if (!modFragment.vgc.acceptedSupport) modFragment.vgc.acceptedSupport = [];
+								if (!modFragment.vgc.acceptedSupport.includes('spdefreduction')) modFragment.vgc.acceptedSupport.push('spdefreduction');
+							}
+							modFragment.teraType = fragment.moveType;
+
+							// we don't want several of the same type on the same set
+							modFragment.tags.push(`${(modFragment.moveType).toLowerCase()}priority`);
+							if (!modFragment.avoid) modFragment.avoid = [];
+							modFragment.avoid.push(`${(modFragment.moveType).toLowerCase()}priority`);
+							
+							newMon.randbats.offeredSupport.personal.push(modFragment);
+						}
+					}
+					// spread
+					if ((move.target === 'allAdjacentFoes' || moveid === 'expandingforce') && fragment.moveBasePower > 80 && fragment.moveAccuracy >= 90 && moveid !== 'razorwind') {
+						if (!newMon.randbats.offeredSupport.spread) newMon.randbats.offeredSupport.spread = [];
+						let modFragment = Utils.deepClone(fragment);
+						modFragment.score = fragment.moveBasePower;
+							
+						if (!modFragment.tags) modFragment.tags = [];
+						if (!move.overrideOffensiveStat && !modFragment.tags.includes(`${(move.category).toLowerCase()}`)) modFragment.tags.push(`${(move.category).toLowerCase()}`);
+						if (fragment.moveAccuracy < 80 || move.multiaccuracy) {
+							modFragment.tags.push('inaccurate');
+							if (!modFragment.buddy) modFragment.buddy = {};
+							if (!modFragment.buddy.roles) modFragment.buddy.roles = [];
+							modFragment.buddy.roles.push('accuracyboost');
+						}
+
+						if ((move.category === 'Physical' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'def')) {
+							if (!modFragment.vgc) modFragment.vgc = {};
+							if (!modFragment.vgc.acceptedSupport) modFragment.vgc.acceptedSupport = [];
+							if (!modFragment.vgc.acceptedSupport.includes('defensereduction')) modFragment.vgc.acceptedSupport.push('defensereduction');
+						}
+						if ((move.category === 'Special' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'spd')) {
+							if (!modFragment.vgc) modFragment.vgc = {};
+							if (!modFragment.vgc.acceptedSupport) modFragment.vgc.acceptedSupport = [];
+							if (!modFragment.vgc.acceptedSupport.includes('spdefreduction')) modFragment.vgc.acceptedSupport.push('spdefreduction');
+						}
+
+						// we don't want several of the same type on the same set
+						modFragment.tags.push(`${(modFragment.moveType).toLowerCase()}spread`);
+						if (!modFragment.avoid) modFragment.avoid = [];
+						modFragment.avoid.push(`${(modFragment.moveType).toLowerCase()}spread`);
+						
+						newMon.randbats.offeredSupport.spread.push(modFragment);
+					}
+					if (move.target === 'allAdjacent' && !move.selfdestruct && moveid !== 'synchronoise') {
+						let modFragment = Utils.deepClone(fragment);
+						modFragment.score = fragment.moveBasePower;
+						
+						// seems like we're getting a *lot* of options for these on almost every team, so let's limit ourselves to one of these per Pokémon!
+						if (!modFragment.tags) modFragment.tags = [];
+						if (!modFragment.tags.includes('allyspread')) modFragment.tags.push('allyspread');
+						if (!modFragment.avoid) modFragment.avoid = [];
+						if (!modFragment.avoid.includes('allyspread')) modFragment.avoid.push('allyspread');
+						// in testing so far, some sets have been getting *too* excited about ally immunities and filling up with several spread moves like this,
+						// which is bad, because ally synergies are given the highest priority -
+						// if we let them take every possible option for these, they run out of room for important things quickly!
+
+						// we don't want several of the same type on the same set
+						modFragment.tags.push(`${(modFragment.moveType).toLowerCase()}spread`);
+						modFragment.avoid.push(`${(modFragment.moveType).toLowerCase()}spread`);
+						
+						// ones that we can use as a main spread should be strong!
+						if (fragment.moveBasePower > 80 && fragment.moveAccuracy >= 90) {
+							if (!modFragment.tags) modFragment.tags = [];
+							if (!move.overrideOffensiveStat && !modFragment.tags.includes(`${(move.category).toLowerCase()}`)) modFragment.tags.push(`${(move.category).toLowerCase()}`);
+							if (fragment.moveAccuracy < 80 || move.multiaccuracy) {
+								modFragment.tags.push('inaccurate');
+								if (!modFragment.buddy) modFragment.buddy = {};
+								if (!modFragment.buddy.roles) modFragment.buddy.roles = [];
+								modFragment.buddy.roles.push('accuracyboost');
+							}
+
+							modFragment.vgc.requestedSupport.push(`${(fragment.moveType).toLowerCase()}immune`); // ex. "electricimmune"
+							if (!newMon.randbats.offeredSupport.spread) newMon.randbats.offeredSupport.spread = [];
+							newMon.randbats.offeredSupport.spread.push(modFragment);
+						}
+						
+						// but we can drop the BP requirement if it's just to enable ally Abilities, like Lightning Rod
+						// these supports will be called, for example, "sideelectric" or "sideelectricnopara"
+						if (moveid === 'discharge') { // mostly for Cell Battery
+							if (!newMon.randbats.offeredSupport[`side${(fragment.moveType).toLowerCase()}nopara`]) newMon.randbats.offeredSupport[`side${(fragment.moveType).toLowerCase()}nopara`] = [];
+							newMon.randbats.offeredSupport[`side${(fragment.moveType).toLowerCase()}nopara`].push(modFragment);
+						} else {
+							if (!newMon.randbats.offeredSupport[`side${(fragment.moveType).toLowerCase()}`]) newMon.randbats.offeredSupport[`side${(fragment.moveType).toLowerCase()}`] = [];
+							newMon.randbats.offeredSupport[`side${(fragment.moveType).toLowerCase()}`].push(modFragment);
+						}
+					}
+					if ([
+						'tailwind', 'stickyweb', 'silktrap',
+						'cottonspore', 'stringshot', 'scaryface', 'venomdrench',
+						'electroweb', 'icywind', 'glaciate', // Bulldoze will receive special handling elsewhere because it doesn't work for every team
+						'thunderwave', 'nuzzle', 'glare', 'stunspore',
+						'syrupbomb', 'tarshot', 'quash',
+					].includes(moveid) ||
+						 ([
+							 'lowsweep', 'mudshot', 'drumbeating', 'pounce',
+						 ].includes(moveid) && fragment.moveBasePower > 80)
+					) {
+						let modFragment = Utils.deepClone(fragment);
+						if (!modFragment.avoid) modFragment.avoid = [];
+						modFragment.avoid.push('speedcontrol');
+						
+						// if (['cottonspore', 'stringshot', 'scaryface'].includes(moveid)) {
+						// actually, I want to be more charitable here - Cotton Spore and String Shot are really good moves and shouldn't be rejected like this
+						if (['scaryface'].includes(moveid)) {
+							if (!modFragment.tags) modFragment.tags = [];
+							modFragment.tags.push('statusdebuffmove');
+							modFragment.avoid.push('statusdebuffmove');
+						}
+						if (moveid === 'venomdrench') modFragment.vgc.requestedSupport.push('poison');
+						
+						if (modFragment.movePriority > 0) {
+								if (!newMon.randbats.offeredSupport.speedcontrol) newMon.randbats.offeredSupport.speedcontrol = [];
+								newMon.randbats.offeredSupport.speedcontrol.push(modFragment);
+						} else {
+							if (!pickyVgcSupport.speedcontrol) pickyVgcSupport.speedcontrol = [];
+							pickyVgcSupport.speedcontrol.push(modFragment);
+						}
+					}
+					if (moveid === 'trickroom') {
+						let modFragment = Utils.deepClone(fragment);
+						if (!modFragment.tags) modFragment.tags = [];
+						modFragment.tags.push('backuptrickroom');
+						modFragment.tags.push('minspeed');
+						modFragment.singles.requestedSupport.push('backuptrickroom');
+						modFragment.vgc.acceptedSupport.push('backuptrickroom');
+						
+						if (!newMon.randbats.offeredSupport.trickroom) newMon.randbats.offeredSupport.trickroom = [];
+						newMon.randbats.offeredSupport.trickroom.push(modFragment);
+					}
+					if (moveid === 'gravity') {
+						// I think this is getting overused,
+						// so I might want it to request some kind of support that limits its scope to more specific abusers
+						if (!pickyVgcSupport.gravity) pickyVgcSupport.gravity = [];
+						pickyVgcSupport.gravity.push(fragment);
+					}
+					if (['poisongas', 'mortalspin', 'toxicspikes'].includes(moveid)) {
+						let modFragment = Utils.deepClone(fragment);
+						if (moveid === 'poisongas') modFragment.format = 'vgc';
+						if (moveid === 'toxicspikes') modFragment.format = 'singles';
+
+						if (modFragment.movePriority > 0 || moveid === 'mortalspin') {
+							if (!newMon.randbats.offeredSupport.poison) newMon.randbats.offeredSupport.poison = [];
+							newMon.randbats.offeredSupport.poison.push(modFragment);
+						} else {
+							if (!pickyVgcSupport.poison) pickyVgcSupport.poison = [];
+							pickyVgcSupport.poison.push(modFragment);
+						}
+					}
+					if (moveid === 'round') {
+						if (fragment.moveBasePower >= 80) {
+							let modFragment = Utils.deepClone(fragment);
+							modFragment.format = 'vgc';
+							modFragment.vgc.requestedSupport.push('round');
+							if (!newMon.randbats.offeredSupport.round) newMon.randbats.offeredSupport.round = [];
+							newMon.randbats.offeredSupport.round.push(modFragment);
+						}
+						if (fragment.moveBasePower >= 70) {
+							let modFragment = Utils.deepClone(fragment);
+							modFragment.format = 'vgc';
+							if (!pickyVgcSupport.round) pickyVgcSupport.round = [];
+							pickyVgcSupport.round.push(modFragment);
+						}
+					}
+
+					// some moves cover both physicalreduction and specialreduction at once
+					if (
+						(['auroraveil',
+						'followme', 'ragepowder',
+						'shadowbox', 'partingshot',
+						'nobleroar', 'venomdrench',
+						'grasswhistle', 'hypnosis', 'lovelykiss', 'sing', 'sleeppowder', 'spore', 'yawn'
+					].includes(moveid) && !(fragment.moveAccuracy && fragment.moveAccuracy < 70)) ||
+						(['nobleroar', 'tearfullook'].includes(moveid) && fragment.movePriority > 0)
+					) {
+						let modFragment = Utils.deepClone(fragment);
+						if (['nobleroar'].includes(moveid)) {
+							if (!modFragment.tags) modFragment.tags = [];
+							modFragment.tags.push('statusdebuffmove');
+							if (!modFragment.avoid) modFragment.avoid = [];
+							modFragment.avoid.push('statusdebuffmove');
+						}
+						if (moveid === 'venomdrench') modFragment.vgc.requestedSupport.push('poison');
+						if (modFragment.movePriority > 0) {
+							if (!newMon.randbats.offeredSupport.physicalreduction) newMon.randbats.offeredSupport.physicalreduction = [];
+							newMon.randbats.offeredSupport.physicalreduction.push(modFragment);
+							if (!newMon.randbats.offeredSupport.specialreduction) newMon.randbats.offeredSupport.specialreduction = [];
+							newMon.randbats.offeredSupport.specialreduction.push(modFragment);
+						} else {
+							if (!pickyVgcSupport.physicalreduction) pickyVgcSupport.physicalreduction = [];
+							pickyVgcSupport.physicalreduction.push(modFragment);
+							if (!pickyVgcSupport.specialreduction) pickyVgcSupport.specialreduction = [];
+							pickyVgcSupport.specialreduction.push(modFragment);
+						}
+					}
+					// others are specialized, so you need one of each
+					if (
+						['kingsshield', 'breakingswipe', 'strengthsap'].includes(moveid) ||
+						(['baddybad', 'bittermalice', 'chillingwater', 'lunge', 'tropkick'].includes(moveid) && fragment.moveBasePower > 80) ||
+						(['reflect', 'growl', 'charm', 'tickle', 'featherdance'].includes(moveid) && fragment.movePriority > 0)
+					) {
+						let modFragment = Utils.deepClone(fragment);
+						if (['growl', 'charm', 'tickle', 'featherdance'].includes(moveid)) {
+							if (!modFragment.tags) modFragment.tags = [];
+							modFragment.tags.push('statusdebuffmove');
+							if (!modFragment.avoid) modFragment.avoid = [];
+							modFragment.avoid.push('statusdebuffmove');
+						}
+						if (modFragment.movePriority > 0) {
+							if (!newMon.randbats.offeredSupport.physicalreduction) newMon.randbats.offeredSupport.physicalreduction = [];
+							newMon.randbats.offeredSupport.physicalreduction.push(modFragment);
+						} else {
+							if (!pickyVgcSupport.physicalreduction) pickyVgcSupport.physicalreduction = [];
+							pickyVgcSupport.physicalreduction.push(modFragment);
+						}
+					}
+					if (
+						['snarl', 'strugglebug'].includes(moveid) ||
+						(['glitzyglow', 'mysticalfire'].includes(moveid) && fragment.moveBasePower > 80) ||
+						(['lightscreen', 'eerieumpulse'].includes(moveid) && fragment.movePriority > 0)
+					) {
+						let modFragment = Utils.deepClone(fragment);
+						if (['eerieimpulse'].includes(moveid)) {
+							if (!modFragment.tags) modFragment.tags = [];
+							modFragment.tags.push('statusdebuffmove');
+							if (!modFragment.avoid) modFragment.avoid = [];
+							modFragment.avoid.push('statusdebuffmove');
+						}
+						if (modFragment.movePriority > 0) {
+							if (!newMon.randbats.offeredSupport.specialreduction) newMon.randbats.offeredSupport.specialreduction = [];
+							newMon.randbats.offeredSupport.specialreduction.push(modFragment);
+						} else {
+							if (!pickyVgcSupport.specialreduction) pickyVgcSupport.specialreduction = [];
+							pickyVgcSupport.specialreduction.push(modFragment);
+						}
+					}
+					
+					// somewhat rudimentary handling of protection for VGC
+					if ((move.stallingMove && moveid !== 'endure') || ['fakeout', 'substitute', 'quickguard', 'wideguard'].includes(moveid)) {
+						let modFragment = Utils.deepClone(fragment);
+						
+						modFragment.format = 'vgc'; // forcibly skip these fragments for singles!
+						
+						if (!modFragment.avoid) modFragment.avoid = [];
+						modFragment.avoid.push('protection');
+						modFragment.avoid.push('redirection');
+						
+						if (['fakeout'].includes(moveid)) modFragment.score = 4;
+						else if (!['substitute', 'protect', 'detect'].includes(moveid)) modFragment.score = 3;
+						else if (moveid === 'detect') modFragment.score = 2;
+						else if (moveid === 'protect') modFragment.score = 1;
+						else if (moveid === 'substitute') {
+							modFragment.score = 0; // never use unless its buddy role is checked off
+							if (!modFragment.buddy) modFragment.buddy = {};
+							if (!modFragment.buddy.roles) modFragment.buddy.roles = [];
+							if (newMon.randbats.types.includes('Ghost')) {
+								modFragment.buddy.roles.push('setup');
+							} else {
+								modFragment.buddy.roles.push('physicalsetup'); // it makes sense in my head okay
+							}
+						}
+						// I don't really want these to replace Protect 100% of the time, but it's nice to have a random chance of them for now:
+						else if (['quickguard', 'wideguard'].includes(moveid)) {
+							modFragment.bypassScore = true;
+							modFragment.unique = true;
+						}
+						else modFragment.score = 5; // the unique protection clones are the best
+						
+						if (!newMon.randbats.offeredSupport.protection) newMon.randbats.offeredSupport.protection = [];
+						newMon.randbats.offeredSupport.protection.push(modFragment);
+					}
+
+					// now we're getting into stuff that not every team will request by default, so I'll also have to establish what teams request them, or just setting them up does nothing!
+					// redirection
+					if (['allyswitch', 'followme', 'ragepowder'].includes(moveid)) {
+						if (!newMon.randbats.offeredSupport.redirection) newMon.randbats.offeredSupport.redirection = [];
+						newMon.randbats.offeredSupport.redirection.push(fragment);
+					}
+					// move disruption
+					if (['taunt', 'torment', 'encore', 'disable', 'skydrop', 'psychicnoise', 'upperhand', 'imprison'].includes(moveid)) {
+						// TODO: these *are not* all interchangeable and should be divided further
+						if (!newMon.randbats.offeredSupport.disruption) newMon.randbats.offeredSupport.disruption = [];
+						newMon.randbats.offeredSupport.disruption.push(fragment);
+					}
+					// anti-Trick Room
+					if ([
+						'taunt', 'encore', 'imprison',
+						'spore', 'sleeppowder',
+						// 'trickroom', // okay, running Trick Room solely as anti-Trick Room feels weird when it happens
+						'roar', 'whirlwind', 'dragontail', 'circlethrow',
+					].includes(moveid)) {
+						let modFragment = Utils.deepClone(fragment);
+						let role = 'antitrickroom';
+						if (moveid === 'imprison') {
+							if (learnset.trickroom && learnset.trickroom.length) modFragment.moves.push('Trick Room');
+							else if (learnset.protect && learnset.protect.length) {
+								modFragment.moves.push('Protect');
+								role = 'antiprotect';
+							} else role = null;
+						}
+						if (role) {
+							if (!newMon.randbats.offeredSupport[role]) newMon.randbats.offeredSupport[role] = [];
+							newMon.randbats.offeredSupport[role].push(modFragment);
+						}
+					}
+					// fixed damage
+					if ([
+						'destinybond', 'counter', 'mirrorcoat', 'metalburst', 'comeuppance', 'endeavor',
+						'superfang', 'naturesmadness', 'ruination'
+					].includes(moveid)) {
+						// TODO: these *are not* all interchangeable and should be divided further
+						if (!newMon.randbats.offeredSupport.fixeddamage) newMon.randbats.offeredSupport.fixeddamage = [];
+						newMon.randbats.offeredSupport.fixeddamage.push(fragment);
+					}
+					// damage support
+					// physical
+					if (
+						[
+							'howl', 'coaching', 'decorate', 'helpinghand',
+							'leer', 'screech', 'obstruct', 'octolock', 'spicyextract', 'tickle',
+							'firelash', 'gravapple', 'thunderouskick'
+						].includes(moveid) ||
+						(['crushclaw', 'razorshell', 'triplearrows'].includes(moveid) && ((!fragment.ability && newMon.randbats.abilities.includes('Serene Grace')) || (fragment.ability && fragment.ability === 'Serene Grace')))
+					) {
+						let modFragment = Utils.deepClone(fragment);
+						if (['leer', 'screech', 'octolock', 'spicyextract', 'tickle'].includes(moveid)) {
+							if (!modFragment.tags) modFragment.tags = [];
+							modFragment.tags.push('statusdebuffmove');
+							if (!modFragment.avoid) modFragment.avoid = [];
+							modFragment.avoid.push('statusdebuffmove');
+						}
+						if ((['crushclaw', 'razorshell', 'triplearrows'].includes(moveid) && !fragment.ability && newMon.randbats.abilities.includes('Serene Grace'))) modFragment.ability = 'Serene Grace';
+						
+						// to be viable, many of these need priority, naturally high Speed, or an Ability that boosts Speed
+						// I have set up a way to generalize that, since it comes up for a lot of other kinds of support
+						if (modFragment.movePriority > 0 || modFragment.baseMove === 'Octolock') {
+								if (!newMon.randbats.offeredSupport.defensereduction) newMon.randbats.offeredSupport.defensereduction = [];
+								newMon.randbats.offeredSupport.defensereduction.push(modFragment);
+						} else {
+							if (!pickyVgcSupport.defensereduction) pickyVgcSupport.defensereduction = [];
+							pickyVgcSupport.defensereduction.push(modFragment);
+						}
+					}
+					// special
+					if (
+						[
+							'decorate', 'helpinghand',
+							'faketears', 'metalsound', 'octolock',
+							'acidspray', 'appleacid', 'luminacrash'
+						].includes(moveid) ||
+						(['lusterpurge', 'seedflare'].includes(moveid) && ((!fragment.ability && newMon.randbats.abilities.includes('Serene Grace')) || (fragment.ability && fragment.ability === 'Serene Grace')))
+					) {
+						let modFragment = Utils.deepClone(fragment);
+						if (['faketears', 'metalsound', 'octolock'].includes(moveid)) {
+							if (!modFragment.tags) modFragment.tags = [];
+							modFragment.tags.push('statusdebuffmove');
+							if (!modFragment.avoid) modFragment.avoid = [];
+							modFragment.avoid.push('statusdebuffmove');
+						}
+						if ((['lusterpurge', 'seedflare'].includes(moveid) && !fragment.ability && newMon.randbats.abilities.includes('Serene Grace'))) modFragment.ability = 'Serene Grace';
+						
+						// to be viable, many of these need priority, naturally high Speed, or an Ability that boosts Speed
+						// I have set up a way to generalize that, since it comes up for a lot of other kinds of support
+						if (modFragment.movePriority > 0 || modFragment.baseMove === 'Octolock') {
+							if (!newMon.randbats.offeredSupport.spdefreduction) newMon.randbats.offeredSupport.spdefreduction = [];
+							newMon.randbats.offeredSupport.spdefreduction.push(modFragment);
+						} else {
+							if (!pickyVgcSupport.spdefreduction) pickyVgcSupport.spdefreduction = [];
+							pickyVgcSupport.spdefreduction.push(modFragment);
+						}
+					}
+					// side healing
+					if (
+						[
+							'healpulse', 'floralhealing', 'pollenpuff',
+							'lifedew', 'junglehealing', 'lunarblessing',
+							'revivalblessing',
+						].includes(moveid)
+					) {
+						if (!newMon.randbats.offeredSupport.sidehealing) newMon.randbats.offeredSupport.sidehealing = [];
+						newMon.randbats.offeredSupport.sidehealing.push(fragment);
+					}
+					// momentum
+					if (
+						[
+							'uturn', 'voltswitch', 'flipturn',
+							'batonpass', 'teleport', 'chillyreception', 'partingshot',
+						].includes(moveid)
+					) {
+						let modFragment = Utils.deepClone(fragment);
+						if (moveid === 'batonpass') modFragment.format = 'vgc'; // banned in singles
+						if (!newMon.randbats.offeredSupport.pivoting) newMon.randbats.offeredSupport.pivoting = [];
+						newMon.randbats.offeredSupport.pivoting.push(modFragment);
+						// TODO: also counts as "personal" with tag "momentum" and probably some buddy fragments
+					}
+					// backup field effect setting
+					if (
+						[
+							'sunnyday', 'raindance', 'sandstorm', 'hail', 'snowscape', 'chillyreception',
+							'electricterrain', 'psychicterrain', 'grassyterrain', 'mistyterrain',
+						].includes(moveid)
+					) {
+						let accept = [];
+						let fieldeffect = moveid;
+						
+						switch (moveid) {
+							// offeredSupport
+							case 'sunnyday':
+								fieldeffect = 'sun';
+								break;
+							case 'raindance':
+								fieldeffect = 'rain';
+								break;
+							case 'sandstorm':
+								fieldeffect = 'sand';
+								break;
+							case 'hail':
+							case 'snowscape':
+							case 'chillyreception':
+								fieldeffect = 'snow';
+								break;
+						}
+
+						// usually, you want the backup setter to provide some other support as well - especially something that would make it a good lead
+						// and there are some other characteristics that can depend on the field effect itself!
+						// so...
+						if (learnset.tailwind && learnset.tailwind.length) {
+							let tailwindFragment = Utils.deepClone(fragment);
+							tailwindFragment.moves.push('Tailwind');
+							if (!tailwindFragment.tags) tailwindFragment.tags = [];
+							tailwindFragment.tags.push('speedcontrol');
+							tailwindFragment.format = 'vgc';
+							accept.push(tailwindFragment);
+						}
+						if (learnset.fakeout && learnset.fakeout.length) {
+							let fakeOutFragment = Utils.deepClone(fragment);
+							fakeOutFragment.moves.push('Fake Out');
+							if (!fakeOutFragment.tags) fakeOutFragment.tags = [];
+							fakeOutFragment.tags.push('fakeout');
+							fakeOutFragment.format = 'vgc';
+							accept.push(fakeOutFragment);
+						}
+						// these ones shouldn't usually have backup setters just because they can
+						if (['sandstorm', 'snow', 'grassyterrain', 'mistyterrain'].includes(fieldeffect)) accept = null;
+						// in theory, I can expand on this list with more specific criteria for each field effect!
+						// but I don't know what I would do with most of them just yet
+
+						if (accept && accept.length) {
+							for (const modFragment of accept) {
+								if (modFragment.movePriority > 0) {
+									if (!newMon.randbats.offeredSupport[`backup${fieldeffect}`]) newMon.randbats.offeredSupport[`backup${fieldeffect}`] = [];
+									newMon.randbats.offeredSupport[`backup${fieldeffect}`].push(modFragment);
+								} else {
+									if (!pickyVgcSupport[`backup${fieldeffect}`]) pickyVgcSupport[`backup${fieldeffect}`] = [];
+									pickyVgcSupport[`backup${fieldeffect}`].push(modFragment);
+								}
+							}
+						}
+					}
+					
+					// setup
+					// Speed-boosting setup
+					if (
+						[
+							'clangoroussoul', 'shellsmash', 'filletaway', 'noretreat', // mixed setup
+							'dragondance', 'shiftgear', 'tidyup', 'victorydance', // physical setup
+							'quiverdance', 'geomancy', // special setup
+
+							'rapidspin', // "mixed" Speed-boosting attacks
+							'flamecharge', 'aquastep', 'scaleshot', 'trailblaze', // physical Speed-boosting attacks
+							'esperwing', // special Speed-boosting attacks
+						].includes(moveid)
+					) {
+						let modFragment = Utils.deepClone(fragment);
+
+						if (!modFragment.tags) modFragment.tags = [];
+						modFragment.tags.push('speedsetup');
+						if (['dragondance', 'shiftgear', 'tidyup', 'victorydance'].includes(moveid)) modFragment.tags.push('physicalsetup');
+						if (['quiverdance', 'geomancy'].includes(moveid)) modFragment.tags.push('specialsetup');
+						
+						if (!modFragment.avoid) modFragment.avoid = [];
+						if ([
+							'dragondance', 'shiftgear', 'victorydance',
+							'flamecharge', 'aquastep', 'scaleshot', 'trailblaze',
+						].includes(moveid)) modFragment.avoid.push('special');
+						if ([
+							'quiverdance', 'geomancy',
+							'esperwing',
+						].includes(moveid)) modFragment.avoid.push('physical');
+						modFragment.avoid.push('speedsetup'); // redundant to have more than one of these on the same set
+						
+						if (!modFragment.buddy) modFragment.buddy = {};
+						if (!modFragment.buddy.roles) modFragment.buddy.roles = [];
+						if ([
+							'dragondance', 'shiftgear', 'victorydance',
+							'flamecharge', 'aquastep', 'scaleshot', 'trailblaze',
+						].includes(moveid)) modFragment.buddy.roles.push('physical');
+						if ([
+							'quiverdance', 'geomancy',
+							'esperwing',
+						].includes(moveid)) modFragment.buddy.roles.push('special');
+						if (['flamecharge', 'aquastep', 'scaleshot', 'trailblaze'].includes(moveid)) modFragment.buddy.roles.push('physicalsetup');
+						if (['esperwing'].includes(moveid)) modFragment.buddy.roles.push('specialsetup');
+
+						modFragment.score = 3; // the ones that count as offensive setup should outcompete other setup moves
+						
+						if (!newMon.randbats.offeredSupport.personal) newMon.randbats.offeredSupport.personal = [];
+						newMon.randbats.offeredSupport.personal.push(modFragment);
+					}
+					// offensive setup
+					if (
+						[
+							'growth', 'workup',
+							'bellydrum', 'bulkup', 'coil', 'curse', 'honeclaws', 'howl', 'poweruppunch', 'swordsdance',
+							'calmmind', 'chargebeam', 'electroshot', 'fierydance', 'meteorbeam', 'mysticalpower', 'nastyplot', 'tailglow', 'takeheart', 'torchsong',
+						].includes(moveid)
+					) {
+						let modFragment = Utils.deepClone(fragment);
+
+						if (!modFragment.tags) modFragment.tags = [];
+						if (!modFragment.avoid) modFragment.avoid = [];
+						if (!modFragment.buddy) modFragment.buddy = {};
+						if (!modFragment.buddy.roles) modFragment.buddy.roles = [];
+
+						// hard-coding notes:
+						// Belly Drum should require Sitrus and might want to require a priority move even in singles (?)
+						// Curse doesn't count for Ghost-types but probably has more specific requirements in general
+						// Hone Claws requires Triple Axel or a similar inaccurate move
+						// Work Up should only be for sets that are already mixed
+
+						// some moves have individual exceptions
+						if (moveid === 'workup') {
+							modFragment.tags.push('physicalsetup');
+							modFragment.tags.push('specialsetup');
+							modFragment.avoid.push('physicalsetup');
+							modFragment.avoid.push('specialsetup');
+							modFragment.buddy.roles.push('physical');
+							modFragment.buddy.roles.push('special');
+						}
+						if (moveid === 'bellydrum') {
+							if (!modFragment.item) modFragment.item = 'Sitrus Berry';
+						}
+						if (moveid === 'growth') {
+							// already requested sun support earlier
+							modFragment.tags.push('physicalsetup');
+							modFragment.tags.push('specialsetup');
+							modFragment.avoid.push('physicalsetup');
+							modFragment.avoid.push('specialsetup');
+						}
+						if (moveid === 'honeclaws') {
+							modFragment.buddy.roles.push('inaccurate');
+							modFragment.tags.push('accuracyboost');
+							modFragment.avoid.push('accuracyboost');
+						}
+						if (moveid === 'coil') {
+							modFragment.tags.push('accuracyboost');
+							modFragment.avoid.push('accuracyboost');
+						}
+						if (
+							[
+								'poweruppunch', 'chargebeam',
+								'honeclaws', 'workup',
+							].includes(moveid)
+						) { // you usually don't really want these if there are other options - unless they're a buddy move for some other reason
+							modFragment.score = -3;
+						} else {
+							// you also don't want these getting picked early, though; it's better if they usually only come up as a buddy move
+							modFragment.score = -1;
+						}
+
+						// physical setup
+						if (
+							[
+								'bellydrum', 'bulkup', 'coil', 'curse', 'honeclaws', 'howl', 'poweruppunch', 'swordsdance',
+							].includes(moveid)
+						) {
+							modFragment.tags.push('physicalsetup');
+							
+							modFragment.avoid.push('special');
+							modFragment.avoid.push('physicalsetup');
+							modFragment.avoid.push('specialsetup');
+							
+							modFragment.buddy.roles.push('physical');
+						}
+
+						// special setup
+						if (
+							[
+								'calmmind', 'chargebeam', 'electroshot', 'fierydance', 'meteorbeam', 'mysticalpower', 'nastyplot', 'tailglow', 'takeheart', 'torchsong',
+							].includes(moveid)
+						) {
+							modFragment.tags.push('specialsetup');
+							
+							modFragment.avoid.push('physical');
+							modFragment.avoid.push('physicalsetup');
+							if (moveid !== 'fierydance') modFragment.avoid.push('specialsetup');
+							
+							modFragment.buddy.roles.push('special');
+						}
+
+						let modFragmentPrioVGC = Utils.deepClone(modFragment);
+						modFragmentPrioVGC.format = 'vgc';
+						modFragmentPrioVGC.buddy.roles.push('priority');
+						let modFragmentSpreadVGC = Utils.deepClone(modFragment);
+						modFragmentSpreadVGC.format = 'vgc';
+						modFragmentSpreadVGC.buddy.roles.push('spread');
+						modFragment.format = 'singles';
+						
+						if (!newMon.randbats.offeredSupport.personal) newMon.randbats.offeredSupport.personal = [];
+						if (moveid === 'howl') {
+							// you don't really need priority or spread to be a good Howl user in VGC, and we don't want to push it to singles at all
+							modFragment.format = 'vgc';
+							newMon.randbats.offeredSupport.personal.push(modFragment);
+						} else if (moveid === 'bellydrum') {
+							modFragment.buddy.roles.push('priority');
+							newMon.randbats.offeredSupport.personal.push(modFragment);
+							newMon.randbats.offeredSupport.personal.push(modFragmentPrioVGC);
+						} else if (moveid === 'curse') {
+							if (!newMon.randbats.types.includes('Ghost')) { // completely ignore the setup version of Curse if you're Ghost-type
+								// normally, singles Pokémon will avoid Curse if they have Bulk Up as an option
+								if (!learnset.bulkup) newMon.randbats.offeredSupport.personal.push(modFragment);
+								// but if you have something else tagged "minspeed" anyway, go for it!
+								let modFragmentCurseSlow = Utils.deepClone(modFragment);
+								modFragmentCurseSlow.buddy.roles.push('minspeed');
+								newMon.randbats.offeredSupport.personal.push(modFragmentCurseSlow);
+								// this is to get it paired with things like Gyro Ball
+
+								// for VGC, it's not necessarily worse than Bulk Up, so I won't make that check
+								// but there are plenty situations when sets will be labeled minspeed, so it's still good to do that part:
+								modFragmentPrioVGC.buddy.roles.push('minspeed');
+								modFragmentSpreadVGC.buddy.roles.push('minspeed');
+								newMon.randbats.offeredSupport.personal.push(modFragmentPrioVGC);
+								newMon.randbats.offeredSupport.personal.push(modFragmentSpreadVGC);
+							}
+						} else {
+							newMon.randbats.offeredSupport.personal.push(modFragment);
+							newMon.randbats.offeredSupport.personal.push(modFragmentPrioVGC);
+							newMon.randbats.offeredSupport.personal.push(modFragmentSpreadVGC);
+						}
+					}
+				
+				// singles-only:
+					// Knock Off
+					if (fragment.moves.includes('Knock Off')) {
+						if (!newMon.randbats.offeredSupport.knockoff) newMon.randbats.offeredSupport.knockoff = [];
+						newMon.randbats.offeredSupport.knockoff.push(fragment);
+					}
+					// damaging entry hazards - Sticky Web and Toxic Spikes will probably be handled differently
+					if (['ceaselessedge', 'spikes', 'stealthrock', 'stoneaxe'].includes(moveid)) {
+						if (!newMon.randbats.offeredSupport.entryhazard) newMon.randbats.offeredSupport.entryhazard = [];
+						newMon.randbats.offeredSupport.entryhazard.push(fragment);
+					}
+					// hazard control
+					if (['defog', 'mortalspin', 'rapidspin', 'tidyup'].includes(moveid)) {
+						if (!newMon.randbats.offeredSupport.hazardcontrol) newMon.randbats.offeredSupport.hazardcontrol = [];
+						newMon.randbats.offeredSupport.hazardcontrol.push(fragment);
+					}
+				}
+					
+					// Upper Hand and team-supported Grassy Glide need their own cases and were *not* included in priority
+					// Venom Drench is also neat
+			}
+
+			// okay, now the VGC support that was picky about Speed can get sorted properly into offeredSupport
+			for (const offeredSupport in pickyVgcSupport) {
+				for (const fragment of pickyVgcSupport[offeredSupport]) {
+					let supportFragments = [];
+					for (const subfragment of vgcSupportSubfragments) {
+						let modFragment = Utils.deepClone(fragment);
+						let accept = true;
+						if (subfragment.ability) {
+							if (modFragment.ability && modFragment.ability !== subfragment.ability) accept = false;
+							modFragment.ability = subfragment.ability;
+						}
+						if (subfragment.item) {
+							if (modFragment.item && modFragment.item !== subfragment.item) accept = false;
+							modFragment.item = subfragment.item;
+						}
+						if (subfragment.teraType) {
+							if (modFragment.teraType && modFragment.teraType !== subfragment.teraType) accept = false;
+							modFragment.teraType = subfragment.teraType;
+						}
+						if (subfragment.tags) {
+							if (!modFragment.tags) modFragment.tags = [];
+							for (const tag of subfragment.tags) if (!modFragment.tags.includes(tag)) modFragment.tags.push(tag);
+							if (modFragment.avoid) {
+								for (const avoid of modFragment.avoid) if (modFragment.tags.includes(avoid)) accept = false;
+							}
+						}
+						if (subfragment.moves) {
+							if (!modFragment.moves) modFragment.moves = [];
+							for (const move of subfragment.moves) if (!modFragment.moves.includes(move)) modFragment.moves.push(move);
+							if (modFragment.moves.length > 4) accept = false;
+						}
+						if (subfragment.requestedSupport) {
+							if (!modFragment.vgc.requestedSupport) modFragment.vgc.requestedSupport = [];
+							for (const requestedSupport of subfragment.requestedSupport) {
+								if (offeredSupport === requestedSupport) accept = false;
+								if (offeredSupport === `backup${requestedSupport}`) accept = false;
+								// I don't want, for example, the fastest Swift Swim user on the team to be pressured to run Rain Dance simply to support its own Drizzle user
+								// backup rain setters should be things like Pranskter users, not rain abusers!
+								if (!modFragment.vgc.requestedSupport.includes(requestedSupport)) modFragment.vgc.requestedSupport.push(requestedSupport);
+							}
+						}
+						if (subfragment.evs) {
+							if (!modFragment.evs) modFragment.evs = subfragment.evs;
+							if (subfragment.evs.hp > modFragment.evs.hp) modFragment.evs.hp = subfragment.evs.hp;
+							if (subfragment.evs.atk > modFragment.evs.atk) modFragment.evs.atk = subfragment.evs.atk;
+							if (subfragment.evs.def > modFragment.evs.def) modFragment.evs.def = subfragment.evs.def;
+							if (subfragment.evs.spa > modFragment.evs.spa) modFragment.evs.spa = subfragment.evs.spa;
+							if (subfragment.evs.spd > modFragment.evs.spd) modFragment.evs.spd = subfragment.evs.spd;
+							if (subfragment.evs.spe > modFragment.evs.spe) modFragment.evs.spe = subfragment.evs.spe;
+							if (modFragment.evs.hp + modFragment.evs.atk + modFragment.evs.def + modFragment.evs.spa + modFragment.evs.spd + modFragment.evs.spe > 508) accept = false;
+						}
+						if (accept) supportFragments.push(modFragment);
+					}
+					if (supportFragments.length) {
+						if (!newMon.randbats.offeredSupport[offeredSupport]) newMon.randbats.offeredSupport[offeredSupport] = [];
+						for (const supportFragment of supportFragments) newMon.randbats.offeredSupport[offeredSupport].push(supportFragment);
+					}
+				}
+			}
+
+			// okay I'm gonna have to figure out exactly how an individual fragment's support requests count
+			
+			// I think after I get through the whole movepool, and there's an *entire category* of offeredSupport where *every* fragment is requesting support,
+			// the Pokémon loses that offeredSupport category, and every fragment gets pushed into acceptedSupport instead
+			// (a common example might be Grass-types where Grassy Glide is the only priority they're offering)
+			
+			// but if we have an offeredSupport category where some options are always available while others have requestedSupport,
+			// then the category continues to exist,
+			// and all of the fragments requesting support additionally get pushed to the acceptedSupport for the species to make it more likely to come up
+			// but - obviously - if the support just never comes up during species selection, there are still contingencies in the category
+
+			// from there, the individual fragments' requestedSupports only need to be checked again during set construction, after the whole team is done
+			// and obviously ones with support available are favored, but ones with requestedSupport missing are completely ignored
+			
+			for (const fragment of newMon.randbats.viableStabs) {
+				let modFragment = Utils.deepClone(fragment);
+				modFragment.mainstab = true;
+				
+				if (fragment.singles.requestedSupport.length) {
+					for (const request of fragment.singles.requestedSupport) {
+						if (!newMon.randbats.singles.acceptedSupport[request]) newMon.randbats.singles.acceptedSupport[request] = [];
+						newMon.randbats.singles.acceptedSupport[request].push(modFragment);
+					}
+				}
+				if (fragment.vgc.requestedSupport.length) {
+					for (const request of fragment.vgc.requestedSupport) {
+						if (!newMon.randbats.vgc.acceptedSupport[request]) newMon.randbats.vgc.acceptedSupport[request] = [];
+						newMon.randbats.vgc.acceptedSupport[request].push(modFragment);
+					}
+				}
+			}
+			
+			for (const offeredSupport in newMon.randbats.offeredSupport) {
+				let accepted = false;
+				for (const fragment of newMon.randbats.offeredSupport[offeredSupport]) {
+					if (fragment.baseMove) { // if it was just an Ability, this is unnecessary
 						if (fragment.singles.requestedSupport.length) {
 							for (const request of fragment.singles.requestedSupport) {
 								if (!newMon.randbats.singles.acceptedSupport[request]) newMon.randbats.singles.acceptedSupport[request] = [];
-								newMon.randbats.singles.acceptedSupport[request].push(modFragment);
+								newMon.randbats.singles.acceptedSupport[request].push(fragment);
 							}
 						}
 						if (fragment.vgc.requestedSupport.length) {
 							for (const request of fragment.vgc.requestedSupport) {
 								if (!newMon.randbats.vgc.acceptedSupport[request]) newMon.randbats.vgc.acceptedSupport[request] = [];
-								newMon.randbats.vgc.acceptedSupport[request].push(modFragment);
+								newMon.randbats.vgc.acceptedSupport[request].push(fragment);
 							}
 						}
-					}
-					
-					for (const offeredSupport in newMon.randbats.offeredSupport) {
-						let accepted = false;
-						for (const fragment of newMon.randbats.offeredSupport[offeredSupport]) {
-							if (fragment.baseMove) { // if it was just an Ability, this is unnecessary
-								if (fragment.singles.requestedSupport.length) {
-									for (const request of fragment.singles.requestedSupport) {
-										if (!newMon.randbats.singles.acceptedSupport[request]) newMon.randbats.singles.acceptedSupport[request] = [];
-										newMon.randbats.singles.acceptedSupport[request].push(fragment);
-									}
-								}
-								if (fragment.vgc.requestedSupport.length) {
-									for (const request of fragment.vgc.requestedSupport) {
-										if (!newMon.randbats.vgc.acceptedSupport[request]) newMon.randbats.vgc.acceptedSupport[request] = [];
-										newMon.randbats.vgc.acceptedSupport[request].push(fragment);
-									}
-								}
-								if (!fragment.singles.requestedSupport.length && !fragment.vgc.requestedSupport.length) accepted = true;
-							} else accepted = true;
-						}
-						if (!accepted) delete newMon.randbats.offeredSupport[offeredSupport];
-					}
-					
-					// finally, some Abilities offer innate utility which has nothing to do with how they affect moves or type matchups, so let's cover those quickly
-					for (const ability of newMon.randbats.abilities) {
-						let fragment = {
-							ability: ability,
-							singles: {
-								requestedSupport: [],
-								acceptedSupport: [],
-							},
-							vgc: {
-								requestedSupport: [],
-								acceptedSupport: [],
-							},
-							fragmentPriority: 4,
-						};
-						switch (ability) {
-							// offeredSupport
-							case 'Drizzle':
-								fragment.singles.acceptedSupport.push('rain');
-								fragment.singles.acceptedSupport.push('backuprain');
-								fragment.vgc.acceptedSupport.push('rain');
-								fragment.vgc.acceptedSupport.push('backuprain');
-								
-								if (!newMon.randbats.offeredSupport.rain) newMon.randbats.offeredSupport.rain = [];
-								newMon.randbats.offeredSupport.rain.push(fragment);
-								break;
-							case 'Drought':
-							case 'Orichalcum Pulse':
-								fragment.singles.acceptedSupport.push('sun');
-								fragment.singles.acceptedSupport.push('backupsun');
-								fragment.vgc.acceptedSupport.push('sun');
-								fragment.vgc.acceptedSupport.push('backupsun');
-								
-								if (!newMon.randbats.offeredSupport.sun) newMon.randbats.offeredSupport.sun = [];
-								newMon.randbats.offeredSupport.sun.push(fragment);
-								break;
-							case 'Electric Surge':
-							case 'Hadron Engine':
-								fragment.singles.acceptedSupport.push('electricterrain');
-								fragment.singles.acceptedSupport.push('backupelectricterrain');
-								fragment.vgc.acceptedSupport.push('electricterrain');
-								fragment.vgc.acceptedSupport.push('backupelectricterrain');
-								
-								if (!newMon.randbats.offeredSupport.electricterrain) newMon.randbats.offeredSupport.electricterrain = [];
-								newMon.randbats.offeredSupport.electricterrain.push(fragment);
-								if (!newMon.randbats.offeredSupport.antisleep) newMon.randbats.offeredSupport.antisleep = [];
-								newMon.randbats.offeredSupport.antisleep.push(fragment);
-								break;
-							case 'Grassy Surge':
-								fragment.singles.acceptedSupport.push('grassyterrain');
-								fragment.singles.acceptedSupport.push('backupgrassyterrain');
-								fragment.vgc.acceptedSupport.push('grassyterrain');
-								fragment.vgc.acceptedSupport.push('backupgrassyterrain');
-								// full disclosure: it's relatively unlikely that anything will actually be set to offer the support "backupgrassyterrain"
-								// this is just because it's almost never a worthwhile consideration
-								// but I'm still adding the acceptedSupport here for completion just in case it comes up
-								
-								if (!newMon.randbats.offeredSupport.grassyterrain) newMon.randbats.offeredSupport.grassyterrain = [];
-								newMon.randbats.offeredSupport.grassyterrain.push(fragment);
-								break;
-							case 'Intimidate':
-								if (!newMon.randbats.offeredSupport.physicalreduction) newMon.randbats.offeredSupport.physicalreduction = [];
-								newMon.randbats.offeredSupport.physicalreduction.push(fragment);
-								if (!newMon.randbats.offeredSupport.intimidate) newMon.randbats.offeredSupport.intimidate = [];
-								newMon.randbats.offeredSupport.intimidate.push(fragment);
-								break;
-							case 'Flower Gift':
-								fragment.singles.requestedSupport.push('sun');
-								fragment.vgc.requestedSupport.push('sun');
-								if (!newMon.randbats.singles.acceptedSupport.sun) newMon.randbats.singles.acceptedSupport.sun = [];
-								newMon.randbats.singles.acceptedSupport.sun.push(fragment);
-								if (!newMon.randbats.vgc.acceptedSupport.sun) newMon.randbats.vgc.acceptedSupport.sun = [];
-								newMon.randbats.vgc.acceptedSupport.sun.push(fragment);
-								
-								if (!newMon.randbats.offeredSupport.specialreduction) newMon.randbats.offeredSupport.specialreduction = [];
-								newMon.randbats.offeredSupport.specialreduction.push(fragment);
-								break;
-							case 'Misty Surge':
-								fragment.singles.acceptedSupport.push('mistyterrain');
-								fragment.singles.acceptedSupport.push('backupmistyterrain');
-								fragment.vgc.acceptedSupport.push('mistyterrain');
-								fragment.vgc.acceptedSupport.push('backupmistyterrain');
-								// full disclosure: it's relatively unlikely that anything will actually be set to offer the support "backupmistyterrain"
-								// this is just because it's almost never a worthwhile consideration
-								// but I'm still adding the acceptedSupport here for completion just in case it comes up
-
-								if (!newMon.randbats.offeredSupport.mistyterrain) newMon.randbats.offeredSupport.mistyterrain = [];
-								newMon.randbats.offeredSupport.mistyterrain.push(fragment);
-								if (!newMon.randbats.offeredSupport.antistatus) newMon.randbats.offeredSupport.antistatus = [];
-								newMon.randbats.offeredSupport.antistatus.push(fragment);
-								if (!newMon.randbats.offeredSupport.antisleep) newMon.randbats.offeredSupport.antisleep = [];
-								newMon.randbats.offeredSupport.antisleep.push(fragment);
-								break;
-							case 'Psychic Surge':
-							case 'Mega-Neural':
-								fragment.singles.acceptedSupport.push('psychicterrain');
-								fragment.singles.acceptedSupport.push('backuppsychicterrain');
-								fragment.vgc.acceptedSupport.push('psychicterrain');
-								fragment.vgc.acceptedSupport.push('backuppsychicterrain');
-								
-								if (!newMon.randbats.offeredSupport.psychicterrain) newMon.randbats.offeredSupport.psychicterrain = [];
-								newMon.randbats.offeredSupport.psychicterrain.push(fragment);
-								if (!newMon.randbats.offeredSupport.antipriority) newMon.randbats.offeredSupport.antipriority = [];
-								newMon.randbats.offeredSupport.antipriority.push(fragment);
-								break;
-							case 'Sand Stream':
-							case 'Sand Spit':
-								fragment.singles.acceptedSupport.push('sand');
-								fragment.singles.acceptedSupport.push('backupsand');
-								fragment.vgc.acceptedSupport.push('sand');
-								fragment.vgc.acceptedSupport.push('backupsand');
-								// full disclosure: it's relatively unlikely that anything will actually be set to offer the support "backupsand"
-								// this is just because it's almost never a worthwhile consideration
-								// but I'm still adding the acceptedSupport here for completion just in case it comes up
-								
-								if (!newMon.randbats.offeredSupport.sand) newMon.randbats.offeredSupport.sand = [];
-								newMon.randbats.offeredSupport.sand.push(fragment);
-								break;
-							case 'Snow Warning':
-								fragment.singles.acceptedSupport.push('snow');
-								fragment.singles.acceptedSupport.push('backupsnow');
-								fragment.vgc.acceptedSupport.push('snow');
-								fragment.vgc.acceptedSupport.push('backupsnow');
-								// full disclosure: it's relatively unlikely that anything will actually be set to offer the support "backupsnow"
-								// this is just because it's almost never a worthwhile consideration
-								// but I'm still adding the acceptedSupport here for completion just in case it comes up
-								
-								if (!newMon.randbats.offeredSupport.snow) newMon.randbats.offeredSupport.snow = [];
-								newMon.randbats.offeredSupport.snow.push(fragment);
-								break;
-							case 'Storm Chaser':
-								// we need any one of these, not all three
-								let fragmentElectric = Utils.deepClone(fragment);
-								fragmentElectric.singles.acceptedSupport.push('rain');
-								fragmentElectric.singles.acceptedSupport.push('backuprain');
-								fragmentElectric.vgc.acceptedSupport.push('rain');
-								fragmentElectric.vgc.acceptedSupport.push('backuprain');
-								fragmentElectric.vgc.requestedSupport.push('sideelectric');
-								
-								let fragmentFlying = Utils.deepClone(fragment);
-								fragmentFlying.singles.acceptedSupport.push('rain');
-								fragmentFlying.singles.acceptedSupport.push('backuprain');
-								fragmentFlying.vgc.acceptedSupport.push('rain');
-								fragmentFlying.vgc.acceptedSupport.push('backuprain');
-								fragmentFlying.vgc.requestedSupport.push('sideflying');
-								
-								let fragmentWater = Utils.deepClone(fragment);
-								fragmentWater.singles.acceptedSupport.push('rain');
-								fragmentWater.singles.acceptedSupport.push('backuprain');
-								fragmentWater.vgc.acceptedSupport.push('rain');
-								fragmentWater.vgc.acceptedSupport.push('backuprain');
-								fragmentWater.vgc.requestedSupport.push('sidewater');
-								
-								if (!newMon.randbats.offeredSupport.rain) newMon.randbats.offeredSupport.rain = [];
-								if (!newMon.randbats.offeredSupport.backuprain) newMon.randbats.offeredSupport.backuprain = [];
-								newMon.randbats.offeredSupport.rain.push(fragmentElectric);
-								newMon.randbats.offeredSupport.rain.push(fragmentFlying);
-								newMon.randbats.offeredSupport.rain.push(fragmentWater);
-								newMon.randbats.offeredSupport.backuprain.push(fragmentElectric);
-								newMon.randbats.offeredSupport.backuprain.push(fragmentFlying);
-								newMon.randbats.offeredSupport.backuprain.push(fragmentWater);
-								break;
-							// acceptedSupport
-							case 'Swift Swim':
-							case 'Dry Skin':
-							case 'Rain Dish':
-								fragment.singles.requestedSupport.push('rain');
-								fragment.vgc.requestedSupport.push('rain');
-								if (!newMon.randbats.singles.acceptedSupport.rain) newMon.randbats.singles.acceptedSupport.rain = [];
-								newMon.randbats.singles.acceptedSupport.rain.push(fragment);
-								if (!newMon.randbats.vgc.acceptedSupport.rain) newMon.randbats.vgc.acceptedSupport.rain = [];
-								newMon.randbats.vgc.acceptedSupport.rain.push(fragment);
-								break;
-							case 'Hydration':
-								fragment.singles.requestedSupport.push('rain');
-								fragment.vgc.requestedSupport.push('rain');
-								if (learnset.rest && learnset.rest.length) {
-									fragment.baseMove = 'Rest';
-									fragment.moves = ['Rest'];
-									fragment.tags = 'recovery';
-									fragment.role = 'personal';
-								}
-								if (!newMon.randbats.singles.acceptedSupport.rain) newMon.randbats.singles.acceptedSupport.rain = [];
-								newMon.randbats.singles.acceptedSupport.rain.push(fragment);
-								if (!newMon.randbats.vgc.acceptedSupport.rain) newMon.randbats.vgc.acceptedSupport.rain = [];
-								newMon.randbats.vgc.acceptedSupport.rain.push(fragment);
-								break;
-							case 'Chlorophyll':
-							case 'Harvest':
-								fragment.singles.requestedSupport.push('sun');
-								fragment.vgc.requestedSupport.push('sun');
-								if (!newMon.randbats.singles.acceptedSupport.sun) newMon.randbats.singles.acceptedSupport.sun = [];
-								newMon.randbats.singles.acceptedSupport.sun.push(fragment);
-								if (!newMon.randbats.vgc.acceptedSupport.sun) newMon.randbats.vgc.acceptedSupport.sun = [];
-								newMon.randbats.vgc.acceptedSupport.sun.push(fragment);
-								break;
-							case 'Sand Rush':
-							case 'Sand Force':
-								fragment.singles.requestedSupport.push('sand');
-								fragment.vgc.requestedSupport.push('sand');
-								if (!newMon.randbats.singles.acceptedSupport.sand) newMon.randbats.singles.acceptedSupport.sand = [];
-								newMon.randbats.singles.acceptedSupport.sand.push(fragment);
-								if (!newMon.randbats.vgc.acceptedSupport.sand) newMon.randbats.vgc.acceptedSupport.sand = [];
-								newMon.randbats.vgc.acceptedSupport.sand.push(fragment);
-								break;
-							case 'Slush Rush':
-							case 'Ice Body':
-							case 'Ice Face':
-								fragment.singles.requestedSupport.push('snow');
-								fragment.vgc.requestedSupport.push('snow');
-								if (!newMon.randbats.singles.acceptedSupport.snow) newMon.randbats.singles.acceptedSupport.snow = [];
-								newMon.randbats.singles.acceptedSupport.snow.push(fragment);
-								if (!newMon.randbats.vgc.acceptedSupport.snow) newMon.randbats.vgc.acceptedSupport.snow = [];
-								newMon.randbats.vgc.acceptedSupport.snow.push(fragment);
-								break;
-							case 'Surge Surfer':
-								fragment.singles.requestedSupport.push('electricterrain');
-								fragment.vgc.requestedSupport.push('electricterrain');
-								if (!newMon.randbats.singles.acceptedSupport.electricterrain) newMon.randbats.singles.acceptedSupport.electricterrain = [];
-								newMon.randbats.singles.acceptedSupport.electricterrain.push(fragment);
-								if (!newMon.randbats.vgc.acceptedSupport.electricterrain) newMon.randbats.vgc.acceptedSupport.electricterrain = [];
-								newMon.randbats.vgc.acceptedSupport.electricterrain.push(fragment);
-								break;
-						}
-					}
+						if (!fragment.singles.requestedSupport.length && !fragment.vgc.requestedSupport.length) accepted = true;
+					} else accepted = true;
 				}
+				if (!accepted) delete newMon.randbats.offeredSupport[offeredSupport];
+			}
+			
+			// finally, some Abilities offer innate utility which has nothing to do with how they affect moves or type matchups, so let's cover those quickly
+			for (const ability of newMon.randbats.abilities) {
+				let fragment = {
+					ability: ability,
+					singles: {
+						requestedSupport: [],
+						acceptedSupport: [],
+					},
+					vgc: {
+						requestedSupport: [],
+						acceptedSupport: [],
+					},
+					fragmentPriority: 4,
+				};
+				switch (ability) {
+					// offeredSupport
+					case 'Drizzle':
+						fragment.singles.acceptedSupport.push('rain');
+						fragment.singles.acceptedSupport.push('backuprain');
+						fragment.vgc.acceptedSupport.push('rain');
+						fragment.vgc.acceptedSupport.push('backuprain');
+						
+						if (!newMon.randbats.offeredSupport.rain) newMon.randbats.offeredSupport.rain = [];
+						newMon.randbats.offeredSupport.rain.push(fragment);
+						break;
+					case 'Drought':
+					case 'Orichalcum Pulse':
+						fragment.singles.acceptedSupport.push('sun');
+						fragment.singles.acceptedSupport.push('backupsun');
+						fragment.vgc.acceptedSupport.push('sun');
+						fragment.vgc.acceptedSupport.push('backupsun');
+						
+						if (!newMon.randbats.offeredSupport.sun) newMon.randbats.offeredSupport.sun = [];
+						newMon.randbats.offeredSupport.sun.push(fragment);
+						break;
+					case 'Electric Surge':
+					case 'Hadron Engine':
+						fragment.singles.acceptedSupport.push('electricterrain');
+						fragment.singles.acceptedSupport.push('backupelectricterrain');
+						fragment.vgc.acceptedSupport.push('electricterrain');
+						fragment.vgc.acceptedSupport.push('backupelectricterrain');
+						
+						if (!newMon.randbats.offeredSupport.electricterrain) newMon.randbats.offeredSupport.electricterrain = [];
+						newMon.randbats.offeredSupport.electricterrain.push(fragment);
+						if (!newMon.randbats.offeredSupport.antisleep) newMon.randbats.offeredSupport.antisleep = [];
+						newMon.randbats.offeredSupport.antisleep.push(fragment);
+						break;
+					case 'Grassy Surge':
+						fragment.singles.acceptedSupport.push('grassyterrain');
+						fragment.singles.acceptedSupport.push('backupgrassyterrain');
+						fragment.vgc.acceptedSupport.push('grassyterrain');
+						fragment.vgc.acceptedSupport.push('backupgrassyterrain');
+						// full disclosure: it's relatively unlikely that anything will actually be set to offer the support "backupgrassyterrain"
+						// this is just because it's almost never a worthwhile consideration
+						// but I'm still adding the acceptedSupport here for completion just in case it comes up
+						
+						if (!newMon.randbats.offeredSupport.grassyterrain) newMon.randbats.offeredSupport.grassyterrain = [];
+						newMon.randbats.offeredSupport.grassyterrain.push(fragment);
+						break;
+					case 'Intimidate':
+						if (!newMon.randbats.offeredSupport.physicalreduction) newMon.randbats.offeredSupport.physicalreduction = [];
+						newMon.randbats.offeredSupport.physicalreduction.push(fragment);
+						if (!newMon.randbats.offeredSupport.intimidate) newMon.randbats.offeredSupport.intimidate = [];
+						newMon.randbats.offeredSupport.intimidate.push(fragment);
+						break;
+					case 'Flower Gift':
+						fragment.singles.requestedSupport.push('sun');
+						fragment.vgc.requestedSupport.push('sun');
+						if (!newMon.randbats.singles.acceptedSupport.sun) newMon.randbats.singles.acceptedSupport.sun = [];
+						newMon.randbats.singles.acceptedSupport.sun.push(fragment);
+						if (!newMon.randbats.vgc.acceptedSupport.sun) newMon.randbats.vgc.acceptedSupport.sun = [];
+						newMon.randbats.vgc.acceptedSupport.sun.push(fragment);
+						
+						if (!newMon.randbats.offeredSupport.specialreduction) newMon.randbats.offeredSupport.specialreduction = [];
+						newMon.randbats.offeredSupport.specialreduction.push(fragment);
+						break;
+					case 'Misty Surge':
+						fragment.singles.acceptedSupport.push('mistyterrain');
+						fragment.singles.acceptedSupport.push('backupmistyterrain');
+						fragment.vgc.acceptedSupport.push('mistyterrain');
+						fragment.vgc.acceptedSupport.push('backupmistyterrain');
+						// full disclosure: it's relatively unlikely that anything will actually be set to offer the support "backupmistyterrain"
+						// this is just because it's almost never a worthwhile consideration
+						// but I'm still adding the acceptedSupport here for completion just in case it comes up
+
+						if (!newMon.randbats.offeredSupport.mistyterrain) newMon.randbats.offeredSupport.mistyterrain = [];
+						newMon.randbats.offeredSupport.mistyterrain.push(fragment);
+						if (!newMon.randbats.offeredSupport.antistatus) newMon.randbats.offeredSupport.antistatus = [];
+						newMon.randbats.offeredSupport.antistatus.push(fragment);
+						if (!newMon.randbats.offeredSupport.antisleep) newMon.randbats.offeredSupport.antisleep = [];
+						newMon.randbats.offeredSupport.antisleep.push(fragment);
+						break;
+					case 'Psychic Surge':
+					case 'Mega-Neural':
+						fragment.singles.acceptedSupport.push('psychicterrain');
+						fragment.singles.acceptedSupport.push('backuppsychicterrain');
+						fragment.vgc.acceptedSupport.push('psychicterrain');
+						fragment.vgc.acceptedSupport.push('backuppsychicterrain');
+						
+						if (!newMon.randbats.offeredSupport.psychicterrain) newMon.randbats.offeredSupport.psychicterrain = [];
+						newMon.randbats.offeredSupport.psychicterrain.push(fragment);
+						if (!newMon.randbats.offeredSupport.antipriority) newMon.randbats.offeredSupport.antipriority = [];
+						newMon.randbats.offeredSupport.antipriority.push(fragment);
+						break;
+					case 'Sand Stream':
+					case 'Sand Spit':
+						fragment.singles.acceptedSupport.push('sand');
+						fragment.singles.acceptedSupport.push('backupsand');
+						fragment.vgc.acceptedSupport.push('sand');
+						fragment.vgc.acceptedSupport.push('backupsand');
+						// full disclosure: it's relatively unlikely that anything will actually be set to offer the support "backupsand"
+						// this is just because it's almost never a worthwhile consideration
+						// but I'm still adding the acceptedSupport here for completion just in case it comes up
+						
+						if (!newMon.randbats.offeredSupport.sand) newMon.randbats.offeredSupport.sand = [];
+						newMon.randbats.offeredSupport.sand.push(fragment);
+						break;
+					case 'Snow Warning':
+						fragment.singles.acceptedSupport.push('snow');
+						fragment.singles.acceptedSupport.push('backupsnow');
+						fragment.vgc.acceptedSupport.push('snow');
+						fragment.vgc.acceptedSupport.push('backupsnow');
+						// full disclosure: it's relatively unlikely that anything will actually be set to offer the support "backupsnow"
+						// this is just because it's almost never a worthwhile consideration
+						// but I'm still adding the acceptedSupport here for completion just in case it comes up
+						
+						if (!newMon.randbats.offeredSupport.snow) newMon.randbats.offeredSupport.snow = [];
+						newMon.randbats.offeredSupport.snow.push(fragment);
+						break;
+					case 'Storm Chaser':
+						// we need any one of these, not all three
+						let fragmentElectric = Utils.deepClone(fragment);
+						fragmentElectric.singles.acceptedSupport.push('rain');
+						fragmentElectric.singles.acceptedSupport.push('backuprain');
+						fragmentElectric.vgc.acceptedSupport.push('rain');
+						fragmentElectric.vgc.acceptedSupport.push('backuprain');
+						fragmentElectric.vgc.requestedSupport.push('sideelectric');
+						
+						let fragmentFlying = Utils.deepClone(fragment);
+						fragmentFlying.singles.acceptedSupport.push('rain');
+						fragmentFlying.singles.acceptedSupport.push('backuprain');
+						fragmentFlying.vgc.acceptedSupport.push('rain');
+						fragmentFlying.vgc.acceptedSupport.push('backuprain');
+						fragmentFlying.vgc.requestedSupport.push('sideflying');
+						
+						let fragmentWater = Utils.deepClone(fragment);
+						fragmentWater.singles.acceptedSupport.push('rain');
+						fragmentWater.singles.acceptedSupport.push('backuprain');
+						fragmentWater.vgc.acceptedSupport.push('rain');
+						fragmentWater.vgc.acceptedSupport.push('backuprain');
+						fragmentWater.vgc.requestedSupport.push('sidewater');
+						
+						if (!newMon.randbats.offeredSupport.rain) newMon.randbats.offeredSupport.rain = [];
+						if (!newMon.randbats.offeredSupport.backuprain) newMon.randbats.offeredSupport.backuprain = [];
+						newMon.randbats.offeredSupport.rain.push(fragmentElectric);
+						newMon.randbats.offeredSupport.rain.push(fragmentFlying);
+						newMon.randbats.offeredSupport.rain.push(fragmentWater);
+						newMon.randbats.offeredSupport.backuprain.push(fragmentElectric);
+						newMon.randbats.offeredSupport.backuprain.push(fragmentFlying);
+						newMon.randbats.offeredSupport.backuprain.push(fragmentWater);
+						break;
+					// acceptedSupport
+					case 'Swift Swim':
+					case 'Dry Skin':
+					case 'Rain Dish':
+						fragment.singles.requestedSupport.push('rain');
+						fragment.vgc.requestedSupport.push('rain');
+						if (!newMon.randbats.singles.acceptedSupport.rain) newMon.randbats.singles.acceptedSupport.rain = [];
+						newMon.randbats.singles.acceptedSupport.rain.push(fragment);
+						if (!newMon.randbats.vgc.acceptedSupport.rain) newMon.randbats.vgc.acceptedSupport.rain = [];
+						newMon.randbats.vgc.acceptedSupport.rain.push(fragment);
+						break;
+					case 'Hydration':
+						fragment.singles.requestedSupport.push('rain');
+						fragment.vgc.requestedSupport.push('rain');
+						if (learnset.rest && learnset.rest.length) {
+							fragment.baseMove = 'Rest';
+							fragment.moves = ['Rest'];
+							fragment.tags = 'recovery';
+							fragment.role = 'personal';
+						}
+						if (!newMon.randbats.singles.acceptedSupport.rain) newMon.randbats.singles.acceptedSupport.rain = [];
+						newMon.randbats.singles.acceptedSupport.rain.push(fragment);
+						if (!newMon.randbats.vgc.acceptedSupport.rain) newMon.randbats.vgc.acceptedSupport.rain = [];
+						newMon.randbats.vgc.acceptedSupport.rain.push(fragment);
+						break;
+					case 'Chlorophyll':
+					case 'Harvest':
+						fragment.singles.requestedSupport.push('sun');
+						fragment.vgc.requestedSupport.push('sun');
+						if (!newMon.randbats.singles.acceptedSupport.sun) newMon.randbats.singles.acceptedSupport.sun = [];
+						newMon.randbats.singles.acceptedSupport.sun.push(fragment);
+						if (!newMon.randbats.vgc.acceptedSupport.sun) newMon.randbats.vgc.acceptedSupport.sun = [];
+						newMon.randbats.vgc.acceptedSupport.sun.push(fragment);
+						break;
+					case 'Sand Rush':
+					case 'Sand Force':
+						fragment.singles.requestedSupport.push('sand');
+						fragment.vgc.requestedSupport.push('sand');
+						if (!newMon.randbats.singles.acceptedSupport.sand) newMon.randbats.singles.acceptedSupport.sand = [];
+						newMon.randbats.singles.acceptedSupport.sand.push(fragment);
+						if (!newMon.randbats.vgc.acceptedSupport.sand) newMon.randbats.vgc.acceptedSupport.sand = [];
+						newMon.randbats.vgc.acceptedSupport.sand.push(fragment);
+						break;
+					case 'Slush Rush':
+					case 'Ice Body':
+					case 'Ice Face':
+						fragment.singles.requestedSupport.push('snow');
+						fragment.vgc.requestedSupport.push('snow');
+						if (!newMon.randbats.singles.acceptedSupport.snow) newMon.randbats.singles.acceptedSupport.snow = [];
+						newMon.randbats.singles.acceptedSupport.snow.push(fragment);
+						if (!newMon.randbats.vgc.acceptedSupport.snow) newMon.randbats.vgc.acceptedSupport.snow = [];
+						newMon.randbats.vgc.acceptedSupport.snow.push(fragment);
+						break;
+					case 'Surge Surfer':
+						fragment.singles.requestedSupport.push('electricterrain');
+						fragment.vgc.requestedSupport.push('electricterrain');
+						if (!newMon.randbats.singles.acceptedSupport.electricterrain) newMon.randbats.singles.acceptedSupport.electricterrain = [];
+						newMon.randbats.singles.acceptedSupport.electricterrain.push(fragment);
+						if (!newMon.randbats.vgc.acceptedSupport.electricterrain) newMon.randbats.vgc.acceptedSupport.electricterrain = [];
+						newMon.randbats.vgc.acceptedSupport.electricterrain.push(fragment);
+						break;
+				}
+			}
+		}
+		
+		// Right now, we'll call randbatsInitialize for every Pokémon in the Evo 2 dex
+		// After species selection, we'll call randbatsInitialize again, this time for just the Pokémon on the player's team
+		// That way, we can safely ensure that every Pokémon we actually need to look at is properly initialized - even if players are using custom rulesets with Pokémon we wouldn't normally care about
+		for (const id in this.dex.data.Pokedex) {
+			// the real randbats setup only needs to take place Pokémon you can bring to an Evo game
+			if (
+				this.dex.data.FormatsData[id] && this.dex.data.FormatsData[id].tier &&
+				(this.dex.data.FormatsData[id].tier === "Evo!" || this.dex.data.FormatsData[id].tier === "(Prevo)")
+			) {
+				randbatsInitialize(id);
+				// banlists
+				if ([
+					'toxapex', 'noivernvariant', 'chandelure', 'corviknight', 'darmanitan', 'darmanitangalar', 'excadrill', 'hawlucha', 'garchomp', 'velocinobi',
+					'dragonite', 'tapukoko', 'tapulele', 'tapubulu', 'tapufini', 'zacian', 'zaciancrowned', 'zamazenta', 'zamazentacrowned', 'deoxys',
+					'deoxysattack', 'deoxysdefense', 'deoxysspeed',
+				].includes(id)) this.dex.data.Pokedex[id].randbats.singles.banned = true;
+				if ([
+					'dragonite', 'tapukoko', 'tapulele', 'tapubulu', 'tapufini', 'zacian', 'zaciancrowned', 'zamazenta', 'zamazentacrowned', 'deoxys',
+					'deoxysattack', 'deoxysdefense', 'deoxysspeed',
+				].includes(id)) this.dex.data.Pokedex[id].randbats.vgc.banned = true;
 			}
 		}
 
@@ -3217,11 +3097,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 		if (team) {
 			for (const pokemon of team) {
-				if (pokemon && pokemon.species && this.dex.species.get(pokemon.species)) {
+				randbatsInitialize(pokemon.species);
+				if (pokemon.species && this.dex.species.get(pokemon.species)) {
 					if (this.dex.species.get(pokemon.species).id) originalTeamSpecies.push(this.dex.species.get(pokemon.species).id);
 					if (this.dex.species.get(pokemon.species).num) originalTeamNumbers.push(this.dex.species.get(pokemon.species).num);
 				}
-				if (pokemon && (!pokemon.level || pokemon.level > 5)) stage = 'Evo'; // can't be LC if you're not level 5
+				if (!pokemon.level || pokemon.level > 5) stage = 'Evo'; // can't be LC if you're not level 5
 				// !pokemon.level is for level 100s, which are missed otherwise
 			}
 		} else team = [];
