@@ -5170,15 +5170,21 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					} else if (set.species === 'Rotom-Fan') set.possibleItems.tier2.push('Air Balloon'); // ONLY SOMETIMES but it's funny
 					// Utility Umbrella I guess???
 					if (
-						(teamOfferedSupport.sun && !teamRequestedSupport.sun.includes(set) && !set.roles.includes('sun') && !set.roles.includes('backupsun') && !(
-							this.dex.species.get(set.species).randbats.resistances.Fire === 'true' ||
-							(this.dex.species.get(set.species).randbats.resistances.Fire.Ability && this.dex.species.get(set.species).randbats.resistances.Fire.Ability.includes(set.ability))
-						)) ||
-						(teamOfferedSupport.rain && !teamRequestedSupport.rain.includes(set) && !set.roles.includes('rain') && !set.roles.includes('backuprain') && !(
+						teamOfferedSupport.rain && !teamRequestedSupport.rain.includes(set) && !set.roles.includes('rain') && !set.roles.includes('backuprain') && !(
 							this.dex.species.get(set.species).randbats.resistances.Water === 'true' ||
 							(this.dex.species.get(set.species).randbats.resistances.Water.Ability && this.dex.species.get(set.species).randbats.resistances.Water.Ability.includes(set.ability))
-						))
-					) set.possibleItems.tier2.push('Utility Umbrella');
+						)
+					) {
+						if (set.moves.includes('Synthesis') || set.moves.includes('Morning Sun') || set.moves.includes('Moonlight')) set.possibleItems.tier0.push('Utility Umbrella');
+						else set.possibleItems.tier2.push('Utility Umbrella');
+					} else if (
+						teamOfferedSupport.sun && !teamRequestedSupport.sun.includes(set) && !set.roles.includes('sun') && !set.roles.includes('backupsun') && !(
+							this.dex.species.get(set.species).randbats.resistances.Fire === 'true' ||
+							(this.dex.species.get(set.species).randbats.resistances.Fire.Ability && this.dex.species.get(set.species).randbats.resistances.Fire.Ability.includes(set.ability))
+						)
+					) {
+						set.possibleItems.tier2.push('Utility Umbrella');
+					}
 					// Absorb Bulb and Cell Battery
 					// For these, you want to resist the type, but *not* be immune to it
 					// Absorb Bulb also wants to be a special attacker, and Cell Battery wants to be a physical attacker
