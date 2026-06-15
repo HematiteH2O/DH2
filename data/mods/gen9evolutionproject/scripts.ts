@@ -1894,11 +1894,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					}
 				}
 
-				const makeFragment = (
-					fragment: AnyObject, moveChecks: AnyObject | null, offeredSupport: string[] | null, fragmentMods: AnyObject | null
-				) = {
+				const makeFragment = (instructions: AnyObject) = {
 					// moveChecks are criteria to make sure the fragment is eligible
-					if (moveChecks) {
+					if (instructions.moveChecks) {
+						moveChecks = instructions.moveChecks;
 						if (moveChecks.moves) {
 							if (Array.isArray(moveChecks.moves) && !moveChecks.moves.includes(fragment.baseMove)) return;
 							else if (moveChecks.moves !== fragment.baseMove) return;
@@ -1907,21 +1906,32 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					}
 					
 					// fragmentResults are changes to make to the fragment before we do that
-					let modFragment = Utils.deepClone(fragment);
-					if (fragmentMods) {
+					let modFragments = [];
+					if (instructions.fragmentMods) {
 						// nothing yet
 					}
 					
 					// offeredSupport is where to put the fragment if we accept it
-					if (offeredSupport) {
-						for (const support of offeredSupport) {
-							if (!newMon.randbats.offeredSupport[support]) newMon.randbats.offeredSupport[support] = [];
-							newMon.randbats.offeredSupport[support].push(modFragment);
+					if (instructions.offeredSupport) {
+						if (modFragments.length) {
+							for (const modFragment of modFragments) for (const support of instructions.offeredSupport) {
+								if (!newMon.randbats.offeredSupport[support]) newMon.randbats.offeredSupport[support] = [];
+								newMon.randbats.offeredSupport[support].push(modFragment);
+							}
+						} else {
+							for (const support of instructions.offeredSupport) {
+								if (!newMon.randbats.offeredSupport[support]) newMon.randbats.offeredSupport[support] = [];
+								newMon.randbats.offeredSupport[support].push(fragment);
+							}
 						}
 					}
 				}
 				for (const fragment of fragments) {
-					makeFragment(fragment, {moves: ['Fake Out', 'Mat Block']}, ['fakeout']);
+					makeFragment({
+						fragment: fragment,
+						moveChecks: {moves: ['Fake Out', 'Mat Block']},
+						offeredSupport: ['fakeout'],
+					});
 
 				// general / STAB
 					// okay, the STAB categories are obviously way unfinished - I'm gonna come back to this
