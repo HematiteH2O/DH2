@@ -3578,6 +3578,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					}
 				}
 				if (randomized) set.hasBeenRandomized = true;
+				set.roles = [];
+				set.avoid = [];
 				set.coveredStabs = [];
 				set.attackingTypes = {};
 				set.movePowers = {};
@@ -3750,7 +3752,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						continue;
 					}
 				}
-				if (fragment.avoid && fragment.pokemon.roles) {
+				if (fragment.pokemon.roles.length && fragment.avoid) {
 					let avoid = false;
 					for (const role of fragment.avoid) {
 						if (fragment.pokemon.roles.includes(role)) avoid = true;
@@ -3760,7 +3762,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						continue;
 					}
 				}
-				if (fragment.pokemon.avoid && fragment.role) {
+				if (fragment.pokemon.avoid.length && fragment.role) {
 					let avoid = false;
 					for (const role of fragment.pokemon.avoid) {
 						if (role === fragment.role) avoid = true;
@@ -3770,7 +3772,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						continue;
 					}
 				}
-				if (fragment.pokemon.avoid && fragment.tags) {
+				if (fragment.pokemon.avoid.length && fragment.tags) {
 					let avoid = false;
 					for (const role of fragment.pokemon.avoid) {
 						if (fragment.tags.includes(role)) avoid = true;
@@ -3838,7 +3840,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						if (!['mainstab', 'protection', 'personal'].includes(fragment.role)) {
 							if (!teamOfferedSupport[fragment.role]) teamOfferedSupport[fragment.role] = [];
 							if (!teamOfferedSupport[fragment.role].includes(fragment.pokemon)) teamOfferedSupport[fragment.role].push(fragment.pokemon);
-							if (!fragment.pokemon.roles) fragment.pokemon.roles = [];
 							if (!fragment.pokemon.roles.includes(fragment.role)) fragment.pokemon.roles.push(fragment.role);
 						}
 						else if (fragment.role === 'mainstab' && fragment.moveType && !fragment.pokemon.coveredStabs.includes(fragment.moveType)) fragment.pokemon.coveredStabs.push(fragment.moveType);
@@ -3851,11 +3852,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						}
 					}
 					if (fragment.tags) { // I only define each fragment with one role, but sometimes - especially for the "buddy" property later - I think it could come in handy to give them more labels than that
-						if (!fragment.pokemon.roles) fragment.pokemon.roles = [];
 						for (const tag of fragment.tags) if (!fragment.pokemon.roles.includes(tag)) fragment.pokemon.roles.push(tag);
 					}
 					if (fragment.avoid) {
-						if (!fragment.pokemon.avoid) fragment.pokemon.avoid = [];
 						for (const avoid of fragment.avoid) if (!fragment.pokemon.avoid.includes(avoid)) fragment.pokemon.avoid.push(avoid);
 					}
 					if (fragment[format].acceptedSupport) for (const request of fragment[format].acceptedSupport) {
@@ -4242,19 +4241,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (!['mainstab', 'protection', 'personal'].includes(chosenFragment.role)) {
 						if (!teamOfferedSupport[chosenFragment.role]) teamOfferedSupport[chosenFragment.role] = [];
 						if (!teamOfferedSupport[chosenFragment.role].includes(chosenFragment.pokemon)) teamOfferedSupport[chosenFragment.role].push(chosenFragment.pokemon);
-						if (!chosenFragment.pokemon.roles) chosenFragment.pokemon.roles = [];
 						if (!chosenFragment.pokemon.roles.includes(chosenFragment.role)) chosenFragment.pokemon.roles.push(chosenFragment.role);
 					}
 					else if (chosenFragment.role === 'mainstab' && chosenFragment.moveType && !chosenFragment.pokemon.coveredStabs.includes(chosenFragment.moveType)) chosenFragment.pokemon.coveredStabs.push(chosenFragment.moveType);
 				}
-				if (chosenFragment.tags) {
-					if (!chosenFragment.pokemon.roles) chosenFragment.pokemon.roles = [];
-					for (const tag of chosenFragment.tags) if (!chosenFragment.pokemon.roles.includes(tag)) chosenFragment.pokemon.roles.push(tag);
-				}
-				if (chosenFragment.avoid) {
-					if (!chosenFragment.pokemon.avoid) chosenFragment.pokemon.avoid = [];
-					for (const avoid of chosenFragment.avoid) if (!chosenFragment.pokemon.avoid.includes(avoid)) chosenFragment.pokemon.avoid.push(avoid);
-				}
+				if (chosenFragment.tags) for (const tag of chosenFragment.tags) if (!chosenFragment.pokemon.roles.includes(tag)) chosenFragment.pokemon.roles.push(tag);
+				if (chosenFragment.avoid) for (const avoid of chosenFragment.avoid) if (!chosenFragment.pokemon.avoid.includes(avoid)) chosenFragment.pokemon.avoid.push(avoid);
 				if (chosenFragment.baseMove) {
 					if (chosenFragment.pokemon.movePowers[this.dex.moves.get(chosenFragment.baseMove).name]) {
 						if (chosenFragment.moveBasePower && chosenFragment.moveBasePower > chosenFragment.pokemon.movePowers[this.dex.moves.get(chosenFragment.baseMove).name]) chosenFragment.pokemon.movePowers[this.dex.moves.get(chosenFragment.baseMove).name] = chosenFragment.moveBasePower;
