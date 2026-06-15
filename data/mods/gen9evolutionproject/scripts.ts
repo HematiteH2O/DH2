@@ -5238,7 +5238,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 				if (choiceItem) {
 					let choiceValue = 'tier2';
-					if (set.roles.includes('pivoting') choiceValue = 'tier0';
+					if (set.roles.includes('pivoting')) choiceValue = 'tier0';
 					if (set.roles.includes('physical') && !set.roles.includes('special')) set.possibleItems[choiceValue].push('Choice Band');
 					if (set.roles.includes('special') && !set.roles.includes('physical')) set.possibleItems[choiceValue].push('Choice Specs');
 					if ((set.exactStats.spe * 1.5 > (format === 'singles' ? 403 : 204)) && !(set.exactStats.spe > (format === 'singles' ? 403 : 204))) set.possibleItems[choiceValue].push('Choice Scarf');
