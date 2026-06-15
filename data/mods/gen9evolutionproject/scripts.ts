@@ -5107,6 +5107,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				} else if (set.roles.includes('snow') || set.roles.includes('backupsnow')) {
 					set.possibleItems.tier2.push('Icy Rock');
 				}
+				// species-specific items
+				if (this.dex.species.get(set.species).evos) set.possibleItems.tier0.push('Eviolite');
+				// ... actually yeah that's the only one I guess
+				// it doesn't feel correct at all to push for something like Soul Dew on Latios and Latias,
+				// and something like Thick Club is more likely to be outright guaranteed by an earlier fragment
+				// so I guess it's just Eviolite?
 				for (const item of pushItems) if (!set.possibleItems.tier0.includes(item)) set.possibleItems.tier0.push(item);
 
 				// this section was going to be tier 1 at first, but they ended up a bit more spread out
@@ -5173,6 +5179,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					// // In VGC, again, you want a teammate that can side-proc the item
 					// // In singles, you want high bulk, an offensive role, and Speed-boosting capability
 				}
+				// Room Service is... specific enough to be interesting, but not strong enough to be a top priority,
+				// so I guess I'll also make it tier 1 for now and see how that feels?
+				if (format === 'vgc' && teamOfferedSupport.trickroom) {
+					if (set.exactStats.spe / 1.5 < 80 && set.exactStats.spe > 80) set.possibleItems.tier1.push('Room Service');
+				}
 
 				// tier 2 - generic, good items; most likely to pull from here in general
 				// Leftovers / Black Sludge
@@ -5204,11 +5215,16 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					].includes(move)) choiceItem = false;
 					if (['Fake Out', 'First Impression'].includes(move)) choiceItem = false;
 				}
-				if (!statusMoveCount) set.possibleItems.tier2.push('Assault Vest');
-				if (choiceItem && set.roles.includes('pivoting')) {
-					if (set.roles.includes('physical') && !set.roles.includes('special')) set.possibleItems.tier2.push('Choice Band');
-					if (set.roles.includes('special') && !set.roles.includes('physical')) set.possibleItems.tier2.push('Choice Specs');
-					if (set.evs.spe >= 248) set.possibleItems.tier2.push('Choice Scarf');
+				if (!statusMoveCount) {
+					if (format === 'vgc' && set.ability === 'Intimidate' || set.moves.includes('Fake Out')) set.possibleItems.tier0.push('Assault Vest');
+					else set.possibleItems.tier2.push('Assault Vest');
+				}
+				if (choiceItem) {
+					let choiceValue = 'tier2';
+					if (set.roles.includes('pivoting') choiceValue = 'tier0';
+					if (set.roles.includes('physical') && !set.roles.includes('special')) set.possibleItems[choiceValue].push('Choice Band');
+					if (set.roles.includes('special') && !set.roles.includes('physical')) set.possibleItems[choiceValue].push('Choice Specs');
+					if ((set.exactStats.spe * 1.5 > (format === 'singles' ? 403 : 204)) && !(set.exactStats.spe > (format === 'singles' ? 403 : 204))) set.possibleItems[choiceValue].push('Choice Scarf');
 				}
 				// Covert Cloak and Clear Amulet
 				if (format === 'vgc') {
@@ -5284,9 +5300,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					}
 				}
 				// Focus Sash
-				if (set.ability !== 'Sturdy' && (set.evs.hp + set.evs.def + set.evs.spd) <= 16) {
+				if (set.ability !== 'Sturdy') {
 					if (format === 'vgc') {
-						if (set.evs.spe >= 248 || set.ability === 'Prankster') set.possibleItems.tier2.push('Focus Sash');
+						if (
+							(set.exactStats.hp * set.exactStats.def <= 16000 || set.exactStats.hp * set.exactStats.spd <= 16000) &&
+							(set.evs.spe >= 248 || set.ability === 'Prankster')
+						) set.possibleItems.tier2.push('Focus Sash');
 					} else {
 						if (set.roles.includes('entryhazard') && statusMoveCount > 1) set.possibleItems.tier2.push('Focus Sash');
 					}
