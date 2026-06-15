@@ -1,3 +1,4 @@
+// recoding a little at a time
 import { Pokemon, EffectState } from '../../../sim/pokemon';
 import { Teams } from '../../../sim/teams';
 import { Utils } from '../../../lib/utils';
