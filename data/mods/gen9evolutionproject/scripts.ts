@@ -4808,7 +4808,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// some items will want to calculate exact stats, but it's way easier if I do that here because I still have natures stored
 				set.exactStats = {
 					hp: Math.floor(
-						(this.dex.species.get(set.species).baseStats.atk * 2 + set.ivs.atk + set.evs.atk/4) * (setLevel / 100) + setLevel + 10
+						(this.dex.species.get(set.species).baseStats.hp * 2 + set.ivs.hp + set.evs.hp/4) * (setLevel / 100) + setLevel + 10
 					),
 					atk: Math.floor(
 						Math.floor(
