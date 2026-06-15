@@ -820,7 +820,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			let learnset = this.dex.data.Learnsets[id].learnset;
 			if (newMon.baseSpecies && newMon.baseSpecies === 'Rotom') learnset = this.dex.data.Learnsets.rotom.learnset;
 			// going to handle their form-specific moves separately; this is fine for here!
-			if (!learnset) continue;
+			if (!learnset) return;
 
 			// we need to initialize this for certain kinds of Speed-reliant support in VGC
 			let viableVgcSupport = false;
