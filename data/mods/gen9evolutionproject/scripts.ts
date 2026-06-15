@@ -842,7 +842,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			// we need to initialize this for certain kinds of Speed-reliant support in VGC
 			const vgcSupportSubfragments = [];
 			const makeSubfragment = (
-				ability: string | null, item: string | null, requestedSupport: string[] | null, avoid: string[] | null, tags: string[] | null, spe: number | null
+				spe: number | null, ability: string | null, item: string | null, requestedSupport: string[] | null, tags: string[] | null, avoid: string[] | null
 			) => {
 				if (
 					(ability && !newMon.randbats.abilities.includes(ability)) ||
@@ -866,23 +866,23 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				vgcSupportSubfragments.push(subfragment);
 			}
 			// +0 Speed cutoff: Garchomp
-			makeSubfragment(spe: 102);
+			makeSubfragment(102);
 			// +1 Speed cutoff: Aleon
-			makeSubfragment(ability: 'Speed Boost', spe: 72);
-			makeSubfragment(ability: 'Noble Potential', spe: 72, tags: ['proficientspe']); // TODO: set up "most proficient stat" functionality I guess
-			makeSubfragment(ability: 'Quark Drive', spe: 72, requestedSupport: ['electricterrain'], avoid: ['boosterenergy'], tags: ['proficientspe']);
-			makeSubfragment(ability: 'Quark Drive', spe: 72, item: 'Booster Energy', tags: ['boosterenergy', 'proficientspe']);
-			makeSubfragment(ability: 'Protosynthesis', spe: 72, requestedSupport: ['sun'], avoid: ['boosterenergy'], tags: ['proficientspe']);
-			makeSubfragment(ability: 'Protosynthesis', spe: 72, item: 'Booster Energy', tags: ['boosterenergy', 'proficientspe']);
+			makeSubfragment(72, 'Speed Boost');
+			makeSubfragment(72, 'Noble Potential', null, null, ['proficientspe']); // TODO: set up "most proficient stat" functionality I guess
+			makeSubfragment(72, 'Quark Drive', null, ['electricterrain'], ['proficientspe'], ['boosterenergy']);
+			makeSubfragment(72, 'Quark Drive', 'Booster Energy', null, ['proficientspe', 'boosterenergy']);
+			makeSubfragment(72, 'Protosynthesis', null, ['sun'], ['proficientspe'], ['boosterenergy']);
+			makeSubfragment(72, 'Protosynthesis', 'Booster Energy', null, ['proficientspe', 'boosterenergy']);
 			// +2 Speed cutoff: Aleon
-			makeSubfragment(ability: 'Chlorophyll', spe: 41, requestedSupport: 'sun');
-			makeSubfragment(ability: 'Swift Swim', spe: 41, requestedSupport: 'rain');
-			makeSubfragment(ability: 'Sand Rush', spe: 41, requestedSupport: 'sand');
-			makeSubfragment(ability: 'Slush Rush', spe: 41, requestedSupport: 'snow');
-			makeSubfragment(ability: 'Unburden', spe: 41, item: 'Grassy Seed', requestedSupport: 'grassyterrain');
-			makeSubfragment(ability: 'Unburden', spe: 41, item: 'Electric Seed', requestedSupport: 'electricterrain');
-			makeSubfragment(ability: 'Unburden', spe: 41, item: 'Misty Seed', requestedSupport: 'mistyterrain');
-			makeSubfragment(ability: 'Unburden', spe: 41, item: 'Psychic Seed', requestedSupport: 'psychicterrain');
+			makeSubfragment(41, 'Chlorophyll', null, ['sun']);
+			makeSubfragment(41, 'Swift Swim', null, ['rain']);
+			makeSubfragment(41, 'Sand Rush', null, ['sand']);
+			makeSubfragment(41, 'Slush Rush', null, ['snow']);
+			makeSubfragment(41, 'Unburden', 'Grassy Seed', ['grassyterrain']);
+			makeSubfragment(41, 'Unburden', 'Electric Seed', ['electricterrain']);
+			makeSubfragment(41, 'Unburden', 'Misty Seed', ['mistyterrain']);
+			makeSubfragment(41, 'Unburden', 'Psychic Seed', ['psychicterrain']);
 			if (newMon.baseStats.spe < 66 && learnset.trickroom && learnset.trickroom.length) {
 				vgcSupportSubfragments.push({
 					moves: ['Trick Room'],
