@@ -3103,42 +3103,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		let shiny = false;
 		if (!team.length && this.randomChance(1, 100)) shiny = true; // for fun, the whole team will be Shiny 1% of the time
 		
-		// Now, we'll call randbatsInitialize for every Pokémon in the Evo 2 dex
-		// After species selection, we'll call randbatsInitialize again, this time for just the Pokémon on the player's team
-		// That way, we can safely ensure that every Pokémon we actually need to look at is properly initialized - even if players are using custom rulesets with Pokémon we wouldn't normally care about
-		if (stage === 'LC') {
-			for (const id in this.dex.data.Pokedex) {
-				if (
-					this.dex.data.FormatsData[id] && this.dex.data.FormatsData[id].tier &&
-					['Pokémon of the Day!', 'Evo!', '(Prevo)'].includes(this.dex.data.FormatsData[id].tier) &&
-					(newMon.evos && newMon.evos.length && !newMon.prevo && !['mareanie'].includes(id))
-				) {
-					randbatsInitialize(id);
-				}
-			}
-		} else {
-			for (const id in this.dex.data.Pokedex) {
-				if (
-					this.dex.data.FormatsData[id] && this.dex.data.FormatsData[id].tier &&
-					(['Pokémon of the Day!', 'Evo!'].includes(this.dex.data.FormatsData[id].tier) || ['porygon2', 'accelgor'].includes(id))
-				) {
-					randbatsInitialize(id);
-					// banlists
-					if ([
-						'toxapex', 'noivernvariant', 'chandelure', 'corviknight', 'darmanitan', 'darmanitangalar', 'excadrill', 'hawlucha', 'garchomp', 'velocinobi',
-						'dragonite', 'tapukoko', 'tapulele', 'tapubulu', 'tapufini', 'zacian', 'zaciancrowned', 'zamazenta', 'zamazentacrowned', 'deoxys',
-						'deoxysattack', 'deoxysdefense', 'deoxysspeed',
-					].includes(id)) this.dex.data.Pokedex[id].randbats.singles.banned = true;
-					if ([
-						'dragonite', 'tapukoko', 'tapulele', 'tapubulu', 'tapufini', 'zacian', 'zaciancrowned', 'zamazenta', 'zamazentacrowned', 'deoxys',
-						'deoxysattack', 'deoxysdefense', 'deoxysspeed',
-					].includes(id)) this.dex.data.Pokedex[id].randbats.vgc.banned = true;
-				}
-			}
-		}
-
-
-		
 		// check for monotype and LC
 		let monotype = null;
 		let types = [
@@ -3185,6 +3149,40 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		if (!regulationb) {
 			megaLimit = 0;
 			restrictedLimit = 0;
+		}
+		
+		// Now, we'll call randbatsInitialize for every Pokémon in the Evo 2 dex
+		// After species selection, we'll call randbatsInitialize again, this time for just the Pokémon on the player's team
+		// That way, we can safely ensure that every Pokémon we actually need to look at is properly initialized - even if players are using custom rulesets with Pokémon we wouldn't normally care about
+		if (stage === 'LC') {
+			for (const id in this.dex.data.Pokedex) {
+				if (
+					this.dex.data.FormatsData[id] && this.dex.data.FormatsData[id].tier &&
+					['Pokémon of the Day!', 'Evo!', '(Prevo)'].includes(this.dex.data.FormatsData[id].tier) &&
+					(newMon.evos && newMon.evos.length && !newMon.prevo && !['mareanie'].includes(id))
+				) {
+					randbatsInitialize(id);
+				}
+			}
+		} else {
+			for (const id in this.dex.data.Pokedex) {
+				if (
+					this.dex.data.FormatsData[id] && this.dex.data.FormatsData[id].tier &&
+					(['Pokémon of the Day!', 'Evo!'].includes(this.dex.data.FormatsData[id].tier) || ['porygon2', 'accelgor'].includes(id))
+				) {
+					randbatsInitialize(id);
+					// banlists
+					if ([
+						'toxapex', 'noivernvariant', 'chandelure', 'corviknight', 'darmanitan', 'darmanitangalar', 'excadrill', 'hawlucha', 'garchomp', 'velocinobi',
+						'dragonite', 'tapukoko', 'tapulele', 'tapubulu', 'tapufini', 'zacian', 'zaciancrowned', 'zamazenta', 'zamazentacrowned', 'deoxys',
+						'deoxysattack', 'deoxysdefense', 'deoxysspeed',
+					].includes(id)) this.dex.data.Pokedex[id].randbats.singles.banned = true;
+					if ([
+						'dragonite', 'tapukoko', 'tapulele', 'tapubulu', 'tapufini', 'zacian', 'zaciancrowned', 'zamazenta', 'zamazentacrowned', 'deoxys',
+						'deoxysattack', 'deoxysdefense', 'deoxysspeed',
+					].includes(id)) this.dex.data.Pokedex[id].randbats.vgc.banned = true;
+				}
+			}
 		}
 
 		
