@@ -840,104 +840,49 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			if (!learnset) return;
 
 			// we need to initialize this for certain kinds of Speed-reliant support in VGC
-			let viableVgcSupport = false;
-			let vgcSupportSubfragments = [];
-			if (newMon.baseStats.spe > 102) { // unboosted Speed cutoff: Garchomp
-				vgcSupportSubfragments.push({
-					default: true,
-				});
-				viableVgcSupport = true;
-			} else if (newMon.baseStats.spe > 72) { // +1 Speed cutoff: Aleon
-				if (newMon.randbats.abilities.includes('Speed Boost')) {
-					vgcSupportSubfragments.push({
-						ability: 'Speed Boost',
-					});
-					viableVgcSupport = true;
+			const vgcSupportSubfragments = [];
+			const makeSubfragment = (
+				ability: string | null, item: string | null, requestedSupport: string[] | null, avoid: string[] | null, tags: string[] | null, spe: number | null
+			) => {
+				if (
+					(ability && !newMon.randbats.abilities.includes(ability)) ||
+					(spe && !newMon.baseStats.spe <= spe)
+				) return;
+				let subfragment = {};
+				if (ability) subfragment.ability = ability;
+				if (item) subfragment.item = item;
+				if (requestedSupport) {
+					subfragment.requestedSupport = [];
+					for (const support of requestedSupport) subfragment.requestedSupport.push(support);
 				}
-				if (newMon.randbats.abilities.includes('Noble Potential')) {
-					vgcSupportSubfragments.push({
-						ability: 'Noble Potential',
-					});
-					viableVgcSupport = true;
+				if (avoid) {
+					subfragment.requestedSupport = [];
+					for (const support of requestedSupport) subfragment.requestedSupport.push(support);
 				}
-				if (newMon.randbats.abilities.includes('Quark Drive')) {
-					vgcSupportSubfragments.push({
-						ability: 'Quark Drive',
-						requestedSupport: ['electricterrain'],
-						avoid: ['boosterenergy'],
-					});
-					vgcSupportSubfragments.push({
-						ability: 'Quark Drive',
-						item: 'Booster Energy',
-						tags: ['boosterenergy'],
-					});
+				if (tags) {
+					subfragment.requestedSupport = [];
+					for (const support of requestedSupport) subfragment.requestedSupport.push(support);
 				}
-				if (newMon.randbats.abilities.includes('Protosynthesis')) {
-					vgcSupportSubfragments.push({
-						ability: 'Protosynthesis',
-						requestedSupport: ['sun'],
-						avoid: ['boosterenergy'],
-					});
-					vgcSupportSubfragments.push({
-						ability: 'Protosynthesis',
-						item: 'Booster Energy',
-						tags: ['boosterenergy'],
-					});
-					viableVgcSupport = true;
-				}
-			} else if (newMon.baseStats.spe > 41) { // +2 Speed cutoff: Aleon
-				if (newMon.randbats.abilities.includes('Chlorophyll')) {
-					vgcSupportSubfragments.push({
-						ability: 'Chlorophyll',
-						requestedSupport: ['sun'],
-					});
-					viableVgcSupport = true;
-				}
-				else if (newMon.randbats.abilities.includes('Swift Swim')) {
-					vgcSupportSubfragments.push({
-						ability: 'Swift Swim',
-						requestedSupport: ['rain'],
-					});
-					viableVgcSupport = true;
-				}
-				else if (newMon.randbats.abilities.includes('Sand Rush')) {
-					vgcSupportSubfragments.push({
-						ability: 'Sand Rush',
-						requestedSupport: ['sand'],
-					});
-					viableVgcSupport = true;
-				}
-				else if (newMon.randbats.abilities.includes('Slush Rush')) {
-					vgcSupportSubfragments.push({
-						ability: 'Slush Rush',
-						requestedSupport: ['snow'],
-					});
-					viableVgcSupport = true;
-				}
-				else if (newMon.randbats.abilities.includes('Unburden')) {
-					vgcSupportSubfragments.push({
-						ability: 'Unburden',
-						item: 'Grassy Seed',
-						requestedSupport: ['grassyterrain'],
-					});
-					vgcSupportSubfragments.push({
-						ability: 'Unburden',
-						item: 'Electric Seed',
-						requestedSupport: ['electricterrain'],
-					});
-					vgcSupportSubfragments.push({
-						ability: 'Unburden',
-						item: 'Misty Seed',
-						requestedSupport: ['mistyterrain'],
-					});
-					vgcSupportSubfragments.push({
-						ability: 'Unburden',
-						item: 'Psychic Seed',
-						requestedSupport: ['psychicterrain'],
-					});
-					viableVgcSupport = true;
-				}
+				vgcSupportSubfragments.push(subfragment);
 			}
+			// +0 Speed cutoff: Garchomp
+			makeSubfragment(spe: 102);
+			// +1 Speed cutoff: Aleon
+			makeSubfragment(ability: 'Speed Boost', spe: 72);
+			makeSubfragment(ability: 'Noble Potential', spe: 72, tags: ['proficientspe']); // TODO: set up "most proficient stat" functionality I guess
+			makeSubfragment(ability: 'Quark Drive', spe: 72, requestedSupport: ['electricterrain'], avoid: ['boosterenergy'], tags: ['proficientspe']);
+			makeSubfragment(ability: 'Quark Drive', spe: 72, item: 'Booster Energy', tags: ['boosterenergy', 'proficientspe']);
+			makeSubfragment(ability: 'Protosynthesis', spe: 72, requestedSupport: ['sun'], avoid: ['boosterenergy'], tags: ['proficientspe']);
+			makeSubfragment(ability: 'Protosynthesis', spe: 72, item: 'Booster Energy', tags: ['boosterenergy', 'proficientspe']);
+			// +2 Speed cutoff: Aleon
+			makeSubfragment(ability: 'Chlorophyll', spe: 41, requestedSupport: 'sun');
+			makeSubfragment(ability: 'Swift Swim', spe: 41, requestedSupport: 'rain');
+			makeSubfragment(ability: 'Sand Rush', spe: 41, requestedSupport: 'sand');
+			makeSubfragment(ability: 'Slush Rush', spe: 41, requestedSupport: 'snow');
+			makeSubfragment(ability: 'Unburden', spe: 41, item: 'Grassy Seed', requestedSupport: 'grassyterrain');
+			makeSubfragment(ability: 'Unburden', spe: 41, item: 'Electric Seed', requestedSupport: 'electricterrain');
+			makeSubfragment(ability: 'Unburden', spe: 41, item: 'Misty Seed', requestedSupport: 'mistyterrain');
+			makeSubfragment(ability: 'Unburden', spe: 41, item: 'Psychic Seed', requestedSupport: 'psychicterrain');
 			if (newMon.baseStats.spe < 66 && learnset.trickroom && learnset.trickroom.length) {
 				vgcSupportSubfragments.push({
 					moves: ['Trick Room'],
