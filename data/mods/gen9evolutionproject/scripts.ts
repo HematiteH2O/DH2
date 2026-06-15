@@ -1901,10 +1901,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					const offeredSupport = instructions.offeredSupport;
 					// moveChecks are criteria to make sure the fragment is eligible
 					if (moveChecks) {
-						if (moveChecks.moves) {
-							if (Array.isArray(moveChecks.moves) && !moveChecks.moves.includes(fragment.baseMove)) return;
-							else if (moveChecks.moves !== fragment.baseMove) return;
-						}
+						if (moveChecks.moves && Array.isArray(moveChecks.moves) && !moveChecks.moves.includes(fragment.baseMove)) return;
+						else if (moveChecks.moves && !Array.isArray(moveChecks.moves) && moveChecks.moves !== fragment.baseMove) return;
 						if (moveChecks.priority && fragment.movePriority < moveChecks.priority) return;
 					}
 					
