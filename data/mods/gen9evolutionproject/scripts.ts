@@ -3344,7 +3344,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		if (!firstDraftTeam.length && eligiblePokemon.filter(id => this.dex.data.Pokedex[id].copyData).length) {
 			// if a team started completely empty, I want the first Pokémon selected to be a completely random Evo 2 sub
 			let chosenRandomPokemon = this.sample(eligiblePokemon.filter(id => this.dex.data.Pokedex[id].copyData));
-			chosenRandomPokemon = 'overchillzen',
 			firstDraftTeam.push({
 				name: this.dex.data.Pokedex[chosenRandomPokemon].name,
 				species: this.dex.data.Pokedex[chosenRandomPokemon].name,
