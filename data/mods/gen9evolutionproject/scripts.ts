@@ -4972,7 +4972,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							if (this.dex.species.get(set.species).randbats.types.includes[coverageType]) itemTier = 'tier3';
 							if (this.dex.data.TypeChart[berryType.toLowerCase()].damageTaken[coverageType] === 1) eligible = true; // that can hit it for SE
 						}
-						if (berryType === 'Dark') eligible = true; // ... or I guess if it's just a Dark weakness, because Colbur for Knock is kinda always viable
+						if (berryType === 'Dark' && format === 'singles') eligible = true; // ... or I guess if it's just a Dark weakness, because Colbur for Knock is kinda always viable
 						if (eligible) {
 							// give them a boost if your Tera Type is also weak to it
 							if (this.dex.data.TypeChart[(set.teraType).toLowerCase()].damageTaken[berryType] === 1) itemTier = 'tier1';
