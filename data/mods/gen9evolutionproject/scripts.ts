@@ -757,7 +757,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			abilityImmunity('Levitate', 'Ground');
 			// TODO: status and powder immunities
 			if (!newMon.randbats.types.includes('Flying')) abilityResistance('Misty Surge', 'Dragon');
-			if (newMon.abilities.includes('Wonder Guard')) for (const type of types) if (!newMon.randbats.weaknesses[type]) abilityImmunity('Wonder Guard', type);
+			if (newMon.randbats.abilities.includes('Wonder Guard')) for (const type of types) if (!newMon.randbats.weaknesses[type]) abilityImmunity('Wonder Guard', type);
 			
 			// Evo customs
 			abilityResistance('Storm Chaser', 'Water');
@@ -773,7 +773,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			abilityResistance('Directing Traffic', 'Normal');
 			abilityImmunity('Centrifuge', 'Ground');
 			abilityImmunity('Divinated Protection', 'Psychic');
-			if (newMon.abilities.includes('Patch Note')) for (const type of types) if (this.dex.data.TypeChart[type.toLowerCase()].damageTaken[newMon.types[0]] === 1) abilityResistance('Patch Note', type);
+			if (newMon.randbats.abilities.includes('Patch Note')) for (const type of types) if (this.dex.data.TypeChart[type.toLowerCase()].damageTaken[newMon.types[0]] === 1) abilityResistance('Patch Note', type);
 
 			// now, we're going to turn some of these into offeredSupport like 'groundimmune'
 			for (const immunity in newMon.randbats.immunities) {
