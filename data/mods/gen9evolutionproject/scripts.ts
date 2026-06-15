@@ -961,33 +961,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								fragments.push(modFragment);
 							}
 							break;
-						case 'Awakening':
-							if (move.type === 'Fighting' && basePower) {
-								let modFragment = {
-									ability: ability,
-									moveBasePower: basePower * 1.5,
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Calcify':
-							if (move.type === 'Rock' && basePower) {
-								let modFragment = {
-									ability: ability,
-									moveBasePower: basePower * 1.3,
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Canopy':
-							if (move.type === 'Grass' && basePower) {
-								let modFragment = {
-									ability: ability,
-									moveBasePower: basePower * 1.3,
-								};
-								fragments.push(modFragment);
-							}
-							break;
 						case 'Desolate Land':
 						case 'Drought':
 						case 'Mega Sol':
@@ -1037,7 +1010,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							break;
 						case 'Drizzle':
 						case 'Primordial Sea':
-						case 'Storm Chaser':
 							if (move.type === 'Water' && basePower) {
 								let modFragment = {
 									ability: ability,
@@ -1108,23 +1080,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 									vgc: {
 										acceptedSupport: [],
 										requestedSupport: ['sun'],
-									},
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Frozen Focus':
-							if (move.category === 'Special') {
-								let modFragment = {
-									ability: ability,
-									moveBasePower: basePower * 1.5,
-									singles: {
-										acceptedSupport: [],
-										requestedSupport: ['snow'],
-									},
-									vgc: {
-										acceptedSupport: [],
-										requestedSupport: ['snow'],
 									},
 								};
 								fragments.push(modFragment);
@@ -1218,7 +1173,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								fragments.push(modFragment);
 							}
 							break;
-						case 'Mega-Neural':
 						case 'Psychic Surge':
 							if (!newMon.randbats.types.includes('Flying')) {
 								if (move.type === 'Psychic' && basePower) {
@@ -1291,18 +1245,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 									ability: ability,
 									tags: ['Normalize'],
 									moveType: 'Normal',
-									moveBasePower: basePower * 1.2,
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Permafrost':
-							if (basePower && !noModifyType.includes(moveid)) {
-								baseFragment.avoid = ['Permafrost'];
-								let modFragment = {
-									ability: ability,
-									tags: ['Permafrost'],
-									moveType: 'Ice',
 									moveBasePower: basePower * 1.2,
 								};
 								fragments.push(modFragment);
@@ -1510,6 +1452,116 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								fragments.push(modFragment);
 							}
 							break;
+						// Evo customs
+						case 'Awakening':
+							if (move.type === 'Fighting' && basePower) {
+								let modFragment = {
+									ability: ability,
+									moveBasePower: basePower * 1.5,
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case 'Calcify':
+							if (move.type === 'Rock' && basePower) {
+								let modFragment = {
+									ability: ability,
+									moveBasePower: basePower * 1.3,
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case 'Canopy':
+							if (move.type === 'Grass' && basePower) {
+								let modFragment = {
+									ability: ability,
+									moveBasePower: basePower * 1.3,
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case 'Storm Chaser':
+							if (move.type === 'Water' && basePower) {
+								let modFragment = {
+									ability: ability,
+									moveBasePower: basePower * 1.5,
+								};
+								fragments.push(modFragment);
+							}
+							if (['hurricane', 'thunder', 'bleakwindstorm', 'wildboltstorm', 'sandsearstorm'].includes(moveid)) {
+								// today I learned Springtide Storm is not affected by rain
+								let modFragment = {
+									ability: ability,
+									moveAccuracy: 100,
+								};
+								fragments.push(modFragment);
+							}
+							if (moveid === 'weatherball') {
+								let modFragment = {
+									ability: ability,
+									moveType: 'Water',
+									moveBasePower: 150,
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case 'Frozen Focus':
+							if (move.category === 'Special') {
+								let modFragment = {
+									ability: ability,
+									moveBasePower: basePower * 1.5,
+									singles: {
+										acceptedSupport: [],
+										requestedSupport: ['snow'],
+									},
+									vgc: {
+										acceptedSupport: [],
+										requestedSupport: ['snow'],
+									},
+								};
+								fragments.push(modFragment);
+							}
+							break;
+						case 'Mega-Neural':
+							if (!newMon.randbats.types.includes('Flying')) {
+								if (move.type === 'Psychic' && basePower) {
+									let modFragment = {
+										ability: ability,
+										moveBasePower: basePower * 1.3,
+									};
+									if (moveid === 'Expanding Force') modFragment.moveBasePower *= 1.5;
+									fragments.push(modFragment);
+								}
+								if (moveid === 'terrainpulse') {
+									let modFragment = {
+										ability: ability,
+										moveType: 'Psychic',
+										moveBasePower: 130,
+									};
+									fragments.push(modFragment);
+								}
+								if (moveid === 'naturepower') {
+									let modFragment = {
+										ability: ability,
+										moveType: 'Psychic',
+										moveBasePower: 90 * 1.3,
+									};
+									fragments.push(modFragment);
+								}
+							}
+							break;
+						case 'Permafrost':
+							if (basePower && !noModifyType.includes(moveid)) {
+								baseFragment.avoid = ['Permafrost'];
+								let modFragment = {
+									ability: ability,
+									tags: ['Permafrost'],
+									moveType: 'Ice',
+									moveBasePower: basePower * 1.2,
+								};
+								fragments.push(modFragment);
+							}
+							break;
 					}
 				}
 				
@@ -1541,6 +1593,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						fragment.vgc.requestedSupport.push('electricterrain');
 						// can still work with Ground immunity
 					}
+					// Evo customs (Mega-Neural)
 					if (moveid === 'expandingforce' && !['Mega-Neural', 'Psychic Surge'].includes(fragment.ability)) {
 						fragment.moveBasePower *= 1.5;
 						fragment.singles.requestedSupport.push('psychicterrain');
@@ -1564,6 +1617,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						fragment.singles.acceptedSupport.push('sun');
 						fragment.vgc.acceptedSupport.push('sun');
 					}
+					// Evo customs (Storm Chaser)
 					if (['electroshot'].includes(moveid) && !(fragment.ability && ['Drizzle', 'Primordial Sea', 'Storm Chaser'].includes(fragment.ability))) {
 						fragment.singles.requestedSupport.push('rain');
 						fragment.vgc.requestedSupport.push('rain');
@@ -1576,6 +1630,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						fragment.singles.requestedSupport.push('snow');
 						fragment.vgc.requestedSupport.push('snow');
 					}
+					// Evo customs (Shave Off)
 					if (['shaveoff'].includes(moveid) && !(fragment.ability && ['Snow Warning'].includes(fragment.ability))) {
 						fragment.singles.acceptedSupport.push('snow');
 						fragment.vgc.acceptedSupport.push('snow');
@@ -1606,6 +1661,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					// rain
 					if (
 						(fragment.moveType === 'Water') &&
+						// Evo customs (Storm Chaser)
 						!(fragment.ability && ['Drizzle', 'Primordial Sea', 'Storm Chaser'].includes(fragment.ability))
 					) {
 						let modFragment = Utils.deepClone(fragment);
@@ -1626,6 +1682,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					}
 					if (
 						['Thunder', 'Hurricane', 'Bleakwind Storm', 'Wildbolt Storm', 'Sandsear Storm'].includes(fragment.baseMove) &&
+						// Evo customs (Storm Chaser)
 						!(fragment.ability && ['Drizzle', 'Primordial Sea', 'Storm Chaser'].includes(fragment.ability))
 					) {
 						let modFragment = Utils.deepClone(fragment);
@@ -1721,6 +1778,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					
 					// Psychic Terrain
 					if (
+						// Evo customs (Mega-Neural)
 						fragment.moveType === 'Psychic' && !(fragment.ability && ['Psychic Surge', 'Mega-Neural'].includes(fragment.ability))
 					) {
 						let modFragment = Utils.deepClone(fragment);
@@ -1870,7 +1928,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						'hardpress', 'spinout', 'steelroller', 'gigatonhammer', 'makeitrain',
 						'fleurcannon',
 						'crushgrip', 'flail', 'naturalgift', 'fakeout', 'takedown', 'doubleedge', 'headcharge', 'thrash', 'wringout',
-						
+						// Evo customs
 						'renewingring', 'entanglement', 'slimecannon',
 					];
 					const rejectStabs = [
