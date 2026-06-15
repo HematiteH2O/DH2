@@ -5479,11 +5479,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						'Adrenaline Orb', 'Air Balloon', 'Berry Juice', 'Blunder Policy', 'Cell Battery', 'Electric Seed', 'Focus Sash', 'Grassy Seed', 'Luminous Moss', 'Mental Herb',
 						'Mirror Herb', 'Misty Seed', 'Normal Gem', 'Power Herb', 'Psychic Seed', 'Red Card', 'Snowball', 'Throat Spray', 'Weakness Policy', 'White Herb',
 					];
-					set.possibleItems.tier0 = set.possibleItems.tier0.filter((item) => (unburdenItems.includes(item)));
-					set.possibleItems.tier1 = set.possibleItems.tier1.filter((item) => (unburdenItems.includes(item)));
-					set.possibleItems.tier2 = set.possibleItems.tier2.filter((item) => (unburdenItems.includes(item)));
-					set.possibleItems.tier3 = set.possibleItems.tier3.filter((item) => (unburdenItems.includes(item)));
-					set.possibleItems.tier4 = set.possibleItems.tier4.filter((item) => (unburdenItems.includes(item)));
+					set.possibleItems.tier0 = set.possibleItems.tier0.filter((item) => (this.dex.items.get(item).isBerry || unburdenItems.includes(item)));
+					set.possibleItems.tier1 = set.possibleItems.tier1.filter((item) => (this.dex.items.get(item).isBerry || unburdenItems.includes(item)));
+					set.possibleItems.tier2 = set.possibleItems.tier2.filter((item) => (this.dex.items.get(item).isBerry || unburdenItems.includes(item)));
+					set.possibleItems.tier3 = set.possibleItems.tier3.filter((item) => (this.dex.items.get(item).isBerry || unburdenItems.includes(item)));
+					set.possibleItems.tier4 = set.possibleItems.tier4.filter((item) => (this.dex.items.get(item).isBerry || unburdenItems.includes(item)));
 				}
 
 				// FOR CHEEK POUCH AND BELCH
@@ -5495,6 +5495,18 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					set.possibleItems.tier2 = set.possibleItems.tier2.filter((item) => (this.dex.items.get(item).isBerry));
 					set.possibleItems.tier3 = set.possibleItems.tier3.filter((item) => (this.dex.items.get(item).isBerry));
 					set.possibleItems.tier4 = set.possibleItems.tier4.filter((item) => (this.dex.items.get(item).isBerry));
+				}
+
+				if (set.ability === 'Contrary') {
+					const boostingItems = [
+						'Adrenaline Orb', 'Apicot Berry', 'Ganlon Berry', 'Kee Berry', 'Liechi Berry', 'Maranga Berry', 'Mirror Herb', 'Petaya Berry', 'Salac Berry', 'Starf Berry',
+						'Absorb Bulb', 'Cell Battery', 'Electric Seed', 'Grassy Seed', 'Luminous Moss', 'Misty Seed', 'Psychic Seed', 'Room Service', 'Snowball', 'Throat Spray', 'Weakness Policy',
+					];
+					set.possibleItems.tier0 = set.possibleItems.tier0.filter((item) => (!boostingItems.includes(item)));
+					set.possibleItems.tier1 = set.possibleItems.tier1.filter((item) => (!boostingItems.includes(item)));
+					set.possibleItems.tier2 = set.possibleItems.tier2.filter((item) => (!boostingItems.includes(item)));
+					set.possibleItems.tier3 = set.possibleItems.tier3.filter((item) => (!boostingItems.includes(item)));
+					set.possibleItems.tier4 = set.possibleItems.tier4.filter((item) => (!boostingItems.includes(item)));
 				}
 			}
 
