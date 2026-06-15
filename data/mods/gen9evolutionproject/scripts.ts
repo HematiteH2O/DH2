@@ -773,7 +773,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			abilityResistance('Directing Traffic', 'Normal');
 			abilityImmunity('Centrifuge', 'Ground');
 			abilityImmunity('Divinated Protection', 'Psychic');
-			if (newMon.randbats.abilities.includes('Patch Note')) for (const type of types) if (this.dex.data.TypeChart[type.toLowerCase()].damageTaken[newMon.types[0]] === 1) abilityResistance('Patch Note', type);
+			if (newMon.randbats.abilities.includes('Patch Note')) for (const type of types) if (this.dex.data.TypeChart[type.toLowerCase()] && this.dex.data.TypeChart[type.toLowerCase()].damageTaken[newMon.types[0]] === 1) abilityResistance('Patch Note', type);
 
 			// now, we're going to turn some of these into offeredSupport like 'groundimmune'
 			for (const immunity in newMon.randbats.immunities) {
