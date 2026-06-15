@@ -1894,7 +1894,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					}
 				}
 
-				const makeFragment = (fragment: AnyObject, moveChecks: AnyObject, offeredSupport: string[], fragmentResults: AnyObject) = {
+				const makeFragment = (
+					fragment: AnyObject, moveChecks: AnyObject | null, offeredSupport: string[] | null, fragmentMods: AnyObject | null
+				) = {
 					// moveChecks are criteria to make sure the fragment is eligible
 					if (moveChecks) {
 						if (moveChecks.moves) {
@@ -1906,7 +1908,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					
 					// fragmentResults are changes to make to the fragment before we do that
 					let modFragment = Utils.deepClone(fragment);
-					if (fragmentResults) {
+					if (fragmentMods) {
 						// nothing yet
 					}
 					
