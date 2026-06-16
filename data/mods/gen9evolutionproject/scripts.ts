@@ -649,7 +649,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			if (!this.dex.data.Pokedex[id]) return false;
 			const newMon = this.dex.data.Pokedex[id];
 			if (newMon.randbatsInitialized) return;
-			newMon.randbatsInitialized = true;
 			
 			newMon.randbats = {
 				name: newMon.name, // for console.logging convenience
@@ -672,6 +671,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			
 			if (this.dex.data.FormatsData[id].tier === "Evo!" || ['porygon2', 'accelgor'].includes(id)) newMon.randbats.stage = 'Evo';
 			else if (newMon.evos && newMon.evos.length && !newMon.prevo && !['mareanie'].includes(id)) newMon.randbats.stage = 'LC';
+			newMon.randbatsInitialized = true;
 
 			// basic information
 			newMon.randbats.types.push(newMon.types[0]);
