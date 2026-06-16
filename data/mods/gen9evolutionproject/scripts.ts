@@ -649,6 +649,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			if (!this.dex.data.Pokedex[id]) return false;
 			const newMon = this.dex.data.Pokedex[id];
 			if (newMon.randbatsInitialized) return;
+			newMon.randbatsInitialized = true;
 			
 			newMon.randbats = {
 				name: newMon.name, // for console.logging convenience
