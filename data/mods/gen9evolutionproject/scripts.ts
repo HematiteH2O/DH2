@@ -668,10 +668,20 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				resistances: {},
 				immunities: {},
 			};
+			newMon.randbatsInitialized = true;
 			
 			if (this.dex.data.FormatsData[id].tier === "Evo!" || ['porygon2', 'accelgor'].includes(id)) newMon.randbats.stage = 'Evo';
 			else if (newMon.evos && newMon.evos.length && !newMon.prevo && !['mareanie'].includes(id)) newMon.randbats.stage = 'LC';
-			newMon.randbatsInitialized = true;
+			// banlists
+			if ([
+				'toxapex', 'noivernvariant', 'chandelure', 'corviknight', 'darmanitan', 'darmanitangalar', 'excadrill', 'hawlucha', 'garchomp', 'velocinobi',
+				'dragonite', 'tapukoko', 'tapulele', 'tapubulu', 'tapufini', 'zacian', 'zaciancrowned', 'zamazenta', 'zamazentacrowned', 'deoxys',
+				'deoxysattack', 'deoxysdefense', 'deoxysspeed',
+			].includes(id)) newMon.randbats.singles.banned = true;
+			if ([
+				'dragonite', 'tapukoko', 'tapulele', 'tapubulu', 'tapufini', 'zacian', 'zaciancrowned', 'zamazenta', 'zamazentacrowned', 'deoxys',
+				'deoxysattack', 'deoxysdefense', 'deoxysspeed',
+			].includes(id)) newMon.randbats.vgc.banned = true;
 
 			// basic information
 			newMon.randbats.types.push(newMon.types[0]);
@@ -3205,28 +3215,14 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					this.dex.data.FormatsData[id] && this.dex.data.FormatsData[id].tier &&
 					['Pokémon of the Day!', 'Evo!', '(Prevo)'].includes(this.dex.data.FormatsData[id].tier) &&
 					(this.dex.data.Pokedex[id].evos && this.dex.data.Pokedex[id].evos.length && !this.dex.data.Pokedex[id].prevo && !['mareanie'].includes(id))
-				) {
-					randbatsInitialize(id);
-				}
+				) randbatsInitialize(id);
 			}
 		} else {
 			for (const id in this.dex.data.Pokedex) {
 				if (
 					this.dex.data.FormatsData[id] && this.dex.data.FormatsData[id].tier &&
 					(['Pokémon of the Day!', 'Evo!'].includes(this.dex.data.FormatsData[id].tier) || ['porygon2', 'accelgor'].includes(id))
-				) {
-					randbatsInitialize(id);
-					// banlists
-					if ([
-						'toxapex', 'noivernvariant', 'chandelure', 'corviknight', 'darmanitan', 'darmanitangalar', 'excadrill', 'hawlucha', 'garchomp', 'velocinobi',
-						'dragonite', 'tapukoko', 'tapulele', 'tapubulu', 'tapufini', 'zacian', 'zaciancrowned', 'zamazenta', 'zamazentacrowned', 'deoxys',
-						'deoxysattack', 'deoxysdefense', 'deoxysspeed',
-					].includes(id)) this.dex.data.Pokedex[id].randbats.singles.banned = true;
-					if ([
-						'dragonite', 'tapukoko', 'tapulele', 'tapubulu', 'tapufini', 'zacian', 'zaciancrowned', 'zamazenta', 'zamazentacrowned', 'deoxys',
-						'deoxysattack', 'deoxysdefense', 'deoxysspeed',
-					].includes(id)) this.dex.data.Pokedex[id].randbats.vgc.banned = true;
-				}
+				) randbatsInitialize(id);
 			}
 		}
 
