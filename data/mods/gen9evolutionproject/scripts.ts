@@ -636,9 +636,14 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 	// CUSTOM RANDOM TEAM GENERATOR
 	
 	getTeam(options) {
+		if (!this.teamsSoFar) this.teamsSoFar = [];
+		
 		let team = options.team;
 		if (typeof team === 'string') team = Teams.unpack(team);
-		if (team && team.length === 6) return team;
+		if (team) {
+			this.teamsSoFar.push(team);
+			if (team.length === 6) return team;
+		}
 
 		// Okay, if we're here, we're doing random battles; that means we have to do some setup, but ideally only once!
 		// This used to be in init(), but that meant it was getting called for each player every battle *anyway*
@@ -671,7 +676,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		// but I actually prefer monotype just being a random chance for each player instead of making them depend on each other!
 		// It's just a matter of personal preference, but that's what I decided for Evo 2
 
-		
+		console.log(this.teamsSoFar);
 		
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// SECTION 2 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
