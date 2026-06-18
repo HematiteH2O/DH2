@@ -644,6 +644,145 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		// This used to be in init(), but that meant it was getting called for each player every battle *anyway*
 		// Even though it's weird to be doing a bunch of dex initialization in getTeam(), this setup is effectively minimizing how often it gets called
 
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// SECTION 0 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		// This section is meant for declaring some constants, empty arrays and variables.
+		// These are for ones that I know belong outside of any loops, because I'll want to keep using them throughout the team generation process.
+		// It will help me to stay organized if I list all of them in one place at the beginning!
+
+		
+		
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// SECTION 1 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		// This section checks any partial teams so far so that we can confirm information about the format they're playing.
+		// This is mostly checking basic stuff like singles vs VGC vs LC,
+		// but later, it will also be useful to determine if they're playing regulation A or regulation B, for example.
+		
+		// It's also an important failsafe in case players are using Pokémon that aren't usually legal!
+		// For instance, I don't want to initialize randbats data for Zygarde every single time, because Zygarde doesn't exist in Evo 2 right now
+		// but what if someone uses custom rules like @@@ +Zygarde and brings a Zygarde to the game anyway?
+		// In a case like that, we need to prepare randbats data for Zygarde after all!
+		
+		// If you wanted, when porting this to another format, you could also make it so rules like monotype always apply to both players,
+		// but I actually prefer monotype just being a random chance for each player instead of making them depend on each other!
+		// It's just a matter of personal preference, but that's what I decided for Evo 2
+
+		
+		
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// SECTION 2 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		// This section iterates over the eligible dex for the current format and initializes randbats data for Pokémon that will be relevant
+		// This is one of the most involved sections by far, because there's a lot of information we need to gather for each Pokémon!
+		
+		// There's an important time-save here:
+		// obviously, we only want to have to initialize each Pokémon once - not redo this step for each team for every single random battle!
+		// But at the same time, we also want to limit the scope of initialization to Pokémon that are actually in the current format,
+		// and ideally (because of the planned section 5), we need to save it in a place where we *can* continue to edit it on a per-battle basis.
+		// We also want the two players to share a list of eligible Pokémon to make sure they're playing by the same rules!
+		
+		// First, we'll set up the function randbatsInitialize so we can call it as needed for each Pokémon;
+		// then, we'll iterate over the teams and the dex to run randbatsInitialize on Pokémon we want to include, depending on the format.
+
+
+
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// SECTION 3 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		// This section is much smaller, and it gets completely skipped if the player didn't bring at least part of a team!
+		// It's just taking notes on the sets they brought so far, if any, so we know what's being "requested" during species selection steps
+		// There are a couple of reasons for this section to be so early:
+		
+		// - First, the next sections are narrowing down which fragments are "viable;"
+		// for example, Round is a universal move, but only a handful of Pokémon would actually consider running it.
+		// In section 4, we're going to start removing Round from the randbats data of Pokémon that can technically learn it but can't use it well.
+		// But we don't want to do that before we look at the player's team!
+		// If the player brought a Pokémon with Round, and it just happened to be one I wouldn't have assigned it,
+		// after section 4, we would be completely missing the randbats data for Round on that Pokémon and what kind of teammates it wants,
+		// so we'd build the same team as if it didn't know Round.
+		// It's really important that we pick up on the groudwork the player is laying!
+
+		// - Second, if we only review the species-wide randbats data for a Pokémon, we might start making choices that are actually impossible!
+		// For instance, just looking at Rootsnoot's general randbats data might make us think it can provide Grassy Terrain support,
+		// so if the player brings a Rootsnoot and we don't look at its set first, we might naturally start building a Grassy Terrain team around it.
+		// But what if the player actually brought a Stalwart Rootsnoot?
+		// Then, we'd have a whole team built around Grassy Surge, but we'd suddenly reject the Grassy Surge fragment in the set construction loop.
+		// That would completely change the direction of the team, so we don't want it to surprise us after we've locked in a bunch of choices!
+
+
+
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// SECTION 4 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		// Note: this one is something of a stretch goal and will be blank for a while!
+		// Rough premise: using the threatlist to figure out damage thresholds or other criteria for important matchups in the format being played.
+
+
+
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// SECTION 5 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		// Note: this one is something of a stretch goal and will be blank for a while!
+		// Rough premise: using the above criteria, filtering out unviable fragments before the species-selection loop.
+
+
+
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// SECTION 6 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		// This is the species selection loop! This was actually one of the first things I coded. I'll write this description as I revise it!
+
+
+
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// SECTION 7 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		// Note: this one is something of a stretch goal and will be blank for a while!
+		// Rough premise: iterating over the threatlist and evaluating which attacking moves are relevant for the selected species.
+		// This is most important for establishing EV goals and judging when mixed attacking sets are appropriate.
+
+
+
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// SECTION 8 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		// This is the main set construction loop! This was also one of the first things I coded. I'll write this description as I revise it!
+
+
+
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// SECTION 9 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		// We made it! This is the last section!
+		// This is essentially just filling in the leftover blanks in each set.
+		// In theory, any part of any set can still be blank after section 8, depending on the Pokémon.
+		// Based on which fragments were relevant in section 8, we *might* not have needed to set an item, Tera Type or Ability by now,
+		// and we're especially likely to have room left over for some of our EVs and natures!
+		
+		// Although this section is technically for the lowest-priority features, it's arguably the *most* important on the user end;
+		// you can still play a game even with a team that doesn't have flashy layers of synergy between its Pokémon,
+		// but it looks *really* bad if the random team generator is spitting out visibly incomplete sets, like missing items or fewer than 508 EVs.
+		
+		// On the bright side, once we're here, every *specific goal* we had was either already checked off or deemed impossble.
+		// We're also more or less done needing to check other Pokémon or teamwide goals for every little thing.
+		// That means there's a lot of room to mess around and very little at stake for making a "wrong" choice!
+		// A lot of the last few sections are just driven by my whims and what sounded like it would be a fun surprise,
+		// and at least within reason, there's a healthy amount of RNG in picking stuff like Tera Types and items. P:
+
+
+
 		const randbatsInitialize = (mon: string) => { // this is a function so it can be called later as needed
 			const id = this.toID(mon);
 			if (!this.dex.data.Pokedex[id]) return false;
