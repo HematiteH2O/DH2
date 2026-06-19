@@ -631,149 +631,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 	
 	// CUSTOM RANDOM TEAM GENERATOR
 
-	// First, I'm making a minor change to constructor() in /sim/battle.ts.
-	// This is because I need the random team generator to have access to both players' teams for one early step.
-	// It's not so that it can have payers counterpick each other or anything!
-	// but in case, say, one player is requesting a random team and the other player isn't,
-	// I want to be able to check if the player who *brought* a team is playing a nonstandard format -
-	// like if they brought LC, or whether it looks like they're trying to challenge the other player to Regulation A or Regulation B.
-	// That means I need to be able to check *both* teams at one of the first steps in the random team generator.
-	// Since getTeam() goes through one player at a time in order...
-	// if I waited until getTeam() to send that information, the second player would be able to react to the first player,
-	// but the first player wouldn't be able to react to the second player!
-	// For reference, the place where this is actually used is Section 1 of getTeam() below.
-
-	constructor(options: BattleOptions) {
-		this.log = [];
-		this.add('t:', Math.floor(Date.now() / 1000));
-
-		const format = options.format || Dex.formats.get(options.formatid, true);
-		this.format = format;
-		this.dex = Dex.forFormat(format);
-		this.gen = this.dex.gen;
-		this.ruleTable = this.dex.formats.getRuleTable(format);
-
-		this.trunc = this.dex.trunc;
-		this.clampIntRange = Utils.clampIntRange;
-		// Object.assign(this, this.dex.data.Scripts);
-		for (const i in this.dex.data.Scripts) {
-			const entry = this.dex.data.Scripts[i];
-			if (typeof entry === 'function') (this as any)[i] = entry;
-		}
-		if (format.battle) Object.assign(this, format.battle);
-
-		this.id = '';
-		this.debugMode = format.debug || !!options.debug;
-		// Require debug mode and explicitly passed true/false
-		this.forceRandomChance = (this.debugMode && typeof options.forceRandomChance === 'boolean') ?
-			options.forceRandomChance : null;
-		this.deserialized = !!options.deserialized;
-		this.strictChoices = !!options.strictChoices;
-		this.formatData = {id: format.id};
-		this.gameType = (format.gameType || 'singles');
-		this.field = new Field(this);
-		this.sides = Array(format.playerCount).fill(null) as any;
-		this.activePerHalf = this.gameType === 'triples' ? 3 :
-			(format.playerCount > 2 || this.gameType === 'doubles') ? 2 :
-			1;
-		this.prng = options.prng || new PRNG(options.seed || undefined);
-		this.prngSeed = this.prng.startingSeed.slice() as PRNGSeed;
-		this.rated = options.rated || !!options.rated;
-		this.reportExactHP = !!format.debug;
-		this.reportPercentages = false;
-		this.supportCancel = false;
-
-		this.queue = new BattleQueue(this);
-		this.actions = new BattleActions(this);
-		this.faintQueue = [];
-
-		this.inputLog = [];
-		this.messageLog = [];
-		this.sentLogPos = 0;
-		this.sentEnd = false;
-
-		this.requestState = '';
-		this.turn = 0;
-		this.midTurn = false;
-		this.started = false;
-		this.ended = false;
-
-		this.effect = {id: ''} as Effect;
-		this.effectState = {id: ''};
-
-		this.event = {id: ''};
-		this.events = null;
-		this.eventDepth = 0;
-
-		this.activeMove = null;
-		this.activePokemon = null;
-		this.activeTarget = null;
-
-		this.lastMove = null;
-		this.lastMoveLine = -1;
-		this.lastSuccessfulMoveThisTurn = null;
-		this.lastDamage = 0;
-		this.abilityOrder = 0;
-		this.quickClawRoll = false;
-
-		this.teamGenerator = null;
-
-		this.hints = new Set();
-
-		this.NOT_FAIL = '';
-		this.HIT_SUBSTITUTE = 0;
-		this.FAIL = false;
-		this.SILENT_FAIL = null;
-
-		this.send = options.send || (() => {});
-
-		const inputOptions: {formatid: ID, seed: PRNGSeed, rated?: string | true} = {
-			formatid: options.formatid, seed: this.prng.seed,
-		};
-		if (this.rated) inputOptions.rated = this.rated;
-		if (typeof __version !== 'undefined') {
-			if (__version.head) {
-				this.inputLog.push(`>version ${__version.head}`);
-			}
-			if (__version.origin) {
-				this.inputLog.push(`>version-origin ${__version.origin}`);
-			}
-		}
-		this.inputLog.push(`>start ` + JSON.stringify(inputOptions));
-
-		this.add('gametype', this.gameType);
-
-		// timing is early enough to hook into ModifySpecies event
-		for (const rule of this.ruleTable.keys()) {
-			if ('+*-!'.includes(rule.charAt(0))) continue;
-			const subFormat = this.dex.formats.get(rule);
-			if (subFormat.exists) {
-				const hasEventHandler = Object.keys(subFormat).some(
-					// skip event handlers that are handled elsewhere
-					val => val.startsWith('on') && ![
-						'onBegin', 'onTeamPreview', 'onBattleStart', 'onValidateRule', 'onValidateTeam', 'onChangeSet', 'onValidateSet',
-					].includes(val)
-				);
-				if (hasEventHandler) this.field.addPseudoWeather(rule);
-			}
-		}
-
-		const sides: SideID[] = ['p1', 'p2', 'p3', 'p4'];
-		// vvv ONLY MODDED SECTION BELOW vvv
-		if (!this.teamsSoFar) this.teamsSoFar = [];
-		for (const side of sides) if (options[side] && options[side].team) this.teamsSoFar.push(options[side].team);
-		// ^^^ ONLY MODDED SECTION ABOVE ^^^
-		for (const side of sides) {
-			if (options[side]) {
-				this.setPlayer(side, options[side]!);
-			}
-		}
-	},
-
-	// getTeam is where the actual generator is
 	getTeam(options) {
 		let team = options.team;
 		if (typeof team === 'string') team = Teams.unpack(team);
+		if (!this.teamsSoFar) this.teamsSoFar = [];
+		if (team) this.teamsSoFar.push(team);
 		if (team && team.length === 6) return team;
 
 		// Okay, if we're here, we're doing random battles; that means we have to do some setup, but ideally only once!
@@ -807,11 +669,25 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		// but I actually prefer monotype just being a random chance for each player instead of making them depend on each other!
 		// It's just a matter of personal preference, but that's what I decided for Evo 2
 
-		if(this.teamsSoFar && this.teamsSoFar.length) {
-			for (const team of this.teamsSoFar) {
-				const checkTeam = Teams.unpack(team);
-				console.log(checkTeam);
-			}
+		// IMPORTANT SHORTCOMING:
+		// Ideally, I would want to make sure both players can check both teams to make sure they're following the same rules;
+		// unfortunately, because of how the battle constructor(), setPlayer() and getTeam() are set up,
+		// it appears to be impossible for player 1 to access player 2's team until too late (player 2 can access player 1's team just fine),
+		// at least without modding the global /sim/battle.ts.
+		// If one player has a partial team that might influence the format, but the other player wants to use a completely empty team,
+		// please note that the player with a team *must* send the challenge, and the player with an empty team must accept the challenge.
+		// If the player with an empty team is the one who sends the challenge, we won't be able to see what format the other player's team is for!
+
+		const battleCheckRules = (team) => {
+			if (!team || !team.length) return;
+			// some basic checks will go here
+			console.log(team);
+			return;
+		}
+
+		if (team && team.length) battleCheckRules.team;
+		if (this.teamsSoFar && this.teamsSoFar.length) {
+			for (const team of this.teamsSoFar) battleCheckRules(team);
 		}
 		
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
