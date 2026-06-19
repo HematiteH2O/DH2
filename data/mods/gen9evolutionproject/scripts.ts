@@ -5140,16 +5140,20 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// Utility Umbrella I guess???
 				if (
 					teamOfferedSupport.rain && !(teamRequestedSupport.rain && !teamRequestedSupport.rain.includes(set)) && !set.roles.includes('rain') && !set.roles.includes('backuprain') && !(
-						randbatsData(set.species).resistances.Water === 'true' ||
-						(randbatsData(set.species).resistances.Water.Ability && randbatsData(set.species).resistances.Water.Ability.includes(set.ability))
+						randbatsData(set.species).resistances.Water && (
+							randbatsData(set.species).resistances.Water === 'true' ||
+							(randbatsData(set.species).resistances.Water.Ability && randbatsData(set.species).resistances.Water.Ability.includes(set.ability))
+						)
 					)
 				) {
 					if (set.moves.includes('Synthesis') || set.moves.includes('Morning Sun') || set.moves.includes('Moonlight')) set.possibleItems.tier0.push('Utility Umbrella');
 					else set.possibleItems.tier2.push('Utility Umbrella');
 				} else if (
 					teamOfferedSupport.sun && !(teamRequestedSupport.sun && teamRequestedSupport.sun.includes(set)) && !set.roles.includes('sun') && !set.roles.includes('backupsun') && !(
-						randbatsData(set.species).resistances.Fire === 'true' ||
-						(randbatsData(set.species).resistances.Fire.Ability && randbatsData(set.species).resistances.Fire.Ability.includes(set.ability))
+						randbatsData(set.species).resistances.Fire && (
+							randbatsData(set.species).resistances.Fire === 'true' ||
+							(randbatsData(set.species).resistances.Fire.Ability && randbatsData(set.species).resistances.Fire.Ability.includes(set.ability))
+						)
 					)
 				) {
 					set.possibleItems.tier2.push('Utility Umbrella');
