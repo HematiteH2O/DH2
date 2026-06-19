@@ -2106,15 +2106,15 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								modFragment.buddy.roles.push('accuracyboost');
 							}
 
-							if ((move.category === 'Physical' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'def')) {
-								if (!modFragment.vgc) modFragment.vgc = {};
-								if (!modFragment.acceptedSupport) modFragment.acceptedSupport = [];
-								if (!modFragment.acceptedSupport.includes('defensereduction')) modFragment.acceptedSupport.push('defensereduction');
-							}
-							if ((move.category === 'Special' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'spd')) {
-								if (!modFragment.vgc) modFragment.vgc = {};
-								if (!modFragment.acceptedSupport) modFragment.acceptedSupport = [];
-								if (!modFragment.acceptedSupport.includes('spdefreduction')) modFragment.acceptedSupport.push('spdefreduction');
+							if (format === 'vgc') {
+								if ((move.category === 'Physical' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'def')) {
+									if (!modFragment.acceptedSupport) modFragment.acceptedSupport = [];
+									if (!modFragment.acceptedSupport.includes('defensereduction')) modFragment.acceptedSupport.push('defensereduction');
+								}
+								if ((move.category === 'Special' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'spd')) {
+									if (!modFragment.acceptedSupport) modFragment.acceptedSupport = [];
+									if (!modFragment.acceptedSupport.includes('spdefreduction')) modFragment.acceptedSupport.push('spdefreduction');
+								}
 							}
 
 							// we don't want several of the same type on the same set
@@ -2141,15 +2141,15 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								modFragment.buddy.roles.push('accuracyboost');
 							}
 
-							if ((move.category === 'Physical' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'def')) {
-								if (!modFragment.vgc) modFragment.vgc = {};
-								if (!modFragment.acceptedSupport) modFragment.acceptedSupport = [];
-								if (!modFragment.acceptedSupport.includes('defensereduction')) modFragment.acceptedSupport.push('defensereduction');
-							}
-							if ((move.category === 'Special' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'spd')) {
-								if (!modFragment.vgc) modFragment.vgc = {};
-								if (!modFragment.acceptedSupport) modFragment.acceptedSupport = [];
-								if (!modFragment.acceptedSupport.includes('spdefreduction')) modFragment.acceptedSupport.push('spdefreduction');
+							if (format === 'vgc') {
+								if ((move.category === 'Physical' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'def')) {
+									if (!modFragment.acceptedSupport) modFragment.acceptedSupport = [];
+									if (!modFragment.acceptedSupport.includes('defensereduction')) modFragment.acceptedSupport.push('defensereduction');
+								}
+								if ((move.category === 'Special' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'spd')) {
+									if (!modFragment.acceptedSupport) modFragment.acceptedSupport = [];
+									if (!modFragment.acceptedSupport.includes('spdefreduction')) modFragment.acceptedSupport.push('spdefreduction');
+								}
 							}
 							modFragment.teraType = fragment.moveType;
 
@@ -2176,15 +2176,15 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							modFragment.buddy.roles.push('accuracyboost');
 						}
 
-						if ((move.category === 'Physical' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'def')) {
-							if (!modFragment.vgc) modFragment.vgc = {};
-							if (!modFragment.acceptedSupport) modFragment.acceptedSupport = [];
-							if (!modFragment.acceptedSupport.includes('defensereduction')) modFragment.acceptedSupport.push('defensereduction');
-						}
-						if ((move.category === 'Special' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'spd')) {
-							if (!modFragment.vgc) modFragment.vgc = {};
-							if (!modFragment.acceptedSupport) modFragment.acceptedSupport = [];
-							if (!modFragment.acceptedSupport.includes('spdefreduction')) modFragment.acceptedSupport.push('spdefreduction');
+						if (format === 'vgc') {
+							if ((move.category === 'Physical' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'def')) {
+								if (!modFragment.acceptedSupport) modFragment.acceptedSupport = [];
+								if (!modFragment.acceptedSupport.includes('defensereduction')) modFragment.acceptedSupport.push('defensereduction');
+							}
+							if ((move.category === 'Special' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'spd')) {
+								if (!modFragment.acceptedSupport) modFragment.acceptedSupport = [];
+								if (!modFragment.acceptedSupport.includes('spdefreduction')) modFragment.acceptedSupport.push('spdefreduction');
+							}
 						}
 
 						// we don't want several of the same type on the same set
@@ -2809,7 +2809,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					// Venom Drench is also neat
 			}
 
-			// okay, now the VGC support that was picky about Speed can get sorted properly into [format].offeredSupport
+			// okay, now the VGC support that was picky about Speed can get sorted properly into offeredSupport
 			for (const offeredSupport in pickyVgcSupport) {
 				for (const fragment of pickyVgcSupport[offeredSupport]) {
 					let supportFragments = [];
@@ -3717,7 +3717,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (monotype && !randbatsData(set.species).types.includes(monotype) && !species.forceTeraType) set.teraType = monotype;
 			}
 			
-			// push everything in viableStabs, offeredSupport, [format].requestedSupport and [format].acceptedSupport
+			// push everything in viableStabs, offeredSupport, requestedSupport and acceptedSupport
 			// note that viableStabs is intentionally not sorted by type - for instance viableStabs.flying doesn't exist; all of the fragments are in viableStabs right now
 			for (const fragment of randbatsData(set.species).viableStabs) {
 				if (typeof fragment === 'string') continue;
@@ -3925,11 +3925,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (fragment.avoid) {
 						for (const avoid of fragment.avoid) if (!fragment.pokemon.avoid.includes(avoid)) fragment.pokemon.avoid.push(avoid);
 					}
-					if (fragment[format].acceptedSupport) for (const request of fragment[format].acceptedSupport) {
+					if (fragment.acceptedSupport) for (const request of fragment.acceptedSupport) {
 						if (!teamHighPrioRequestedSupport[request]) teamHighPrioRequestedSupport[request] = [];
 						if (!teamHighPrioRequestedSupport[request].includes(fragment.pokemon)) teamHighPrioRequestedSupport[request].push(fragment.pokemon);
 					}
-					if (fragment[format].requestedSupport) for (const request of fragment[format].requestedSupport) {
+					if (fragment.requestedSupport) for (const request of fragment.requestedSupport) {
 						if (!teamHighPrioRequestedSupport[request]) teamHighPrioRequestedSupport[request] = [];
 						if (!teamHighPrioRequestedSupport[request].includes(fragment.pokemon)) teamHighPrioRequestedSupport[request].push(fragment.pokemon);
 					}
@@ -4085,11 +4085,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (!teamRequestedSupport[request]) teamRequestedSupport[request] = [];
 				teamRequestedSupport[request].push("true");
 			}
-			for (const fragment of fragmentsList) if (fragment[format].requestedSupport) for (const request of fragment[format].requestedSupport) {
+			for (const fragment of fragmentsList) if (fragment.requestedSupport) for (const request of fragment.requestedSupport) {
 				if (!teamRequestedSupport[request]) teamRequestedSupport[request] = [];
 				if (!teamRequestedSupport[request].includes(fragment.pokemon)) teamRequestedSupport[request].push(fragment.pokemon);
 			}
-			for (const fragment of fragmentsList) if (fragment[format].acceptedSupport) for (const request of fragment[format].acceptedSupport) {
+			for (const fragment of fragmentsList) if (fragment.acceptedSupport) for (const request of fragment.acceptedSupport) {
 				if (!teamRequestedSupport[request]) teamRequestedSupport[request] = [];
 				if (!teamRequestedSupport[request].includes(fragment.pokemon)) teamRequestedSupport[request].push(fragment.pokemon);
 			}
@@ -4135,8 +4135,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			}
 			
 			for (const fragment of fragmentsList) {
-				if (fragment[format].requestedSupport) {
-					for (const request of fragment[format].requestedSupport) {
+				if (fragment.requestedSupport) {
+					for (const request of fragment.requestedSupport) {
 						// if one half of a synergy exists, prioritize getting at least one of the other half
 						if ((teamOfferedSupport[request] && teamOfferedSupport[request].filter((requester) => (requester !== fragment.pokemon)).length) && !teamHighPrioRequestedSupport[request]) fragment.highpriority = true;
 						// but filter out impossible requests
@@ -4250,7 +4250,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (!roleScores[fragment.pokemon]) roleScores[fragment.pokemon] = 0;
 					if (fragment.score && fragment.score > roleScores[fragment.pokemon]) roleScores[fragment.pokemon] = fragment.score;
 					if (!safeScores[fragment.pokemon]) safeScores[fragment.pokemon] = 0;
-					if (fragment[format].safeStab && fragment.moveBasePower && fragment.moveBasePower > safeScores[fragment.pokemon]) safeScores[fragment.pokemon] = fragment.moveBasePower;
+					if (fragment.safeStab && fragment.moveBasePower && fragment.moveBasePower > safeScores[fragment.pokemon]) safeScores[fragment.pokemon] = fragment.moveBasePower;
 				}
 			}
 			for (const fragment of fragmentsListThisStep) {
@@ -4322,11 +4322,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						if (chosenFragment.moveBasePower) chosenFragment.pokemon.movePowers[this.dex.moves.get(chosenFragment.baseMove).name] = chosenFragment.moveBasePower;
 					}
 				}
-				if (chosenFragment[format].acceptedSupport) for (const request of chosenFragment[format].acceptedSupport) {
+				if (chosenFragment.acceptedSupport) for (const request of chosenFragment.acceptedSupport) {
 					if (!teamHighPrioRequestedSupport[request]) teamHighPrioRequestedSupport[request] = [];
 					teamHighPrioRequestedSupport[request].push(chosenFragment.pokemon);
 				}
-				if (chosenFragment[format].requestedSupport) for (const request of chosenFragment[format].requestedSupport) {
+				if (chosenFragment.requestedSupport) for (const request of chosenFragment.requestedSupport) {
 					if (!teamHighPrioRequestedSupport[request]) teamHighPrioRequestedSupport[request] = [];
 					teamHighPrioRequestedSupport[request].push(chosenFragment.pokemon);
 				}
