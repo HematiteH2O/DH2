@@ -2036,8 +2036,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							 (['vcreate', 'armorcannon', 'overheat', 'leafstorm', 'icehammer', 'hammerarm', 'axekick', 'closecombat', 'superpower', 'headlongrush', 'dragonascent', 'psychoboost', 'clangingscales', 'dracometeor', 'hyperspacefury', 'spinout', 'makeitrain', 'fleurcannon'].includes(moveid) && fragment.ability && ['Contrary'].includes(fragment.ability))
 							)
 						) {
-							modFragment.safeStab = true;
-							if (move.target !== 'allAdjacent') modFragment.safeStab = true;
+							if (format !== 'vgc') modFragment.safeStab = true;
+							if (format === 'vgc' && move.target !== 'allAdjacent') modFragment.safeStab = true;
 							modFragment.weight = 2;
 						}
 						if (!fragment.stab && !fragment.teraType) modFragment.teraType = fragment.moveType;
