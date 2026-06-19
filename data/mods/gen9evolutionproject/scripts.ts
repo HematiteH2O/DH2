@@ -805,12 +805,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				'Fire', 'Water', 'Electric', 'Grass', 'Ice', 'Fighting', 'Poison', 'Ground', 'Flying', 'Psychic', 'Bug', 'Rock', 'Ghost', 'Dragon', 'Dark', 'Steel', 'Fairy', 'Normal',
 				'psn', 'tox', 'brn', 'par', 'slp', 'frz', 'powder', // (these are ones I expect to use later; I'm not expecting Prankster or trapping immunity to come up, and weather is handled separately)
 			];
-			for (const type1 of activeData.types) {
+			for (const defendingType of activeData.types) {
 				// fill in weaknesses and resistances by type first
-				for (const type of types) {
-					if (this.dex.data.TypeChart[type1.toLowerCase()].damageTaken[type] === 1 && !weaknesses.includes(type)) weaknesses.push(type);
-					else if (this.dex.data.TypeChart[type1.toLowerCase()].damageTaken[type] === 2 && !resistances.includes(type)) resistances.push(type);
-					else if (this.dex.data.TypeChart[type1.toLowerCase()].damageTaken[type] === 3 && !immunities.includes(type)) immunities.push(type);
+				for (const attackingType of types) {
+					if (this.dex.data.TypeChart[defendingType.toLowerCase()].damageTaken[attackingType] === 1 && !weaknesses.includes(attackingType)) weaknesses.push(type);
+					else if (this.dex.data.TypeChart[defendingType.toLowerCase()].damageTaken[attackingType] === 2 && !resistances.includes(attackingType)) resistances.push(type);
+					else if (this.dex.data.TypeChart[defendingType.toLowerCase()].damageTaken[attackingType] === 3 && !immunities.includes(attackingType)) immunities.push(type);
 				}
 			}
 			// then let them cancel out
@@ -919,8 +919,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			if (activeData.types.includes('Ice')) activeData.acceptedSupport.snow = ["true"];
 			if (activeData.types.includes('Rock')) activeData.acceptedSupport.sand = ["true"];
 
-			// no I can start iterating over the movepool!
-			
+			// now I can start iterating over the movepool!
 			let learnset = this.dex.data.Learnsets[id].learnset;
 			if (activeMon.baseSpecies && activeMon.baseSpecies === 'Rotom') learnset = this.dex.data.Learnsets.rotom.learnset;
 			// going to handle their form-specific moves separately; this is fine for here!
@@ -977,12 +976,17 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				});
 			}
 			const pickyVgcSupport = {};
-			
-			for (const moveid in learnset) {
-				if (!learnset[moveid].length) continue;
-				// *rudimentary* LC set legality:
+
+			const learnMove = (move: string) => {
+				let moveid = this.toID(move);
+				if (!learnset[moveid].length) return false;
+				
+				// *Rudimentary* LC set legality:
+				// A handful of Pokémon need to worry about levels in LC
+				// Currently, this has some sloppy hard-coding based on the Evo 2 dex only;
+				// I'll try to make a better version later...
+				// For now:
 				if (activeData.stage === 'LC' && activeMon.gender && ['M', 'N'].includes(activeMon.gender) && !['golett', 'bronzor'].includes(id)) {
-					// A handful of Pokémon need to worry about levels in LC
 					// For Bronzor, this affects Extrasensory, Feint Attack, Heal Block and Psywave; for Golett, it affects Dynamic Punch, Hammer Arm, Magnitude and Shadow Punch...
 					// ... but they learned all of those moves in Gen VII, so they get them anyway by Heart Scale! I checked and these are legal sets
 					// That means that as of now, this is actually only for the four Riboxys babies
@@ -994,9 +998,45 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						let lcLevelLearned = false;
 						// parseInt(source.substr(2)) < parseInt(levelLearned)
 						for (const source of learnset[moveid]) if (parseInt(source.substr(2)) < 5) lcLevelLearned = true;
-						if (!lcLevelLearned) continue; // if you can only learn it by level, and only by a level after 5, continue
+						return lcLevelLearned; // if you can only learn it by level, and only by a level after 5, continue
 					}
 				}
+				return true;
+			};
+			const learnAny = (moves: string[]) => {
+				let learned = false;
+				for (const move of moves) if (learnMove(move)) learned = true;
+				return learned;
+			};
+			const learnAll = (moves: string[]) => {
+				let learned = true;
+				for (const move of moves) if (!learnMove(move)) learned = false;
+				return learned;
+			};
+
+			const noModifyType = [ // used for -ates in splitMoveByAbility
+				'hiddenpower', 'judgment', 'multiattack', 'naturalgift', 'revelationdance', 'struggle', 'technoblast', 'terrainpulse', 'weatherball',
+			];
+			// const splitMoveByEffect
+			// const splitMoveByAbility
+			// const splitMoveBySupport
+			const splitMove = (baseMove: string) => {
+				const moveid = this.toID(baseMove);
+				if (!learnMove(moveid) || this.dex.data.Moves[moveid]) return;
+				let move = this.dex.data.Moves[moveid];
+
+				let fragments = [];
+				let baseFragment = {};
+
+				// if (fragments.length) do it for everything in fragments? otherwise, just do it for baseFragment?
+				
+				fragments.push(baseFragment);
+				// uhh... how do I want to do this...
+			};
+			
+			for (const moveid in learnset) {
+				if (!learnMove(moveid)) continue;
+				// later: if (learnMove(moveid)) splitMove(moveid);
 				
 				let move = this.dex.data.Moves[moveid];
 				let basePower = move.basePower;
@@ -1021,9 +1061,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				fragments.push(baseFragment);
 
 				// some moves need copies in case of multiple Abilities
-				const noModifyType = [
-					'hiddenpower', 'judgment', 'multiattack', 'naturalgift', 'revelationdance', 'struggle', 'technoblast', 'terrainpulse', 'weatherball',
-				];
 				for (const ability of activeData.abilities) {
 					let modifier = 1; // for Orichalcum Pulse and Hadron Engine later
 					switch (ability) {
