@@ -725,10 +725,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 			if (initialize) {
 				if (this.eligiblePokemon[id]) return;
-				if (newMon[format].randbatsInitialized === 'in progress') return;
-				if (newMon[format].randbatsInitialized === 'complete') this.eligiblePokemon[id] = newMon.randbats;
+				if (newMon.randbatsInitialized && newMon.randbatsInitialized[format] === 'in progress') return;
+				if (newMon.randbatsInitialized && newMon.randbatsInitialized[format] === 'complete') this.eligiblePokemon[id] = newMon.randbats;
 			} else {
-				if (!this.eligiblePokemon[id] && newMon[format].randbatsInitialized === 'complete') this.eligiblePokemon[id] = newMon.randbats;
+				if (!this.eligiblePokemon[id] && newMon.randbatsInitialized && newMon.randbatsInitialized[format] === 'complete') this.eligiblePokemon[id] = newMon.randbats;
 				if (this.eligiblePokemon[id]) return this.eligiblePokemon[id];
 			}
 			
@@ -752,7 +752,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				resistances: {},
 				immunities: {},
 			};
-			newMon[format].randbatsInitialized = 'in progress';
+			if (!newMon.randbatsInitialized) newMon.randbatsInitialized = {
+				singles: null,
+				vgc: null,
+			};
+			newMon.randbatsInitialized[format] = 'in progress';
 			
 			if (this.dex.data.FormatsData[id].tier === "Evo!" || ['porygon2', 'accelgor'].includes(id)) newMon.randbats.stage = 'Evo';
 			else if (newMon.evos && newMon.evos.length && !newMon.prevo && !['mareanie'].includes(id)) newMon.randbats.stage = 'LC';
@@ -3215,7 +3219,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						break;
 				}
 			}
-			newMon[format].randbatsInitialized = 'complete';
+			newMon.randbatsInitialized[format] = 'complete';
 			this.eligiblePokemon[id] = newMon.randbats;
 			if (!initialize) return this.eligiblePokemon[id];
 		}
