@@ -2285,7 +2285,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						if (!pickyVgcSupport.gravity) pickyVgcSupport.gravity = [];
 						pickyVgcSupport.gravity.push(fragment);
 					}
-					if (moveid === 'mortalspin' || (format === 'vgc' && movedid === 'poisongas') || (format === 'singles' && moveid === 'toxicspikes')) {
+					if (moveid === 'mortalspin' || (format === 'vgc' && moveid === 'poisongas') || (format === 'singles' && moveid === 'toxicspikes')) {
 						let modFragment = Utils.deepClone(fragment);
 
 						if (modFragment.movePriority > 0 || moveid === 'mortalspin') {
