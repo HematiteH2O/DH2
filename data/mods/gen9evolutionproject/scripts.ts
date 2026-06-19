@@ -3699,13 +3699,13 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (randbatsData(set.species).abilities.length === 1) set.ability = randbatsData(set.species).abilities[0];
 	
 				// some species may have been given hard-coded randbats details
-				if (species.randbats[format].mandatory) {
-					if (species.randbats[format].mandatory.ability) set.ability = species.randbats[format].mandatory.ability;
-					if (species.randbats[format].mandatory.item) set.item = species.randbats[format].mandatory.item;
-					if (species.randbats[format].mandatory.teraType) set.teraType = species.randbats[format].mandatory.teraType;
-					if (species.randbats[format].mandatory.moves) {
+				if (randbatsData(set.species).mandatory) {
+					if (randbatsData(set.species).mandatory.ability) set.ability = randbatsData(set.species).mandatory.ability;
+					if (randbatsData(set.species).mandatory.item) set.item = randbatsData(set.species).mandatory.item;
+					if (randbatsData(set.species).mandatory.teraType) set.teraType = randbatsData(set.species).mandatory.teraType;
+					if (randbatsData(set.species).mandatory.moves) {
 						if (!set.moves) set.moves = [];
-						for (const move of species.randbats[format].mandatory.moves) {
+						for (const move of randbatsData(set.species).mandatory.moves) {
 							if (!set.moves.includes(move) && set.moves.length < 4) set.moves.push(move);
 						}
 					}
@@ -3714,24 +3714,24 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// we need that boss team "monotype" vibe!
 				// this overrides even the Pokémon's hard-coded randbats details if it has any -
 				// but we still have to check for forceTeraType for set legality!
-				if (monotype && !species.randbats.types.includes(monotype) && !species.forceTeraType) set.teraType = monotype;
+				if (monotype && !randbatsData(set.species).types.includes(monotype) && !species.forceTeraType) set.teraType = monotype;
 			}
 			
 			// push everything in viableStabs, offeredSupport, [format].requestedSupport and [format].acceptedSupport
 			// note that viableStabs is intentionally not sorted by type - for instance viableStabs.flying doesn't exist; all of the fragments are in viableStabs right now
-			for (const fragment of species.randbats.viableStabs) {
+			for (const fragment of randbatsData(set.species).viableStabs) {
 				if (typeof fragment === 'string') continue;
 				let modFragment = Utils.deepClone(fragment);
 				modFragment.pokemon = set;
 				modFragment.role = 'mainstab'; // actually I don't want this to specify a type either
 				fragmentsList.push(modFragment);
 			}
-			for (const offeredSupport in species.randbats[format].offeredSupport) {
-				if (species.randbats[format].offeredSupport[offeredSupport] === 'true') {
+			for (const offeredSupport in randbatsData(set.species).offeredSupport) {
+				if (randbatsData(set.species).offeredSupport[offeredSupport] === 'true') {
 					if (!teamOfferedSupport[offeredSupport]) teamOfferedSupport[offeredSupport] = [];
 					if (!teamOfferedSupport[offeredSupport].includes(set)) teamOfferedSupport[offeredSupport].push(set);
 				}
-				for (const fragment of species.randbats[format].offeredSupport[offeredSupport]) {
+				for (const fragment of randbatsData(set.species).offeredSupport[offeredSupport]) {
 					if (typeof fragment !== 'string') {
 						let modFragment = Utils.deepClone(fragment);
 						modFragment.pokemon = set;
@@ -3740,12 +3740,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					}
 				}
 			}
-			for (const requestedSupport in species.randbats[format].requestedSupport) {
+			for (const requestedSupport in randbatsData(set.species).requestedSupport) {
 				if (typeof fragment === 'string' && fragment === 'true') {
 					if (!teamHighPrioRequestedSupport[requestedSupport]) teamHighPrioRequestedSupport[requestedSupport] = [];
 					if (!teamHighPrioRequestedSupport[requestedSupport].includes(set)) teamHighPrioRequestedSupport[requestedSupport].push(set);
 				}
-				for (const fragment of species.randbats[format].requestedSupport[requestedSupport]) {
+				for (const fragment of randbatsData(set.species).requestedSupport[requestedSupport]) {
 					if (typeof fragment !== 'string') {
 						let modFragment = Utils.deepClone(fragment);
 						modFragment.pokemon = set;
@@ -3753,8 +3753,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					}
 				}
 			}
-			for (const acceptedSupport in species.randbats[format].acceptedSupport) {
-				for (const fragment of species.randbats[format].acceptedSupport[acceptedSupport]) {
+			for (const acceptedSupport in randbatsData(set.species).acceptedSupport) {
+				for (const fragment of randbatsData(set.species).acceptedSupport[acceptedSupport]) {
 					if (typeof fragment === 'string' && fragment === 'true') {
 						if (!teamHighPrioRequestedSupport[acceptedSupport]) teamHighPrioRequestedSupport[acceptedSupport] = [];
 						if (!teamHighPrioRequestedSupport[acceptedSupport].includes(set)) teamHighPrioRequestedSupport[acceptedSupport].push(set);
