@@ -97,7 +97,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			}
 		}
 
-		for (let i = 0, i < 3, i++) {
+		for (let i = 0; i < 3; i++) {
 			console.log(customList);
 			let potd = customList[Math.floor(Math.random() * customList.length)];
 			console.log(potd);
