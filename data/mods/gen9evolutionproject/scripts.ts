@@ -3551,7 +3551,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (
 						!originalTeamSpecies.includes(id) && !originalTeamNumbers.includes(randbatsData(id).num) && // species clause
 						!(randbatsData(id)[format] && randbatsData(id)[format].banned) && // not banned
-						!(this.dex.data.Pokedex[id].forceTeraType && !this.dex.data.Pokedex[id]..battleOnly) && // if something has a special Terastallized state, don't separately count the base form as eligible
+						!(this.dex.data.Pokedex[id].forceTeraType && !this.dex.data.Pokedex[id].battleOnly) && // if something has a special Terastallized state, don't separately count the base form as eligible
 						(randbatsData(id).stage && randbatsData(id).stage === stage) && // account for LC
 						(!this.dex.data.Pokedex[id].forceTeraType || this.dex.data.Pokedex[id].forceTeraType === monotype) // we want to force a Tera Type later
 					) monotypeBypassEligiblePokemon.push(id);
