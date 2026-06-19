@@ -654,6 +654,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		// plus a section for anything format-specific that I have to define manually, like banlists and Speed tiers I want to use.
 
 		// SECTION 0.0 - battle-wide
+		if (!this.eligiblePokemon) this.eligiblePokemon = [];
 
 		// SECTION 0.1 - player-specific
 		
@@ -707,30 +708,43 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		// and ideally (because of the planned section 5), we need to save it in a place where we *can* continue to edit it on a per-battle basis.
 		// We also want the two players to share a list of eligible Pokémon to make sure they're playing by the same rules!
 		
-		// First, we'll set up the function randbatsInitialize so we can call it as needed for each Pokémon;
-		// then, we'll iterate over this player's team and the dex to run randbatsInitialize on Pokémon we want to include, depending on the format.
+		// First, we'll set up the function randbatsData so we can call it as needed for each Pokémon;
+		// then, we'll iterate over this player's team and the dex to run randbatsData on Pokémon we want to include, depending on the format.
 		// Iterating over the player's team separately is an important failsafe, in case players are using Pokémon that aren't usually legal!
 		// For instance, I wouldn't want to initialize randbats data for Zygarde every single time, because Zygarde doesn't exist in Evo 2 right noww -
 		// but what if someone uses custom rules like @@@ +Zygarde and brings a Zygarde to the game anyway?
 		// In a case like that, we need to prepare randbats data for Zygarde after all!
 
-		const randbatsInitialize = (mon: string) => { // this is a function so it can be called per-species later as needed!
-			const id = this.toID(mon);
-			if (!this.dex.data.Pokedex[id]) return false;
+		const randbatsData = (mon: string, initialize: boolean) => { // this is a function so it can be called per-species later as needed!
+			let id = mon;
+			if (typeof id !== 'string' && id.species) id = id.species;
+			id = this.toID(id);
+			
 			const newMon = this.dex.data.Pokedex[id];
-			if (newMon.randbatsInitialized) return true;
+			if (!newMon) return false;
+
+			if (initialize) {
+				if (this.eligiblePokemon[id]) return;
+				if (newMon[format].randbatsInitialized === 'in progress') return;
+				if (newMon[format].randbatsInitialized === 'complete') this.eligiblePokemon[id] = newMon.randbats;
+			} else {
+				if (!this.eligiblePokemon[id] && newMon[format].randbatsInitialized === 'complete') this.eligiblePokemon[id] = newMon.randbats;
+				if (this.eligiblePokemon[id]) return this.eligiblePokemon[id];
+			}
 			
 			newMon.randbats = {
-				name: newMon.name, // for console.logging convenience
+				name: newMon.name,
+				num: newMon.num,
 				types: [],
 				abilities: [],
 				viableStabs: [],
-				offeredSupport: {},
 				singles: {
+					offeredSupport: {},
 					requestedSupport: {},
 					acceptedSupport: {},
 				},
 				vgc: {
+					offeredSupport: {},
 					requestedSupport: {},
 					acceptedSupport: {},
 				},
@@ -738,7 +752,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				resistances: {},
 				immunities: {},
 			};
-			newMon.randbatsInitialized = true;
+			newMon[format].randbatsInitialized = 'in progress';
 			
 			if (this.dex.data.FormatsData[id].tier === "Evo!" || ['porygon2', 'accelgor'].includes(id)) newMon.randbats.stage = 'Evo';
 			else if (newMon.evos && newMon.evos.length && !newMon.prevo && !['mareanie'].includes(id)) newMon.randbats.stage = 'LC';
@@ -860,7 +874,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			// now, we're going to turn some of these into offeredSupport like 'groundimmune'
 			for (const immunity in newMon.randbats.immunities) {
 				if (newMon.randbats.immunities[immunity].Ability && newMon.randbats.immunities[immunity].Ability.length) {
-					newMon.randbats.offeredSupport[`${(immunity).toLowerCase()}immune`] = [];
+					newMon.randbats[format].offeredSupport[`${(immunity).toLowerCase()}immune`] = [];
 					for (const ability of newMon.randbats.immunities[immunity].Ability) {
 						// push fragments
 						let fragment = {
@@ -875,15 +889,15 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							},
 							fragmentPriority: 4,
 						};
-						newMon.randbats.offeredSupport[`${(immunity).toLowerCase()}immune`].push(fragment);
+						newMon.randbats[format].offeredSupport[`${(immunity).toLowerCase()}immune`].push(fragment);
 					}
-				} else newMon.randbats.offeredSupport[`${(immunity).toLowerCase()}immune`] = newMon.randbats.immunities[immunity];
+				} else newMon.randbats[format].offeredSupport[`${(immunity).toLowerCase()}immune`] = newMon.randbats.immunities[immunity];
 			}
 
 			for (const resistance in newMon.randbats.resistances) { // if I don't end up needing this, I'll just delete it
 				if (newMon.randbats.weaknesses[resistance]) continue;
 				if (newMon.randbats.resistances[resistance].Ability && newMon.randbats.resistances[resistance].Ability.length) {
-					newMon.randbats.offeredSupport[`${(resistance).toLowerCase()}resist`] = [];
+					newMon.randbats[format].offeredSupport[`${(resistance).toLowerCase()}resist`] = [];
 					for (const ability of newMon.randbats.resistances[resistance].Ability) {
 						// push fragments
 						let fragment = {
@@ -898,9 +912,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							},
 							fragmentPriority: 4,
 						};
-						newMon.randbats.offeredSupport[`${(resistance).toLowerCase()}resist`].push(fragment);
+						newMon.randbats[format].offeredSupport[`${(resistance).toLowerCase()}resist`].push(fragment);
 					}
-				} else newMon.randbats.offeredSupport[`${(resistance).toLowerCase()}resist`] = newMon.randbats.resistances[resistance];
+				} else newMon.randbats[format].offeredSupport[`${(resistance).toLowerCase()}resist`] = newMon.randbats.resistances[resistance];
 			}
 
 			// some innate properties of types
@@ -1997,13 +2011,13 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (offeredSupport) {
 						if (modFragments.length) {
 							for (const modFragment of modFragments) for (const support of offeredSupport) {
-								if (!newMon.randbats.offeredSupport[support]) newMon.randbats.offeredSupport[support] = [];
-								newMon.randbats.offeredSupport[support].push(modFragment);
+								if (!newMon.randbats[format].offeredSupport[support]) newMon.randbats[format].offeredSupport[support] = [];
+								newMon.randbats[format].offeredSupport[support].push(modFragment);
 							}
 						} else {
 							for (const support of offeredSupport) {
-								if (!newMon.randbats.offeredSupport[support]) newMon.randbats.offeredSupport[support] = [];
-								newMon.randbats.offeredSupport[support].push(fragment);
+								if (!newMon.randbats[format].offeredSupport[support]) newMon.randbats[format].offeredSupport[support] = [];
+								newMon.randbats[format].offeredSupport[support].push(fragment);
 							}
 						}
 					}
@@ -2115,11 +2129,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						if (fragment.moveBasePower >= 120 && !fragment.item) {
 							let modFragment2 = Utils.deepClone(modFragment);
 							// this will be a good threshold for choice item sets... I think
-							if (!newMon.randbats.offeredSupport.choicebreaker) newMon.randbats.offeredSupport.choicebreaker = [];
+							if (!newMon.randbats[format].offeredSupport.choicebreaker) newMon.randbats[format].offeredSupport.choicebreaker = [];
 							modFragment2.item = (fragment.moveCategory === 'Physical' ? 'Choice Band' : 'Choice Specs');
 							if (!modFragment2.avoid) modFragment2.avoid = [];
 							modFragment2.avoid.push('speedsetup');
-							newMon.randbats.offeredSupport.choicebreaker.push(modFragment2);
+							newMon.randbats[format].offeredSupport.choicebreaker.push(modFragment2);
 						}
 					}
 					
@@ -2128,15 +2142,15 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					// okay I'm trying something with this in the makeFragment function so let's see if that works
 					/*
 					if (fragment.moves.includes('Fake Out') || fragment.moves.includes('Mat Block')) {
-						if (!newMon.randbats.offeredSupport.fakeout) newMon.randbats.offeredSupport.fakeout = [];
-						newMon.randbats.offeredSupport.fakeout.push(fragment);
+						if (!newMon.randbats[format].offeredSupport.fakeout) newMon.randbats[format].offeredSupport.fakeout = [];
+						newMon.randbats[format].offeredSupport.fakeout.push(fragment);
 					}
 					*/
 					// priority
 					if (fragment.movePriority > 0 && !['upperhand', 'feint'].includes(moveid)) {
 						// those two are cool and all, but they do *not* count as being a team's priority user jsdfngh
 						if (fragment.moveBasePower > 40 || ['assist', 'copycat', 'mefirst', 'metronome', 'mirrormove', 'naturepower'].includes(moveid)) {
-							if (!newMon.randbats.offeredSupport.priority) newMon.randbats.offeredSupport.priority = [];
+							if (!newMon.randbats[format].offeredSupport.priority) newMon.randbats[format].offeredSupport.priority = [];
 							// this was initially a sample to test the score feature, but I think it's a good idea to keep it this way:
 							// if you have multiple candidates for priority users, the strongest one is picked first
 							let modFragment = Utils.deepClone(fragment);
@@ -2172,10 +2186,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							if (!modFragment.avoid) modFragment.avoid = [];
 							modFragment.avoid.push(`${(modFragment.moveType).toLowerCase()}priority`);
 							
-							newMon.randbats.offeredSupport.priority.push(modFragment);
+							newMon.randbats[format].offeredSupport.priority.push(modFragment);
 						} else if (fragment.moveBasePower && (fragment.moveBasePower *1.5 > 40) && !fragment.stab && !fragment.teraType && fragment.moveType !== 'Normal') {
 							// push to "personal" for some last-pick set filler
-							if (!newMon.randbats.offeredSupport.personal) newMon.randbats.offeredSupport.personal = [];
+							if (!newMon.randbats[format].offeredSupport.personal) newMon.randbats[format].offeredSupport.personal = [];
 							let modFragment = Utils.deepClone(fragment);
 							if (['firstimpression', 'fakeout'].includes(moveid)) {
 								if (!modFragment.avoid) modFragment.avoid = [];
@@ -2208,12 +2222,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							if (!modFragment.avoid) modFragment.avoid = [];
 							modFragment.avoid.push(`${(modFragment.moveType).toLowerCase()}priority`);
 							
-							newMon.randbats.offeredSupport.personal.push(modFragment);
+							newMon.randbats[format].offeredSupport.personal.push(modFragment);
 						}
 					}
 					// spread
 					if ((move.target === 'allAdjacentFoes' || moveid === 'expandingforce') && fragment.moveBasePower > 80 && fragment.moveAccuracy >= 90 && moveid !== 'razorwind') {
-						if (!newMon.randbats.offeredSupport.spread) newMon.randbats.offeredSupport.spread = [];
+						if (!newMon.randbats[format].offeredSupport.spread) newMon.randbats[format].offeredSupport.spread = [];
 						let modFragment = Utils.deepClone(fragment);
 						modFragment.score = fragment.moveBasePower;
 							
@@ -2242,7 +2256,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						if (!modFragment.avoid) modFragment.avoid = [];
 						modFragment.avoid.push(`${(modFragment.moveType).toLowerCase()}spread`);
 						
-						newMon.randbats.offeredSupport.spread.push(modFragment);
+						newMon.randbats[format].offeredSupport.spread.push(modFragment);
 					}
 					if (move.target === 'allAdjacent' && !move.selfdestruct && moveid !== 'synchronoise') {
 						let modFragment = Utils.deepClone(fragment);
@@ -2273,18 +2287,18 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							}
 
 							modFragment.vgc.requestedSupport.push(`${(fragment.moveType).toLowerCase()}immune`); // ex. "electricimmune"
-							if (!newMon.randbats.offeredSupport.spread) newMon.randbats.offeredSupport.spread = [];
-							newMon.randbats.offeredSupport.spread.push(modFragment);
+							if (!newMon.randbats[format].offeredSupport.spread) newMon.randbats[format].offeredSupport.spread = [];
+							newMon.randbats[format].offeredSupport.spread.push(modFragment);
 						}
 						
 						// but we can drop the BP requirement if it's just to enable ally Abilities, like Lightning Rod
 						// these supports will be called, for example, "sideelectric" or "sideelectricnopara"
 						if (moveid === 'discharge') { // mostly for Cell Battery
-							if (!newMon.randbats.offeredSupport[`side${(fragment.moveType).toLowerCase()}nopara`]) newMon.randbats.offeredSupport[`side${(fragment.moveType).toLowerCase()}nopara`] = [];
-							newMon.randbats.offeredSupport[`side${(fragment.moveType).toLowerCase()}nopara`].push(modFragment);
+							if (!newMon.randbats[format].offeredSupport[`side${(fragment.moveType).toLowerCase()}nopara`]) newMon.randbats[format].offeredSupport[`side${(fragment.moveType).toLowerCase()}nopara`] = [];
+							newMon.randbats[format].offeredSupport[`side${(fragment.moveType).toLowerCase()}nopara`].push(modFragment);
 						} else {
-							if (!newMon.randbats.offeredSupport[`side${(fragment.moveType).toLowerCase()}`]) newMon.randbats.offeredSupport[`side${(fragment.moveType).toLowerCase()}`] = [];
-							newMon.randbats.offeredSupport[`side${(fragment.moveType).toLowerCase()}`].push(modFragment);
+							if (!newMon.randbats[format].offeredSupport[`side${(fragment.moveType).toLowerCase()}`]) newMon.randbats[format].offeredSupport[`side${(fragment.moveType).toLowerCase()}`] = [];
+							newMon.randbats[format].offeredSupport[`side${(fragment.moveType).toLowerCase()}`].push(modFragment);
 						}
 					}
 					if ([
@@ -2312,8 +2326,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						if (moveid === 'venomdrench') modFragment.vgc.requestedSupport.push('poison');
 						
 						if (modFragment.movePriority > 0) {
-								if (!newMon.randbats.offeredSupport.speedcontrol) newMon.randbats.offeredSupport.speedcontrol = [];
-								newMon.randbats.offeredSupport.speedcontrol.push(modFragment);
+								if (!newMon.randbats[format].offeredSupport.speedcontrol) newMon.randbats[format].offeredSupport.speedcontrol = [];
+								newMon.randbats[format].offeredSupport.speedcontrol.push(modFragment);
 						} else {
 							if (!pickyVgcSupport.speedcontrol) pickyVgcSupport.speedcontrol = [];
 							pickyVgcSupport.speedcontrol.push(modFragment);
@@ -2327,8 +2341,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						modFragment.singles.requestedSupport.push('backuptrickroom');
 						modFragment.vgc.acceptedSupport.push('backuptrickroom');
 						
-						if (!newMon.randbats.offeredSupport.trickroom) newMon.randbats.offeredSupport.trickroom = [];
-						newMon.randbats.offeredSupport.trickroom.push(modFragment);
+						if (!newMon.randbats[format].offeredSupport.trickroom) newMon.randbats[format].offeredSupport.trickroom = [];
+						newMon.randbats[format].offeredSupport.trickroom.push(modFragment);
 					}
 					if (moveid === 'gravity') {
 						// I think this is getting overused,
@@ -2342,8 +2356,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						if (moveid === 'toxicspikes') modFragment.format = 'singles';
 
 						if (modFragment.movePriority > 0 || moveid === 'mortalspin') {
-							if (!newMon.randbats.offeredSupport.poison) newMon.randbats.offeredSupport.poison = [];
-							newMon.randbats.offeredSupport.poison.push(modFragment);
+							if (!newMon.randbats[format].offeredSupport.poison) newMon.randbats[format].offeredSupport.poison = [];
+							newMon.randbats[format].offeredSupport.poison.push(modFragment);
 						} else {
 							if (!pickyVgcSupport.poison) pickyVgcSupport.poison = [];
 							pickyVgcSupport.poison.push(modFragment);
@@ -2354,8 +2368,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							let modFragment = Utils.deepClone(fragment);
 							modFragment.format = 'vgc';
 							modFragment.vgc.requestedSupport.push('round');
-							if (!newMon.randbats.offeredSupport.round) newMon.randbats.offeredSupport.round = [];
-							newMon.randbats.offeredSupport.round.push(modFragment);
+							if (!newMon.randbats[format].offeredSupport.round) newMon.randbats[format].offeredSupport.round = [];
+							newMon.randbats[format].offeredSupport.round.push(modFragment);
 						}
 						if (fragment.moveBasePower >= 70) {
 							let modFragment = Utils.deepClone(fragment);
@@ -2384,10 +2398,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						}
 						if (moveid === 'venomdrench') modFragment.vgc.requestedSupport.push('poison');
 						if (modFragment.movePriority > 0) {
-							if (!newMon.randbats.offeredSupport.physicalreduction) newMon.randbats.offeredSupport.physicalreduction = [];
-							newMon.randbats.offeredSupport.physicalreduction.push(modFragment);
-							if (!newMon.randbats.offeredSupport.specialreduction) newMon.randbats.offeredSupport.specialreduction = [];
-							newMon.randbats.offeredSupport.specialreduction.push(modFragment);
+							if (!newMon.randbats[format].offeredSupport.physicalreduction) newMon.randbats[format].offeredSupport.physicalreduction = [];
+							newMon.randbats[format].offeredSupport.physicalreduction.push(modFragment);
+							if (!newMon.randbats[format].offeredSupport.specialreduction) newMon.randbats[format].offeredSupport.specialreduction = [];
+							newMon.randbats[format].offeredSupport.specialreduction.push(modFragment);
 						} else {
 							if (!pickyVgcSupport.physicalreduction) pickyVgcSupport.physicalreduction = [];
 							pickyVgcSupport.physicalreduction.push(modFragment);
@@ -2409,8 +2423,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							modFragment.avoid.push('statusdebuffmove');
 						}
 						if (modFragment.movePriority > 0) {
-							if (!newMon.randbats.offeredSupport.physicalreduction) newMon.randbats.offeredSupport.physicalreduction = [];
-							newMon.randbats.offeredSupport.physicalreduction.push(modFragment);
+							if (!newMon.randbats[format].offeredSupport.physicalreduction) newMon.randbats[format].offeredSupport.physicalreduction = [];
+							newMon.randbats[format].offeredSupport.physicalreduction.push(modFragment);
 						} else {
 							if (!pickyVgcSupport.physicalreduction) pickyVgcSupport.physicalreduction = [];
 							pickyVgcSupport.physicalreduction.push(modFragment);
@@ -2429,8 +2443,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							modFragment.avoid.push('statusdebuffmove');
 						}
 						if (modFragment.movePriority > 0) {
-							if (!newMon.randbats.offeredSupport.specialreduction) newMon.randbats.offeredSupport.specialreduction = [];
-							newMon.randbats.offeredSupport.specialreduction.push(modFragment);
+							if (!newMon.randbats[format].offeredSupport.specialreduction) newMon.randbats[format].offeredSupport.specialreduction = [];
+							newMon.randbats[format].offeredSupport.specialreduction.push(modFragment);
 						} else {
 							if (!pickyVgcSupport.specialreduction) pickyVgcSupport.specialreduction = [];
 							pickyVgcSupport.specialreduction.push(modFragment);
@@ -2468,21 +2482,21 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						}
 						else modFragment.score = 5; // the unique protection clones are the best
 						
-						if (!newMon.randbats.offeredSupport.protection) newMon.randbats.offeredSupport.protection = [];
-						newMon.randbats.offeredSupport.protection.push(modFragment);
+						if (!newMon.randbats[format].offeredSupport.protection) newMon.randbats[format].offeredSupport.protection = [];
+						newMon.randbats[format].offeredSupport.protection.push(modFragment);
 					}
 
 					// now we're getting into stuff that not every team will request by default, so I'll also have to establish what teams request them, or just setting them up does nothing!
 					// redirection
 					if (['allyswitch', 'followme', 'ragepowder'].includes(moveid)) {
-						if (!newMon.randbats.offeredSupport.redirection) newMon.randbats.offeredSupport.redirection = [];
-						newMon.randbats.offeredSupport.redirection.push(fragment);
+						if (!newMon.randbats[format].offeredSupport.redirection) newMon.randbats[format].offeredSupport.redirection = [];
+						newMon.randbats[format].offeredSupport.redirection.push(fragment);
 					}
 					// move disruption
 					if (['taunt', 'torment', 'encore', 'disable', 'skydrop', 'psychicnoise', 'upperhand', 'imprison'].includes(moveid)) {
 						// TODO: these *are not* all interchangeable and should be divided further
-						if (!newMon.randbats.offeredSupport.disruption) newMon.randbats.offeredSupport.disruption = [];
-						newMon.randbats.offeredSupport.disruption.push(fragment);
+						if (!newMon.randbats[format].offeredSupport.disruption) newMon.randbats[format].offeredSupport.disruption = [];
+						newMon.randbats[format].offeredSupport.disruption.push(fragment);
 					}
 					// anti-Trick Room
 					if ([
@@ -2501,8 +2515,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							} else role = null;
 						}
 						if (role) {
-							if (!newMon.randbats.offeredSupport[role]) newMon.randbats.offeredSupport[role] = [];
-							newMon.randbats.offeredSupport[role].push(modFragment);
+							if (!newMon.randbats[format].offeredSupport[role]) newMon.randbats[format].offeredSupport[role] = [];
+							newMon.randbats[format].offeredSupport[role].push(modFragment);
 						}
 					}
 					// fixed damage
@@ -2511,8 +2525,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						'superfang', 'naturesmadness', 'ruination'
 					].includes(moveid)) {
 						// TODO: these *are not* all interchangeable and should be divided further
-						if (!newMon.randbats.offeredSupport.fixeddamage) newMon.randbats.offeredSupport.fixeddamage = [];
-						newMon.randbats.offeredSupport.fixeddamage.push(fragment);
+						if (!newMon.randbats[format].offeredSupport.fixeddamage) newMon.randbats[format].offeredSupport.fixeddamage = [];
+						newMon.randbats[format].offeredSupport.fixeddamage.push(fragment);
 					}
 					// damage support
 					// physical
@@ -2536,8 +2550,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						// to be viable, many of these need priority, naturally high Speed, or an Ability that boosts Speed
 						// I have set up a way to generalize that, since it comes up for a lot of other kinds of support
 						if (modFragment.movePriority > 0 || modFragment.baseMove === 'Octolock') {
-								if (!newMon.randbats.offeredSupport.defensereduction) newMon.randbats.offeredSupport.defensereduction = [];
-								newMon.randbats.offeredSupport.defensereduction.push(modFragment);
+								if (!newMon.randbats[format].offeredSupport.defensereduction) newMon.randbats[format].offeredSupport.defensereduction = [];
+								newMon.randbats[format].offeredSupport.defensereduction.push(modFragment);
 						} else {
 							if (!pickyVgcSupport.defensereduction) pickyVgcSupport.defensereduction = [];
 							pickyVgcSupport.defensereduction.push(modFragment);
@@ -2564,8 +2578,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						// to be viable, many of these need priority, naturally high Speed, or an Ability that boosts Speed
 						// I have set up a way to generalize that, since it comes up for a lot of other kinds of support
 						if (modFragment.movePriority > 0 || modFragment.baseMove === 'Octolock') {
-							if (!newMon.randbats.offeredSupport.spdefreduction) newMon.randbats.offeredSupport.spdefreduction = [];
-							newMon.randbats.offeredSupport.spdefreduction.push(modFragment);
+							if (!newMon.randbats[format].offeredSupport.spdefreduction) newMon.randbats[format].offeredSupport.spdefreduction = [];
+							newMon.randbats[format].offeredSupport.spdefreduction.push(modFragment);
 						} else {
 							if (!pickyVgcSupport.spdefreduction) pickyVgcSupport.spdefreduction = [];
 							pickyVgcSupport.spdefreduction.push(modFragment);
@@ -2579,8 +2593,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							'revivalblessing',
 						].includes(moveid)
 					) {
-						if (!newMon.randbats.offeredSupport.sidehealing) newMon.randbats.offeredSupport.sidehealing = [];
-						newMon.randbats.offeredSupport.sidehealing.push(fragment);
+						if (!newMon.randbats[format].offeredSupport.sidehealing) newMon.randbats[format].offeredSupport.sidehealing = [];
+						newMon.randbats[format].offeredSupport.sidehealing.push(fragment);
 					}
 					// momentum
 					if (
@@ -2591,8 +2605,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					) {
 						let modFragment = Utils.deepClone(fragment);
 						if (moveid === 'batonpass') modFragment.format = 'vgc'; // banned in singles
-						if (!newMon.randbats.offeredSupport.pivoting) newMon.randbats.offeredSupport.pivoting = [];
-						newMon.randbats.offeredSupport.pivoting.push(modFragment);
+						if (!newMon.randbats[format].offeredSupport.pivoting) newMon.randbats[format].offeredSupport.pivoting = [];
+						newMon.randbats[format].offeredSupport.pivoting.push(modFragment);
 						// TODO: also counts as "personal" with tag "momentum" and probably some buddy fragments
 					}
 					// backup field effect setting
@@ -2650,8 +2664,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						if (accept && accept.length) {
 							for (const modFragment of accept) {
 								if (modFragment.movePriority > 0) {
-									if (!newMon.randbats.offeredSupport[`backup${fieldeffect}`]) newMon.randbats.offeredSupport[`backup${fieldeffect}`] = [];
-									newMon.randbats.offeredSupport[`backup${fieldeffect}`].push(modFragment);
+									if (!newMon.randbats[format].offeredSupport[`backup${fieldeffect}`]) newMon.randbats[format].offeredSupport[`backup${fieldeffect}`] = [];
+									newMon.randbats[format].offeredSupport[`backup${fieldeffect}`].push(modFragment);
 								} else {
 									if (!pickyVgcSupport[`backup${fieldeffect}`]) pickyVgcSupport[`backup${fieldeffect}`] = [];
 									pickyVgcSupport[`backup${fieldeffect}`].push(modFragment);
@@ -2706,8 +2720,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 						modFragment.score = 3; // the ones that count as offensive setup should outcompete other setup moves
 						
-						if (!newMon.randbats.offeredSupport.personal) newMon.randbats.offeredSupport.personal = [];
-						newMon.randbats.offeredSupport.personal.push(modFragment);
+						if (!newMon.randbats[format].offeredSupport.personal) newMon.randbats[format].offeredSupport.personal = [];
+						newMon.randbats[format].offeredSupport.personal.push(modFragment);
 					}
 					// offensive setup
 					if (
@@ -2808,54 +2822,54 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						modFragmentSpreadVGC.buddy.roles.push('spread');
 						modFragment.format = 'singles';
 						
-						if (!newMon.randbats.offeredSupport.personal) newMon.randbats.offeredSupport.personal = [];
+						if (!newMon.randbats[format].offeredSupport.personal) newMon.randbats[format].offeredSupport.personal = [];
 						if (moveid === 'howl') {
 							// you don't really need priority or spread to be a good Howl user in VGC, and we don't want to push it to singles at all
 							modFragment.format = 'vgc';
-							newMon.randbats.offeredSupport.personal.push(modFragment);
+							newMon.randbats[format].offeredSupport.personal.push(modFragment);
 						} else if (moveid === 'bellydrum') {
 							modFragment.buddy.roles.push('priority');
-							newMon.randbats.offeredSupport.personal.push(modFragment);
-							newMon.randbats.offeredSupport.personal.push(modFragmentPrioVGC);
+							newMon.randbats[format].offeredSupport.personal.push(modFragment);
+							newMon.randbats[format].offeredSupport.personal.push(modFragmentPrioVGC);
 						} else if (moveid === 'curse') {
 							if (!newMon.randbats.types.includes('Ghost')) { // completely ignore the setup version of Curse if you're Ghost-type
 								// normally, singles Pokémon will avoid Curse if they have Bulk Up as an option
-								if (!learnset.bulkup) newMon.randbats.offeredSupport.personal.push(modFragment);
+								if (!learnset.bulkup) newMon.randbats[format].offeredSupport.personal.push(modFragment);
 								// but if you have something else tagged "minspeed" anyway, go for it!
 								let modFragmentCurseSlow = Utils.deepClone(modFragment);
 								modFragmentCurseSlow.buddy.roles.push('minspeed');
-								newMon.randbats.offeredSupport.personal.push(modFragmentCurseSlow);
+								newMon.randbats[format].offeredSupport.personal.push(modFragmentCurseSlow);
 								// this is to get it paired with things like Gyro Ball
 
 								// for VGC, it's not necessarily worse than Bulk Up, so I won't make that check
 								// but there are plenty situations when sets will be labeled minspeed, so it's still good to do that part:
 								modFragmentPrioVGC.buddy.roles.push('minspeed');
 								modFragmentSpreadVGC.buddy.roles.push('minspeed');
-								newMon.randbats.offeredSupport.personal.push(modFragmentPrioVGC);
-								newMon.randbats.offeredSupport.personal.push(modFragmentSpreadVGC);
+								newMon.randbats[format].offeredSupport.personal.push(modFragmentPrioVGC);
+								newMon.randbats[format].offeredSupport.personal.push(modFragmentSpreadVGC);
 							}
 						} else {
-							newMon.randbats.offeredSupport.personal.push(modFragment);
-							newMon.randbats.offeredSupport.personal.push(modFragmentPrioVGC);
-							newMon.randbats.offeredSupport.personal.push(modFragmentSpreadVGC);
+							newMon.randbats[format].offeredSupport.personal.push(modFragment);
+							newMon.randbats[format].offeredSupport.personal.push(modFragmentPrioVGC);
+							newMon.randbats[format].offeredSupport.personal.push(modFragmentSpreadVGC);
 						}
 					}
 				
 				// singles-only:
 					// Knock Off
 					if (fragment.moves.includes('Knock Off')) {
-						if (!newMon.randbats.offeredSupport.knockoff) newMon.randbats.offeredSupport.knockoff = [];
-						newMon.randbats.offeredSupport.knockoff.push(fragment);
+						if (!newMon.randbats[format].offeredSupport.knockoff) newMon.randbats[format].offeredSupport.knockoff = [];
+						newMon.randbats[format].offeredSupport.knockoff.push(fragment);
 					}
 					// damaging entry hazards - Sticky Web and Toxic Spikes will probably be handled differently
 					if (['ceaselessedge', 'spikes', 'stealthrock', 'stoneaxe'].includes(moveid)) {
-						if (!newMon.randbats.offeredSupport.entryhazard) newMon.randbats.offeredSupport.entryhazard = [];
-						newMon.randbats.offeredSupport.entryhazard.push(fragment);
+						if (!newMon.randbats[format].offeredSupport.entryhazard) newMon.randbats[format].offeredSupport.entryhazard = [];
+						newMon.randbats[format].offeredSupport.entryhazard.push(fragment);
 					}
 					// hazard control
 					if (['defog', 'mortalspin', 'rapidspin', 'tidyup'].includes(moveid)) {
-						if (!newMon.randbats.offeredSupport.hazardcontrol) newMon.randbats.offeredSupport.hazardcontrol = [];
-						newMon.randbats.offeredSupport.hazardcontrol.push(fragment);
+						if (!newMon.randbats[format].offeredSupport.hazardcontrol) newMon.randbats[format].offeredSupport.hazardcontrol = [];
+						newMon.randbats[format].offeredSupport.hazardcontrol.push(fragment);
 					}
 				}
 					
@@ -2863,7 +2877,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					// Venom Drench is also neat
 			}
 
-			// okay, now the VGC support that was picky about Speed can get sorted properly into offeredSupport
+			// okay, now the VGC support that was picky about Speed can get sorted properly into [format].offeredSupport
 			for (const offeredSupport in pickyVgcSupport) {
 				for (const fragment of pickyVgcSupport[offeredSupport]) {
 					let supportFragments = [];
@@ -2917,8 +2931,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						if (accept) supportFragments.push(modFragment);
 					}
 					if (supportFragments.length) {
-						if (!newMon.randbats.offeredSupport[offeredSupport]) newMon.randbats.offeredSupport[offeredSupport] = [];
-						for (const supportFragment of supportFragments) newMon.randbats.offeredSupport[offeredSupport].push(supportFragment);
+						if (!newMon.randbats[format].offeredSupport[offeredSupport]) newMon.randbats[format].offeredSupport[offeredSupport] = [];
+						for (const supportFragment of supportFragments) newMon.randbats[format].offeredSupport[offeredSupport].push(supportFragment);
 					}
 				}
 			}
@@ -2955,9 +2969,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 			}
 			
-			for (const offeredSupport in newMon.randbats.offeredSupport) {
+			for (const offeredSupport in newMon.randbats[format].offeredSupport) {
 				let accepted = false;
-				for (const fragment of newMon.randbats.offeredSupport[offeredSupport]) {
+				for (const fragment of newMon.randbats[format].offeredSupport[offeredSupport]) {
 					if (fragment.baseMove) { // if it was just an Ability, this is unnecessary
 						if (fragment.singles.requestedSupport.length) {
 							for (const request of fragment.singles.requestedSupport) {
@@ -2974,7 +2988,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						if (!fragment.singles.requestedSupport.length && !fragment.vgc.requestedSupport.length) accepted = true;
 					} else accepted = true;
 				}
-				if (!accepted) delete newMon.randbats.offeredSupport[offeredSupport];
+				if (!accepted) delete newMon.randbats[format].offeredSupport[offeredSupport];
 			}
 			
 			// finally, some Abilities offer innate utility which has nothing to do with how they affect moves or type matchups, so let's cover those quickly
@@ -2999,8 +3013,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						fragment.vgc.acceptedSupport.push('rain');
 						fragment.vgc.acceptedSupport.push('backuprain');
 						
-						if (!newMon.randbats.offeredSupport.rain) newMon.randbats.offeredSupport.rain = [];
-						newMon.randbats.offeredSupport.rain.push(fragment);
+						if (!newMon.randbats[format].offeredSupport.rain) newMon.randbats[format].offeredSupport.rain = [];
+						newMon.randbats[format].offeredSupport.rain.push(fragment);
 						break;
 					case 'Drought':
 					case 'Orichalcum Pulse':
@@ -3009,8 +3023,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						fragment.vgc.acceptedSupport.push('sun');
 						fragment.vgc.acceptedSupport.push('backupsun');
 						
-						if (!newMon.randbats.offeredSupport.sun) newMon.randbats.offeredSupport.sun = [];
-						newMon.randbats.offeredSupport.sun.push(fragment);
+						if (!newMon.randbats[format].offeredSupport.sun) newMon.randbats[format].offeredSupport.sun = [];
+						newMon.randbats[format].offeredSupport.sun.push(fragment);
 						break;
 					case 'Electric Surge':
 					case 'Hadron Engine':
@@ -3019,10 +3033,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						fragment.vgc.acceptedSupport.push('electricterrain');
 						fragment.vgc.acceptedSupport.push('backupelectricterrain');
 						
-						if (!newMon.randbats.offeredSupport.electricterrain) newMon.randbats.offeredSupport.electricterrain = [];
-						newMon.randbats.offeredSupport.electricterrain.push(fragment);
-						if (!newMon.randbats.offeredSupport.antisleep) newMon.randbats.offeredSupport.antisleep = [];
-						newMon.randbats.offeredSupport.antisleep.push(fragment);
+						if (!newMon.randbats[format].offeredSupport.electricterrain) newMon.randbats[format].offeredSupport.electricterrain = [];
+						newMon.randbats[format].offeredSupport.electricterrain.push(fragment);
+						if (!newMon.randbats[format].offeredSupport.antisleep) newMon.randbats[format].offeredSupport.antisleep = [];
+						newMon.randbats[format].offeredSupport.antisleep.push(fragment);
 						break;
 					case 'Grassy Surge':
 						fragment.singles.acceptedSupport.push('grassyterrain');
@@ -3033,14 +3047,14 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						// this is just because it's almost never a worthwhile consideration
 						// but I'm still adding the acceptedSupport here for completion just in case it comes up
 						
-						if (!newMon.randbats.offeredSupport.grassyterrain) newMon.randbats.offeredSupport.grassyterrain = [];
-						newMon.randbats.offeredSupport.grassyterrain.push(fragment);
+						if (!newMon.randbats[format].offeredSupport.grassyterrain) newMon.randbats[format].offeredSupport.grassyterrain = [];
+						newMon.randbats[format].offeredSupport.grassyterrain.push(fragment);
 						break;
 					case 'Intimidate':
-						if (!newMon.randbats.offeredSupport.physicalreduction) newMon.randbats.offeredSupport.physicalreduction = [];
-						newMon.randbats.offeredSupport.physicalreduction.push(fragment);
-						if (!newMon.randbats.offeredSupport.intimidate) newMon.randbats.offeredSupport.intimidate = [];
-						newMon.randbats.offeredSupport.intimidate.push(fragment);
+						if (!newMon.randbats[format].offeredSupport.physicalreduction) newMon.randbats[format].offeredSupport.physicalreduction = [];
+						newMon.randbats[format].offeredSupport.physicalreduction.push(fragment);
+						if (!newMon.randbats[format].offeredSupport.intimidate) newMon.randbats[format].offeredSupport.intimidate = [];
+						newMon.randbats[format].offeredSupport.intimidate.push(fragment);
 						break;
 					case 'Flower Gift':
 						fragment.singles.requestedSupport.push('sun');
@@ -3050,8 +3064,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						if (!newMon.randbats.vgc.acceptedSupport.sun) newMon.randbats.vgc.acceptedSupport.sun = [];
 						newMon.randbats.vgc.acceptedSupport.sun.push(fragment);
 						
-						if (!newMon.randbats.offeredSupport.specialreduction) newMon.randbats.offeredSupport.specialreduction = [];
-						newMon.randbats.offeredSupport.specialreduction.push(fragment);
+						if (!newMon.randbats[format].offeredSupport.specialreduction) newMon.randbats[format].offeredSupport.specialreduction = [];
+						newMon.randbats[format].offeredSupport.specialreduction.push(fragment);
 						break;
 					case 'Misty Surge':
 						fragment.singles.acceptedSupport.push('mistyterrain');
@@ -3062,12 +3076,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						// this is just because it's almost never a worthwhile consideration
 						// but I'm still adding the acceptedSupport here for completion just in case it comes up
 
-						if (!newMon.randbats.offeredSupport.mistyterrain) newMon.randbats.offeredSupport.mistyterrain = [];
-						newMon.randbats.offeredSupport.mistyterrain.push(fragment);
-						if (!newMon.randbats.offeredSupport.antistatus) newMon.randbats.offeredSupport.antistatus = [];
-						newMon.randbats.offeredSupport.antistatus.push(fragment);
-						if (!newMon.randbats.offeredSupport.antisleep) newMon.randbats.offeredSupport.antisleep = [];
-						newMon.randbats.offeredSupport.antisleep.push(fragment);
+						if (!newMon.randbats[format].offeredSupport.mistyterrain) newMon.randbats[format].offeredSupport.mistyterrain = [];
+						newMon.randbats[format].offeredSupport.mistyterrain.push(fragment);
+						if (!newMon.randbats[format].offeredSupport.antistatus) newMon.randbats[format].offeredSupport.antistatus = [];
+						newMon.randbats[format].offeredSupport.antistatus.push(fragment);
+						if (!newMon.randbats[format].offeredSupport.antisleep) newMon.randbats[format].offeredSupport.antisleep = [];
+						newMon.randbats[format].offeredSupport.antisleep.push(fragment);
 						break;
 					case 'Psychic Surge':
 					case 'Mega-Neural':
@@ -3076,10 +3090,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						fragment.vgc.acceptedSupport.push('psychicterrain');
 						fragment.vgc.acceptedSupport.push('backuppsychicterrain');
 						
-						if (!newMon.randbats.offeredSupport.psychicterrain) newMon.randbats.offeredSupport.psychicterrain = [];
-						newMon.randbats.offeredSupport.psychicterrain.push(fragment);
-						if (!newMon.randbats.offeredSupport.antipriority) newMon.randbats.offeredSupport.antipriority = [];
-						newMon.randbats.offeredSupport.antipriority.push(fragment);
+						if (!newMon.randbats[format].offeredSupport.psychicterrain) newMon.randbats[format].offeredSupport.psychicterrain = [];
+						newMon.randbats[format].offeredSupport.psychicterrain.push(fragment);
+						if (!newMon.randbats[format].offeredSupport.antipriority) newMon.randbats[format].offeredSupport.antipriority = [];
+						newMon.randbats[format].offeredSupport.antipriority.push(fragment);
 						break;
 					case 'Sand Stream':
 					case 'Sand Spit':
@@ -3091,8 +3105,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						// this is just because it's almost never a worthwhile consideration
 						// but I'm still adding the acceptedSupport here for completion just in case it comes up
 						
-						if (!newMon.randbats.offeredSupport.sand) newMon.randbats.offeredSupport.sand = [];
-						newMon.randbats.offeredSupport.sand.push(fragment);
+						if (!newMon.randbats[format].offeredSupport.sand) newMon.randbats[format].offeredSupport.sand = [];
+						newMon.randbats[format].offeredSupport.sand.push(fragment);
 						break;
 					case 'Snow Warning':
 						fragment.singles.acceptedSupport.push('snow');
@@ -3103,8 +3117,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						// this is just because it's almost never a worthwhile consideration
 						// but I'm still adding the acceptedSupport here for completion just in case it comes up
 						
-						if (!newMon.randbats.offeredSupport.snow) newMon.randbats.offeredSupport.snow = [];
-						newMon.randbats.offeredSupport.snow.push(fragment);
+						if (!newMon.randbats[format].offeredSupport.snow) newMon.randbats[format].offeredSupport.snow = [];
+						newMon.randbats[format].offeredSupport.snow.push(fragment);
 						break;
 					case 'Storm Chaser':
 						// we need any one of these, not all three
@@ -3129,14 +3143,14 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						fragmentWater.vgc.acceptedSupport.push('backuprain');
 						fragmentWater.vgc.requestedSupport.push('sidewater');
 						
-						if (!newMon.randbats.offeredSupport.rain) newMon.randbats.offeredSupport.rain = [];
-						if (!newMon.randbats.offeredSupport.backuprain) newMon.randbats.offeredSupport.backuprain = [];
-						newMon.randbats.offeredSupport.rain.push(fragmentElectric);
-						newMon.randbats.offeredSupport.rain.push(fragmentFlying);
-						newMon.randbats.offeredSupport.rain.push(fragmentWater);
-						newMon.randbats.offeredSupport.backuprain.push(fragmentElectric);
-						newMon.randbats.offeredSupport.backuprain.push(fragmentFlying);
-						newMon.randbats.offeredSupport.backuprain.push(fragmentWater);
+						if (!newMon.randbats[format].offeredSupport.rain) newMon.randbats[format].offeredSupport.rain = [];
+						if (!newMon.randbats[format].offeredSupport.backuprain) newMon.randbats[format].offeredSupport.backuprain = [];
+						newMon.randbats[format].offeredSupport.rain.push(fragmentElectric);
+						newMon.randbats[format].offeredSupport.rain.push(fragmentFlying);
+						newMon.randbats[format].offeredSupport.rain.push(fragmentWater);
+						newMon.randbats[format].offeredSupport.backuprain.push(fragmentElectric);
+						newMon.randbats[format].offeredSupport.backuprain.push(fragmentFlying);
+						newMon.randbats[format].offeredSupport.backuprain.push(fragmentWater);
 						break;
 					// acceptedSupport
 					case 'Swift Swim':
@@ -3201,7 +3215,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						break;
 				}
 			}
-			return true;
+			newMon[format].randbatsInitialized = 'complete';
+			this.eligiblePokemon[id] = newMon.randbats;
+			if (!initialize) return this.eligiblePokemon[id];
 		}
 		
 		
@@ -3243,7 +3259,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 		if (team) {
 			for (const pokemon of team) {
-				randbatsInitialize(pokemon.species);
+				randbatsData(pokemon.species, true);
 				if (pokemon.species && this.dex.species.get(pokemon.species)) {
 					if (this.dex.species.get(pokemon.species).id) originalTeamSpecies.push(this.dex.species.get(pokemon.species).id);
 					if (this.dex.species.get(pokemon.species).num) originalTeamNumbers.push(this.dex.species.get(pokemon.species).num);
@@ -3266,10 +3282,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		if (originalTeamSpecies.length) {
 			for (const type of types) {
 				let eligible = true;
-				for (const id of originalTeamSpecies) if (!this.dex.species.get(id).randbats.types.includes(type)) eligible = false;
+				for (const id of originalTeamSpecies) if (!randbatsData(id).types.includes(type)) eligible = false;
 				if (eligible) eligibleMonotypes.push(type);
 			}
-			for (const id of originalTeamSpecies) if (!(this.dex.species.get(id).randbats.stage && this.dex.species.get(id).randbats.stage === 'LC')) stage = 'Evo';
+			for (const id of originalTeamSpecies) if (!(randbatsData(id).stage && randbatsData(id).stage === 'LC')) stage = 'Evo';
 			// it must not be LC if you have a non-LC
 		} else stage = 'Evo'; // ... and obviously don't assume LC if the team is empty!
 		if (originalTeamSpecies.length > 1) {
@@ -3304,8 +3320,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			restrictedLimit = 0;
 		}
 		
-		// Now, we'll call randbatsInitialize for every Pokémon in the Evo 2 dex
-		// After species selection, we'll call randbatsInitialize again, this time for just the Pokémon on the player's team
+		// Now, we'll call randbatsData for every Pokémon in the Evo 2 dex
+		// After species selection, we'll call randbatsData again, this time for just the Pokémon on the player's team
 		// That way, we can safely ensure that every Pokémon we actually need to look at is properly initialized - even if players are using custom rulesets with Pokémon we wouldn't normally care about
 		if (stage === 'LC') {
 			for (const id in this.dex.data.Pokedex) {
@@ -3313,40 +3329,38 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					this.dex.data.FormatsData[id] && this.dex.data.FormatsData[id].tier &&
 					['Pokémon of the Day!', 'Evo!', '(Prevo)'].includes(this.dex.data.FormatsData[id].tier) &&
 					(this.dex.data.Pokedex[id].evos && this.dex.data.Pokedex[id].evos.length && !this.dex.data.Pokedex[id].prevo && !['mareanie'].includes(id))
-				) randbatsInitialize(id);
+				) randbatsData(id, true);
 			}
 		} else {
 			for (const id in this.dex.data.Pokedex) {
 				if (
 					this.dex.data.FormatsData[id] && this.dex.data.FormatsData[id].tier &&
 					(['Pokémon of the Day!', 'Evo!'].includes(this.dex.data.FormatsData[id].tier) || ['porygon2', 'accelgor'].includes(id))
-				) randbatsInitialize(id);
+				) randbatsData(id, true);
 			}
 		}
 
 		
 		// now let's gather a list of eligible Pokémon to use for the rest of the process
 		let eligiblePokemon = [];
-		for (const id in this.dex.data.Pokedex) {
+		for (const id in this.eligiblePokemon) {
 			if (
-				this.dex.data.Pokedex[id].randbats && // in the format/has randbats data
-				!originalTeamSpecies.includes(id) && !originalTeamNumbers.includes(this.dex.data.Pokedex[id].num) && // species clause
-				(!(this.dex.data.Pokedex[id].randbats[format] && this.dex.data.Pokedex[id].randbats[format].banned) || regulationb) && // not banned
-				(!monotype || this.dex.data.Pokedex[id].randbats.types.includes(monotype) ||
+				!originalTeamSpecies.includes(id) && !originalTeamNumbers.includes(randbatsData(id).num) && // species clause
+				(!(randbatsData(id)[format] && randbatsData(id)[format].banned) || regulationb) && // not banned
+				(!monotype || randbatsData(id).types.includes(monotype) ||
 				 (this.dex.data.Pokedex[id].forceTeraType && this.dex.data.Pokedex[id].forceTeraType === monotype)
 				) && // account for monotype, but our special Terastallized states get some flexibility
-				!(this.dex.data.Pokedex[id].forceTeraType && !this.dex.data.Pokedex[id].randbats.battleOnly) && // if something has a special Terastallized state, don't separately count the base form as eligible
-				(this.dex.data.Pokedex[id].randbats.stage && this.dex.data.Pokedex[id].randbats.stage === stage) // account for LC
+				!(this.dex.data.Pokedex[id].forceTeraType && !this.dex.data.Pokedex[id].battleOnly) && // if something has a special Terastallized state, don't separately count the base form as eligible
+				(randbatsData(id).stage && randbatsData(id).stage === stage) // account for LC
 			) eligiblePokemon.push(id);
 		}
 		if (!eligiblePokemon.length || 6 > (team.length + eligiblePokemon.length)) { // shouldn't be an issue but just in case
 			monotype = null;
-			for (const id in this.dex.data.Pokedex) {
+			for (const id in this.eligiblePokemon) {
 				if (
-					this.dex.data.Pokedex[id].randbats && // in the format/has randbats data
-					!originalTeamSpecies.includes(id) && !originalTeamNumbers.includes(this.dex.data.Pokedex[id].num) && // species clause
-					(!(this.dex.data.Pokedex[id].randbats[format] && this.dex.data.Pokedex[id].randbats[format].banned) || regulationb) && // not banned
-					(this.dex.data.Pokedex[id].randbats.stage && this.dex.data.Pokedex[id].randbats.stage === stage) // account for LC
+					!originalTeamSpecies.includes(id) && !originalTeamNumbers.includes(randbatsData(id).num) && // species clause
+					(!(randbatsData(id)[format] && randbatsData(id)[format].banned) || regulationb) && // not banned
+					(randbatsData(id).stage && randbatsData(id).stage === stage) // account for LC
 				) eligiblePokemon.push(id);
 			}
 		}
@@ -3361,9 +3375,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 		if (team.length) {
 			for (const pokemon of team) {
-				pokemon.offeredSupport = this.dex.species.get(pokemon.species).randbats.offeredSupport;
-				pokemon.requestedSupport = this.dex.species.get(pokemon.species).randbats[format].requestedSupport;
-				pokemon.acceptedSupport = this.dex.species.get(pokemon.species).randbats[format].acceptedSupport;
+				pokemon.offeredSupport = randbatsData(pokemon.species)[format].offeredSupport;
+				pokemon.requestedSupport = randbatsData(pokemon.species)[format].requestedSupport;
+				pokemon.acceptedSupport = randbatsData(pokemon.species)[format].acceptedSupport;
 				pokemon.coveredStabs = [];
 				pokemon.attackingTypes = {};
 				pokemon.remainingStabTypes = [];
@@ -3418,11 +3432,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			// if a team started completely empty, I want the first Pokémon selected to be a completely random Evo 2 sub
 			let chosenRandomPokemon = this.sample(eligiblePokemon.filter(id => this.dex.data.Pokedex[id].copyData));
 			firstDraftTeam.push({
-				name: this.dex.data.Pokedex[chosenRandomPokemon].name,
-				species: this.dex.data.Pokedex[chosenRandomPokemon].name,
-				offeredSupport: this.dex.data.Pokedex[chosenRandomPokemon].randbats.offeredSupport,
-				requestedSupport: this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].requestedSupport,
-				acceptedSupport: this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].acceptedSupport,
+				name: randbatsData(chosenRandomPokemon).name,
+				species: randbatsData(chosenRandomPokemon).name,
+				offeredSupport: randbatsData(chosenRandomPokemon)[format].offeredSupport,
+				requestedSupport: randbatsData(chosenRandomPokemon)[format].requestedSupport,
+				acceptedSupport: randbatsData(chosenRandomPokemon)[format].acceptedSupport,
 				coveredStabs: [],
 				attackingTypes: {},
 				remainingStabTypes: [],
@@ -3442,13 +3456,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// figure out the full list of eligible Pokémon
 				// we don't want to overwrite eligiblePokemon because we'll still use it in the for loop after this one!
 				// instead, we can make a temporary list for just this step
-				for (const id in this.dex.data.Pokedex) {
+				for (const id in this.eligiblePokemon) {
 					if (
-						this.dex.data.Pokedex[id].randbats && // in the format/has randbats data
-						!originalTeamSpecies.includes(id) && !originalTeamNumbers.includes(this.dex.data.Pokedex[id].num) && // species clause
-						!(this.dex.data.Pokedex[id].randbats[format] && this.dex.data.Pokedex[id].randbats[format].banned) && // not banned
-						!(this.dex.data.Pokedex[id].forceTeraType && !this.dex.data.Pokedex[id].randbats.battleOnly) && // if something has a special Terastallized state, don't separately count the base form as eligible
-						(this.dex.data.Pokedex[id].randbats.stage && this.dex.data.Pokedex[id].randbats.stage === stage) && // account for LC
+						!originalTeamSpecies.includes(id) && !originalTeamNumbers.includes(randbatsData(id).num) && // species clause
+						!(randbatsData(id)[format] && randbatsData(id)[format].banned) && // not banned
+						!(this.dex.data.Pokedex[id].forceTeraType && !randbatsData(id).battleOnly) && // if something has a special Terastallized state, don't separately count the base form as eligible
+						(randbatsData(id).stage && randbatsData(id).stage === stage) && // account for LC
 						(!this.dex.data.Pokedex[id].forceTeraType || this.dex.data.Pokedex[id].forceTeraType === monotype) // we want to force a Tera Type later
 					) monotypeBypassEligiblePokemon.push(id);
 				}
@@ -3456,11 +3469,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			}
 			let chosenRandomPokemon = this.sample(eligiblePokemonThisStep);
 			firstDraftTeam.push({
-				name: this.dex.data.Pokedex[chosenRandomPokemon].name,
-				species: this.dex.data.Pokedex[chosenRandomPokemon].name,
-				offeredSupport: this.dex.data.Pokedex[chosenRandomPokemon].randbats.offeredSupport,
-				requestedSupport: this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].requestedSupport,
-				acceptedSupport: this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].acceptedSupport,
+				name: randbatsData(chosenRandomPokemon).name,
+				species: randbatsData(chosenRandomPokemon).name,
+				offeredSupport: randbatsData(chosenRandomPokemon)[format].offeredSupport,
+				requestedSupport: randbatsData(chosenRandomPokemon)[format].requestedSupport,
+				acceptedSupport: randbatsData(chosenRandomPokemon)[format].acceptedSupport,
 				coveredStabs: [],
 				attackingTypes: {},
 				remainingStabTypes: [],
@@ -3508,14 +3521,14 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (pokemon === draftTeamMember) continue; // we're evaluating them against every *other* Pokémon
 					for (const requestedSupport in pokemon.requestedSupport) if (!requestedSupportInGeneral.includes(requestedSupport)) requestedSupportInGeneral.push(requestedSupport);
 					for (const offeredSupport in pokemon.offeredSupport) {
-						if (!offeredSupportThisStep.includes(offeredSupport)) offeredSupportThisStep.push(offeredSupport);
+						if (!offeredSupportThisStep.includes([offeredSupport)) offeredSupportThisStep.push(offeredSupport);
 						if (!offeredSupportInGeneral[offeredSupport]) offeredSupportInGeneral[offeredSupport] = 0;
 						offeredSupportInGeneral[offeredSupport]++;
 					}
 					for (const acceptedSupport in pokemon.acceptedSupport) if (!acceptedSupportThisStep.includes(acceptedSupport)) acceptedSupportThisStep.push(acceptedSupport);
-					if (randbatsInitialize(pokemon.species)) {
+					if (randbatsData(pokemon.species)) {
 						if (this.dex.species.get(pokemon.species).num) teamNumbersThisStep.push(this.dex.species.get(pokemon.species).num);
-						for (const type of types) if (!resistancesThisStep.includes(type) && (this.dex.species.get(pokemon.species).randbats.immunities[type] || (this.dex.species.get(pokemon.species).randbats.resistances[type] && !this.dex.species.get(pokemon.species).randbats.weaknesses[type]))) resistancesThisStep.push(type);
+						for (const type of types) if (!resistancesThisStep.includes(type) && (randbatsData(pokemon.species).immunities[type] || (randbatsData(pokemon.species).resistances[type] && !randbatsData(pokemon.species).weaknesses[type]))) resistancesThisStep.push(type);
 
 						// special limits
 						if (this.dex.species.get(pokemon.species).forceTeraType) specialTerastallizedStateThisStep = true;
@@ -3534,13 +3547,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// figure out the full list of eligible Pokémon
 				// we don't want to overwrite eligiblePokemon because we'll still use it in the for loop after this one!
 				// instead, we can make a temporary list for just this step
-				for (const id in this.dex.data.Pokedex) {
+				for (const id in this.eligiblePokemon) {
 					if (
-						this.dex.data.Pokedex[id].randbats && // in the format/has randbats data
-						!originalTeamSpecies.includes(id) && !originalTeamNumbers.includes(this.dex.data.Pokedex[id].num) && // species clause
-						!(this.dex.data.Pokedex[id].randbats[format] && this.dex.data.Pokedex[id].randbats[format].banned) && // not banned
-						!(this.dex.data.Pokedex[id].forceTeraType && !this.dex.data.Pokedex[id].randbats.battleOnly) && // if something has a special Terastallized state, don't separately count the base form as eligible
-						(this.dex.data.Pokedex[id].randbats.stage && this.dex.data.Pokedex[id].randbats.stage === stage) && // account for LC
+						!originalTeamSpecies.includes(id) && !originalTeamNumbers.includes(randbatsData(id).num) && // species clause
+						!(randbatsData(id)[format] && randbatsData(id)[format].banned) && // not banned
+						!(this.dex.data.Pokedex[id].forceTeraType && !this.dex.data.Pokedex[id]..battleOnly) && // if something has a special Terastallized state, don't separately count the base form as eligible
+						(randbatsData(id).stage && randbatsData(id).stage === stage) && // account for LC
 						(!this.dex.data.Pokedex[id].forceTeraType || this.dex.data.Pokedex[id].forceTeraType === monotype) // we want to force a Tera Type later
 					) monotypeBypassEligiblePokemon.push(id);
 				}
@@ -3571,7 +3583,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			for (const request of requestedSupportInGeneral) {
 				let possible = false;
 				for (const id of eligiblePokemonThisStep) {
-					if (this.dex.data.Pokedex[id].randbats.offeredSupport[request]) possible = true;
+					if (randbatsData(id)[format].offeredSupport[request]) possible = true;
 				}
 				if (possible) requestedSupportThisStep.push(request);
 			}
@@ -3593,10 +3605,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				let maxScore = 0;
 				for (const id of eligiblePokemonThisStep) {
 					// species clause
-					if (teamNumbersThisStep.includes(this.dex.data.Pokedex[id].num)) continue;
+					if (teamNumbersThisStep.includes(randbatsData(id).num)) continue;
 					
 					let score = 0;
-					for (const role of requestedSupportThisStep) if (this.dex.data.Pokedex[id].randbats.offeredSupport[role]) score++;
+					for (const role of requestedSupportThisStep) if (randbatsData(id)[format].offeredSupport[role]) score++;
 					if (score > (requestedSupportThisStep.length + (teamPosition - 6))) score = (requestedSupportThisStep.length + (teamPosition - 6));
 					if (score < 0) score = 0;
 					if (score > maxScore) { // reset
@@ -3615,18 +3627,18 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			// but I think there are enough failsafes in later steps that it should come up with something usable more often than not,
 			// and I want it to be open-ended enough to leave room for variety and fun options, too!
 			
-			if (!currentStep.length) currentStep = eligiblePokemonThisStep.filter(id => !teamNumbersThisStep.includes(this.dex.data.Pokedex[id].num));
+			if (!currentStep.length) currentStep = eligiblePokemonThisStep.filter(id => !teamNumbersThisStep.includes(randbatsData(id).num));
 			
 			// Then, we'll try to look for anything with acceptedSupport that matches our offeredSupport
 			if (offeredSupportThisStep.length) {
 				let desiredSupport = [];
 				for (const id of currentStep) {
 					// species clause
-					if (teamNumbersThisStep.includes(this.dex.data.Pokedex[id].num)) continue;
+					if (teamNumbersThisStep.includes(randbatsData(id).num)) continue;
 					
 					// Unlike before, I think just a yes or a no is fine
 					let accepted = false;
-					for (const role of offeredSupportThisStep) if (this.dex.data.Pokedex[id].randbats[format].acceptedSupport[role] && !acceptedSupportThisStep.includes(role)) accepted = true;
+					for (const role of offeredSupportThisStep) if (randbatsData(id)[format].acceptedSupport[role] && !acceptedSupportThisStep.includes(role)) accepted = true;
 					if (accepted === true) desiredSupport.push(id);
 				}
 				if (desiredSupport.length) currentStep = desiredSupport;
@@ -3644,17 +3656,17 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				for (const id of currentStep) {
 					let synergyResistScore = 0;
 					let membersRequestingSupport = [];
-					for (const offeredSupport in this.dex.data.Pokedex[id].randbats.offeredSupport) for (const pokemon of firstDraftTeam) if (pokemon.requestedSupport[offeredSupport] || pokemon.acceptedSupport[offeredSupport]) membersRequestingSupport.push(pokemon);
+					for (const offeredSupport in randbatsData(id)[format].offeredSupport) for (const pokemon of firstDraftTeam) if (pokemon.requestedSupport[offeredSupport] || pokemon.acceptedSupport[offeredSupport]) membersRequestingSupport.push(pokemon);
 					if (!membersRequestingSupport) continue;
 
 					if (membersRequestingSupport.length) {
 						for (const type in types) {
-							if (this.dex.data.Pokedex[id].randbats.immunities[type] || (this.dex.data.Pokedex[id].randbats.resistances[type] && !this.dex.data.Pokedex[id].randbats.weaknesses[type])) {
+							if (randbatsData(id).immunities[type] || (randbatsData(id).resistances[type] && !randbatsData(id).weaknesses[type])) {
 								// the Pokémon we're checking has a resistance, so give it points for each memberRequestingSupport that's weak to that type
-								for (const member in membersRequestingSupport) if (this.dex.species.get(member.species).randbats.weaknesses[type] && !this.dex.species.get(member.species).randbats.resistances[type]) synergyResistScore++;
-							} else if (this.dex.data.Pokedex[id].randbats.weaknesses[type] && !this.dex.data.Pokedex[id].randbats.resistances[type]) {
+								for (const member in membersRequestingSupport) if (randbatsData(member.species).weaknesses[type] && !randbatsData(member.species).resistances[type]) synergyResistScore++;
+							} else if (randbatsData(id).weaknesses[type] && !randbatsData(id).resistances[type]) {
 								// the Pokémon we're checking has a weakness, so give it points for each memberRequestingSupport that resists that type
-								for (const member in membersRequestingSupport) if (this.dex.species.get(member.species).randbats.immunities[type] || (this.dex.species.get(member.species).randbats.resistances[type] && !this.dex.species.get(member.species).randbats.weaknesses[type])) synergyResistScore++;
+								for (const member in membersRequestingSupport) if (randbatsData(member.species).immunities[type] || (randbatsData(member.species).resistances[type] && !randbatsData(member.species).weaknesses[type])) synergyResistScore++;
 							}
 						}
 						if (synergyResistScore > synergyResistMaxScore) { // reset
@@ -3673,7 +3685,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			let teamResistMaxScore = 0;
 			for (const id of currentStep) {
 				let teamResistScore = 0;
-				for (const type of types) if (!resistancesThisStep.includes(type) && (this.dex.data.Pokedex[id].randbats.immunities[type] || (this.dex.data.Pokedex[id].randbats.resistances[type] && !this.dex.data.Pokedex[id].randbats.weaknesses[type]))) teamResistScore++;
+				for (const type of types) if (!resistancesThisStep.includes(type) && (randbatsData(id).immunities[type] || (randbatsData(id).resistances[type] && !randbatsData(id).weaknesses[type]))) teamResistScore++;
 				if (teamResistScore > (18 - resistancesThisStep.length + teamPosition - 6)) teamResistScore = (18 - resistancesThisStep.length + teamPosition - 6);
 				if (teamResistScore < 0) teamResistScore = 0;
 				// I hope I did this right? uh, the point is - it should be "good enough" to cover all but 5 types on the first member, all but 4 types on the second member, all but 3 types on the third member, and so on
@@ -3692,19 +3704,19 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				let desiredSupport = [];
 				for (const id of currentStep) {
 					// species clause
-					if (teamNumbersThisStep.includes(this.dex.data.Pokedex[id].num)) continue;
+					if (teamNumbersThisStep.includes(randbatsData(id).num)) continue;
 					
 					// for now, I think just a yes or a no is fine
 					let accepted = false;
-					for (const role of offeredSupportThisStep) if (this.dex.data.Pokedex[id].randbats[format].acceptedSupport[role]) accepted = true;
+					for (const role of offeredSupportThisStep) if (randbatsData(id)[format].acceptedSupport[role]) accepted = true;
 					if (accepted === true) desiredSupport.push(id);
 				}
 				if (desiredSupport.length) currentStep = desiredSupport;
 			}
 			
 			// safety nets
-			if (!currentStep.length) currentStep = eligiblePokemonThisStep.filter(id => !teamNumbersThisStep.includes(this.dex.data.Pokedex[id].num));
-			if (!currentStep.length) currentStep = eligiblePokemon.filter(id => !teamNumbersThisStep.includes(this.dex.data.Pokedex[id].num));
+			if (!currentStep.length) currentStep = eligiblePokemonThisStep.filter(id => !teamNumbersThisStep.includes(randbatsData(id).num));
+			if (!currentStep.length) currentStep = eligiblePokemon.filter(id => !teamNumbersThisStep.includes(randbatsData(id).num));
 			if (!currentStep.length) continue;
 			
 			// and... now we get to choose a Pokémon!
@@ -3712,11 +3724,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			// we can replace the drafted team member accordingly
 			console.log(`Replaced ${draftTeamMember.name} with ${chosenRandomPokemon}`);
 			firstDraftTeam[teamPosition - 1] = {
-				name: this.dex.data.Pokedex[chosenRandomPokemon].name,
-				species: this.dex.data.Pokedex[chosenRandomPokemon].name,
-				offeredSupport: this.dex.data.Pokedex[chosenRandomPokemon].randbats.offeredSupport,
-				requestedSupport: this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].requestedSupport,
-				acceptedSupport: this.dex.data.Pokedex[chosenRandomPokemon].randbats[format].acceptedSupport,
+				name: randbatsData(chosenRandomPokemon).name,
+				species: randbatsData(chosenRandomPokemon).name,
+				offeredSupport: randbatsData(chosenRandomPokemon)[format].offeredSupport,
+				requestedSupport: randbatsData(chosenRandomPokemon)[format].requestedSupport,
+				acceptedSupport: randbatsData(chosenRandomPokemon)[format].acceptedSupport,
 				coveredStabs: [],
 				attackingTypes: {},
 				remainingStabTypes: [],
@@ -3812,7 +3824,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (species.forceTeraType) set.teraType = species.forceTeraType;
 	
 				// if there's only one possible Ability, account for it right away (in case it's a role, so the team knows it's covered)
-				if (this.dex.species.get(set.species).randbats && this.dex.species.get(set.species).randbats.abilities.length === 1) set.ability = this.dex.species.get(set.species).randbats.abilities[0];
+				if (randbatsData(set.species).abilities.length === 1) set.ability = randbatsData(set.species).abilities[0];
 	
 				// some species may have been given hard-coded randbats details
 				if (species.randbats[format].mandatory) {
@@ -3842,12 +3854,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				modFragment.role = 'mainstab'; // actually I don't want this to specify a type either
 				fragmentsList.push(modFragment);
 			}
-			for (const offeredSupport in species.randbats.offeredSupport) {
-				if (species.randbats.offeredSupport[offeredSupport] === 'true') {
-					if (!teamOfferedSupport[offeredSupport]) teamOfferedSupport[offeredSupport] = [];
-					if (!teamOfferedSupport[offeredSupport].includes(set)) teamOfferedSupport[offeredSupport].push(set);
+			for (const offeredSupport in species.randbats[format].offeredSupport) {
+				if (species.randbats[format].offeredSupport[offeredSupport] === 'true') {
+					if (!team.offeredSupport[offeredSupport]) team.offeredSupport[offeredSupport] = [];
+					if (!team.offeredSupport[offeredSupport].includes(set)) team.offeredSupport[offeredSupport].push(set);
 				}
-				for (const fragment of species.randbats.offeredSupport[offeredSupport]) {
+				for (const fragment of species.randbats[format].offeredSupport[offeredSupport]) {
 					if (typeof fragment !== 'string') {
 						let modFragment = Utils.deepClone(fragment);
 						modFragment.pokemon = set;
@@ -4979,20 +4991,20 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (['Refrigerate', 'Aerilate', 'Pixilate', 'Galvanize', 'Dragonize'].includes(set.ability)) teraTypes.Normal = 0;
 				}
 
-				if (this.dex.species.get(set.species).randbats) {
+				if (randbatsData(set.species)) {
 					// - types that complement the Pokémon's defensive profile:
 					for (const teraType of validTeraTypes) {
 						for (const checkType of validTeraTypes) {
 							// - this mostly means resistances to the Pokémon's weaknesses...
 							if (
-								this.dex.species.get(set.species).randbats.weaknesses[checkType] &&
-								!(this.dex.species.get(set.species).randbats.resistances[checkType] && (
-									this.dex.species.get(set.species).randbats.resistances[checkType] === 'true' ||
-									(this.dex.species.get(set.species).randbats.resistances[checkType].Ability && this.dex.species.get(set.species).randbats.resistances[checkType].Ability.includes(set.ability))
+								randbatsData(set.species).weaknesses[checkType] &&
+								!(randbatsData(set.species).resistances[checkType] && (
+									randbatsData(set.species).resistances[checkType] === 'true' ||
+									(randbatsData(set.species).resistances[checkType].Ability && randbatsData(set.species).resistances[checkType].Ability.includes(set.ability))
 								)) &&
-								!(this.dex.species.get(set.species).randbats.immunities[checkType] && (
-									this.dex.species.get(set.species).randbats.immunities[checkType] === 'true' ||
-									(this.dex.species.get(set.species).randbats.immunities[checkType].Ability && this.dex.species.get(set.species).randbats.immunities[checkType].Ability.includes(set.ability))
+								!(randbatsData(set.species).immunities[checkType] && (
+									randbatsData(set.species).immunities[checkType] === 'true' ||
+									(randbatsData(set.species).immunities[checkType].Ability && randbatsData(set.species).immunities[checkType].Ability.includes(set.ability))
 								))
 							) {
 								if (this.dex.data.TypeChart[teraType.toLowerCase()].damageTaken[checkType] >= 2) { // the Tera Type has a resistance or immunity
@@ -5004,8 +5016,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							}
 							// - ... but it also helps if the Pokémon has an immunity or resistance Ability that cancels out one of the new type's weaknesses
 							if (
-								(this.dex.species.get(set.species).randbats.immunities[checkType] && this.dex.species.get(set.species).randbats.immunities[checkType].Ability && this.dex.species.get(set.species).randbats.immunities[checkType].Ability.includes(set.ability)) ||
-								(this.dex.species.get(set.species).randbats.resistances[checkType] && this.dex.species.get(set.species).randbats.resistances[checkType].Ability && this.dex.species.get(set.species).randbats.resistances[checkType].Ability.includes(set.ability))
+								(randbatsData(set.species).immunities[checkType] && randbatsData(set.species).immunities[checkType].Ability && randbatsData(set.species).immunities[checkType].Ability.includes(set.ability)) ||
+								(randbatsData(set.species).resistances[checkType] && randbatsData(set.species).resistances[checkType].Ability && randbatsData(set.species).resistances[checkType].Ability.includes(set.ability))
 							) {
 								if (this.dex.data.TypeChart[teraType.toLowerCase()].damageTaken[checkType] === 1) { // the Tera Type has a weakness
 									teraTypes[teraType] += 2;
@@ -5135,7 +5147,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 				if (set.moves.includes('Fling')) { // why would you have this assigned and not already have an item jsmdfg
 					if (
-						this.dex.species.get(set.species) && this.dex.species.get(set.species).randbats && this.dex.species.get(set.species).randbats.types.includes('Dark')
+						this.dex.species.get(set.species) && randbatsData(set.species).types.includes('Dark')
 					) pushItems.push('Iron Ball');
 					else pushItems.push('Light Ball');
 				}
@@ -5209,7 +5221,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 				// this section was going to be tier 1 at first, but they ended up a bit more spread out
 				// these items are mostly based on type matchups!
-				if (this.dex.species.get(set.species) && this.dex.species.get(set.species).randbats && this.dex.species.get(set.species).randbats.weaknesses) {
+				if (randbatsData(set.species).weaknesses) {
 					// actually, resist Berries are more fun in some situations than others, so I'm putting them in tiers all over the place
 					const resistBerryTypes = [
 						'Fire', 'Water', 'Electric', 'Grass', 'Ice', 'Fighting', 'Poison', 'Ground', 'Flying', 'Psychic', 'Bug', 'Rock', 'Ghost', 'Dragon', 'Dark',
@@ -5218,12 +5230,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					for (const berryType of resistBerryTypes) {
 						let itemTier = 'tier2'; // start out at tier 2
 						let eligible = false;
-						if (!this.dex.species.get(set.species).randbats.weaknesses[berryType]) continue;
+						if (!randbatsData(set.species).weaknesses[berryType]) continue;
 						// if it's one of your weaknesses...
 						for (const coverageType of resistBerryTypes) {
 							if (!set.attackingTypes[coverageType]) continue; // and you have a coverage type...
 							// (... preferably not just one of your STABs...)
-							if (this.dex.species.get(set.species).randbats.types.includes[coverageType]) itemTier = 'tier3';
+							if (randbatsData(set.species).types.includes[coverageType]) itemTier = 'tier3';
 							if (this.dex.data.TypeChart[berryType.toLowerCase()].damageTaken[coverageType] === 1) eligible = true; // that can hit it for SE
 						}
 						if (berryType === 'Dark' && format === 'singles') eligible = true; // ... or I guess if it's just a Dark weakness, because Colbur for Knock is kinda always viable
@@ -5254,25 +5266,25 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					}
 					// Air Balloon
 					if (
-						this.dex.species.get(set.species).randbats.weaknesses.Ground &&
-						!(this.dex.species.get(set.species).randbats.immunities.Ground && !(this.dex.species.get(set.species).randbats.immunities.Ground.Ability || this.dex.species.get(set.species).randbats.immunities.Ground.Ability.includes(set.ability))) &&
-						(this.dex.species.get(set.species).randbats.resistances.Rock || ['Magic Guard', 'Regenerator'].includes(set.ability))
+						randbatsData(set.species).weaknesses.Ground &&
+						!(randbatsData(set.species).immunities.Ground && !(randbatsData(set.species).immunities.Ground.Ability || randbatsData(set.species).immunities.Ground.Ability.includes(set.ability))) &&
+						(randbatsData(set.species).resistances.Rock || ['Magic Guard', 'Regenerator'].includes(set.ability))
 					) {
 						set.possibleItems.tier2.push('Air Balloon');
 					} else if (set.species === 'Rotom-Fan') set.possibleItems.tier2.push('Air Balloon'); // ONLY SOMETIMES but it's funny
 					// Utility Umbrella I guess???
 					if (
 						teamOfferedSupport.rain && !teamRequestedSupport.rain.includes(set) && !set.roles.includes('rain') && !set.roles.includes('backuprain') && !(
-							this.dex.species.get(set.species).randbats.resistances.Water === 'true' ||
-							(this.dex.species.get(set.species).randbats.resistances.Water.Ability && this.dex.species.get(set.species).randbats.resistances.Water.Ability.includes(set.ability))
+							randbatsData(set.species).resistances.Water === 'true' ||
+							(randbatsData(set.species).resistances.Water.Ability && randbatsData(set.species).resistances.Water.Ability.includes(set.ability))
 						)
 					) {
 						if (set.moves.includes('Synthesis') || set.moves.includes('Morning Sun') || set.moves.includes('Moonlight')) set.possibleItems.tier0.push('Utility Umbrella');
 						else set.possibleItems.tier2.push('Utility Umbrella');
 					} else if (
 						teamOfferedSupport.sun && !teamRequestedSupport.sun.includes(set) && !set.roles.includes('sun') && !set.roles.includes('backupsun') && !(
-							this.dex.species.get(set.species).randbats.resistances.Fire === 'true' ||
-							(this.dex.species.get(set.species).randbats.resistances.Fire.Ability && this.dex.species.get(set.species).randbats.resistances.Fire.Ability.includes(set.ability))
+							randbatsData(set.species).resistances.Fire === 'true' ||
+							(randbatsData(set.species).resistances.Fire.Ability && randbatsData(set.species).resistances.Fire.Ability.includes(set.ability))
 						)
 					) {
 						set.possibleItems.tier2.push('Utility Umbrella');
@@ -5349,7 +5361,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						set.possibleItems.tier3.push('White Herb');
 					}
 					if (
-						!(this.dex.species.get(set.species).randbats && this.dex.species.get(set.species).randbats.types.includes('Ghost')) && set.teraType !== 'Ghost' &&
+						!(randbatsData(set.species) && randbatsData(set.species).types.includes('Ghost')) && set.teraType !== 'Ghost' &&
 						!set.roles.includes('antipriority') && set.ability !== 'Shield Dust'
 					) {
 						if (set.roles.includes('speedcontrol') || set.roles.includes('trickroom')) set.possibleItems.tier0.push('Covert Cloak');
@@ -5361,7 +5373,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					format === 'vgc' && set.roles.includes('trickroom') && !['Oblivious', 'Good as Gold', 'Magic Bounce'].includes(set.ability) && !teamOfferedSupport.aromaveil
 				) {
 					if ( // higher priority if you're really not worried about Fake Out
-						(this.dex.species.get(set.species).randbats && this.dex.species.get(set.species).randbats.types.includes('Ghost')) ||
+						(randbatsData(set.species) && randbatsData(set.species).types.includes('Ghost')) ||
 						set.teraType === 'Ghost' || set.roles.includes('antipriority') || set.ability === 'Shield Dust' ||
 						teamOfferedSupport.psychicterrain
 					) {
@@ -5373,7 +5385,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// Safety Goggles
 				if ( // let's avoid complete redundancy at least
 					format === 'vgc' &&
-					!(this.dex.species.get(set.species).randbats && this.dex.species.get(set.species).randbats.types.includes('Grass')) && set.teraType !== 'Grass' &&
+					!(randbatsData(set.species) && randbatsData(set.species).types.includes('Grass')) && set.teraType !== 'Grass' &&
 					!set.roles.includes('sleepimmune') &&
 					![
 						'Overcoat', 'Good as Gold', 'Magic Bounce',
@@ -5388,7 +5400,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					// let's look at this the same way as Mental Herb: give Safety Goggles *much* higher priority if you're not afraid of priority
 					if (
 						set.roles.includes('trickroom') &&
-						((this.dex.species.get(set.species).randbats && this.dex.species.get(set.species).randbats.types.includes('Ghost')) ||
+						((randbatsData(set.species) && randbatsData(set.species).types.includes('Ghost')) ||
 						set.teraType === 'Ghost' || set.roles.includes('antipriority') || set.ability === 'Shield Dust' ||
 						teamOfferedSupport.psychicterrain)
 					) {
@@ -5438,25 +5450,25 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						// must resist at least one of Dark, Fighting and Bug
 						(
 							(
-								this.dex.species.get(set.species).randbats.resistances.Dark && (
-									this.dex.species.get(set.species).randbats.resistances.Dark === 'true' ||
-									(this.dex.species.get(set.species).randbats.resistances.Dark.Ability && this.dex.species.get(set.species).randbats.resistances.Dark.Ability.includes(set.ability))
+								randbatsData(set.species).resistances.Dark && (
+									randbatsData(set.species).resistances.Dark === 'true' ||
+									(randbatsData(set.species).resistances.Dark.Ability && randbatsData(set.species).resistances.Dark.Ability.includes(set.ability))
 								)
 							) || (
-								this.dex.species.get(set.species).randbats.resistances.Fighting && (
-									this.dex.species.get(set.species).randbats.resistances.Fighting === 'true' ||
-									(this.dex.species.get(set.species).randbats.resistances.Fighting.Ability && this.dex.species.get(set.species).randbats.resistances.Fighting.Ability.includes(set.ability))
+								randbatsData(set.species).resistances.Fighting && (
+									randbatsData(set.species).resistances.Fighting === 'true' ||
+									(randbatsData(set.species).resistances.Fighting.Ability && randbatsData(set.species).resistances.Fighting.Ability.includes(set.ability))
 								)
 							) || (
-								this.dex.species.get(set.species).randbats.resistances.Bug && (
-									this.dex.species.get(set.species).randbats.resistances.Bug === 'true' ||
-									(this.dex.species.get(set.species).randbats.resistances.Bug.Ability && this.dex.species.get(set.species).randbats.resistances.Bug.Ability.includes(set.ability))
+								randbatsData(set.species).resistances.Bug && (
+									randbatsData(set.species).resistances.Bug === 'true' ||
+									(randbatsData(set.species).resistances.Bug.Ability && randbatsData(set.species).resistances.Bug.Ability.includes(set.ability))
 								)
 							)
 						) &&
 						
 						// must not be weak to Stealth Rock
-						(['Regenerator', 'Magic Guard'].includes(set.ability) || !(this.dex.species.get(set.species).randbats.weaknesses.Rock))
+						(['Regenerator', 'Magic Guard'].includes(set.ability) || !(randbatsData(set.species).weaknesses.Rock))
 					) set.possibleItems.tier2.push('Rocky Helmet');
 				} else {
 					// if you have redirection?
@@ -5465,13 +5477,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// Heavy-Duty Boots
 				if (format === 'singles' && set.ability !== 'Magic Guard') {
 					if (set.roles.includes('pivoting') || set.roles.includes('hazardcontrol')) {
-						if (
-							this.dex.species.get(set.species) && this.dex.species.get(set.species).randbats &&
-							this.dex.species.get(set.species).randbats.weaknesses.Rock
-						) set.possibleItems.tier0.push('Heavy-Duty Boots'); // if you're a pivot or hazard control and not Rock-resistant
+						if (randbatsData(set.species).weaknesses.Rock) set.possibleItems.tier0.push('Heavy-Duty Boots'); // if you're a pivot or hazard control and not Rock-resistant
 					} else if ( // if you're not a pivot or hazard control, but you're Rock-weak
-						this.dex.species.get(set.species) && this.dex.species.get(set.species).randbats &&
-						this.dex.species.get(set.species).randbats.weaknesses.Rock
+						randbatsData(set.species).weaknesses.Rock
 					) {
 						set.possibleItems.tier2.push('Heavy-Duty Boots');
 					}
@@ -5482,7 +5490,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				) {
 					set.possibleItems.tier2.push('Red Card');
 					if (
-						format !== 'singles' || ['Regenerator', 'Magic Guard'].includes(set.ability) || !(this.dex.species.get(set.species).randbats.weaknesses.Rock)
+						format !== 'singles' || ['Regenerator', 'Magic Guard'].includes(set.ability) || !(randbatsData(set.species).weaknesses.Rock)
 					) set.possibleItems.tier2.push('Eject Button');
 				}
 				// type-boosting items
