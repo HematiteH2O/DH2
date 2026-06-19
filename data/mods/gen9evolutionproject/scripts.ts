@@ -5145,7 +5145,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				} else if (set.species === 'Rotom-Fan') set.possibleItems.tier2.push('Air Balloon'); // ONLY SOMETIMES but it's funny
 				// Utility Umbrella I guess???
 				if (
-					teamOfferedSupport.rain && !teamRequestedSupport.rain.includes(set) && !set.roles.includes('rain') && !set.roles.includes('backuprain') && !(
+					teamOfferedSupport.rain && !(teamRequestedSupport.rain && !teamRequestedSupport.rain.includes(set)) && !set.roles.includes('rain') && !set.roles.includes('backuprain') && !(
 						randbatsData(set.species).resistances.Water === 'true' ||
 						(randbatsData(set.species).resistances.Water.Ability && randbatsData(set.species).resistances.Water.Ability.includes(set.ability))
 					)
@@ -5153,7 +5153,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (set.moves.includes('Synthesis') || set.moves.includes('Morning Sun') || set.moves.includes('Moonlight')) set.possibleItems.tier0.push('Utility Umbrella');
 					else set.possibleItems.tier2.push('Utility Umbrella');
 				} else if (
-					teamOfferedSupport.sun && !teamRequestedSupport.sun.includes(set) && !set.roles.includes('sun') && !set.roles.includes('backupsun') && !(
+					teamOfferedSupport.sun && !(teamRequestedSupport.sun && teamRequestedSupport.sun.includes(set)) && !set.roles.includes('sun') && !set.roles.includes('backupsun') && !(
 						randbatsData(set.species).resistances.Fire === 'true' ||
 						(randbatsData(set.species).resistances.Fire.Ability && randbatsData(set.species).resistances.Fire.Ability.includes(set.ability))
 					)
