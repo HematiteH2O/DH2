@@ -733,7 +733,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			if (initialize) {
 				if (this.eligiblePokemon[id]) return;
 				if (activeMon.randbatsInitialized && activeMon.randbatsInitialized[format] === 'in progress') return;
-				if (activeMon.randbatsInitialized && activeMon.randbatsInitialized[format] === 'complete') this.eligiblePokemon[id] = Utils.deepClone(activeMon.randbats[format]);
+				if (activeMon.randbatsInitialized && activeMon.randbatsInitialized[format] === 'complete') {
+					this.eligiblePokemon[id] = Utils.deepClone(activeMon.randbats[format]);
+					return;
+				}
 			} else {
 				if (!this.eligiblePokemon[id] && activeMon.randbatsInitialized && activeMon.randbatsInitialized[format] === 'complete') this.eligiblePokemon[id] = Utils.deepClone(activeMon.randbats[format]);
 				if (this.eligiblePokemon[id]) return this.eligiblePokemon[id];
