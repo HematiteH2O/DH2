@@ -643,7 +643,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 	// but the first player wouldn't be able to react to the second player!
 	// For reference, the place where this is actually used is Section 1 of getTeam() below.
 
-	/*
 	constructor(options: BattleOptions) {
 		this.log = [];
 		this.add('t:', Math.floor(Date.now() / 1000));
@@ -770,7 +769,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			}
 		}
 	},
-	*/
 
 	// getTeam is where the actual generator is
 	getTeam(options) {
