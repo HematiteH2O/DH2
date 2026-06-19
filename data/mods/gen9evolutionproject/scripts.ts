@@ -768,36 +768,36 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			};
 			const activeData = activeMon.randbats[format];
 			
-			if (this.dex.data.FormatsData[id].tier === "Evo!" || ['porygon2', 'accelgor'].includes(id)) activeMon.randbats.stage = 'Evo';
-			else if (activeMon.evos && activeMon.evos.length && !activeMon.prevo && !['mareanie'].includes(id)) activeMon.randbats.stage = 'LC';
+			if (this.dex.data.FormatsData[id].tier === "Evo!" || ['porygon2', 'accelgor'].includes(id)) activeData.stage = 'Evo';
+			else if (activeMon.evos && activeMon.evos.length && !activeMon.prevo && !['mareanie'].includes(id)) activeData.stage = 'LC';
 			// banlists
 			if ([
 				'toxapex', 'noivernvariant', 'chandelure', 'corviknight', 'darmanitan', 'darmanitangalar', 'excadrill', 'hawlucha', 'garchomp', 'velocinobi',
 				'dragonite', 'tapukoko', 'tapulele', 'tapubulu', 'tapufini', 'zacian', 'zaciancrowned', 'zamazenta', 'zamazentacrowned', 'deoxys',
 				'deoxysattack', 'deoxysdefense', 'deoxysspeed',
-			].includes(id)) activeMon.randbats.singles.banned = true;
+			].includes(id) && format === 'singles') activeData.banned = true;
 			if ([
 				'dragonite', 'tapukoko', 'tapulele', 'tapubulu', 'tapufini', 'zacian', 'zaciancrowned', 'zamazenta', 'zamazentacrowned', 'deoxys',
 				'deoxysattack', 'deoxysdefense', 'deoxysspeed',
-			].includes(id)) activeMon.randbats.vgc.banned = true;
+			].includes(id) && format === 'vgc') activeData.banned = true;
 
 			// basic information
-			activeMon.randbats.types.push(activeMon.types[0]);
-			if (activeMon.types[1]) activeMon.randbats.types.push(activeMon.types[1]);
+			activeData.types.push(activeMon.types[0]);
+			if (activeMon.types[1]) activeData.types.push(activeMon.types[1]);
 			
-			activeMon.randbats.abilities.push(activeMon.abilities[0]);
-			if (activeMon.abilities[1]) activeMon.randbats.abilities.push(activeMon.abilities[1]);
-			if (activeMon.abilities['H']) activeMon.randbats.abilities.push(activeMon.abilities['H']);
-			if (activeMon.abilities['S']) activeMon.randbats.abilities.push(activeMon.abilities['S']);
+			activeData.abilities.push(activeMon.abilities[0]);
+			if (activeMon.abilities[1]) activeData.abilities.push(activeMon.abilities[1]);
+			if (activeMon.abilities['H']) activeData.abilities.push(activeMon.abilities['H']);
+			if (activeMon.abilities['S']) activeData.abilities.push(activeMon.abilities['S']);
 			if (activeMon.battleOnly) {
 				if (activeMon.requiredAbility) {
-					activeMon.randbats.abilities.push(activeMon.requiredAbility);
+					activeData.abilities.push(activeMon.requiredAbility);
 				} else {
 					let baseMon = this.dex.species.get(activeMon.battleOnly);
-					activeMon.randbats.abilities.push(baseMon.abilities[0]);
-					if (baseMon.abilities[1]) activeMon.randbats.abilities.push(baseMon.abilities[1]);
-					if (baseMon.abilities['H']) activeMon.randbats.abilities.push(baseMon.abilities['H']);
-					if (baseMon.abilities['S']) activeMon.randbats.abilities.push(baseMon.abilities['S']);
+					activeData.abilities.push(baseMon.abilities[0]);
+					if (baseMon.abilities[1]) activeData.abilities.push(baseMon.abilities[1]);
+					if (baseMon.abilities['H']) activeData.abilities.push(baseMon.abilities['H']);
+					if (baseMon.abilities['S']) activeData.abilities.push(baseMon.abilities['S']);
 				}
 			}
 
@@ -809,7 +809,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				'Fire', 'Water', 'Electric', 'Grass', 'Ice', 'Fighting', 'Poison', 'Ground', 'Flying', 'Psychic', 'Bug', 'Rock', 'Ghost', 'Dragon', 'Dark', 'Steel', 'Fairy', 'Normal',
 				'psn', 'tox', 'brn', 'par', 'slp', 'frz', 'powder', // (these are ones I expect to use later; I'm not expecting Prankster or trapping immunity to come up, and weather is handled separately)
 			];
-			for (const type1 of activeMon.randbats.types) {
+			for (const type1 of activeData.types) {
 				// fill in weaknesses and resistances by type first
 				for (const type of types) {
 					if (this.dex.data.TypeChart[type1.toLowerCase()].damageTaken[type] === 1 && !weaknesses.includes(type)) weaknesses.push(type);
@@ -818,28 +818,28 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 			}
 			// then let them cancel out
-			for (const type of weaknesses) if (!resistances.includes(type) && !immunities.includes(type)) activeMon.randbats.weaknesses[type] = "true";
-			for (const type of resistances) if (!weaknesses.includes(type) || immunities.includes(type)) activeMon.randbats.resistances[type] = "true";
+			for (const type of weaknesses) if (!resistances.includes(type) && !immunities.includes(type)) activeData.weaknesses[type] = "true";
+			for (const type of resistances) if (!weaknesses.includes(type) || immunities.includes(type)) activeData.resistances[type] = "true";
 			// immunities are just better resistances, so they might as well still count
-			for (const type of immunities) activeMon.randbats.immunities[type] = "true";
+			for (const type of immunities) activeData.immunities[type] = "true";
 			
 			// finally, account for Abilities
 			const abilityWeakness = (ability: string, type: string) => {
-				if (!activeMon.randbats.abilities.includes(ability)) return;
-				if (!activeMon.randbats.weaknesses[type]) activeMon.randbats.weaknesses[type] = {Ability: [ability]};
-				else if (activeMon.randbats.weaknesses[type].Ability) activeMon.randbats.weaknesses[type].Ability.push(ability);
+				if (!activeData.abilities.includes(ability)) return;
+				if (!activeData.weaknesses[type]) activeData.weaknesses[type] = {Ability: [ability]};
+				else if (activeData.weaknesses[type].Ability) activeData.weaknesses[type].Ability.push(ability);
 			}
 			const abilityResistance = (ability: string, type: string) => {
-				if (!activeMon.randbats.abilities.includes(ability)) return;
-				if (!activeMon.randbats.resistances[type]) activeMon.randbats.resistances[type] = {Ability: [ability]};
-				else if (activeMon.randbats.resistances[type].Ability) activeMon.randbats.resistances[type].Ability.push(ability);
+				if (!activeData.abilities.includes(ability)) return;
+				if (!activeData.resistances[type]) activeData.resistances[type] = {Ability: [ability]};
+				else if (activeData.resistances[type].Ability) activeData.resistances[type].Ability.push(ability);
 			}
 			const abilityImmunity = (ability: string, type: string) => {
-				if (!activeMon.randbats.abilities.includes(ability)) return;
-				if (!activeMon.randbats.resistances[type]) activeMon.randbats.resistances[type] = {Ability: [ability]};
-				else if (activeMon.randbats.resistances[type].Ability) activeMon.randbats.resistances[type].Ability.push(ability);
-				if (!activeMon.randbats.immunities[type]) activeMon.randbats.immunities[type] = {Ability: [ability]};
-				else if (activeMon.randbats.immunities[type].Ability) activeMon.randbats.immunities[type].Ability.push(ability);
+				if (!activeData.abilities.includes(ability)) return;
+				if (!activeData.resistances[type]) activeData.resistances[type] = {Ability: [ability]};
+				else if (activeData.resistances[type].Ability) activeData.resistances[type].Ability.push(ability);
+				if (!activeData.immunities[type]) activeData.immunities[type] = {Ability: [ability]};
+				else if (activeData.immunities[type].Ability) activeData.immunities[type].Ability.push(ability);
 			}
 			
 			abilityWeakness('Dry Skin', 'Fire');
@@ -866,8 +866,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			abilityImmunity('Earth Eater', 'Ground');
 			abilityImmunity('Levitate', 'Ground');
 			// TODO: status and powder immunities
-			if (!activeMon.randbats.types.includes('Flying')) abilityResistance('Misty Surge', 'Dragon');
-			if (activeMon.randbats.abilities.includes('Wonder Guard')) for (const type of types) if (!activeMon.randbats.weaknesses[type]) abilityImmunity('Wonder Guard', type);
+			if (!activeData.types.includes('Flying')) abilityResistance('Misty Surge', 'Dragon');
+			if (activeData.abilities.includes('Wonder Guard')) for (const type of types) if (!activeData.weaknesses[type]) abilityImmunity('Wonder Guard', type);
 			
 			// Evo customs
 			abilityResistance('Storm Chaser', 'Water');
@@ -883,63 +883,45 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			abilityResistance('Directing Traffic', 'Normal');
 			abilityImmunity('Centrifuge', 'Ground');
 			abilityImmunity('Divinated Protection', 'Psychic');
-			if (activeMon.randbats.abilities.includes('Patch Note')) for (const type of types) if (this.dex.data.TypeChart[type.toLowerCase()] && this.dex.data.TypeChart[type.toLowerCase()].damageTaken[activeMon.types[0]] === 1) abilityResistance('Patch Note', type);
+			if (activeData.abilities.includes('Patch Note')) for (const type of types) if (this.dex.data.TypeChart[type.toLowerCase()] && this.dex.data.TypeChart[type.toLowerCase()].damageTaken[activeMon.types[0]] === 1) abilityResistance('Patch Note', type);
 
 			// now, we're going to turn some of these into offeredSupport like 'groundimmune'
-			for (const immunity in activeMon.randbats.immunities) {
-				if (activeMon.randbats.immunities[immunity].Ability && activeMon.randbats.immunities[immunity].Ability.length) {
+			for (const immunity in activeData.immunities) {
+				if (activeData.immunities[immunity].Ability && activeData.immunities[immunity].Ability.length) {
 					activeData.offeredSupport[`${(immunity).toLowerCase()}immune`] = [];
-					for (const ability of activeMon.randbats.immunities[immunity].Ability) {
+					for (const ability of activeData.immunities[immunity].Ability) {
 						// push fragments
 						let fragment = {
 							ability: ability,
-							singles: {
-								requestedSupport: [],
-								acceptedSupport: [],
-							},
-							vgc: {
-								requestedSupport: [],
-								acceptedSupport: [],
-							},
+							requestedSupport: [],
+							acceptedSupport: [],
 							fragmentPriority: 4,
 						};
 						activeData.offeredSupport[`${(immunity).toLowerCase()}immune`].push(fragment);
 					}
-				} else activeData.offeredSupport[`${(immunity).toLowerCase()}immune`] = activeMon.randbats.immunities[immunity];
+				} else activeData.offeredSupport[`${(immunity).toLowerCase()}immune`] = activeData.immunities[immunity];
 			}
 
-			for (const resistance in activeMon.randbats.resistances) { // if I don't end up needing this, I'll just delete it
-				if (activeMon.randbats.weaknesses[resistance]) continue;
-				if (activeMon.randbats.resistances[resistance].Ability && activeMon.randbats.resistances[resistance].Ability.length) {
+			for (const resistance in activeData.resistances) { // if I don't end up needing this, I'll just delete it
+				if (activeData.weaknesses[resistance]) continue;
+				if (activeData.resistances[resistance].Ability && activeData.resistances[resistance].Ability.length) {
 					activeData.offeredSupport[`${(resistance).toLowerCase()}resist`] = [];
-					for (const ability of activeMon.randbats.resistances[resistance].Ability) {
+					for (const ability of activeData.resistances[resistance].Ability) {
 						// push fragments
 						let fragment = {
 							ability: ability,
-							singles: {
-								requestedSupport: [],
-								acceptedSupport: [],
-							},
-							vgc: {
-								requestedSupport: [],
-								acceptedSupport: [],
-							},
+							requestedSupport: [],
+							acceptedSupport: [],
 							fragmentPriority: 4,
 						};
 						activeData.offeredSupport[`${(resistance).toLowerCase()}resist`].push(fragment);
 					}
-				} else activeData.offeredSupport[`${(resistance).toLowerCase()}resist`] = activeMon.randbats.resistances[resistance];
+				} else activeData.offeredSupport[`${(resistance).toLowerCase()}resist`] = activeData.resistances[resistance];
 			}
 
 			// some innate properties of types
-			if (activeMon.randbats.types.includes('Ice')) {
-				activeMon.randbats.singles.acceptedSupport.snow = ["true"];
-				activeMon.randbats.vgc.acceptedSupport.snow = ["true"];
-			}
-			if (activeMon.randbats.types.includes('Rock')) {
-				activeMon.randbats.singles.acceptedSupport.sand = ["true"];
-				activeMon.randbats.vgc.acceptedSupport.sand = ["true"];
-			}
+			if (activeData.types.includes('Ice')) activeData.acceptedSupport.snow = ["true"];
+			if (activeData.types.includes('Rock')) activeData.acceptedSupport.sand = ["true"];
 
 			// no I can start iterating over the movepool!
 			
@@ -954,7 +936,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				spe: number | null, ability: string | null, item: string | null, requestedSupport: string[] | null, tags: string[] | null, avoid: string[] | null
 			) => {
 				if (
-					(ability && !activeMon.randbats.abilities.includes(ability)) ||
+					(ability && !activeData.abilities.includes(ability)) ||
 					(spe && !activeMon.baseStats.spe <= spe)
 				) return;
 				let subfragment = {};
@@ -1003,7 +985,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			for (const moveid in learnset) {
 				if (!learnset[moveid].length) continue;
 				// *rudimentary* LC set legality:
-				if (activeMon.randbats.stage === 'LC' && activeMon.gender && ['M', 'N'].includes(activeMon.gender) && !['golett', 'bronzor'].includes(id)) {
+				if (activeData.stage === 'LC' && activeMon.gender && ['M', 'N'].includes(activeMon.gender) && !['golett', 'bronzor'].includes(id)) {
 					// A handful of Pokémon need to worry about levels in LC
 					// For Bronzor, this affects Extrasensory, Feint Attack, Heal Block and Psywave; for Golett, it affects Dynamic Punch, Hammer Arm, Magnitude and Shadow Punch...
 					// ... but they learned all of those moves in Gen VII, so they get them anyway by Heart Scale! I checked and these are legal sets
@@ -1046,11 +1028,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				const noModifyType = [
 					'hiddenpower', 'judgment', 'multiattack', 'naturalgift', 'revelationdance', 'struggle', 'technoblast', 'terrainpulse', 'weatherball',
 				];
-				for (const ability of activeMon.randbats.abilities) {
+				for (const ability of activeData.abilities) {
 					let modifier = 1; // for Orichalcum Pulse and Hadron Engine later
 					switch (ability) {
 						case 'Adaptability':
-							if (activeMon.randbats.types.includes(move.type) && !['terrainpulse', 'weatherball'].includes(moveid)) {
+							if (activeData.types.includes(move.type) && !['terrainpulse', 'weatherball'].includes(moveid)) {
 								let modFragment = {
 									ability: ability,
 									moveBasePower: basePower * 4/3,
@@ -1146,7 +1128,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						case 'Electric Surge':
 						case 'Hadron Engine':
 							if (ability === 'Hadron Engine' && move.category === 'Special') modifier = 4/3;
-							if (!activeMon.randbats.types.includes('Flying')) {
+							if (!activeData.types.includes('Flying')) {
 								if (move.type === 'Electric' && basePower) {
 									let modFragment = {
 										ability: ability,
@@ -1182,14 +1164,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								let modFragment = {
 									ability: ability,
 									moveBasePower: basePower * 1.5,
-									singles: {
-										acceptedSupport: [],
-										requestedSupport: ['sun'],
-									},
-									vgc: {
-										acceptedSupport: [],
-										requestedSupport: ['sun'],
-									},
+									requestedSupport: ['sun'],
 								};
 								fragments.push(modFragment);
 							}
@@ -1217,7 +1192,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							break;
 						case 'Grassy Surge':
 						case 'Seed Sower':
-							if (!activeMon.randbats.types.includes('Flying')) {
+							if (!activeData.types.includes('Flying')) {
 								if (move.type === 'Grass' && basePower) {
 									let modFragment = {
 										ability: ability,
@@ -1283,7 +1258,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							}
 							break;
 						case 'Psychic Surge':
-							if (!activeMon.randbats.types.includes('Flying')) {
+							if (!activeData.types.includes('Flying')) {
 								if (move.type === 'Psychic' && basePower) {
 									let modFragment = {
 										ability: ability,
@@ -1315,20 +1290,13 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								let modFragment = {
 									ability: ability,
 									moveBasePower: basePower * 1.5,
-									singles: {
-										acceptedSupport: [],
-										requestedSupport: ['poison'],
-									},
-									vgc: {
-										acceptedSupport: [],
-										requestedSupport: ['poison'],
-									},
+									requestedSupport: ['poison'],
 								};
 								fragments.push(modFragment);
 							}
 							break;
 						case 'Misty Surge':
-							if (!activeMon.randbats.types.includes('Flying')) {
+							if (!activeData.types.includes('Flying')) {
 								if (moveid === 'terrainpulse') {
 									let modFragment = {
 										ability: ability,
@@ -1435,12 +1403,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								let modFragment = {
 									ability: ability,
 									moveBasePower: basePower * 1.2,
-									singles: {
-										requestedSupport: ['sand'],
-									},
-									vgc: {
-										requestedSupport: ['sand'],
-									},
+									requestedSupport: ['sand'],
 								};
 								fragments.push(modFragment);
 							}
@@ -1485,14 +1448,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								let modFragment = {
 									ability: ability,
 									moveBasePower: basePower * 1.5,
-									singles: {
-										acceptedSupport: [],
-										requestedSupport: ['sun'],
-									},
-									vgc: {
-										acceptedSupport: [],
-										requestedSupport: ['sun'],
-									},
+									requestedSupport: ['sun'],
 								};
 								fragments.push(modFragment);
 							}
@@ -1619,20 +1575,13 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								let modFragment = {
 									ability: ability,
 									moveBasePower: basePower * 1.5,
-									singles: {
-										acceptedSupport: [],
-										requestedSupport: ['snow'],
-									},
-									vgc: {
-										acceptedSupport: [],
-										requestedSupport: ['snow'],
-									},
+									requestedSupport: ['snow'],
 								};
 								fragments.push(modFragment);
 							}
 							break;
 						case 'Mega-Neural':
-							if (!activeMon.randbats.types.includes('Flying')) {
+							if (!activeData.types.includes('Flying')) {
 								if (move.type === 'Psychic' && basePower) {
 									let modFragment = {
 										ability: ability,
@@ -1680,12 +1629,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (!fragment.baseMove) fragment.baseMove = move.name;
 					if (!fragment.moves) fragment.moves = [move.name];
 					
-					if (!fragment.singles) fragment.singles = {};
-					if (!fragment.singles.requestedSupport) fragment.singles.requestedSupport = [];
-					if (!fragment.singles.acceptedSupport) fragment.singles.acceptedSupport = [];
-					if (!fragment.vgc) fragment.vgc = {};
-					if (!fragment.vgc.requestedSupport) fragment.vgc.requestedSupport = [];
-					if (!fragment.vgc.acceptedSupport) fragment.vgc.acceptedSupport = [];
+					if (!fragment.requestedSupport) fragment.requestedSupport = [];
+					if (!fragment.acceptedSupport) fragment.acceptedSupport = [];
 					
 					if (!fragment.moveType) fragment.moveType = move.type;
 					if (!fragment.moveBasePower) fragment.moveBasePower = basePower;
@@ -1698,51 +1643,45 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					// support requirements before any context
 					if (moveid === 'risingvoltage' && !['Electric Surge', 'Hadron Engine'].includes(fragment.ability)) {
 						fragment.moveBasePower *= 2;
-						fragment.singles.requestedSupport.push('electricterrain');
-						fragment.vgc.requestedSupport.push('electricterrain');
+						fragment.requestedSupport.push('electricterrain');
+						fragment.requestedSupport.push('electricterrain');
 						// can still work with Ground immunity
 					}
 					// Evo customs (Mega-Neural)
 					if (moveid === 'expandingforce' && !['Mega-Neural', 'Psychic Surge'].includes(fragment.ability)) {
 						fragment.moveBasePower *= 1.5;
-						fragment.singles.requestedSupport.push('psychicterrain');
-						fragment.vgc.requestedSupport.push('psychicterrain');
+						fragment.requestedSupport.push('psychicterrain');
+						fragment.requestedSupport.push('psychicterrain');
 						if (!fragment.avoid) fragment.avoid = [];
 						fragment.avoid.push('groundimmune');
 					}
 					if (moveid === 'grassyglide'  && !['Grassy Surge', 'Seed Sower'].includes(fragment.ability)) {
 						fragment.movePriority += 1;
-						fragment.singles.requestedSupport.push('grassyterrain');
-						fragment.vgc.requestedSupport.push('grassyterrain');
+						fragment.requestedSupport.push('grassyterrain');
+						fragment.requestedSupport.push('grassyterrain');
 						if (!fragment.avoid) fragment.avoid = [];
 						fragment.avoid.push('groundimmune');
 					}
 					// Misty Explosion doesn't actually want Misty Terrain support
 					if (['solarbeam', 'solarblade', 'growth'].includes(moveid) && !(fragment.ability && ['Desolate Land', 'Drought', 'Mega Sol', 'Orichalcum Pulse'].includes(fragment.ability))) {
-						fragment.singles.requestedSupport.push('sun');
-						fragment.vgc.requestedSupport.push('sun');
+						fragment.requestedSupport.push('sun');
 					}
 					if (['synthesis', 'moonlight', 'morningsun'].includes(moveid) && !(fragment.ability && ['Desolate Land', 'Drought', 'Mega Sol', 'Orichalcum Pulse'].includes(fragment.ability))) {
-						fragment.singles.acceptedSupport.push('sun');
-						fragment.vgc.acceptedSupport.push('sun');
+						fragment.acceptedSupport.push('sun');
 					}
 					// Evo customs (Storm Chaser)
 					if (['electroshot'].includes(moveid) && !(fragment.ability && ['Drizzle', 'Primordial Sea', 'Storm Chaser'].includes(fragment.ability))) {
-						fragment.singles.requestedSupport.push('rain');
-						fragment.vgc.requestedSupport.push('rain');
+						fragment.requestedSupport.push('rain');
 					}
 					if (['shoreup'].includes(moveid) && !(fragment.ability && ['Sand Stream'].includes(fragment.ability))) {
-						fragment.singles.acceptedSupport.push('sand');
-						fragment.vgc.acceptedSupport.push('sand');
+						fragment.acceptedSupport.push('sand');
 					}
 					if (['auroraveil'].includes(moveid) && !(fragment.ability && ['Snow Warning'].includes(fragment.ability))) {
-						fragment.singles.requestedSupport.push('snow');
-						fragment.vgc.requestedSupport.push('snow');
+						fragment.requestedSupport.push('snow');
 					}
 					// Evo customs (Shave Off)
 					if (['shaveoff'].includes(moveid) && !(fragment.ability && ['Snow Warning'].includes(fragment.ability))) {
-						fragment.singles.acceptedSupport.push('snow');
-						fragment.vgc.acceptedSupport.push('snow');
+						fragment.acceptedSupport.push('snow');
 					}
 
 					// sun
@@ -1752,8 +1691,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					) {
 						let modFragment = Utils.deepClone(fragment);
 						modFragment.moveBasePower *= 1.5;
-						modFragment.singles.requestedSupport.push('sun');
-						modFragment.vgc.requestedSupport.push('sun');
+						modFragment.requestedSupport.push('sun');
 						alternateFragments.push(modFragment);
 					}
 					if (
@@ -1762,8 +1700,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						let modFragment = Utils.deepClone(fragment);
 						modFragment.moveBasePower *= 3;
 						modFragment.moveType = 'Fire';
-						modFragment.singles.requestedSupport.push('sun');
-						modFragment.vgc.requestedSupport.push('sun');
+						modFragment.requestedSupport.push('sun');
 						alternateFragments.push(modFragment);
 					}
 
@@ -1775,8 +1712,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					) {
 						let modFragment = Utils.deepClone(fragment);
 						modFragment.moveBasePower *= 1.5;
-						modFragment.singles.requestedSupport.push('rain');
-						modFragment.vgc.requestedSupport.push('rain');
+						modFragment.requestedSupport.push('rain');
 						alternateFragments.push(modFragment);
 					}
 					if (
@@ -1785,8 +1721,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						let modFragment = Utils.deepClone(fragment);
 						modFragment.moveBasePower *= 3;
 						modFragment.moveType = 'Water';
-						modFragment.singles.requestedSupport.push('rain');
-						modFragment.vgc.requestedSupport.push('rain');
+						modFragment.requestedSupport.push('rain');
 						alternateFragments.push(modFragment);
 					}
 					if (
@@ -1796,8 +1731,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					) {
 						let modFragment = Utils.deepClone(fragment);
 						modFragment.moveAccuracy = 100;
-						modFragment.singles.requestedSupport.push('rain');
-						modFragment.vgc.requestedSupport.push('rain');
+						modFragment.requestedSupport.push('rain');
 						alternateFragments.push(modFragment);
 					}
 
@@ -1808,8 +1742,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						let modFragment = Utils.deepClone(fragment);
 						modFragment.moveBasePower *= 2;
 						modFragment.moveType = 'Rock';
-						modFragment.singles.requestedSupport.push('sand');
-						modFragment.vgc.requestedSupport.push('sand');
+						modFragment.requestedSupport.push('sand');
 						alternateFragments.push(modFragment);
 					}
 
@@ -1820,8 +1753,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					) {
 						let modFragment = Utils.deepClone(fragment);
 						modFragment.moveAccuracy = 100;
-						modFragment.singles.requestedSupport.push('snow');
-						modFragment.vgc.requestedSupport.push('snow');
+						modFragment.requestedSupport.push('snow');
 						alternateFragments.push(modFragment);
 					}
 					if (
@@ -1830,8 +1762,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						let modFragment = Utils.deepClone(fragment);
 						modFragment.moveBasePower *= 2;
 						modFragment.moveType = 'Ice';
-						modFragment.singles.requestedSupport.push('snow');
-						modFragment.vgc.requestedSupport.push('snow');
+						modFragment.requestedSupport.push('snow');
 						alternateFragments.push(modFragment);
 					}
 
@@ -1841,8 +1772,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					) {
 						let modFragment = Utils.deepClone(fragment);
 						modFragment.moveBasePower *= 1.3;
-						modFragment.singles.requestedSupport.push('electricterrain');
-						modFragment.vgc.requestedSupport.push('electricterrain');
+						modFragment.requestedSupport.push('electricterrain');
 						if (!modFragment.avoid) modFragment.avoid = [];
 						modFragment.avoid.push('groundimmune');
 						alternateFragments.push(modFragment);
@@ -1855,8 +1785,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						if (fragment.baseMove === 'Nature Power') modFragment.moveBasePower *= (9 / 8);
 						modFragment.moveBasePower *= 1.3;
 						modFragment.moveType = 'Electric';
-						modFragment.singles.requestedSupport.push('electricterrain');
-						modFragment.vgc.requestedSupport.push('electricterrain');
+						modFragment.requestedSupport.push('electricterrain');
 						alternateFragments.push(modFragment);
 					}
 
@@ -1866,8 +1795,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					) {
 						let modFragment = Utils.deepClone(fragment);
 						modFragment.moveBasePower *= 1.3;
-						modFragment.singles.requestedSupport.push('grassyterrain');
-						modFragment.vgc.requestedSupport.push('grassyterrain');
+						modFragment.requestedSupport.push('grassyterrain');
 						if (!modFragment.avoid) modFragment.avoid = [];
 						modFragment.avoid.push('groundimmune');
 						alternateFragments.push(modFragment);
@@ -1880,8 +1808,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						if (fragment.baseMove === 'Nature Power') modFragment.moveBasePower *= (9 / 8);
 						modFragment.moveBasePower *= 1.3;
 						modFragment.moveType = 'Grass';
-						modFragment.singles.requestedSupport.push('grassyterrain');
-						modFragment.vgc.requestedSupport.push('grassyterrain');
+						modFragment.requestedSupport.push('grassyterrain');
 						alternateFragments.push(modFragment);
 					}
 					
@@ -1892,8 +1819,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					) {
 						let modFragment = Utils.deepClone(fragment);
 						modFragment.moveBasePower *= 1.3;
-						modFragment.singles.requestedSupport.push('psychicterrain');
-						modFragment.vgc.requestedSupport.push('psychicterrain');
+						modFragment.requestedSupport.push('psychicterrain');]
 						if (!modFragment.avoid) modFragment.avoid = [];
 						modFragment.avoid.push('groundimmune');
 						alternateFragments.push(modFragment);
@@ -1906,8 +1832,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						if (fragment.baseMove === 'Nature Power') modFragment.moveBasePower *= (9 / 8);
 						modFragment.moveBasePower *= 1.3;
 						modFragment.moveType = 'Psychic';
-						modFragment.singles.requestedSupport.push('psychicterrain');
-						modFragment.vgc.requestedSupport.push('psychicterrain');
+						modFragment.requestedSupport.push('psychicterrain');
 						alternateFragments.push(modFragment);
 					}
 
@@ -1919,24 +1844,22 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						if (fragment.baseMove === 'Terrain Pulse') modFragment.moveBasePower *= 2;
 						if (fragment.baseMove === 'Nature Power') modFragment.moveBasePower *= (95 / 80);
 						modFragment.moveType = 'Fairy';
-						modFragment.singles.requestedSupport.push('mistyterrain');
-						modFragment.vgc.requestedSupport.push('mistyterrain');
+						modFragment.requestedSupport.push('mistyterrain');
 						alternateFragments.push(modFragment);
 					}
 
 					// Gravity
-					if (!move.ohko && fragment.moveAccuracy <= 75 && moveid !== 'Blizzard') {
+					if (format === 'vgc' && !move.ohko && fragment.moveAccuracy <= 75 && moveid !== 'Blizzard') {
 						let modFragment = Utils.deepClone(fragment);
-						modFragment.format = 'vgc';
 						modFragment.moveAccuracy *= 5/3;
-						modFragment.vgc.requestedSupport.push('gravity');
+						modFragment.requestedSupport.push('gravity');
 						alternateFragments.push(modFragment);
 					}
 					/*
 					// in theory, Gravity helps with Ground moves, but in practice, ... uhhhh these make way too many teams ask for Gravity sjkdfhg
 					if (fragment.moveType === 'Ground' && fragment.moveBasePower && fragment.baseMove !== 'Thousand Arrows') {
-						fragment.singles.acceptedSupport.push('gravity');
-						fragment.vgc.acceptedSupport.push('gravity');
+						fragment.acceptedSupport.push('gravity');
+						fragment.acceptedSupport.push('gravity');
 					}
 					*/
 
@@ -1947,17 +1870,15 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					) {
 						let modFragment = Utils.deepClone(fragment);
 						if (fragment.tags && (fragment.tags.includes('poison') || (['Hex', 'Infernal Parade'].includes(fragment.baseMove) && fragment.tags.includes('status')))) {
-							modFragment.singles.acceptedSupport.push('poison');
-							modFragment.vgc.acceptedSupport.push('poison');
+							modFragment.acceptedSupport.push('poison');
 						} else {
 							modFragment.moveBasePower *= 2;
-							modFragment.singles.requestedSupport.push('poison');
-							modFragment.vgc.requestedSupport.push('poison');
+							modFragment.requestedSupport.push('poison');
 						}
 						alternateFragments.push(modFragment);
 					}
 					
-					if (activeMon.randbats.types.includes(fragment.moveType) && fragment.moveBasePower) fragment.stab = true;
+					if (activeData.types.includes(fragment.moveType) && fragment.moveBasePower) fragment.stab = true;
 					// I usually think in terms of regular base powers,
 					// so it's more intuitive for me to divide for lack of STAB than to multiply for STAB:
 					if (!fragment.stab) fragment.moveBasePower /= 1.5;
@@ -1965,7 +1886,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					// interested in accounting for base stats (as modifiers to base power) before continuing
 					// let's say the following steps' base powers are standardized around ~100 base Attack/SpA with 252 EVs
 					// so if the actual stat is more or less than that, the base power should be scaled accoridngly
-					if (activeMon.randbats.stage && activeMon.randbats.stage === 'LC') {
+					if (activeData.stage && activeData.stage === 'LC') {
 						// okay let's say more like base 85 here aksjdfh
 						if (fragment.moveCategory === 'Physical') fragment.moveBasePower *= ((Math.floor((activeMon.baseStats.atk*2+94)/20)+5)/18);
 						if (fragment.moveCategory === 'Special') fragment.moveBasePower *= ((Math.floor((activeMon.baseStats.spa*2+94)/20)+5)/18);
@@ -1976,7 +1897,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 				if (alternateFragments) for (const fragment of alternateFragments) {
 					
-					if (activeMon.randbats.types.includes(fragment.moveType) && fragment.moveBasePower) fragment.stab = true;
+					if (activeData.types.includes(fragment.moveType) && fragment.moveBasePower) fragment.stab = true;
 					// I usually think in terms of regular base powers,
 					// so it's more intuitive for me to divide for lack of STAB than to multiply for STAB:
 					if (!fragment.stab) fragment.moveBasePower /= 1.5;
@@ -1984,7 +1905,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					// interested in accounting for base stats (as modifiers to base power) before continuing
 					// let's say the following steps' base powers are standardized around ~100 base Attack/SpA with 252 EVs
 					// so if the actual stat is more or less than that, the base power should be scaled accoridngly
-					if (activeMon.randbats.stage && activeMon.randbats.stage === 'LC') {
+					if (activeData.stage && activeData.stage === 'LC') {
 						// okay let's say more like base 85 here aksjdfh
 						if (fragment.moveCategory === 'Physical') fragment.moveBasePower *= ((Math.floor((activeMon.baseStats.atk*2+94)/20)+5)/18);
 						if (fragment.moveCategory === 'Special') fragment.moveBasePower *= ((Math.floor((activeMon.baseStats.spa*2+94)/20)+5)/18);
@@ -1995,7 +1916,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					
 					fragments.push(fragment);
 					
-					if (fragment.stab && activeMon.randbats.abilities.includes('Adaptability') && !fragment.ability) {
+					if (fragment.stab && activeData.abilities.includes('Adaptability') && !fragment.ability) {
 						let modFragment = Utils.deepClone(fragment);
 						modFragment.moveBasePower *= 4/3;
 						modFragment.ability = 'Adaptability';
@@ -2004,6 +1925,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 
 				const makeFragment = (instructions: AnyObject) => {
+					if (instructions.format && format !== instructions.format) return;
+					
 					const fragment = instructions.fragment;
 					const moveChecks = instructions.moveChecks;
 					const fragmentMods = instructions.fragmentMods;
@@ -2038,6 +1961,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 				for (const fragment of fragments) {
 					makeFragment({
+						format: 'vgc',
 						fragment: fragment,
 						moveChecks: {moves: ['Fake Out', 'Mat Block']},
 						offeredSupport: ['fakeout'],
@@ -2117,8 +2041,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							 (['vcreate', 'armorcannon', 'overheat', 'leafstorm', 'icehammer', 'hammerarm', 'axekick', 'closecombat', 'superpower', 'headlongrush', 'dragonascent', 'psychoboost', 'clangingscales', 'dracometeor', 'hyperspacefury', 'spinout', 'makeitrain', 'fleurcannon'].includes(moveid) && fragment.ability && ['Contrary'].includes(fragment.ability))
 							)
 						) {
-							modFragment.singles.safeStab = true;
-							if (move.target !== 'allAdjacent') modFragment.vgc.safeStab = true;
+							modFragment.safeStab = true;
+							if (move.target !== 'allAdjacent') modFragment.safeStab = true;
 							modFragment.weight = 2;
 						}
 						if (!fragment.stab && !fragment.teraType) modFragment.teraType = fragment.moveType;
@@ -2136,7 +2060,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							(fragment.moveType !== 'Normal' && fragment.moveBasePower >= 90) ||
 							fragment.moveBasePower >= 120
 						) {
-							activeMon.randbats.viableStabs.push(modFragment);
+							activeData.viableStabs.push(modFragment);
 							// stop giving random things Double-Edge!! I know it has good BP :sob:
 							// (the >= 120 preserves *really* strong cases like non-STAB Punk Rock Boomburst, but otherwise, it has to at least be a coverage type if it's not STAB)
 						}
@@ -2186,13 +2110,13 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 							if ((move.category === 'Physical' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'def')) {
 								if (!modFragment.vgc) modFragment.vgc = {};
-								if (!modFragment.vgc.acceptedSupport) modFragment.vgc.acceptedSupport = [];
-								if (!modFragment.vgc.acceptedSupport.includes('defensereduction')) modFragment.vgc.acceptedSupport.push('defensereduction');
+								if (!modFragment.acceptedSupport) modFragment.acceptedSupport = [];
+								if (!modFragment.acceptedSupport.includes('defensereduction')) modFragment.acceptedSupport.push('defensereduction');
 							}
 							if ((move.category === 'Special' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'spd')) {
 								if (!modFragment.vgc) modFragment.vgc = {};
-								if (!modFragment.vgc.acceptedSupport) modFragment.vgc.acceptedSupport = [];
-								if (!modFragment.vgc.acceptedSupport.includes('spdefreduction')) modFragment.vgc.acceptedSupport.push('spdefreduction');
+								if (!modFragment.acceptedSupport) modFragment.acceptedSupport = [];
+								if (!modFragment.acceptedSupport.includes('spdefreduction')) modFragment.acceptedSupport.push('spdefreduction');
 							}
 
 							// we don't want several of the same type on the same set
@@ -2221,13 +2145,13 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 							if ((move.category === 'Physical' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'def')) {
 								if (!modFragment.vgc) modFragment.vgc = {};
-								if (!modFragment.vgc.acceptedSupport) modFragment.vgc.acceptedSupport = [];
-								if (!modFragment.vgc.acceptedSupport.includes('defensereduction')) modFragment.vgc.acceptedSupport.push('defensereduction');
+								if (!modFragment.acceptedSupport) modFragment.acceptedSupport = [];
+								if (!modFragment.acceptedSupport.includes('defensereduction')) modFragment.acceptedSupport.push('defensereduction');
 							}
 							if ((move.category === 'Special' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'spd')) {
 								if (!modFragment.vgc) modFragment.vgc = {};
-								if (!modFragment.vgc.acceptedSupport) modFragment.vgc.acceptedSupport = [];
-								if (!modFragment.vgc.acceptedSupport.includes('spdefreduction')) modFragment.vgc.acceptedSupport.push('spdefreduction');
+								if (!modFragment.acceptedSupport) modFragment.acceptedSupport = [];
+								if (!modFragment.acceptedSupport.includes('spdefreduction')) modFragment.acceptedSupport.push('spdefreduction');
 							}
 							modFragment.teraType = fragment.moveType;
 
@@ -2256,13 +2180,13 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 						if ((move.category === 'Physical' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'def')) {
 							if (!modFragment.vgc) modFragment.vgc = {};
-							if (!modFragment.vgc.acceptedSupport) modFragment.vgc.acceptedSupport = [];
-							if (!modFragment.vgc.acceptedSupport.includes('defensereduction')) modFragment.vgc.acceptedSupport.push('defensereduction');
+							if (!modFragment.acceptedSupport) modFragment.acceptedSupport = [];
+							if (!modFragment.acceptedSupport.includes('defensereduction')) modFragment.acceptedSupport.push('defensereduction');
 						}
 						if ((move.category === 'Special' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'spd')) {
 							if (!modFragment.vgc) modFragment.vgc = {};
-							if (!modFragment.vgc.acceptedSupport) modFragment.vgc.acceptedSupport = [];
-							if (!modFragment.vgc.acceptedSupport.includes('spdefreduction')) modFragment.vgc.acceptedSupport.push('spdefreduction');
+							if (!modFragment.acceptedSupport) modFragment.acceptedSupport = [];
+							if (!modFragment.acceptedSupport.includes('spdefreduction')) modFragment.acceptedSupport.push('spdefreduction');
 						}
 
 						// we don't want several of the same type on the same set
@@ -2300,7 +2224,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								modFragment.buddy.roles.push('accuracyboost');
 							}
 
-							modFragment.vgc.requestedSupport.push(`${(fragment.moveType).toLowerCase()}immune`); // ex. "electricimmune"
+							modFragment.requestedSupport.push(`${(fragment.moveType).toLowerCase()}immune`); // ex. "electricimmune"
 							if (!activeData.offeredSupport.spread) activeData.offeredSupport.spread = [];
 							activeData.offeredSupport.spread.push(modFragment);
 						}
@@ -2337,7 +2261,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							modFragment.tags.push('statusdebuffmove');
 							modFragment.avoid.push('statusdebuffmove');
 						}
-						if (moveid === 'venomdrench') modFragment.vgc.requestedSupport.push('poison');
+						if (moveid === 'venomdrench') modFragment.requestedSupport.push('poison');
 						
 						if (modFragment.movePriority > 0) {
 								if (!activeData.offeredSupport.speedcontrol) activeData.offeredSupport.speedcontrol = [];
@@ -2352,8 +2276,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						if (!modFragment.tags) modFragment.tags = [];
 						modFragment.tags.push('backuptrickroom');
 						modFragment.tags.push('minspeed');
-						modFragment.singles.requestedSupport.push('backuptrickroom');
-						modFragment.vgc.acceptedSupport.push('backuptrickroom');
+						modFragment.requestedSupport.push('backuptrickroom');
+						modFragment.acceptedSupport.push('backuptrickroom');
 						
 						if (!activeData.offeredSupport.trickroom) activeData.offeredSupport.trickroom = [];
 						activeData.offeredSupport.trickroom.push(modFragment);
@@ -2364,10 +2288,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						if (!pickyVgcSupport.gravity) pickyVgcSupport.gravity = [];
 						pickyVgcSupport.gravity.push(fragment);
 					}
-					if (['poisongas', 'mortalspin', 'toxicspikes'].includes(moveid)) {
+					if (moveid === 'mortalspin' || (format === 'vgc' && movedid === 'poisongas') || (format === 'singles' && moveid === 'toxicspikes')) {
 						let modFragment = Utils.deepClone(fragment);
-						if (moveid === 'poisongas') modFragment.format = 'vgc';
-						if (moveid === 'toxicspikes') modFragment.format = 'singles';
 
 						if (modFragment.movePriority > 0 || moveid === 'mortalspin') {
 							if (!activeData.offeredSupport.poison) activeData.offeredSupport.poison = [];
@@ -2377,17 +2299,15 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							pickyVgcSupport.poison.push(modFragment);
 						}
 					}
-					if (moveid === 'round') {
+					if (moveid === 'round' && format === 'vgc') {
 						if (fragment.moveBasePower >= 80) {
 							let modFragment = Utils.deepClone(fragment);
-							modFragment.format = 'vgc';
-							modFragment.vgc.requestedSupport.push('round');
+							modFragment.requestedSupport.push('round');
 							if (!activeData.offeredSupport.round) activeData.offeredSupport.round = [];
 							activeData.offeredSupport.round.push(modFragment);
 						}
 						if (fragment.moveBasePower >= 70) {
 							let modFragment = Utils.deepClone(fragment);
-							modFragment.format = 'vgc';
 							if (!pickyVgcSupport.round) pickyVgcSupport.round = [];
 							pickyVgcSupport.round.push(modFragment);
 						}
@@ -2410,7 +2330,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							if (!modFragment.avoid) modFragment.avoid = [];
 							modFragment.avoid.push('statusdebuffmove');
 						}
-						if (moveid === 'venomdrench') modFragment.vgc.requestedSupport.push('poison');
+						if (moveid === 'venomdrench') modFragment.requestedSupport.push('poison');
 						if (modFragment.movePriority > 0) {
 							if (!activeData.offeredSupport.physicalreduction) activeData.offeredSupport.physicalreduction = [];
 							activeData.offeredSupport.physicalreduction.push(modFragment);
@@ -2483,7 +2403,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							modFragment.score = 0; // never use unless its buddy role is checked off
 							if (!modFragment.buddy) modFragment.buddy = {};
 							if (!modFragment.buddy.roles) modFragment.buddy.roles = [];
-							if (activeMon.randbats.types.includes('Ghost')) {
+							if (activeData.types.includes('Ghost')) {
 								modFragment.buddy.roles.push('setup');
 							} else {
 								modFragment.buddy.roles.push('physicalsetup'); // it makes sense in my head okay
@@ -2550,7 +2470,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							'leer', 'screech', 'obstruct', 'octolock', 'spicyextract', 'tickle',
 							'firelash', 'gravapple', 'thunderouskick'
 						].includes(moveid) ||
-						(['crushclaw', 'razorshell', 'triplearrows'].includes(moveid) && ((!fragment.ability && activeMon.randbats.abilities.includes('Serene Grace')) || (fragment.ability && fragment.ability === 'Serene Grace')))
+						(['crushclaw', 'razorshell', 'triplearrows'].includes(moveid) && ((!fragment.ability && activeData.abilities.includes('Serene Grace')) || (fragment.ability && fragment.ability === 'Serene Grace')))
 					) {
 						let modFragment = Utils.deepClone(fragment);
 						if (['leer', 'screech', 'octolock', 'spicyextract', 'tickle'].includes(moveid)) {
@@ -2559,7 +2479,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							if (!modFragment.avoid) modFragment.avoid = [];
 							modFragment.avoid.push('statusdebuffmove');
 						}
-						if ((['crushclaw', 'razorshell', 'triplearrows'].includes(moveid) && !fragment.ability && activeMon.randbats.abilities.includes('Serene Grace'))) modFragment.ability = 'Serene Grace';
+						if ((['crushclaw', 'razorshell', 'triplearrows'].includes(moveid) && !fragment.ability && activeData.abilities.includes('Serene Grace'))) modFragment.ability = 'Serene Grace';
 						
 						// to be viable, many of these need priority, naturally high Speed, or an Ability that boosts Speed
 						// I have set up a way to generalize that, since it comes up for a lot of other kinds of support
@@ -2578,7 +2498,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							'faketears', 'metalsound', 'octolock',
 							'acidspray', 'appleacid', 'luminacrash'
 						].includes(moveid) ||
-						(['lusterpurge', 'seedflare'].includes(moveid) && ((!fragment.ability && activeMon.randbats.abilities.includes('Serene Grace')) || (fragment.ability && fragment.ability === 'Serene Grace')))
+						(['lusterpurge', 'seedflare'].includes(moveid) && ((!fragment.ability && activeData.abilities.includes('Serene Grace')) || (fragment.ability && fragment.ability === 'Serene Grace')))
 					) {
 						let modFragment = Utils.deepClone(fragment);
 						if (['faketears', 'metalsound', 'octolock'].includes(moveid)) {
@@ -2587,7 +2507,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							if (!modFragment.avoid) modFragment.avoid = [];
 							modFragment.avoid.push('statusdebuffmove');
 						}
-						if ((['lusterpurge', 'seedflare'].includes(moveid) && !fragment.ability && activeMon.randbats.abilities.includes('Serene Grace'))) modFragment.ability = 'Serene Grace';
+						if ((['lusterpurge', 'seedflare'].includes(moveid) && !fragment.ability && activeData.abilities.includes('Serene Grace'))) modFragment.ability = 'Serene Grace';
 						
 						// to be viable, many of these need priority, naturally high Speed, or an Ability that boosts Speed
 						// I have set up a way to generalize that, since it comes up for a lot of other kinds of support
@@ -2846,7 +2766,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							activeData.offeredSupport.personal.push(modFragment);
 							activeData.offeredSupport.personal.push(modFragmentPrioVGC);
 						} else if (moveid === 'curse') {
-							if (!activeMon.randbats.types.includes('Ghost')) { // completely ignore the setup version of Curse if you're Ghost-type
+							if (!activeData.types.includes('Ghost')) { // completely ignore the setup version of Curse if you're Ghost-type
 								// normally, singles Pokémon will avoid Curse if they have Bulk Up as an option
 								if (!learnset.bulkup) activeData.offeredSupport.personal.push(modFragment);
 								// but if you have something else tagged "minspeed" anyway, go for it!
@@ -2923,13 +2843,13 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							if (modFragment.moves.length > 4) accept = false;
 						}
 						if (subfragment.requestedSupport) {
-							if (!modFragment.vgc.requestedSupport) modFragment.vgc.requestedSupport = [];
+							if (!modFragment.requestedSupport) modFragment.requestedSupport = [];
 							for (const requestedSupport of subfragment.requestedSupport) {
 								if (offeredSupport === requestedSupport) accept = false;
 								if (offeredSupport === `backup${requestedSupport}`) accept = false;
 								// I don't want, for example, the fastest Swift Swim user on the team to be pressured to run Rain Dance simply to support its own Drizzle user
 								// backup rain setters should be things like Pranskter users, not rain abusers!
-								if (!modFragment.vgc.requestedSupport.includes(requestedSupport)) modFragment.vgc.requestedSupport.push(requestedSupport);
+								if (!modFragment.requestedSupport.includes(requestedSupport)) modFragment.requestedSupport.push(requestedSupport);
 							}
 						}
 						if (subfragment.evs) {
@@ -2965,20 +2885,14 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			// from there, the individual fragments' requestedSupports only need to be checked again during set construction, after the whole team is done
 			// and obviously ones with support available are favored, but ones with requestedSupport missing are completely ignored
 			
-			for (const fragment of activeMon.randbats.viableStabs) {
+			for (const fragment of activeData.viableStabs) {
 				let modFragment = Utils.deepClone(fragment);
 				modFragment.mainstab = true;
 				
-				if (fragment.singles.requestedSupport.length) {
-					for (const request of fragment.singles.requestedSupport) {
-						if (!activeMon.randbats.singles.acceptedSupport[request]) activeMon.randbats.singles.acceptedSupport[request] = [];
-						activeMon.randbats.singles.acceptedSupport[request].push(modFragment);
-					}
-				}
-				if (fragment.vgc.requestedSupport.length) {
-					for (const request of fragment.vgc.requestedSupport) {
-						if (!activeMon.randbats.vgc.acceptedSupport[request]) activeMon.randbats.vgc.acceptedSupport[request] = [];
-						activeMon.randbats.vgc.acceptedSupport[request].push(modFragment);
+				if (fragment.requestedSupport.length) {
+					for (const request of fragment.requestedSupport) {
+						if (!activeData.acceptedSupport[request]) activeData.acceptedSupport[request] = [];
+						activeData.acceptedSupport[request].push(modFragment);
 					}
 				}
 			}
@@ -2987,65 +2901,46 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				let accepted = false;
 				for (const fragment of activeData.offeredSupport[offeredSupport]) {
 					if (fragment.baseMove) { // if it was just an Ability, this is unnecessary
-						if (fragment.singles.requestedSupport.length) {
-							for (const request of fragment.singles.requestedSupport) {
-								if (!activeMon.randbats.singles.acceptedSupport[request]) activeMon.randbats.singles.acceptedSupport[request] = [];
-								activeMon.randbats.singles.acceptedSupport[request].push(fragment);
+						if (fragment.requestedSupport.length) {
+							for (const request of fragment.requestedSupport) {
+								if (!activeData.acceptedSupport[request]) activeData.acceptedSupport[request] = [];
+								activeData.acceptedSupport[request].push(fragment);
 							}
-						}
-						if (fragment.vgc.requestedSupport.length) {
-							for (const request of fragment.vgc.requestedSupport) {
-								if (!activeMon.randbats.vgc.acceptedSupport[request]) activeMon.randbats.vgc.acceptedSupport[request] = [];
-								activeMon.randbats.vgc.acceptedSupport[request].push(fragment);
-							}
-						}
-						if (!fragment.singles.requestedSupport.length && !fragment.vgc.requestedSupport.length) accepted = true;
+						} else accepted = true;
 					} else accepted = true;
 				}
 				if (!accepted) delete activeData.offeredSupport[offeredSupport];
 			}
 			
 			// finally, some Abilities offer innate utility which has nothing to do with how they affect moves or type matchups, so let's cover those quickly
-			for (const ability of activeMon.randbats.abilities) {
+			for (const ability of activeData.abilities) {
 				let fragment = {
 					ability: ability,
-					singles: {
-						requestedSupport: [],
-						acceptedSupport: [],
-					},
-					vgc: {
-						requestedSupport: [],
-						acceptedSupport: [],
-					},
+					requestedSupport: [],
+					acceptedSupport: [],
 					fragmentPriority: 4,
 				};
 				switch (ability) {
 					// offeredSupport
 					case 'Drizzle':
-						fragment.singles.acceptedSupport.push('rain');
-						fragment.singles.acceptedSupport.push('backuprain');
-						fragment.vgc.acceptedSupport.push('rain');
-						fragment.vgc.acceptedSupport.push('backuprain');
+						fragment.acceptedSupport.push('rain');
+						fragment.acceptedSupport.push('backuprain');
 						
 						if (!activeData.offeredSupport.rain) activeData.offeredSupport.rain = [];
 						activeData.offeredSupport.rain.push(fragment);
 						break;
 					case 'Drought':
 					case 'Orichalcum Pulse':
-						fragment.singles.acceptedSupport.push('sun');
-						fragment.singles.acceptedSupport.push('backupsun');
-						fragment.vgc.acceptedSupport.push('sun');
-						fragment.vgc.acceptedSupport.push('backupsun');
+						fragment.acceptedSupport.push('sun');
+						fragment.acceptedSupport.push('backupsun');
 						
 						if (!activeData.offeredSupport.sun) activeData.offeredSupport.sun = [];
 						activeData.offeredSupport.sun.push(fragment);
 						break;
 					case 'Electric Surge':
 					case 'Hadron Engine':
-						fragment.singles.acceptedSupport.push('electricterrain');
-						fragment.singles.acceptedSupport.push('backupelectricterrain');
-						fragment.vgc.acceptedSupport.push('electricterrain');
-						fragment.vgc.acceptedSupport.push('backupelectricterrain');
+						fragment.acceptedSupport.push('electricterrain');
+						fragment.acceptedSupport.push('backupelectricterrain');
 						
 						if (!activeData.offeredSupport.electricterrain) activeData.offeredSupport.electricterrain = [];
 						activeData.offeredSupport.electricterrain.push(fragment);
@@ -3053,10 +2948,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						activeData.offeredSupport.antisleep.push(fragment);
 						break;
 					case 'Grassy Surge':
-						fragment.singles.acceptedSupport.push('grassyterrain');
-						fragment.singles.acceptedSupport.push('backupgrassyterrain');
-						fragment.vgc.acceptedSupport.push('grassyterrain');
-						fragment.vgc.acceptedSupport.push('backupgrassyterrain');
+						fragment.acceptedSupport.push('grassyterrain');
+						fragment.acceptedSupport.push('backupgrassyterrain');
 						// full disclosure: it's relatively unlikely that anything will actually be set to offer the support "backupgrassyterrain"
 						// this is just because it's almost never a worthwhile consideration
 						// but I'm still adding the acceptedSupport here for completion just in case it comes up
@@ -3071,21 +2964,18 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						activeData.offeredSupport.intimidate.push(fragment);
 						break;
 					case 'Flower Gift':
-						fragment.singles.requestedSupport.push('sun');
-						fragment.vgc.requestedSupport.push('sun');
-						if (!activeMon.randbats.singles.acceptedSupport.sun) activeMon.randbats.singles.acceptedSupport.sun = [];
-						activeMon.randbats.singles.acceptedSupport.sun.push(fragment);
-						if (!activeMon.randbats.vgc.acceptedSupport.sun) activeMon.randbats.vgc.acceptedSupport.sun = [];
-						activeMon.randbats.vgc.acceptedSupport.sun.push(fragment);
+						fragment.requestedSupport.push('sun');
+						if (!activeData.acceptedSupport.sun) activeData.acceptedSupport.sun = [];
+						activeData.acceptedSupport.sun.push(fragment);
+						if (!activeData.acceptedSupport.sun) activeData.acceptedSupport.sun = [];
+						activeData.acceptedSupport.sun.push(fragment);
 						
 						if (!activeData.offeredSupport.specialreduction) activeData.offeredSupport.specialreduction = [];
 						activeData.offeredSupport.specialreduction.push(fragment);
 						break;
 					case 'Misty Surge':
-						fragment.singles.acceptedSupport.push('mistyterrain');
-						fragment.singles.acceptedSupport.push('backupmistyterrain');
-						fragment.vgc.acceptedSupport.push('mistyterrain');
-						fragment.vgc.acceptedSupport.push('backupmistyterrain');
+						fragment.acceptedSupport.push('mistyterrain');
+						fragment.acceptedSupport.push('backupmistyterrain');
 						// full disclosure: it's relatively unlikely that anything will actually be set to offer the support "backupmistyterrain"
 						// this is just because it's almost never a worthwhile consideration
 						// but I'm still adding the acceptedSupport here for completion just in case it comes up
@@ -3099,10 +2989,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						break;
 					case 'Psychic Surge':
 					case 'Mega-Neural':
-						fragment.singles.acceptedSupport.push('psychicterrain');
-						fragment.singles.acceptedSupport.push('backuppsychicterrain');
-						fragment.vgc.acceptedSupport.push('psychicterrain');
-						fragment.vgc.acceptedSupport.push('backuppsychicterrain');
+						fragment.acceptedSupport.push('psychicterrain');
+						fragment.acceptedSupport.push('backuppsychicterrain');
 						
 						if (!activeData.offeredSupport.psychicterrain) activeData.offeredSupport.psychicterrain = [];
 						activeData.offeredSupport.psychicterrain.push(fragment);
@@ -3111,10 +2999,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						break;
 					case 'Sand Stream':
 					case 'Sand Spit':
-						fragment.singles.acceptedSupport.push('sand');
-						fragment.singles.acceptedSupport.push('backupsand');
-						fragment.vgc.acceptedSupport.push('sand');
-						fragment.vgc.acceptedSupport.push('backupsand');
+						fragment.acceptedSupport.push('sand');
+						fragment.acceptedSupport.push('backupsand');
 						// full disclosure: it's relatively unlikely that anything will actually be set to offer the support "backupsand"
 						// this is just because it's almost never a worthwhile consideration
 						// but I'm still adding the acceptedSupport here for completion just in case it comes up
@@ -3123,10 +3009,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						activeData.offeredSupport.sand.push(fragment);
 						break;
 					case 'Snow Warning':
-						fragment.singles.acceptedSupport.push('snow');
-						fragment.singles.acceptedSupport.push('backupsnow');
-						fragment.vgc.acceptedSupport.push('snow');
-						fragment.vgc.acceptedSupport.push('backupsnow');
+						fragment.acceptedSupport.push('snow');
+						fragment.acceptedSupport.push('backupsnow');
 						// full disclosure: it's relatively unlikely that anything will actually be set to offer the support "backupsnow"
 						// this is just because it's almost never a worthwhile consideration
 						// but I'm still adding the acceptedSupport here for completion just in case it comes up
@@ -3137,25 +3021,19 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					case 'Storm Chaser':
 						// we need any one of these, not all three
 						let fragmentElectric = Utils.deepClone(fragment);
-						fragmentElectric.singles.acceptedSupport.push('rain');
-						fragmentElectric.singles.acceptedSupport.push('backuprain');
-						fragmentElectric.vgc.acceptedSupport.push('rain');
-						fragmentElectric.vgc.acceptedSupport.push('backuprain');
-						fragmentElectric.vgc.requestedSupport.push('sideelectric');
+						fragmentElectric.acceptedSupport.push('rain');
+						fragmentElectric.acceptedSupport.push('backuprain');
+						fragmentElectric.requestedSupport.push('sideelectric');
 						
 						let fragmentFlying = Utils.deepClone(fragment);
-						fragmentFlying.singles.acceptedSupport.push('rain');
-						fragmentFlying.singles.acceptedSupport.push('backuprain');
-						fragmentFlying.vgc.acceptedSupport.push('rain');
-						fragmentFlying.vgc.acceptedSupport.push('backuprain');
-						fragmentFlying.vgc.requestedSupport.push('sideflying');
+						fragmentFlying.acceptedSupport.push('rain');
+						fragmentFlying.acceptedSupport.push('backuprain');
+						fragmentFlying.requestedSupport.push('sideflying');
 						
 						let fragmentWater = Utils.deepClone(fragment);
-						fragmentWater.singles.acceptedSupport.push('rain');
-						fragmentWater.singles.acceptedSupport.push('backuprain');
-						fragmentWater.vgc.acceptedSupport.push('rain');
-						fragmentWater.vgc.acceptedSupport.push('backuprain');
-						fragmentWater.vgc.requestedSupport.push('sidewater');
+						fragmentWater.acceptedSupport.push('rain');
+						fragmentWater.acceptedSupport.push('backuprain');
+						fragmentWater.requestedSupport.push('sidewater');
 						
 						if (!activeData.offeredSupport.rain) activeData.offeredSupport.rain = [];
 						if (!activeData.offeredSupport.backuprain) activeData.offeredSupport.backuprain = [];
@@ -3170,62 +3048,44 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					case 'Swift Swim':
 					case 'Dry Skin':
 					case 'Rain Dish':
-						fragment.singles.requestedSupport.push('rain');
-						fragment.vgc.requestedSupport.push('rain');
-						if (!activeMon.randbats.singles.acceptedSupport.rain) activeMon.randbats.singles.acceptedSupport.rain = [];
-						activeMon.randbats.singles.acceptedSupport.rain.push(fragment);
-						if (!activeMon.randbats.vgc.acceptedSupport.rain) activeMon.randbats.vgc.acceptedSupport.rain = [];
-						activeMon.randbats.vgc.acceptedSupport.rain.push(fragment);
+						fragment.requestedSupport.push('rain');
+						if (!activeData.acceptedSupport.rain) activeData.acceptedSupport.rain = [];
+						activeData.acceptedSupport.rain.push(fragment);
 						break;
 					case 'Hydration':
-						fragment.singles.requestedSupport.push('rain');
-						fragment.vgc.requestedSupport.push('rain');
+						fragment.requestedSupport.push('rain');
 						if (learnset.rest && learnset.rest.length) {
 							fragment.baseMove = 'Rest';
 							fragment.moves = ['Rest'];
 							fragment.tags = 'recovery';
 							fragment.role = 'personal';
 						}
-						if (!activeMon.randbats.singles.acceptedSupport.rain) activeMon.randbats.singles.acceptedSupport.rain = [];
-						activeMon.randbats.singles.acceptedSupport.rain.push(fragment);
-						if (!activeMon.randbats.vgc.acceptedSupport.rain) activeMon.randbats.vgc.acceptedSupport.rain = [];
-						activeMon.randbats.vgc.acceptedSupport.rain.push(fragment);
+						if (!activeData.acceptedSupport.rain) activeData.acceptedSupport.rain = [];
+						activeData.acceptedSupport.rain.push(fragment);
 						break;
 					case 'Chlorophyll':
 					case 'Harvest':
-						fragment.singles.requestedSupport.push('sun');
-						fragment.vgc.requestedSupport.push('sun');
-						if (!activeMon.randbats.singles.acceptedSupport.sun) activeMon.randbats.singles.acceptedSupport.sun = [];
-						activeMon.randbats.singles.acceptedSupport.sun.push(fragment);
-						if (!activeMon.randbats.vgc.acceptedSupport.sun) activeMon.randbats.vgc.acceptedSupport.sun = [];
-						activeMon.randbats.vgc.acceptedSupport.sun.push(fragment);
+						fragment.requestedSupport.push('sun');
+						if (!activeData.acceptedSupport.sun) activeData.acceptedSupport.sun = [];
+						activeData.acceptedSupport.sun.push(fragment);
 						break;
 					case 'Sand Rush':
 					case 'Sand Force':
-						fragment.singles.requestedSupport.push('sand');
-						fragment.vgc.requestedSupport.push('sand');
-						if (!activeMon.randbats.singles.acceptedSupport.sand) activeMon.randbats.singles.acceptedSupport.sand = [];
-						activeMon.randbats.singles.acceptedSupport.sand.push(fragment);
-						if (!activeMon.randbats.vgc.acceptedSupport.sand) activeMon.randbats.vgc.acceptedSupport.sand = [];
-						activeMon.randbats.vgc.acceptedSupport.sand.push(fragment);
+						fragment.requestedSupport.push('sand');
+						if (!activeData.acceptedSupport.sand) activeData.acceptedSupport.sand = [];
+						activeData.acceptedSupport.sand.push(fragment);
 						break;
 					case 'Slush Rush':
 					case 'Ice Body':
 					case 'Ice Face':
-						fragment.singles.requestedSupport.push('snow');
-						fragment.vgc.requestedSupport.push('snow');
-						if (!activeMon.randbats.singles.acceptedSupport.snow) activeMon.randbats.singles.acceptedSupport.snow = [];
-						activeMon.randbats.singles.acceptedSupport.snow.push(fragment);
-						if (!activeMon.randbats.vgc.acceptedSupport.snow) activeMon.randbats.vgc.acceptedSupport.snow = [];
-						activeMon.randbats.vgc.acceptedSupport.snow.push(fragment);
+						fragment.requestedSupport.push('snow');
+						if (!activeData.acceptedSupport.snow) activeData.acceptedSupport.snow = [];
+						activeData.acceptedSupport.snow.push(fragment);
 						break;
 					case 'Surge Surfer':
-						fragment.singles.requestedSupport.push('electricterrain');
-						fragment.vgc.requestedSupport.push('electricterrain');
-						if (!activeMon.randbats.singles.acceptedSupport.electricterrain) activeMon.randbats.singles.acceptedSupport.electricterrain = [];
-						activeMon.randbats.singles.acceptedSupport.electricterrain.push(fragment);
-						if (!activeMon.randbats.vgc.acceptedSupport.electricterrain) activeMon.randbats.vgc.acceptedSupport.electricterrain = [];
-						activeMon.randbats.vgc.acceptedSupport.electricterrain.push(fragment);
+						fragment.requestedSupport.push('electricterrain');
+						if (!activeData.acceptedSupport.electricterrain) activeData.acceptedSupport.electricterrain = [];
+						activeData.acceptedSupport.electricterrain.push(fragment);
 						break;
 				}
 			}
