@@ -720,33 +720,34 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			const activeMon = this.dex.data.Pokedex[id];
 			if (!activeMon) return false;
 
+			let randbats = (format && format === 'vgc' ? 'randbatsVgc' : 'randbats');
+			let randbatsInitialized = (format && format === 'vgc' ? 'randbatsInitializedVgc' : 'randbatsInitialized');
+
 			// "initialize" is true when we're setting up the dex at the beginning, but not when we're actively checking the randbats data.
 			// The main difference is that if initialize is false, we want randbatsData(mon) to return the actual randbats data -
 			// and that means we absolutely need to generate the full information if it doesn't already exist!
 			// But if initialize is true, it means we're just speeding through the dex trying to fill in this.eligiblePokemon,
 			// but we aren't going to do anything with the output just yet, so we don't need to return any information.
-			// If initialize is true, and one player's getTeam() is already working on a Pokémon ("randbatsInitialized[format] === 'in progress'"),
+			// If initialize is true, and one player's getTeam() is already working on a Pokémon ("[randbatsInitialized] === 'in progress'"),
 			// we know the other getTeam() can outright skip it, because it'll be pushed to eligiblePokemon anyway as soon as it's done!
 			// (I don't actually know for sure if the getTeam() process *can* ever run concurrently and not sequentially, but just in case P:)
 			// But if initialize is false, then it doesn't matter that it'll eventually get pushed -
 			// the active getTeam() has to generate it before we continue the code, because we need something specific from it. 
 			if (initialize) {
 				if (this.eligiblePokemon[id]) return;
-				if (activeMon.randbatsInitialized && activeMon.randbatsInitialized[format] === 'in progress') return;
-				if (activeMon.randbatsInitialized && activeMon.randbatsInitialized[format] === 'complete') {
-					this.eligiblePokemon[id] = Utils.deepClone(activeMon.randbats[format]);
+				if (activeMon[randbatsInitialized] && activeMon[randbatsInitialized] === 'in progress') return;
+				if (activeMon[randbatsInitialized] && activeMon[randbatsInitialized] === 'complete') {
+					this.eligiblePokemon[id] = Utils.deepClone(activeMon[randbats]);
 					return;
 				}
 			} else {
-				if (!this.eligiblePokemon[id] && activeMon.randbatsInitialized && activeMon.randbatsInitialized[format] === 'complete') this.eligiblePokemon[id] = Utils.deepClone(activeMon.randbats[format]);
+				if (!this.eligiblePokemon[id] && activeMon[randbatsInitialized] && activeMon[randbatsInitialized] === 'complete') this.eligiblePokemon[id] = Utils.deepClone(activeMon[randbats]);
 				if (this.eligiblePokemon[id]) return this.eligiblePokemon[id];
 			}
 
-			if (!activeMon.randbatsInitialized) activeMon.randbatsInitialized = {};
-			activeMon.randbatsInitialized[format] = 'in progress';
+			activeMon[randbatsInitialized] = 'in progress';
 
-			if (!activeMon.randbats) activeMon.randbats = {};
-			activeMon.randbats[format] = {
+			activeMon[randbats] = {
 				name: activeMon.name,
 				num: activeMon.num,
 				
@@ -764,7 +765,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				resistances: {},
 				immunities: {},
 			};
-			const activeData = activeMon.randbats[format];
+			const activeData = activeMon[randbats];
 			
 			if (this.dex.data.FormatsData[id].tier === "Evo!" || ['porygon2', 'accelgor'].includes(id)) activeData.stage = 'Evo';
 			else if (activeMon.evos && activeMon.evos.length && !activeMon.prevo && !['mareanie'].includes(id)) activeData.stage = 'LC';
@@ -3084,7 +3085,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						break;
 				}
 			}
-			activeMon.randbatsInitialized[format] = 'complete';
+			activeMon[randbatsInitialized] = 'complete';
 			this.eligiblePokemon[id] = Utils.deepClone(activeData);
 			if (!initialize) return this.eligiblePokemon[id];
 		}
