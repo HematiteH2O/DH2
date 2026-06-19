@@ -742,16 +742,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (this.eligiblePokemon[id]) return this.eligiblePokemon[id];
 			}
 
-			if (!activeMon.randbatsInitialized) activeMon.randbatsInitialized = {
-				singles: null,
-				vgc: null,
-			};
+			if (!activeMon.randbatsInitialized) activeMon.randbatsInitialized = {};
 			activeMon.randbatsInitialized[format] = 'in progress';
 
-			if (!activeMon.randbats) activeMon.randbats = {
-				singles: null,
-				vgc: null,
-			};
+			if (!activeMon.randbats) activeMon.randbats = {};
 			activeMon.randbats[format] = {
 				name: activeMon.name,
 				num: activeMon.num,
