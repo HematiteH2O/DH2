@@ -773,7 +773,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				this.setPlayer(side, options[side]!);
 			}
 		}
-	}
+	},
 
 	// getTeam is where the actual generator is
 	getTeam(options) {
@@ -815,6 +815,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		if(this.teamsSoFar && this.teamsSoFar.length) {
 			for (const team of this.teamsSoFar) {
 				const checkTeam = Teams.unpack(team);
+				console.log(checkTeam);
 			}
 		}
 		
