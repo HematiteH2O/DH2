@@ -3521,7 +3521,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (pokemon === draftTeamMember) continue; // we're evaluating them against every *other* Pokémon
 					for (const requestedSupport in pokemon.requestedSupport) if (!requestedSupportInGeneral.includes(requestedSupport)) requestedSupportInGeneral.push(requestedSupport);
 					for (const offeredSupport in pokemon.offeredSupport) {
-						if (!offeredSupportThisStep.includes(offeredSupport) offeredSupportThisStep.push(offeredSupport);
+						if (!offeredSupportThisStep.includes(offeredSupport)) offeredSupportThisStep.push(offeredSupport);
 						if (!offeredSupportInGeneral[offeredSupport]) offeredSupportInGeneral[offeredSupport] = 0;
 						offeredSupportInGeneral[offeredSupport]++;
 					}
