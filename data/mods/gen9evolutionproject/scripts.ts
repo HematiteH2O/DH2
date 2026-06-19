@@ -755,6 +755,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				
 				types: [],
 				abilities: [],
+				viableStabs: [], // temporary
 				splitMoves: [],
 				fragments: [],
 				
