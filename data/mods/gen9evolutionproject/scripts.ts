@@ -1644,20 +1644,17 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (moveid === 'risingvoltage' && !['Electric Surge', 'Hadron Engine'].includes(fragment.ability)) {
 						fragment.moveBasePower *= 2;
 						fragment.requestedSupport.push('electricterrain');
-						fragment.requestedSupport.push('electricterrain');
 						// can still work with Ground immunity
 					}
 					// Evo customs (Mega-Neural)
 					if (moveid === 'expandingforce' && !['Mega-Neural', 'Psychic Surge'].includes(fragment.ability)) {
 						fragment.moveBasePower *= 1.5;
 						fragment.requestedSupport.push('psychicterrain');
-						fragment.requestedSupport.push('psychicterrain');
 						if (!fragment.avoid) fragment.avoid = [];
 						fragment.avoid.push('groundimmune');
 					}
 					if (moveid === 'grassyglide'  && !['Grassy Surge', 'Seed Sower'].includes(fragment.ability)) {
 						fragment.movePriority += 1;
-						fragment.requestedSupport.push('grassyterrain');
 						fragment.requestedSupport.push('grassyterrain');
 						if (!fragment.avoid) fragment.avoid = [];
 						fragment.avoid.push('groundimmune');
@@ -1819,7 +1816,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					) {
 						let modFragment = Utils.deepClone(fragment);
 						modFragment.moveBasePower *= 1.3;
-						modFragment.requestedSupport.push('psychicterrain');]
+						modFragment.requestedSupport.push('psychicterrain');
 						if (!modFragment.avoid) modFragment.avoid = [];
 						modFragment.avoid.push('groundimmune');
 						alternateFragments.push(modFragment);
