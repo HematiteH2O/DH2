@@ -98,9 +98,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		}
 
 		for (let i = 0; i < 3; i++) {
-			console.log(customList);
 			let potd = customList[Math.floor(Math.random() * customList.length)];
-			console.log(potd);
 			this.modData('FormatsData', potd).tier = "Pokémon of the Day!";
 			customList = customList.filter((custom) => (custom !== potd));
 		}
