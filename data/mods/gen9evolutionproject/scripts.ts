@@ -655,8 +655,27 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 		// SECTION 0.0 - battle-wide
 		if (!this.eligiblePokemon) this.eligiblePokemon = [];
+		
+		let format = 'singles';
+		if (this.activePerHalf && this.activePerHalf !== 1) format = 'vgc';
+		let setLevel = 100;
+		if (this.ruleTable.adjustLevel) setLevel = this.ruleTable.adjustLevel;
 
 		// SECTION 0.1 - player-specific
+
+		let originalTeamSpecies = [];
+		let originalTeamNumbers = [];
+		
+		let banlist = [];
+		if (format === 'singles') banlist = [
+			'toxapex', 'noivernvariant', 'chandelure', 'corviknight', 'darmanitan', 'darmanitangalar', 'excadrill', 'hawlucha', 'garchomp', 'velocinobi',
+			'dragonite', 'tapukoko', 'tapulele', 'tapubulu', 'tapufini', 'zacian', 'zaciancrowned', 'zamazenta', 'zamazentacrowned', 'deoxys',
+			'deoxysattack', 'deoxysdefense', 'deoxysspeed',
+		];
+		if (format === 'vgc') banlist = [
+			'dragonite', 'tapukoko', 'tapulele', 'tapubulu', 'tapufini', 'zacian', 'zaciancrowned', 'zamazenta', 'zamazentacrowned', 'deoxys',
+			'deoxysattack', 'deoxysdefense', 'deoxysspeed',
+		];
 		
 		
 		
@@ -690,8 +709,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 		if (team && team.length) battleCheckRules.team;
 		if (this.teamsSoFar && this.teamsSoFar.length) for (const team of this.teamsSoFar) battleCheckRules(team);
-		
-		
 		
 		
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -769,35 +786,15 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			
 			if (this.dex.data.FormatsData[id].tier === "Evo!" || ['porygon2', 'accelgor'].includes(id)) activeData.stage = 'Evo';
 			else if (activeMon.evos && activeMon.evos.length && !activeMon.prevo && !['mareanie'].includes(id)) activeData.stage = 'LC';
-			// banlists
-			if ([
-				'toxapex', 'noivernvariant', 'chandelure', 'corviknight', 'darmanitan', 'darmanitangalar', 'excadrill', 'hawlucha', 'garchomp', 'velocinobi',
-				'dragonite', 'tapukoko', 'tapulele', 'tapubulu', 'tapufini', 'zacian', 'zaciancrowned', 'zamazenta', 'zamazentacrowned', 'deoxys',
-				'deoxysattack', 'deoxysdefense', 'deoxysspeed',
-			].includes(id) && format === 'singles') activeData.banned = true;
-			if ([
-				'dragonite', 'tapukoko', 'tapulele', 'tapubulu', 'tapufini', 'zacian', 'zaciancrowned', 'zamazenta', 'zamazentacrowned', 'deoxys',
-				'deoxysattack', 'deoxysdefense', 'deoxysspeed',
-			].includes(id) && format === 'vgc') activeData.banned = true;
+
+			if (banlist.includes(id)) activeData.banned = true;
 
 			// basic information
-			activeData.types.push(activeMon.types[0]);
-			if (activeMon.types[1]) activeData.types.push(activeMon.types[1]);
-			
-			activeData.abilities.push(activeMon.abilities[0]);
-			if (activeMon.abilities[1]) activeData.abilities.push(activeMon.abilities[1]);
-			if (activeMon.abilities['H']) activeData.abilities.push(activeMon.abilities['H']);
-			if (activeMon.abilities['S']) activeData.abilities.push(activeMon.abilities['S']);
+			for (const type of activeMon.types) activeData.types.push(type);
+			for (const ability in activeMon.abilities) activeData.abilities.push(activeMon.abilities[ability]);
 			if (activeMon.battleOnly) {
-				if (activeMon.requiredAbility) {
-					activeData.abilities.push(activeMon.requiredAbility);
-				} else {
-					let baseMon = this.dex.species.get(activeMon.battleOnly);
-					activeData.abilities.push(baseMon.abilities[0]);
-					if (baseMon.abilities[1]) activeData.abilities.push(baseMon.abilities[1]);
-					if (baseMon.abilities['H']) activeData.abilities.push(baseMon.abilities['H']);
-					if (baseMon.abilities['S']) activeData.abilities.push(baseMon.abilities['S']);
-				}
+				if (activeMon.requiredAbility) activeData.abilities.push(activeMon.requiredAbility);
+				else if (this.dex.species.get(activeMon.battleOnly)) for (const ability in this.dex.species.get(activeMon.battleOnly).abilities) activeData.abilities.push(activeMon.abilities[ability]);
 			}
 
 			// type matchups
@@ -3116,14 +3113,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		// But what if the player actually brought a Stalwart Rootsnoot?
 		// Then, we'd have a whole team built around Grassy Surge, but we'd suddenly reject the Grassy Surge fragment in the set construction loop.
 		// That would completely change the direction of the team, so we don't want it to surprise us after we've locked in a bunch of choices!
-
-		let originalTeamSpecies = [];
-		let originalTeamNumbers = [];
-		
-		let setLevel = 100;
-		let format = "singles";
-		if (this.ruleTable.adjustLevel) setLevel = this.ruleTable.adjustLevel;
-		if (this.activePerHalf && this.activePerHalf !== 1) format = "vgc";
 		
 		let stage = 'LC'; // easier to default to LC and check to disprove it at every possible step than the other way around
 
