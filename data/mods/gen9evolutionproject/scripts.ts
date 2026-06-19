@@ -3860,8 +3860,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			}
 			for (const offeredSupport in species.randbats[format].offeredSupport) {
 				if (species.randbats[format].offeredSupport[offeredSupport] === 'true') {
-					if (!team.offeredSupport[offeredSupport]) team.offeredSupport[offeredSupport] = [];
-					if (!team.offeredSupport[offeredSupport].includes(set)) team.offeredSupport[offeredSupport].push(set);
+					if (!teamOfferedSupport[offeredSupport]) teamOfferedSupport[offeredSupport] = [];
+					if (!teamOfferedSupport[offeredSupport].includes(set)) teamOfferedSupport[offeredSupport].push(set);
 				}
 				for (const fragment of species.randbats[format].offeredSupport[offeredSupport]) {
 					if (typeof fragment !== 'string') {
