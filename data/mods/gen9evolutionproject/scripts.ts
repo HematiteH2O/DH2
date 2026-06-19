@@ -3745,6 +3745,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		// outside the loop
 		let teamOfferedSupport = {};
 		let teamHighPrioRequestedSupport = {};
+		// this one will be reset during the loop,
+		// but I realized it was still useful to be able to reference the latest version of it after the loop was over
+		let teamRequestedSupport = {};
 		
 		let sets = [];
 		let teamItemsSoFar = []; // for item clause
@@ -4192,7 +4195,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			// // // IMPORTANT: delete any fragment that's "just" a main STAB if another main STAB of the *same type* is already in!
 			// // // if I don't, I risk letting two fragments in for "compressing" with conflicting STABs of the same type, and then you can't actually fit them both anyway
 
-			let teamRequestedSupport = {};
+			teamRequestedSupport = {}; // reset each step
 			for (const request of baseRequestedSupport) {
 				if (!teamRequestedSupport[request]) teamRequestedSupport[request] = [];
 				teamRequestedSupport[request].push("true");
