@@ -718,7 +718,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			const id = this.toID(mon);
 			if (!this.dex.data.Pokedex[id]) return false;
 			const newMon = this.dex.data.Pokedex[id];
-			if (newMon.randbatsInitialized) return;
+			if (newMon.randbatsInitialized) return true;
 			
 			newMon.randbats = {
 				name: newMon.name, // for console.logging convenience
@@ -3201,6 +3201,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						break;
 				}
 			}
+			return true;
 		}
 		
 		
@@ -3512,7 +3513,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						offeredSupportInGeneral[offeredSupport]++;
 					}
 					for (const acceptedSupport in pokemon.acceptedSupport) if (!acceptedSupportThisStep.includes(acceptedSupport)) acceptedSupportThisStep.push(acceptedSupport);
-					if (this.dex.species.get(pokemon.species)) {
+					if (randbatsInitialize(pokemon.species)) {
 						if (this.dex.species.get(pokemon.species).num) teamNumbersThisStep.push(this.dex.species.get(pokemon.species).num);
 						for (const type of types) if (!resistancesThisStep.includes(type) && (this.dex.species.get(pokemon.species).randbats.immunities[type] || (this.dex.species.get(pokemon.species).randbats.resistances[type] && !this.dex.species.get(pokemon.species).randbats.weaknesses[type]))) resistancesThisStep.push(type);
 
