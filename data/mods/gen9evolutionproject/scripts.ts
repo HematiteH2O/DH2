@@ -768,8 +768,13 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				name: activeMon.name,
 				num: activeMon.num,
 				
-				types: [],
 				abilities: [],
+				
+				types: [],
+				weaknesses: {},
+				resistances: {},
+				immunities: {},
+				
 				viableStabs: [], // temporary
 				splitMoves: [],
 				fragments: [],
@@ -777,10 +782,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				offeredSupport: {},
 				requestedSupport: {},
 				acceptedSupport: {},
-				
-				weaknesses: {},
-				resistances: {},
-				immunities: {},
 			};
 			const activeData = activeMon[randbats];
 			
@@ -789,15 +790,15 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 			if (banlist.includes(id)) activeData.banned = true;
 
-			// basic information
-			for (const type of activeMon.types) activeData.types.push(type);
+			// SECTION 2.1 basic information
 			for (const ability in activeMon.abilities) activeData.abilities.push(activeMon.abilities[ability]);
 			if (activeMon.battleOnly) {
 				if (activeMon.requiredAbility) activeData.abilities.push(activeMon.requiredAbility);
 				else if (this.dex.species.get(activeMon.battleOnly)) for (const ability in this.dex.species.get(activeMon.battleOnly).abilities) activeData.abilities.push(activeMon.abilities[ability]);
 			}
+			for (const type of activeMon.types) activeData.types.push(type);
 
-			// type matchups
+			// SECTION 2.2 type matchups
 			const weaknesses = [];
 			const resistances = [];
 			const immunities = [];
@@ -1018,14 +1019,169 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				'hiddenpower', 'judgment', 'multiattack', 'naturalgift', 'revelationdance', 'struggle', 'technoblast', 'terrainpulse', 'weatherball',
 			];
 			// const splitMoveByEffect
-			// const splitMoveByAbility
+			const splitMoveByAbility = (instructions: AnyObject) => {
+				let moveSplits = [];
+				
+				// basic sanity check + if you can actually have the Ability
+				if (!instructions) return moveSplits;
+				if (instructions.ability && !activeData.abilities.includes(instructions.ability)) return moveSplits;
+				if (!instructions.move) return moveSplits;
+				
+				let baseMove = instructions.move;
+				let refMove = null;
+				if (typeof instructions.move === 'string') const refMove = this.dex.data.Moves[this.toID(baseMove)];
+				else if (baseMove.baseMove) const refMove = this.dex.data.Moves[this.toID(baseMove.baseMove)];
+				if (!refMove) return moveSplits;
+				if (typeof baseMove === 'string') baseMove = {
+					baseMove: instructions.move,
+					moveid: this.toID(instructions.move),
+				};
+				// think that's all the failsafes we need aksdjfh
+
+				// checking compatibility
+				if (instructions.moveid || instructions.notMoveid) {
+					if (!baseMove.moveid) {
+						if (typeof instructions.move === 'string') baseMove.moveid = this.toID(instructions.move);
+						else if (baseMove.baseMove) baseMove.moveid = this.toID(baseMove.baseMove);
+						else return;
+					}
+					if (instructions.moveid) {
+						if (typeof instructions.moveid === 'string') {
+							if (instructions.moveid !== baseMove.moveid) return;
+						} else if (Array.isArray(instructions.moveid)) {
+							if (!instructions.moveid.includes(baseMove.moveid)) return;
+						}
+					}
+					if (instructions.notMoveid) {
+						if (typeof instructions.moveid === 'string') {
+							if (instructions.moveid === baseMove.moveid) return;
+						} else if (Array.isArray(instructions.moveid)) {
+							if (instructions.moveid.includes(baseMove.moveid)) return;
+						}
+					}
+				}
+				if (instructions.basePower) {
+					if (!baseMove.basePower) baseMove.basePower = refMove.basePower;
+					if (!baseMove.basePower || baseMove.basePower === 0) return;
+					if (instructions.maxBp && baseMove.basePower > instructions.maxBp) return; // for Technician
+					if (instructions.minBp && baseMove.basePower < instructions.minBp) return; // unused for now
+				}
+				if (instructions.type) {
+					if (!baseMove.type) baseMove.type = refMove.type;
+					if (typeof instructions.type === 'string') {
+						if (instructions.type !== baseMove.type) return;
+					} else if (Array.isArray(instructions.type)) {
+						if (!instructions.type.includes(baseMove.type)) return;
+					}
+				}
+				if (instructions.category) {
+					if (!baseMove.category) baseMove.category = refMove.category;
+					if (typeof instructions.type === 'string') {
+						if (instructions.category !== baseMove.category) return;
+					} else if (Array.isArray(instructions.category)) {
+						if (!instructions.category.includes(baseMove.category)) return;
+					}
+				}
+				if (instructions.terrain) {
+					if (activeData.types.includes('Flying')) return;
+					if (!baseMove.avoid) baseMove.avoid = [];
+					baseMove.avoid.push('groundimmune');
+				}
+				if (instructions.flags) {
+					if (!baseMove.flags) baseMove.flags = refMove.flags;
+					if (typeof instructions.flags === 'string') {
+						if (!baseMove.flags[instructions.flags]) return;
+					} else if (Array.isArray(instructions.flags)) {
+						for (const flag of instructions.flags) if (!baseMove.flags[flag]) return;
+					}
+				}
+				if (instructions.other) { // recoil, secondaries, hasSheerForce
+					if (typeof instructions.other === 'string') {
+						if (!baseMove[instructions.other] && !refMove[instructions.other]) return;
+					} else if (Array.isArray(instructions.other)) {
+						// at the moment, this is just used for Sheer Force, where we need *either* secondaries *or* hasSheerForce
+						// so we're returning if none of them are true, not if any of them are false like usual
+						let accept = false;
+						for (const other of instructions.other) if (baseMove[other] || refMove[other]) accept = true;
+						if (!accept) return;
+					}
+				}
+				if (instructions.rejectOther) { // for Merciless (willCrit)
+					if (typeof instructions.rejectOther === 'string') {
+						if (baseMove[instructions.rejectOther] || refMove[instructions.rejectOther]) return;
+					} else if (Array.isArray(instructions.rejectOther)) {
+						for (const other of instructions.rejectOther) if (baseMove[other] || refMove[other]) return;
+					}
+				}
+
+				// marking the base fragment where applicable
+				// this is used for purposes like Aerilate and Sheer Force;
+				// the same set can't have the Aerilate version of one move and the Normal-type version of another,
+				// so we have to make them mutually exclusive!
+				if (instructions.baseAvoid) {
+					let baseFragment = Utils.deepClone(baseMove);
+					if (!baseFragment.tags) baseFragment.tags = [];
+					if (!baseFragment.avoid) baseFragment.avoid = [];
+					if (typeof instructions.baseAvoid === 'string') {
+						if (baseFragment.tags.includes(instructions.baseAvoid)) return;
+						if (!baseFragment.avoid.includes(instructions.baseAvoid)) (baseFragment.avoid.push(instructions.baseAvoid);
+					} else if (Array.isArray(instructions.baseAvoid)) {
+						for (const avoid of instructions.baseAvoid) if (baseFragment.tags.includes(avoid)) return;
+						for (const avoid of instructions.baseAvoid) baseFragment.avoid.push(instructions.baseAvoid);
+					}
+					moveSplits.push(baseFragment);
+				} else (moveSplits.push(baseMove));
+
+				// and... NOW we can actually split the move variations!
+				let outputs = [];
+				if (instructions.output) outputs.push(instructions.output);
+				if (instructions.multiOutput) for (const output of instructions.multiOutput) outputs.push(output);
+				for (const output of outputs) {
+					let modFragment = Utils.deepClone(baseMove);
+					if (instructions.ability) modFragment.ability = instructions.ability;
+					if (output.type) modFragment.type = output.type;
+					if (output.basePower) modFragment.basePower = output.basePower;
+					if (output.basePowerMultiplier) modFragment.basePower *= output.basePowerMultiplier;
+					if (output.accuracy) modFragment.accuracy = output.accuracy;
+					if (output.accuracyMultiplier) modFragment.accuracy *= output.accuracyMultiplier;
+					if (output.priority) modFragment.priority = output.priority;
+					if (output.priorityModifier) modFragment.priority += output.priorityModifier;
+					if (output.tags) {
+						if (!modFragment.tags) modFragment.tags = [];
+						if (typeof output.tags === 'string') {
+							if (!baseFragment.tags.includes(output.tags)) (baseFragment.tags.push(output.tags);
+						} else if (Array.isArray(output.tags)) {
+							for (const tag of output.tags) if (!baseFragment.tags.includes(tag)) baseFragment.tags.push(tag);
+						}
+					}
+					if (output.acceptedSupport) {
+						if (!modFragment.acceptedSupport) modFragment.acceptedSupport = [];
+						if (typeof output.acceptedSupport === 'string') {
+							if (!baseFragment.acceptedSupport.includes(output.acceptedSupport)) (baseFragment.acceptedSupport.push(output.acceptedSupport);
+						} else if (Array.isArray(output.acceptedSupport)) {
+							for (const acceptedSupport of output.acceptedSupport) if (!baseFragment.acceptedSupport.includes(acceptedSupport)) baseFragment.tags.push(acceptedSupport);
+						}
+					}
+					if (output.requestedSupport) {
+						if (!modFragment.requestedSupport) modFragment.requestedSupport = [];
+						if (typeof output.requestedSupport === 'string') {
+							if (!baseFragment.requestedSupport.includes(output.requestedSupport)) (baseFragment.requestedSupport.push(output.requestedSupport);
+						} else if (Array.isArray(output.requestedSupport)) {
+							for (const requestedSupport of output.requestedSupport) if (!baseFragment.requestedSupport.includes(requestedSupport)) baseFragment.tags.push(requestedSupport);
+						}
+					}
+					moveSplits.push(modFragment);
+				}
+				
+				return moveSplits;
+			};
 			// const splitMoveBySupport
 			const splitMove = (baseMove: string) => {
 				const moveid = this.toID(baseMove);
 				if (!learnMove(moveid) || this.dex.data.Moves[moveid]) return;
 				let move = this.dex.data.Moves[moveid];
 
-				let fragments = [];
+				let splitMoves = [];
 				let baseFragment = {};
 
 				// if (fragments.length) do it for everything in fragments? otherwise, just do it for baseFragment?
@@ -1267,7 +1423,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								let modFragment = {
 									ability: ability,
 									moveBasePower: basePower * 2,
-									moveAccuracy: basePower * 0.8,
+									moveAccuracy: move.accuracy * 0.8,
 								};
 								fragments.push(modFragment);
 							}
