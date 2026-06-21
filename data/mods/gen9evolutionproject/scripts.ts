@@ -1355,6 +1355,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// temporary
 				const moveid = this.toID(fragment.baseMove);
 				const move = this.dex.moves.get(fragment.baseMove);
+				if (!fragment.moves) fragment.moves = [this.dex.moves.get(fragment.baseMove).name];
 				if (!fragment.moveBasePower) fragment.moveBasePower = fragment.basePower;
 				if (!fragment.moveAccuracy) fragment.moveAccuracy = fragment.moveAccuracy;
 				if (!fragment.moveType) fragment.moveType = fragment.type;
