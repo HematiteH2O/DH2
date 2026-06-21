@@ -1627,6 +1627,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 			}
 			for (const moveVariant in activeData.splitMoves) {
+				// temporary
+				if (!moveVariant.moveBasePower) moveVariant.moveBasePower = moveVariant.basePower;
+				if (!moveVariant.moveAccuracy) moveVariant.moveAccuracy = moveVariant.moveAccuracy;
+				if (!moveVariant.moveType) moveVariant.moveType = moveVariant.type;
+				if (!moveVariant.moveCategory) moveVariant.moveCategory = moveVariant.category;
+				if (!moveVariant.movePriority) moveVariant.movePriority = moveVariant.priority;
 					makeFragment({
 						format: 'vgc',
 						fragment: fragment,
