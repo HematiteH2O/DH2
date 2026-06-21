@@ -2703,7 +2703,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				remainingStabMoves: [],
 				// we also don't want to reroll this first pick later! the rest of the team can be built around it
 				doNotReroll: true,
-				pokemon.splitMoves = randbatsData(chosenRandomPokemon).splitMoves;
+				splitMoves: randbatsData(chosenRandomPokemon).splitMoves,
 			});
 			eligiblePokemon = eligiblePokemon.filter(pokemon => pokemon !== chosenRandomPokemon);
 		}
