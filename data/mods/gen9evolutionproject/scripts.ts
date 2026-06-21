@@ -1027,8 +1027,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				
 				let baseMove = instructions.move;
 				let refMove = null;
-				if (typeof instructions.move === 'string') const refMove = this.dex.data.Moves[this.toID(baseMove)];
-				else if (baseMove.baseMove) const refMove = this.dex.data.Moves[this.toID(baseMove.baseMove)];
+				if (typeof instructions.move === 'string') refMove = this.dex.data.Moves[this.toID(baseMove)];
+				else if (baseMove.baseMove) refMove = this.dex.data.Moves[this.toID(baseMove.baseMove)];
 				if (!refMove) return;
 				if (typeof baseMove === 'string') baseMove = {
 					baseMove: instructions.move,
@@ -1155,7 +1155,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (output.tags) {
 						if (!modFragment.tags) modFragment.tags = [];
 						if (typeof output.tags === 'string') {
-							if (!baseFragment.tags.includes(output.tags)) (baseFragment.tags.push(output.tags);
+							if (!baseFragment.tags.includes(output.tags)) baseFragment.tags.push(output.tags);
 						} else if (Array.isArray(output.tags)) {
 							for (const tag of output.tags) if (!baseFragment.tags.includes(tag)) baseFragment.tags.push(tag);
 						}
