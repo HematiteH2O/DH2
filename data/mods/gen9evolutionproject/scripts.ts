@@ -1353,6 +1353,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			}
 			for (const fragment of activeData.splitMoves) {
 				// temporary
+				let moveid = this.toID(fragment.baseMove);
 				if (!fragment.moveBasePower) fragment.moveBasePower = fragment.basePower;
 				if (!fragment.moveAccuracy) fragment.moveAccuracy = fragment.moveAccuracy;
 				if (!fragment.moveType) fragment.moveType = fragment.type;
