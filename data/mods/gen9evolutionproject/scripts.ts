@@ -1163,7 +1163,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (output.acceptedSupport) {
 						if (!modFragment.acceptedSupport) modFragment.acceptedSupport = [];
 						if (typeof output.acceptedSupport === 'string') {
-							if (!baseFragment.acceptedSupport.includes(output.acceptedSupport)) (baseFragment.acceptedSupport.push(output.acceptedSupport);
+							if (!baseFragment.acceptedSupport.includes(output.acceptedSupport)) baseFragment.acceptedSupport.push(output.acceptedSupport);
 						} else if (Array.isArray(output.acceptedSupport)) {
 							for (const acceptedSupport of output.acceptedSupport) if (!baseFragment.acceptedSupport.includes(acceptedSupport)) baseFragment.tags.push(acceptedSupport);
 						}
