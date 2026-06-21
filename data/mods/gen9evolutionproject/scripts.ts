@@ -1171,7 +1171,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (output.requestedSupport) {
 						if (!modFragment.requestedSupport) modFragment.requestedSupport = [];
 						if (typeof output.requestedSupport === 'string') {
-							if (!baseFragment.requestedSupport.includes(output.requestedSupport)) (baseFragment.requestedSupport.push(output.requestedSupport);
+							if (!baseFragment.requestedSupport.includes(output.requestedSupport)) baseFragment.requestedSupport.push(output.requestedSupport);
 						} else if (Array.isArray(output.requestedSupport)) {
 							for (const requestedSupport of output.requestedSupport) if (!baseFragment.requestedSupport.includes(requestedSupport)) baseFragment.tags.push(requestedSupport);
 						}
@@ -1189,7 +1189,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (!baseFragment.avoid) baseFragment.avoid = [];
 					if (typeof instructions.baseAvoid === 'string') {
 						if (baseFragment.tags.includes(instructions.baseAvoid)) return;
-						if (!baseFragment.avoid.includes(instructions.baseAvoid)) (baseFragment.avoid.push(instructions.baseAvoid);
+						if (!baseFragment.avoid.includes(instructions.baseAvoid)) baseFragment.avoid.push(instructions.baseAvoid);
 					} else if (Array.isArray(instructions.baseAvoid)) {
 						for (const avoid of instructions.baseAvoid) if (baseFragment.tags.includes(avoid)) return;
 						for (const avoid of instructions.baseAvoid) baseFragment.avoid.push(instructions.baseAvoid);
