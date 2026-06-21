@@ -1024,7 +1024,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			) => {
 				// basic sanity check + if you can actually have the Ability
 				if (!baseMove || !refMove || !instructions) return;
-				if (instructions.ability && (!activeData.abilities.includes(instructions.ability) || move.ability)) return;
+				if (instructions.ability && (!activeData.abilities.includes(instructions.ability) || baseMove.ability)) return;
 
 				// checking compatibility
 				if (instructions.moveid || instructions.notMoveid) {
