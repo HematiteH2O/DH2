@@ -1364,6 +1364,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (!fragment.movePriority) fragment.movePriority = fragment.priority || move.priority;
 				if (!fragment.acceptedSupport) fragment.acceptedSupport = [];
 				if (!fragment.requestedSupport) fragment.requestedSupport = [];
+				if (activeData.types.includes(fragment.type)) fragment.stab = true;
+				if (!fragment.stab && fragment.moveBasePower) fragment.moveBasePower /= 1.5;
 				
 				makeFragment({
 					format: 'vgc',
