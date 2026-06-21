@@ -1351,17 +1351,17 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					}
 				}
 			}
-			for (const moveVariant of activeData.splitMoves) {
+			for (const fragment of activeData.splitMoves) {
 				// temporary
-				if (!moveVariant.moveBasePower) moveVariant.moveBasePower = moveVariant.basePower;
-				if (!moveVariant.moveAccuracy) moveVariant.moveAccuracy = moveVariant.moveAccuracy;
-				if (!moveVariant.moveType) moveVariant.moveType = moveVariant.type;
-				if (!moveVariant.moveCategory) moveVariant.moveCategory = moveVariant.category;
-				if (!moveVariant.movePriority) moveVariant.movePriority = moveVariant.priority;
+				if (!fragment.moveBasePower) fragment.moveBasePower = fragment.basePower;
+				if (!fragment.moveAccuracy) fragment.moveAccuracy = fragment.moveAccuracy;
+				if (!fragment.moveType) fragment.moveType = fragment.type;
+				if (!fragment.moveCategory) fragment.moveCategory = fragment.category;
+				if (!fragment.movePriority) fragment.movePriority = fragment.priority;
 				
 				makeFragment({
 					format: 'vgc',
-					fragment: moveVariant,
+					fragment: fragment,
 					moveChecks: {moves: ['Fake Out', 'Mat Block']},
 					offeredSupport: ['fakeout'],
 				});
