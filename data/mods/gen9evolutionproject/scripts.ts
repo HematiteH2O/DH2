@@ -809,9 +809,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			for (const defendingType of activeData.types) {
 				// fill in weaknesses and resistances by type first
 				for (const attackingType of types) {
-					if (this.dex.data.TypeChart[defendingType.toLowerCase()].damageTaken[attackingType] === 1 && !weaknesses.includes(attackingType)) weaknesses.push(type);
-					else if (this.dex.data.TypeChart[defendingType.toLowerCase()].damageTaken[attackingType] === 2 && !resistances.includes(attackingType)) resistances.push(type);
-					else if (this.dex.data.TypeChart[defendingType.toLowerCase()].damageTaken[attackingType] === 3 && !immunities.includes(attackingType)) immunities.push(type);
+					if (this.dex.data.TypeChart[defendingType.toLowerCase()].damageTaken[attackingType] === 1 && !weaknesses.includes(attackingType)) weaknesses.push(attackingType);
+					else if (this.dex.data.TypeChart[defendingType.toLowerCase()].damageTaken[attackingType] === 2 && !resistances.includes(attackingType)) resistances.push(attackingType);
+					else if (this.dex.data.TypeChart[defendingType.toLowerCase()].damageTaken[attackingType] === 3 && !immunities.includes(attackingType)) immunities.push(attackingType);
 				}
 			}
 			// then let them cancel out
