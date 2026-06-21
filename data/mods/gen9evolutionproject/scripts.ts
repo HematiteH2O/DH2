@@ -1211,6 +1211,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				for (const fragment of effectSplits) {
 					// splitMove(fragment, defaultMove, moveSplitsBySupport, { moveid: 'grassknot', output: { basePower: 60 }}, true );
 				}
+				// MISSING
+				// https://github.com/HematiteH2O/DH2/blob/evo-upd-misc/data/mods/gen9evolutionproject/scripts.ts#L1717
+				// working version there ^
 
 				// SPLIT MOVES BY ABILITY
 				let abilitySplits = Utils.deepClone(supportSplits);
