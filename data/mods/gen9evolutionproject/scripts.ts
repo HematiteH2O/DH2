@@ -1117,12 +1117,14 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						for (const other of instructions.rejectOther) if (baseMove[other] || refMove[other]) return;
 					}
 				}
+				if (activeData.name === 'Malamar-Alola') console.log(`Move: ` + refMove.name + ` made it past instructions`);
 
 				// Seems like the move passed every check, so we can split it now!
 				let outputs = [];
 				if (instructions.output) outputs.push(instructions.output);
 				if (instructions.multiOutput) for (const output of instructions.multiOutput) outputs.push(output);
 				for (const output of outputs) {
+					if (activeData.name === 'Malamar-Alola') console.log(`Output: ` + output);
 					let modFragment = Utils.deepClone(baseMove);
 					if (instructions.ability) modFragment.ability = instructions.ability;
 					if (output.type) modFragment.type = output.type;
@@ -1189,6 +1191,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			};
 			// const splitMoveBySupport
 			const fullySplitMove = (id: string) => {
+				if (activeData.name === 'Malamar-Alola') console.log(id);
 				const moveid = this.toID(id); // just to be safe
 				if (!learnMove(moveid) || this.dex.data.Moves[moveid]) return;
 				let refMove = this.dex.data.Moves[moveid];
@@ -1205,6 +1208,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				splitMove(move, { moveid: 'grassknot', output: { basePower: 60 }}, refMove, defaultMove, effectSplits, true);
 				splitMove(move, { moveid: 'naturepower', output: { basePower: 80, category: 'Special' }}, refMove, defaultMove, effectSplits, true);
 				// I notice the Acrobatics fragment is gonna take some special attention, but one thing at a time
+				if (activeData.name === 'Malamar-Alola') console.log(effectSplits);
 
 				// SPLIT MOVE BY POSSIBLE SUPPORT
 				let supportSplits = Utils.deepClone(effectSplits);
@@ -1306,6 +1310,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					splitMove(fragment, { ability: `Mega-Neural`, moveid: 'expandingforce', terrain: true, output: { basePowerMultiplier: 1.5 * 1.3 }}, refMove, defaultMove, abilitySplits);
 				}
 
+				if (activeData.name === 'Malamar-Alola') console.log(abilitySplits);
 				for (const moveVariant of abilitySplits) activeData.splitMoves.push(moveVariant);
 			};
 			
