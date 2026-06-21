@@ -1206,15 +1206,14 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// I notice the Acrobatics fragment is gonna take some special attention, but one thing at a time
 
 				// SPLIT MOVE BY POSSIBLE SUPPORT
-				let supportSplits = [];
+				let supportSplits = Utils.deepClone(effectSplits);
 				for (const fragment of effectSplits) {
 					// splitMove(fragment, defaultMove, moveSplitsBySupport, { moveid: 'grassknot', output: { basePower: 60 }}, true );
 				}
 
 				// SPLIT MOVES BY ABILITY
-				let abilitySplits = [];
-				// for (const fragment of supportSplits) {
-				for (const fragment of effectSplits) {
+				let abilitySplits = Utils.deepClone(supportSplits);
+				for (const fragment of supportSplits) {
 					// type-based modifiers
 					splitMove(fragment, { ability: 'Adaptability', type: activeData.types, basePower: true, notMoveid: ['terrainpulse', 'weatherball'], output: { basePowerMultiplier: 4/3 }}, refMove, defaultMove, abilitySplits);
 					splitMove(fragment, { ability: `Dragon's Maw`, type: 'Dragon', basePower: true, output: { basePowerMultiplier: 1.5 }}, refMove, defaultMove, abilitySplits);
