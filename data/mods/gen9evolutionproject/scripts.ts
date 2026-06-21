@@ -1345,7 +1345,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					}
 				}
 			}
-			for (const moveVariant in activeData.splitMoves) {
+			for (const moveVariant of activeData.splitMoves) {
 				// temporary
 				if (!moveVariant.moveBasePower) moveVariant.moveBasePower = moveVariant.basePower;
 				if (!moveVariant.moveAccuracy) moveVariant.moveAccuracy = moveVariant.moveAccuracy;
