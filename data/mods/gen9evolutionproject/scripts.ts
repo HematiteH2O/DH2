@@ -943,12 +943,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					for (const support of requestedSupport) subfragment.requestedSupport.push(support);
 				}
 				if (avoid) {
-					subfragment.requestedSupport = [];
-					for (const support of requestedSupport) subfragment.requestedSupport.push(support);
+					subfragment.avoid = [];
+					for (const avo of avoid) subfragment.avoid.push(avo);
 				}
 				if (tags) {
-					subfragment.requestedSupport = [];
-					for (const support of requestedSupport) subfragment.requestedSupport.push(support);
+					subfragment.tags = [];
+					for (const tag of tags) subfragment.tags.push(tag);
 				}
 				vgcSupportSubfragments.push(subfragment);
 			}
@@ -1362,6 +1362,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (!fragment.moveType) fragment.moveType = fragment.type || move.type;
 				if (!fragment.moveCategory) fragment.moveCategory = fragment.category || move.category;
 				if (!fragment.movePriority) fragment.movePriority = fragment.priority || move.priority;
+				if (!fragment.acceptedSupport) fragment.acceptedSupport = [];
+				if (!fragment.requestedSupport) fragment.requestedSupport = [];
 				
 				makeFragment({
 					format: 'vgc',
