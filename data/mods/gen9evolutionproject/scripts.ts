@@ -1361,7 +1361,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				
 				makeFragment({
 					format: 'vgc',
-					fragment: fragment,
+					fragment: moveVariant,
 					moveChecks: {moves: ['Fake Out', 'Mat Block']},
 					offeredSupport: ['fakeout'],
 				});
