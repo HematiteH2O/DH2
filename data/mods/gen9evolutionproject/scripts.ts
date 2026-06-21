@@ -1020,18 +1020,16 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			];
 			// const splitMoveByEffect
 			const splitMoveByAbility = (instructions: AnyObject) => {
-				let moveSplits = [];
-				
 				// basic sanity check + if you can actually have the Ability
-				if (!instructions) return moveSplits;
-				if (instructions.ability && !activeData.abilities.includes(instructions.ability)) return moveSplits;
-				if (!instructions.move) return moveSplits;
+				if (!instructions) return;
+				if (instructions.ability && !activeData.abilities.includes(instructions.ability)) return;
+				if (!instructions.move) return;
 				
 				let baseMove = instructions.move;
 				let refMove = null;
 				if (typeof instructions.move === 'string') const refMove = this.dex.data.Moves[this.toID(baseMove)];
 				else if (baseMove.baseMove) const refMove = this.dex.data.Moves[this.toID(baseMove.baseMove)];
-				if (!refMove) return moveSplits;
+				if (!refMove) return;
 				if (typeof baseMove === 'string') baseMove = {
 					baseMove: instructions.move,
 					moveid: this.toID(instructions.move),
@@ -1074,12 +1072,28 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						if (!instructions.type.includes(baseMove.type)) return;
 					}
 				}
+				if (instructions.notType) {
+					if (!baseMove.type) baseMove.type = refMove.type;
+					if (typeof instructions.notType === 'string') {
+						if (instructions.notType === baseMove.type) return;
+					} else if (Array.isArray(instructions.notType)) {
+						if (instructions.notType.includes(baseMove.type)) return;
+					}
+				}
 				if (instructions.category) {
 					if (!baseMove.category) baseMove.category = refMove.category;
-					if (typeof instructions.type === 'string') {
+					if (typeof instructions.category === 'string') {
 						if (instructions.category !== baseMove.category) return;
 					} else if (Array.isArray(instructions.category)) {
 						if (!instructions.category.includes(baseMove.category)) return;
+					}
+				}
+				if (instructions.notCategory) {
+					if (!baseMove.category) baseMove.category = refMove.category;
+					if (typeof instructions.notCategory === 'string') {
+						if (instructions.notCategory === baseMove.category) return;
+					} else if (Array.isArray(instructions.notCategory)) {
+						if (!instructions.notCategory.includes(baseMove.category)) return;
 					}
 				}
 				if (instructions.terrain) {
@@ -1114,25 +1128,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					}
 				}
 
-				// marking the base fragment where applicable
-				// this is used for purposes like Aerilate and Sheer Force;
-				// the same set can't have the Aerilate version of one move and the Normal-type version of another,
-				// so we have to make them mutually exclusive!
-				if (instructions.baseAvoid) {
-					let baseFragment = Utils.deepClone(baseMove);
-					if (!baseFragment.tags) baseFragment.tags = [];
-					if (!baseFragment.avoid) baseFragment.avoid = [];
-					if (typeof instructions.baseAvoid === 'string') {
-						if (baseFragment.tags.includes(instructions.baseAvoid)) return;
-						if (!baseFragment.avoid.includes(instructions.baseAvoid)) (baseFragment.avoid.push(instructions.baseAvoid);
-					} else if (Array.isArray(instructions.baseAvoid)) {
-						for (const avoid of instructions.baseAvoid) if (baseFragment.tags.includes(avoid)) return;
-						for (const avoid of instructions.baseAvoid) baseFragment.avoid.push(instructions.baseAvoid);
-					}
-					moveSplits.push(baseFragment);
-				} else (moveSplits.push(baseMove));
-
-				// and... NOW we can actually split the move variations!
+				// Seems like the move passed every check, so we can split it now!
 				let outputs = [];
 				if (instructions.output) outputs.push(instructions.output);
 				if (instructions.multiOutput) for (const output of instructions.multiOutput) outputs.push(output);
@@ -1141,11 +1137,21 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (instructions.ability) modFragment.ability = instructions.ability;
 					if (output.type) modFragment.type = output.type;
 					if (output.basePower) modFragment.basePower = output.basePower;
-					if (output.basePowerMultiplier) modFragment.basePower *= output.basePowerMultiplier;
+					if (output.basePowerMultiplier) {
+						if (!modFragment.basePower) modFragment.basePower = refMove.basePower;
+						modFragment.basePower *= output.basePowerMultiplier;
+					}
 					if (output.accuracy) modFragment.accuracy = output.accuracy;
-					if (output.accuracyMultiplier) modFragment.accuracy *= output.accuracyMultiplier;
+					if (output.accuracyMultiplier) {
+						if (!modFragment.accuracy) modFragment.priority = refMove.accuracy;
+						if (modFragment.accuracy <= 1) modFragment.accuracy = 100;
+						modFragment.accuracy *= output.accuracyMultiplier;
+					}
 					if (output.priority) modFragment.priority = output.priority;
-					if (output.priorityModifier) modFragment.priority += output.priorityModifier;
+					if (output.priorityModifier) {
+						if (!modFragment.priority) modFragment.priority = refMove.priority;
+						modFragment.priority += output.priorityModifier;
+					}
 					if (output.tags) {
 						if (!modFragment.tags) modFragment.tags = [];
 						if (typeof output.tags === 'string') {
@@ -1170,29 +1176,201 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							for (const requestedSupport of output.requestedSupport) if (!baseFragment.requestedSupport.includes(requestedSupport)) baseFragment.tags.push(requestedSupport);
 						}
 					}
-					moveSplits.push(modFragment);
+					activeData.splitMoves.push(modFragment);
 				}
-				
-				return moveSplits;
+
+				// Finally, we should mark the base fragment if applicable
+				// This is used for purposes like Aerilate and Sheer Force;
+				// the same set can't have the Aerilate version of one move and the Normal-type version of another,
+				// so we have to make them mutually exclusive!
+				if (instructions.baseAvoid) {
+					let baseFragment = Utils.deepClone(baseMove);
+					if (!baseFragment.tags) baseFragment.tags = [];
+					if (!baseFragment.avoid) baseFragment.avoid = [];
+					if (typeof instructions.baseAvoid === 'string') {
+						if (baseFragment.tags.includes(instructions.baseAvoid)) return;
+						if (!baseFragment.avoid.includes(instructions.baseAvoid)) (baseFragment.avoid.push(instructions.baseAvoid);
+					} else if (Array.isArray(instructions.baseAvoid)) {
+						for (const avoid of instructions.baseAvoid) if (baseFragment.tags.includes(avoid)) return;
+						for (const avoid of instructions.baseAvoid) baseFragment.avoid.push(instructions.baseAvoid);
+					}
+					moveSplits.push(baseFragment);
+				}
 			};
 			// const splitMoveBySupport
 			const splitMove = (baseMove: string) => {
 				const moveid = this.toID(baseMove);
 				if (!learnMove(moveid) || this.dex.data.Moves[moveid]) return;
-				let move = this.dex.data.Moves[moveid];
+				let moveData = this.dex.data.Moves[moveid]; // not sure if I need this
+				let move = {baseMove: moveid};
 
-				let splitMoves = [];
-				let baseFragment = {};
-
-				// if (fragments.length) do it for everything in fragments? otherwise, just do it for baseFragment?
+				// splitMoveByAbility
+				// type-based modifiers
+				splitMoveByAbility( {move: move, ability: 'Adaptability', type: activeData.types, basePower: true, notMoveid: ['terrainpulse', 'weatherball'], output: {
+					basePowerMultiplier: 4/3 }} );
+				splitMoveByAbility( {move: move, ability: `Dragon's Maw`, type: 'Dragon', basePower: true, output: {
+					basePowerMultiplier: 1.5 }} );
+				splitMoveByAbility( {move: move, ability: 'Gale Wings', type: 'Flying', output: {
+					priorityModifier: 1 }} );
+				splitMoveByAbility( {move: move, ability: 'Rocky Payload', type: 'Rock', basePower: true, output: {
+					basePowerMultiplier: 1.5 }} );
+				splitMoveByAbility( {move: move, ability: 'Steely Spirit', type: 'Steel', basePower: true, output: {
+					basePowerMultiplier: 1.5 }} );
+				splitMoveByAbility( {move: move, ability: 'Steelworker', type: 'Steel', basePower: true, output: {
+					basePowerMultiplier: 1.5 }} );
+				splitMoveByAbility( {move: move, ability: 'Transistor', type: 'Electric', basePower: true, output: {
+					basePowerMultiplier: 1.3 }} );
+				splitMoveByAbility( {move: move, ability: 'Water Bubble', type: 'Water', basePower: true, output: {
+					basePowerMultiplier: 2 }} );
+				// category-based modifiers
+				splitMoveByAbility( {move: move, ability: 'Huge Power', category: 'Physical', basePower: true, output: {
+					basePowerMultiplier: 2 }} );
+				splitMoveByAbility( {move: move, ability: 'Pure Power', category: 'Physical', basePower: true, output: {
+					basePowerMultiplier: 2 }} );
+				splitMoveByAbility( {move: move, ability: 'Hustle', category: 'Physical', basePower: true, output: {
+					basePowerMultiplier: 1.5, accuracyMultiplier: 0.8 }} );
+				splitMoveByAbility( {move: move, ability: 'Prankster', category: 'Status', output: {
+					priorityModifier: 1 }} );
+				// flag-based modifiers
+				splitMoveByAbility( {move: move, ability: 'Iron Fist', flags: 'punch', basePower: true, output: {
+					basePowerMultiplier: 1.2 }} );
+				splitMoveByAbility( {move: move, ability: 'Mega Launcher', flags: 'pulse', basePower: true, output: {
+					basePowerMultiplier: 1.5 }} );
+				splitMoveByAbility( {move: move, ability: 'Punk Rock', flags: 'sound', basePower: true, output: {
+					basePowerMultiplier: 1.3 }} );
+				splitMoveByAbility( {move: move, ability: 'Sharpness', flags: 'slicing', basePower: true, output: {
+					basePowerMultiplier: 1.5 }} );
+				splitMoveByAbility( {move: move, ability: 'Strong Jaw', flags: 'bite', basePower: true, output: {
+					basePowerMultiplier: 1.5 }} );
+				splitMoveByAbility( {move: move, ability: 'Tough Claws', flags: 'contact', basePower: true, output: {
+					basePowerMultiplier: 1.3 }} );
+				splitMoveByAbility( {move: move, ability: 'Triage', flags: 'heal', output: {
+					priorityModifier: 3 }} );
+				// other-based modifiers
+				splitMoveByAbility( {move: move, ability: 'Merciless', notCategory: 'status', rejectOther: 'willcrit', output: {
+					basePowerMultiplier: 1.5, requestedSupport: 'poison' }} );
+				splitMoveByAbility( {move: move, ability: 'Reckless', notCategory: 'status', other: 'recoil', output: {
+					basePowerMultiplier: 1.2 }} );
+				splitMoveByAbility( {move: move, ability: 'Technician', basePower: true, maxBp: 60, output: {
+					basePowerMultiplier: 1.5 }} );
+				// -ates
+				splitMoveByAbility( {move: move, ability: 'Aerilate', type: 'Normal', basePower: true, notMoveid: noModifyType, output: {
+					type: 'Flying', basePowerMultiplier: 1.2, tags: 'Aerilate' }, baseAvoid: 'Aerilate'} );
+				splitMoveByAbility( {move: move, ability: 'Pixilate', type: 'Normal', basePower: true, notMoveid: noModifyType, output: {
+					type: 'Fairy', basePowerMultiplier: 1.2, tags: 'Pixilate' }, baseAvoid: 'Pixilate'} );
+				splitMoveByAbility( {move: move, ability: 'Refrigerate', type: 'Normal', basePower: true, notMoveid: noModifyType, output: {
+					type: 'Ice', basePowerMultiplier: 1.2, tags: 'Refrigerate' }, baseAvoid: 'Refrigerate'} );
+				splitMoveByAbility( {move: move, ability: 'Galvanize', type: 'Normal', basePower: true, notMoveid: noModifyType, output: {
+					type: 'Electric', basePowerMultiplier: 1.2, tags: 'Galvanize' }, baseAvoid: 'Galvanize'} );
+				splitMoveByAbility( {move: move, ability: 'Dragonize', type: 'Normal', basePower: true, notMoveid: noModifyType, output: {
+					type: 'Dragon', basePowerMultiplier: 1.2, tags: 'Dragonize' }, baseAvoid: 'Dragonize'} );
+				splitMoveByAbility( {move: move, ability: 'Normalize', basePower: true, notMoveid: noModifyType, output: {
+					type: 'Normal', basePowerMultiplier: 1.2, tags: 'Normalize' }, baseAvoid: 'Normalize'} );
+				// weather
+				for (const ability of ['Desolate Land', 'Drought', 'Mega Sol', 'Orichalcum Pulse']) {
+					splitMoveByAbility( {move: move, ability: ability, type: 'Fire', basePower: true, notMoveid: 'weatherball', output: {
+						basePowerMultiplier: ((ability === 'Orichalcum Pulse' && moveData.category === 'Physical') ? 2 : 1.5) }} );
+					splitMoveByAbility( {move: move, ability: ability, moveid: 'weatherball', output: {
+						basePower: 150, type: 'Fire' }} );
+				}
+				splitMoveByAbility( {move: move, ability: 'Orichalcum Pulse', notType: 'Fire', category: 'Physical', basePower: true, notMoveid: 'weatherball', output: {
+					basePowerMultiplier: 4/3 }} );
+				for (const ability of ['Drizzle', 'Primordial Sea']) {
+					splitMoveByAbility( {move: move, ability: ability, type: 'Water', basePower: true, notMoveid: 'weatherball', output: {
+						basePowerMultiplier: 1.5 }} );
+					splitMoveByAbility( {move: move, ability: ability, moveid: 'weatherball', output: {
+						basePower: 150, type: 'Water' }} );
+					splitMoveByAbility( {move: move, ability: ability, moveid: ['hurricane', 'thunder', 'bleakwindstorm', 'wildboltstorm', 'sandsearstorm'], output: {
+						accuracy: 100 }} );
+				}
+				splitMoveByAbility( {move: move, ability: 'Sand Stream', moveid: 'weatherball', output: {
+					basePower: 100, type: 'Rock' }} );
+				splitMoveByAbility( {move: move, ability: 'Sand Spit', moveid: 'weatherball', output: {
+					basePower: 100, type: 'Rock' }} );
+				splitMoveByAbility( {move: move, ability: 'Snow Warning', moveid: 'weatherball', output: {
+					basePower: 100, type: 'Ice' }} );
+				splitMoveByAbility( {move: move, ability: 'Snow Warning', moveid: 'blizzard', output: {
+					accuracy: 100 }} );
+				// weather support-reliant
+				splitMoveByAbility( {move: move, ability: 'Flower Gift', category: 'Physical', basePower: true, output: {
+					basePowerMultiplier: 1.5, requestedSupport: 'sun' }} );
+				splitMoveByAbility( {move: move, ability: 'Sand Force', type: ['Ground', 'Rock', 'Steel'], basePower: true, output: {
+					basePowerMultiplier: 1.3, requestedSupport: 'sand' }} );
+				splitMoveByAbility( {move: move, ability: 'Solar Power', category: 'Special', basePower: true, output: {
+					basePowerMultiplier: 1.5, requestedSupport: 'sun' }} );
+				// terrain
+				for (const ability of ['Electric Surge', 'Hadron Engine']) {
+					let multiplier = 1.3;
+					if (ability === 'Hadron Engine' && moveData.category === 'Special') multiplier = 1.69;
+					splitMoveByAbility( {move: move, ability: 'Electric Surge', type: 'Electric', basePower: true, notMoveid: ['terrainpulse', 'naturepower', 'risingvoltage'], terrain: true, output: {
+						basePowerMultiplier: multiplier }} );
+					splitMoveByAbility( {move: move, ability: 'Electric Surge', moveid: 'terrainpulse', terrain: true, output: {
+						basePower: multiplier * 100, type: 'Electric' }} );
+					splitMoveByAbility( {move: move, ability: 'Electric Surge', moveid: 'naturepower', terrain: true, output: {
+						basePower: multiplier * 90, type: 'Electric' }} );
+					splitMoveByAbility( {move: move, ability: 'Electric Surge', moveid: 'risingvoltage', terrain: true, output: {
+						basePower: multiplier * 140, type: 'Electric' }} );
+				}
+				splitMoveByAbility( {move: move, ability: 'Hadron Engine', notType: 'Electric', category: 'Special', basePower: true, terrain: true, output: {
+					basePowerMultiplier: 4/3 }} );
+				for (const ability of ['Grassy Surge', 'Seed Sower']) {
+					splitMoveByAbility( {move: move, ability: ability, type: 'Grass', basePower: true, notMoveid: ['terrainpulse', 'naturepower', 'grassyglide'], terrain: true, output: {
+						basePowerMultiplier: 1.3 }} );
+					splitMoveByAbility( {move: move, ability: ability, moveid: 'terrainpulse', terrain: true, output: {
+						basePower: 1.3 * 100, type: 'Grass' }} );
+					splitMoveByAbility( {move: move, ability: ability, moveid: 'naturepower', terrain: true, output: {
+						basePower: 1.3 * 90, type: 'Grass' }} );
+					splitMoveByAbility( {move: move, ability: ability, moveid: 'grassyglide', terrain: true, output: {
+						basePowerMultiplier: 1.3, priority: 1 }} );
+				}
+				splitMoveByAbility( {move: move, ability: 'Misty Surge', moveid: 'terrainpulse', terrain: true, output: {
+					basePower: 100, type: 'Fairy' }} );
+				splitMoveByAbility( {move: move, ability: 'Misty Surge', moveid: 'naturepower', terrain: true, output: {
+					basePower: 95, type: 'Fairy' }} );
+				splitMoveByAbility( {move: move, ability: 'Misty Surge', moveid: 'mistyexplosion', terrain: true, output: {
+					basePower: 150 }} );
+				splitMoveByAbility( {move: move, ability: 'Psychic Surge', type: 'Psychic', basePower: true, notMoveid: ['terrainpulse', 'naturepower', 'expandingforce'], terrain: true, output: {
+					basePowerMultiplier: 1.3 }} );
+				splitMoveByAbility( {move: move, ability: 'Psychic Surge', moveid: 'terrainpulse', terrain: true, output: {
+					basePower: 1.3 * 100, type: 'Psychic' }} );
+				splitMoveByAbility( {move: move, ability: 'Psychic Surge', moveid: 'naturepower', terrain: true, output: {
+					basePower: 1.3 * 90, type: 'Psychic' }} );
+				splitMoveByAbility( {move: move, ability: 'Psychic Surge', moveid: 'expandingforce', terrain: true, output: {
+					basePowerMultiplier: 1.5 * 1.3 }} );
 				
-				fragments.push(baseFragment);
-				// uhh... how do I want to do this...
+				// Evo customs
+				splitMoveByAbility( {move: move, ability: 'Awakening', type: 'Fighting', basePower: true, output: {
+					basePowerMultiplier: 1.5 }} );
+				splitMoveByAbility( {move: move, ability: 'Calcify', type: 'Rock', basePower: true, output: {
+					basePowerMultiplier: 1.3 }} );
+				splitMoveByAbility( {move: move, ability: 'Canopy', type: 'Grass', basePower: true, output: {
+					basePowerMultiplier: 1.3 }} );
+				splitMoveByAbility( {move: move, ability: 'Frozen Focus', category: 'Special', basePower: true, output: {
+					basePowerMultiplier: 1.5, requestedSupport: 'snow' }} );
+				splitMoveByAbility( {move: move, ability: 'Permafrost', basePower: true, notMoveid: noModifyType, output: {
+					type: 'Ice', basePowerMultiplier: 1.2, tags: 'Permafrost' }, baseAvoid: 'Permafrost'} );
+				splitMoveByAbility( {move: move, ability: 'Storm Chaser', type: 'Water', basePower: true, notMoveid: 'weatherball', output: {
+					basePowerMultiplier: 1.5 }} );
+				splitMoveByAbility( {move: move, ability: 'Storm Chaser', moveid: 'weatherball', output: {
+					basePower: 150, type: 'Water' }} );
+				splitMoveByAbility( {move: move, ability: 'Storm Chaser', moveid: ['hurricane', 'thunder', 'bleakwindstorm', 'wildboltstorm', 'sandsearstorm'], output: {
+					accuracy: 100 }} );
+				splitMoveByAbility( {move: move, ability: `Mega-Neural`, type: 'Psychic', basePower: true, notMoveid: ['terrainpulse', 'naturepower', 'expandingforce'], terrain: true, output: {
+					basePowerMultiplier: 1.3 }} );
+				splitMoveByAbility( {move: move, ability: `Mega-Neural`, moveid: 'terrainpulse', terrain: true, output: {
+					basePower: 1.3 * 100, type: 'Psychic' }} );
+				splitMoveByAbility( {move: move, ability: `Mega-Neural`, moveid: 'naturepower', terrain: true, output: {
+					basePower: 1.3 * 90, type: 'Psychic' }} );
+				splitMoveByAbility( {move: move, ability: `Mega-Neural`, moveid: 'expandingforce', terrain: true, output: {
+					basePowerMultiplier: 1.5 * 1.3 }} );
+
+				activeData.splitMoves.push(move);
 			};
 			
 			for (const moveid in learnset) {
 				if (!learnMove(moveid)) continue;
 				// later: if (learnMove(moveid)) splitMove(moveid);
+				splitMove(moveid);
 				
 				let move = this.dex.data.Moves[moveid];
 				let basePower = move.basePower;
@@ -1214,618 +1392,22 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				let fragments = [];
 				let baseFragment = {
 				};
-				fragments.push(baseFragment);
-
-				// some moves need copies in case of multiple Abilities
-				for (const ability of activeData.abilities) {
-					let modifier = 1; // for Orichalcum Pulse and Hadron Engine later
-					switch (ability) {
-						case 'Adaptability':
-							if (activeData.types.includes(move.type) && !['terrainpulse', 'weatherball'].includes(moveid)) {
-								let modFragment = {
-									ability: ability,
-									moveBasePower: basePower * 4/3,
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Aerilate':
-							if (move.type === 'Normal' && basePower && !noModifyType.includes(moveid)) {
-								baseFragment.avoid = ['Aerilate']; // impossible to have an Aerilate-boosted Flying move and an actual Normal-type move on the same set
-								let modFragment = {
-									ability: ability,
-									tags: ['Aerilate'],
-									moveType: 'Flying',
-									moveBasePower: basePower * 1.2,
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Desolate Land':
-						case 'Drought':
-						case 'Mega Sol':
-						case 'Orichalcum Pulse':
-							if (ability === 'Orichalcum Pulse' && move.category === 'Physical') modifier = 4/3;
-							if (move.type === 'Fire' && basePower) {
-								let modFragment = {
-									ability: ability,
-									moveBasePower: basePower * 1.5 * modifier,
-								};
-								fragments.push(modFragment);
-							} else if (moveid === 'weatherball') {
-								let modFragment = {
-									ability: ability,
-									moveType: 'Fire',
-									moveBasePower: 150,
-								};
-								fragments.push(modFragment);
-							} else if (modifier > 1) {
-								let modFragment = {
-									ability: ability,
-									moveBasePower: basePower * modifier,
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Dragonize':
-							if (move.type === 'Normal' && basePower && !noModifyType.includes(moveid)) {
-								baseFragment.avoid = ['Dragonize'];
-								let modFragment = {
-									ability: ability,
-									tags: ['Dragonize'],
-									moveType: 'Dragon',
-									moveBasePower: basePower * 1.2,
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case `Dragon's Maw`:
-							if (move.type === 'Dragon' && basePower) {
-								let modFragment = {
-									ability: ability,
-									moveBasePower: basePower * 1.5,
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Drizzle':
-						case 'Primordial Sea':
-							if (move.type === 'Water' && basePower) {
-								let modFragment = {
-									ability: ability,
-									moveBasePower: basePower * 1.5,
-								};
-								fragments.push(modFragment);
-							}
-							if (['hurricane', 'thunder', 'bleakwindstorm', 'wildboltstorm', 'sandsearstorm'].includes(moveid)) {
-								// today I learned Springtide Storm is not affected by rain
-								let modFragment = {
-									ability: ability,
-									moveAccuracy: 100,
-								};
-								fragments.push(modFragment);
-							}
-							if (moveid === 'weatherball') {
-								let modFragment = {
-									ability: ability,
-									moveType: 'Water',
-									moveBasePower: 150,
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Electric Surge':
-						case 'Hadron Engine':
-							if (ability === 'Hadron Engine' && move.category === 'Special') modifier = 4/3;
-							if (!activeData.types.includes('Flying')) {
-								if (move.type === 'Electric' && basePower) {
-									let modFragment = {
-										ability: ability,
-										moveBasePower: basePower * 1.3 * modifier,
-									};
-									if (moveid === 'Rising Voltage') modFragment.moveBasePower *= 2;
-									fragments.push(modFragment);
-								} else if (moveid === 'terrainpulse') {
-									let modFragment = {
-										ability: ability,
-										moveType: 'Electric',
-										moveBasePower: 100 * 1.3 * modifier,
-									};
-									fragments.push(modFragment);
-								} else if (moveid === 'naturepower') {
-									let modFragment = {
-										ability: ability,
-										moveType: 'Electric',
-										moveBasePower: 90 * 1.3 * modifier,
-									};
-									fragments.push(modFragment);
-								} else if (modifier > 1) {
-									let modFragment = {
-										ability: ability,
-										moveBasePower: basePower * modifier,
-									};
-									fragments.push(modFragment);
-								}
-							}
-							break;
-						case 'Flower Gift':
-							if (move.category === 'Physical') {
-								let modFragment = {
-									ability: ability,
-									moveBasePower: basePower * 1.5,
-									requestedSupport: ['sun'],
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Gale Wings':
-							if (move.type === 'Flying') {
-								let modFragment = {
-									ability: ability,
-									movePriority: move.priority + 1,
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Galvanize':
-							if (move.type === 'Normal' && basePower && !noModifyType.includes(moveid)) {
-								baseFragment.avoid = ['Galvanize'];
-								let modFragment = {
-									ability: ability,
-									tags: ['Galvanize'],
-									moveType: 'Electric',
-									moveBasePower: basePower * 1.2,
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Grassy Surge':
-						case 'Seed Sower':
-							if (!activeData.types.includes('Flying')) {
-								if (move.type === 'Grass' && basePower) {
-									let modFragment = {
-										ability: ability,
-										moveBasePower: basePower * 1.3,
-									};
-									if (moveid === 'Grassy Glide') modFragment.priority = 1;
-									fragments.push(modFragment);
-								}
-								if (moveid === 'terrainpulse') {
-									let modFragment = {
-										ability: ability,
-										moveType: 'Grass',
-										moveBasePower: 130,
-									};
-									fragments.push(modFragment);
-								}
-								if (moveid === 'naturepower') {
-									let modFragment = {
-										ability: ability,
-										moveType: 'Grass',
-										moveBasePower: 90 * 1.3,
-									};
-									fragments.push(modFragment);
-								}
-							}
-							break;
-						case 'Huge Power':
-						case 'Pure Power':
-							if (move.category === 'Physical') {
-								let modFragment = {
-									ability: ability,
-									moveBasePower: basePower * 2,
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Hustle':
-							if (move.category === 'Physical') {
-								let modFragment = {
-									ability: ability,
-									moveBasePower: basePower * 2,
-									moveAccuracy: move.accuracy * 0.8,
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Iron Fist':
-							if (move.flags['punch'] && basePower) {
-								let modFragment = {
-									ability: ability,
-									moveBasePower: basePower * 1.2,
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Mega Launcher':
-							if (move.flags['pulse'] && basePower) {
-								let modFragment = {
-									ability: ability,
-									moveBasePower: basePower * 1.5,
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Psychic Surge':
-							if (!activeData.types.includes('Flying')) {
-								if (move.type === 'Psychic' && basePower) {
-									let modFragment = {
-										ability: ability,
-										moveBasePower: basePower * 1.3,
-									};
-									if (moveid === 'Expanding Force') modFragment.moveBasePower *= 1.5;
-									fragments.push(modFragment);
-								}
-								if (moveid === 'terrainpulse') {
-									let modFragment = {
-										ability: ability,
-										moveType: 'Psychic',
-										moveBasePower: 130,
-									};
-									fragments.push(modFragment);
-								}
-								if (moveid === 'naturepower') {
-									let modFragment = {
-										ability: ability,
-										moveType: 'Psychic',
-										moveBasePower: 90 * 1.3,
-									};
-									fragments.push(modFragment);
-								}
-							}
-							break;
-						case 'Merciless':
-							if (move.category !== 'Status' && !move.willCrit) {
-								let modFragment = {
-									ability: ability,
-									moveBasePower: basePower * 1.5,
-									requestedSupport: ['poison'],
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Misty Surge':
-							if (!activeData.types.includes('Flying')) {
-								if (moveid === 'terrainpulse') {
-									let modFragment = {
-										ability: ability,
-										moveType: 'Fairy',
-										moveBasePower: 100,
-									};
-									fragments.push(modFragment);
-								}
-								if (moveid === 'naturepower') {
-									let modFragment = {
-										ability: ability,
-										moveType: 'Fairy',
-										moveBasePower: 95,
-									};
-									fragments.push(modFragment);
-								}
-							}
-							break;
-						case 'Normalize':
-							if (basePower && !noModifyType.includes(moveid)) {
-								baseFragment.avoid = ['Normalize'];
-								let modFragment = {
-									ability: ability,
-									tags: ['Normalize'],
-									moveType: 'Normal',
-									moveBasePower: basePower * 1.2,
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Pixilate':
-							if (move.type === 'Normal' && basePower && !noModifyType.includes(moveid)) {
-								baseFragment.avoid = ['Pixilate'];
-								let modFragment = {
-									ability: ability,
-									tags: ['Pixilate'],
-									moveType: 'Fairy',
-									moveBasePower: basePower * 1.2,
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Prankster':
-							if (move.category === 'Status') {
-								let modFragment = {
-									ability: ability,
-									movePriority: move.priority + 1,
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Punk Rock':
-							if (move.flags['sound'] && basePower) {
-								let modFragment = {
-									ability: ability,
-									moveBasePower: basePower * 1.3,
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Reckless':
-							if (move.recoil && basePower) {
-								let modFragment = {
-									ability: ability,
-									moveBasePower: basePower * 1.2,
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Refrigerate':
-							if (move.type === 'Normal' && basePower && !noModifyType.includes(moveid)) {
-								baseFragment.avoid = ['Refrigerate'];
-								let modFragment = {
-									ability: ability,
-									tags: ['Refrigerate'],
-									moveType: 'Ice',
-									moveBasePower: basePower * 1.2,
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Rocky Payload':
-							if (move.type === 'Rock' && basePower) {
-								let modFragment = {
-									ability: ability,
-									moveBasePower: basePower * 1.5,
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Sand Stream':
-						case 'Sand Spit':
-							if (moveid === 'weatherball') {
-								let modFragment = {
-									ability: ability,
-									moveType: 'Rock',
-									moveBasePower: 100,
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Sand Force':
-							if (['Rock', 'Ground', 'Steel'].includes(move.type) && basePower) {
-								let modFragment = {
-									ability: ability,
-									moveBasePower: basePower * 1.2,
-									requestedSupport: ['sand'],
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Sharpness':
-							if (move.flags['slicing'] && basePower) {
-								let modFragment = {
-									ability: ability,
-									moveBasePower: basePower * 1.5,
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Sheer Force': // gonna have to make an exception for this in some utility categories
-							if ((move.secondaries || move.hasSheerForce) && basePower) {
-								let modFragment = {
-									ability: ability,
-									moveBasePower: basePower * 1.3,
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Snow Warning':
-							if (moveid === 'weatherball') {
-								let modFragment = {
-									ability: ability,
-									moveType: 'Ice',
-									moveBasePower: 100,
-								};
-								fragments.push(modFragment);
-							}
-							if (moveid === 'blizzard') {
-								let modFragment = {
-									ability: ability,
-									moveAccuracy: 100,
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Solar Power':
-							if (move.category === 'Special') {
-								let modFragment = {
-									ability: ability,
-									moveBasePower: basePower * 1.5,
-									requestedSupport: ['sun'],
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Steelworker':
-						case 'Steely Spirit':
-							if (move.type === 'Steel' && basePower) {
-								let modFragment = {
-									ability: ability,
-									moveBasePower: basePower * 1.5,
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Strong Jaw':
-							if (move.flags['bite'] && basePower) {
-								let modFragment = {
-									ability: ability,
-									moveBasePower: basePower * 1.5,
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Technician':
-							if (basePower && basePower <= 60) {
-								let modFragment = {
-									ability: ability,
-									moveBasePower: basePower * 1.5,
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Tough Claws':
-							if (move.flags['contact'] && basePower) {
-								let modFragment = {
-									ability: ability,
-									moveBasePower: basePower * 1.3,
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Transistor':
-							if (move.type === 'Electric' && basePower) {
-								let modFragment = {
-									ability: ability,
-									moveBasePower: basePower * 1.3,
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Triage':
-							if (move.flags['heal']) {
-								let modFragment = {
-									ability: ability,
-									movePriority: move.priority + 3,
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Water Bubble':
-							if (move.type === 'Water' && basePower) {
-								let modFragment = {
-									ability: ability,
-									moveBasePower: basePower * 2,
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						// Evo customs
-						case 'Awakening':
-							if (move.type === 'Fighting' && basePower) {
-								let modFragment = {
-									ability: ability,
-									moveBasePower: basePower * 1.5,
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Calcify':
-							if (move.type === 'Rock' && basePower) {
-								let modFragment = {
-									ability: ability,
-									moveBasePower: basePower * 1.3,
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Canopy':
-							if (move.type === 'Grass' && basePower) {
-								let modFragment = {
-									ability: ability,
-									moveBasePower: basePower * 1.3,
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Storm Chaser':
-							if (move.type === 'Water' && basePower) {
-								let modFragment = {
-									ability: ability,
-									moveBasePower: basePower * 1.5,
-								};
-								fragments.push(modFragment);
-							}
-							if (['hurricane', 'thunder', 'bleakwindstorm', 'wildboltstorm', 'sandsearstorm'].includes(moveid)) {
-								// today I learned Springtide Storm is not affected by rain
-								let modFragment = {
-									ability: ability,
-									moveAccuracy: 100,
-								};
-								fragments.push(modFragment);
-							}
-							if (moveid === 'weatherball') {
-								let modFragment = {
-									ability: ability,
-									moveType: 'Water',
-									moveBasePower: 150,
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Frozen Focus':
-							if (move.category === 'Special') {
-								let modFragment = {
-									ability: ability,
-									moveBasePower: basePower * 1.5,
-									requestedSupport: ['snow'],
-								};
-								fragments.push(modFragment);
-							}
-							break;
-						case 'Mega-Neural':
-							if (!activeData.types.includes('Flying')) {
-								if (move.type === 'Psychic' && basePower) {
-									let modFragment = {
-										ability: ability,
-										moveBasePower: basePower * 1.3,
-									};
-									if (moveid === 'Expanding Force') modFragment.moveBasePower *= 1.5;
-									fragments.push(modFragment);
-								}
-								if (moveid === 'terrainpulse') {
-									let modFragment = {
-										ability: ability,
-										moveType: 'Psychic',
-										moveBasePower: 130,
-									};
-									fragments.push(modFragment);
-								}
-								if (moveid === 'naturepower') {
-									let modFragment = {
-										ability: ability,
-										moveType: 'Psychic',
-										moveBasePower: 90 * 1.3,
-									};
-									fragments.push(modFragment);
-								}
-							}
-							break;
-						case 'Permafrost':
-							if (basePower && !noModifyType.includes(moveid)) {
-								baseFragment.avoid = ['Permafrost'];
-								let modFragment = {
-									ability: ability,
-									tags: ['Permafrost'],
-									moveType: 'Ice',
-									moveBasePower: basePower * 1.2,
-								};
-								fragments.push(modFragment);
-							}
-							break;
-					}
-				}
+				activeData.splitMoves.push(baseFragment);
 				
 				// fill in default information
 				let alternateFragments = [];
-				for (const fragment of fragments) {
+				for (const fragment of activeData.splitMoves) {
 					if (!fragment.baseMove) fragment.baseMove = move.name;
 					if (!fragment.moves) fragment.moves = [move.name];
 					
 					if (!fragment.requestedSupport) fragment.requestedSupport = [];
 					if (!fragment.acceptedSupport) fragment.acceptedSupport = [];
 					
-					if (!fragment.moveType) fragment.moveType = move.type;
-					if (!fragment.moveBasePower) fragment.moveBasePower = basePower;
-					if (!fragment.moveCategory) fragment.moveCategory = move.category;
-					if (!fragment.movePriority) fragment.movePriority = move.priority;
-					if (!fragment.moveAccuracy) fragment.moveAccuracy = move.accuracy;
+					if (!fragment.moveType) fragment.moveType = fragment.type || move.type;
+					if (!fragment.moveBasePower) fragment.moveBasePower = fragment.basePower || basePower;
+					if (!fragment.moveCategory) fragment.moveCategory = fragment.category || move.category;
+					if (!fragment.movePriority) fragment.movePriority = fragment.priority || move.priority;
+					if (!fragment.moveAccuracy) fragment.moveAccuracy = fragment.accuracy || move.accuracy;
 
 					if (!fragment.fragmentPriority) fragment.fragmentPriority = 4;
 					
