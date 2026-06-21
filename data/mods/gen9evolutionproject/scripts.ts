@@ -1193,6 +1193,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (!learnMove(moveid) || this.dex.data.Moves[moveid]) return;
 				let refMove = this.dex.data.Moves[moveid];
 				let move = { baseMove: moveid }; // this is the basis of a splitMove fragment
+				let defaultMove = { baseMove: moveid }; // and this is a copy of it that we'll flag as needed as the base version of the move
 				
 				// SPLIT MOVE BY INNATE EFFECTS OF THE MOVE
 				let effectSplits = [];
