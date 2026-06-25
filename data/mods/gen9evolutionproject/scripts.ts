@@ -1097,20 +1097,20 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 				if (instructions.other) { // recoil, secondaries, hasSheerForce
 					if (typeof instructions.other === 'string') {
-						if (!baseMove[instructions.other] && !refMove?[instructions.other]) return false;
+						if (!baseMove[instructions.other] && !(refMove && refMove[instructions.other])) return false;
 					} else if (Array.isArray(instructions.other)) {
 						// at the moment, this is just used for Sheer Force, where we need *either* secondaries *or* hasSheerForce
 						// so we're returning if none of them are true, not if any of them are false like usual
 						let accept = false;
-						for (const other of instructions.other) if (baseMove[other] || refMove?[other]) accept = true;
+						for (const other of instructions.other) if (baseMove[other] || (refMove && refMove[other])) accept = true;
 						if (!accept) return false;
 					}
 				}
 				if (instructions.rejectOther) { // for Merciless (willCrit)
 					if (typeof instructions.rejectOther === 'string') {
-						if (baseMove[instructions.rejectOther] || refMove?[instructions.rejectOther]) return false;
+						if (baseMove[instructions.rejectOther] || (refMove && refMove[instructions.rejectOther])) return false;
 					} else if (Array.isArray(instructions.rejectOther)) {
-						for (const other of instructions.rejectOther) if (baseMove[other] || refMove?[other]) return false;
+						for (const other of instructions.rejectOther) if (baseMove[other] || (refMove && refMove[other])) return false;
 					}
 				}
 				
