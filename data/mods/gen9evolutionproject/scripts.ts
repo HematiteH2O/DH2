@@ -1430,7 +1430,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					splitMove(fragment, { ability: `Mega-Neural`, type: 'Psychic', basePower: true, notMoveid: ['terrainpulse', 'naturepower', 'expandingforce'], terrain: true, output: { basePowerMultiplier: 1.3 }}, refMove, defaultMove, abilitySplits);
 					splitMove(fragment, { ability: `Mega-Neural`, moveid: 'terrainpulse', terrain: true, output: { basePower: 1.3 * 100, type: 'Psychic' }}, refMove, defaultMove, abilitySplits);
 					splitMove(fragment, { ability: `Mega-Neural`, moveid: 'naturepower', terrain: true, output: { basePower: 1.3 * 90, type: 'Psychic' }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: `Mega-Neural`, moveid: 'expandingforce', terrain: true, output: { basePowerMultiplier: 1.5 * 1.3 }}, refMove, defaultMove, abilitySplits);
+					splitMove(fragment, { ability: `Mega-Neural`, moveid: 'expandingforce', terrain: true, output: { basePowerMultiplier: 1.5 * 1.3, tags: 'allAdjacentFoes' }}, refMove, defaultMove, abilitySplits);
 				}
 
 				for (const moveVariant of abilitySplits) activeData.splitMoves.push(moveVariant);
