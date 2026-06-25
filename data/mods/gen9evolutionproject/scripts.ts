@@ -1297,14 +1297,25 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// This is used for purposes like Aerilate and Sheer Force;
 				// the same set can't have the Aerilate version of one move and the Normal-type version of another,
 				// so we have to make them mutually exclusive!
-				if (defaultMove && instructions.baseAvoid) {
-					if (!defaultMove.tags) defaultMove.tags = [];
-					if (!defaultMove.avoid) defaultMove.avoid = [];
-					if (typeof instructions.baseAvoid === 'string') {
-						if (!defaultMove.avoid.includes(instructions.baseAvoid)) defaultMove.avoid.push(instructions.baseAvoid);
-					} else if (Array.isArray(instructions.baseAvoid)) {
-						for (const avoid of instructions.baseAvoid) defaultMove.avoid.push(instructions.baseAvoid);
+				if (defaultMove && (instructions.baseTag || instructions.baseAvoid)) {
+					destination = destination.filter((modFragment) => (modFragment === defaultMove));
+					if (instructions.baseTag) {
+						if (!defaultMove.tags) defaultMove.tags = [];
+						if (typeof instructions.baseTag === 'string') {
+							if (!defaultMove.tags.includes(instructions.baseTag)) defaultMove.tags.push(instructions.baseTag);
+						} else if (Array.isArray(instructions.baseTag)) {
+							for (const tag of instructions.baseTag) defaultMove.tags.push(tag);
+						}
 					}
+					if (instructions.baseAvoid) {
+						if (!defaultMove.avoid) defaultMove.avoid = [];
+						if (typeof instructions.baseAvoid === 'string') {
+							if (!defaultMove.avoid.includes(instructions.baseAvoid)) defaultMove.avoid.push(instructions.baseAvoid);
+						} else if (Array.isArray(instructions.baseAvoid)) {
+							for (const avoid of instructions.baseAvoid) defaultMove.avoid.push(avoid);
+						}
+					}
+					destination.push(defaultMove);
 				}
 			};
 			// const splitMoveBySupport
