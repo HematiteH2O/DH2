@@ -1018,68 +1018,64 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			const noModifyType = [ // used for -ates in splitMoveByAbility
 				'hiddenpower', 'judgment', 'multiattack', 'naturalgift', 'revelationdance', 'struggle', 'technoblast', 'terrainpulse', 'weatherball',
 			];
-			// const splitMoveByEffect
-			const splitMove = (
-				baseMove: anyObject, instructions: AnyObject, refMove: anyObject, defaultMove: anyObject, destination: anyObject, override: boolean
-			) => {
-				// basic sanity check + if you can actually have the Ability
-				if (!baseMove || !refMove || !instructions) return;
-				if (instructions.ability && (!activeData.abilities.includes(instructions.ability) || baseMove.ability)) return;
-
-				// checking compatibility
+			const checkRelevance = (
+				baseMove: any, instructions: any, refMove: any
+			) = {
+				if (!baseMove || !instructions) return false;
+				// not having refMove should be okay for later
 				if (instructions.moveid || instructions.notMoveid) {
 					if (!baseMove.moveid) {
 						if (typeof move === 'string') baseMove.moveid = this.toID(move);
 						else if (baseMove.baseMove) baseMove.moveid = this.toID(baseMove.baseMove);
-						else return;
+						else return false;
 					}
 					if (instructions.moveid) {
 						if (typeof instructions.moveid === 'string') {
-							if (instructions.moveid !== baseMove.moveid) return;
+							if (instructions.moveid !== baseMove.moveid) return false;
 						} else if (Array.isArray(instructions.moveid)) {
-							if (!instructions.moveid.includes(baseMove.moveid)) return;
+							if (!instructions.moveid.includes(baseMove.moveid)) return false;
 						}
 					}
 					if (instructions.notMoveid) {
 						if (typeof instructions.moveid === 'string') {
-							if (instructions.moveid === baseMove.moveid) return;
+							if (instructions.moveid === baseMove.moveid) return false;
 						} else if (Array.isArray(instructions.moveid)) {
-							if (instructions.moveid.includes(baseMove.moveid)) return;
+							if (instructions.moveid.includes(baseMove.moveid)) return false;
 						}
 					}
 				}
 				if (instructions.basePower) {
-					if (!baseMove.basePower) baseMove.basePower = refMove.basePower;
-					if (!baseMove.basePower || baseMove.basePower === 0) return;
-					if (instructions.maxBp && baseMove.basePower > instructions.maxBp) return; // for Technician
-					if (instructions.minBp && baseMove.basePower < instructions.minBp) return; // unused for now
+					if (!baseMove.basePower) baseMove.basePower = refMove?.basePower;
+					if (!baseMove.basePower || baseMove.basePower === 0) return false;
+					if (instructions.maxBp && baseMove.basePower > instructions.maxBp) return false; // for Technician
+					if (instructions.minBp && baseMove.basePower < instructions.minBp) return false; // unused for now
 				}
 				if (instructions.type) {
-					if (!baseMove.type) baseMove.type = refMove.type;
+					if (!baseMove.type) baseMove.type = refMove?.type;
 					if (typeof instructions.type === 'string') {
-						if (instructions.type !== baseMove.type) return;
+						if (instructions.type !== baseMove.type) return false;
 					} else if (Array.isArray(instructions.type)) {
-						if (!instructions.type.includes(baseMove.type)) return;
+						if (!instructions.type.includes(baseMove.type)) return false;
 					}
 				}
 				if (instructions.notType) {
-					if (!baseMove.type) baseMove.type = refMove.type;
+					if (!baseMove.type) baseMove.type = refMove?.type;
 					if (typeof instructions.notType === 'string') {
-						if (instructions.notType === baseMove.type) return;
+						if (instructions.notType === baseMove.type) return false;
 					} else if (Array.isArray(instructions.notType)) {
-						if (instructions.notType.includes(baseMove.type)) return;
+						if (instructions.notType.includes(baseMove.type)) return false;
 					}
 				}
 				if (instructions.category) {
-					if (!baseMove.category) baseMove.category = refMove.category;
+					if (!baseMove.category) baseMove.category = refMove?.category;
 					if (typeof instructions.category === 'string') {
-						if (instructions.category !== baseMove.category) return;
+						if (instructions.category !== baseMove.category) return false;
 					} else if (Array.isArray(instructions.category)) {
-						if (!instructions.category.includes(baseMove.category)) return;
+						if (!instructions.category.includes(baseMove.category)) return false;
 					}
 				}
 				/*if (instructions.notCategory) { // nothing needs this (I can use 'basePower: true,' to check attacking moves)
-					if (!baseMove.category) baseMove.category = refMove.category;
+					if (!baseMove.category) baseMove.category = refMove?.category;
 					if (typeof instructions.notCategory === 'string') {
 						if (instructions.notCategory === baseMove.category) return;
 					} else if (Array.isArray(instructions.notCategory)) {
@@ -1087,37 +1083,49 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					}
 				}*/
 				if (instructions.terrain) {
-					if (activeData.types.includes('Flying')) return;
+					if (activeData.types.includes('Flying')) return false;
 					if (!baseMove.avoid) baseMove.avoid = [];
 					baseMove.avoid.push('groundimmune');
 				}
 				if (instructions.flags) {
-					if (!baseMove.flags) baseMove.flags = refMove.flags;
+					if (!baseMove.flags) baseMove.flags = refMove?.flags;
 					if (typeof instructions.flags === 'string') {
-						if (!baseMove.flags[instructions.flags]) return;
+						if (!baseMove.flags[instructions.flags]) return false;
 					} else if (Array.isArray(instructions.flags)) {
-						for (const flag of instructions.flags) if (!baseMove.flags[flag]) return;
+						for (const flag of instructions.flags) if (!baseMove.flags[flag]) return false;
 					}
 				}
 				if (instructions.other) { // recoil, secondaries, hasSheerForce
 					if (typeof instructions.other === 'string') {
-						if (!baseMove[instructions.other] && !refMove[instructions.other]) return;
+						if (!baseMove[instructions.other] && !refMove?[instructions.other]) return false;
 					} else if (Array.isArray(instructions.other)) {
 						// at the moment, this is just used for Sheer Force, where we need *either* secondaries *or* hasSheerForce
 						// so we're returning if none of them are true, not if any of them are false like usual
 						let accept = false;
-						for (const other of instructions.other) if (baseMove[other] || refMove[other]) accept = true;
-						if (!accept) return;
+						for (const other of instructions.other) if (baseMove[other] || refMove?[other]) accept = true;
+						if (!accept) return false;
 					}
 				}
 				if (instructions.rejectOther) { // for Merciless (willCrit)
 					if (typeof instructions.rejectOther === 'string') {
-						if (baseMove[instructions.rejectOther] || refMove[instructions.rejectOther]) return;
+						if (baseMove[instructions.rejectOther] || refMove?[instructions.rejectOther]) return false;
 					} else if (Array.isArray(instructions.rejectOther)) {
-						for (const other of instructions.rejectOther) if (baseMove[other] || refMove[other]) return;
+						for (const other of instructions.rejectOther) if (baseMove[other] || refMove?[other]) return false;
 					}
 				}
+				
+				return true;
+			};
+			const splitMove = (
+				baseMove: any, instructions: any, refMove: any, defaultMove: any, destination: any, override: boolean
+			) => {
+				// basic sanity check + if you can actually have the Ability
+				if (!baseMove || !refMove || !instructions) return;
+				if (instructions.ability && (!activeData.abilities.includes(instructions.ability) || baseMove.ability)) return;
 
+				// checking compatibility
+				if (!checkRelevance(baseMove, instructions, refMove)) return;
+				
 				// Seems like the move passed every check, so we can split it now!
 				let outputs = [];
 				if (instructions.output) outputs.push(instructions.output);
@@ -1315,7 +1323,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			
 			for (const moveid in learnset) if (learnMove(moveid)) fullySplitMove(moveid);
 
-			const makeFragment = (instructions: AnyObject) => {
+			const makeFragment = (instructions: any) => {
 				if (instructions.format && format !== instructions.format) return;
 				
 				const fragment = instructions.fragment;
