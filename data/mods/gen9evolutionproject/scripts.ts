@@ -1125,7 +1125,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					
 					// then, let's see if they follow the instructions
 					if (typeof instructions.selfBoosts === 'boolean') {
-						if (baseMove.selfBoosts.length !== instructions.selfBoosts) return false;
+						if (!baseMove.selfBoosts.length) return false;
 					} else if (baseMove.selfBoosts.length) {
 						if (instructions.selfBoosts.any) {
 							let accept = false;
