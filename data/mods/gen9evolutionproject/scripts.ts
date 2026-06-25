@@ -1437,7 +1437,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			};
 			
 			for (const moveid in learnset) if (learnMove(moveid)) fullySplitMove(moveid);
-			if (activeData.name === 'Malamar') conssole.log(activeData.splitMoves);
+			if (activeData.name === 'Malamar') console.log(activeData.splitMoves);
 
 			const makeFragment = (instructions: any) => {
 				if (instructions.format && format !== instructions.format) return;
