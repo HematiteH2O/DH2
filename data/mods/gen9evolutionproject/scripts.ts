@@ -1078,14 +1078,14 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						if (!instructions.category.includes(baseMove.category)) return;
 					}
 				}
-				if (instructions.notCategory) {
+				/*if (instructions.notCategory) { // nothing needs this (I can use 'basePower: true,' to check attacking moves)
 					if (!baseMove.category) baseMove.category = refMove.category;
 					if (typeof instructions.notCategory === 'string') {
 						if (instructions.notCategory === baseMove.category) return;
 					} else if (Array.isArray(instructions.notCategory)) {
 						if (!instructions.notCategory.includes(baseMove.category)) return;
 					}
-				}
+				}*/
 				if (instructions.terrain) {
 					if (activeData.types.includes('Flying')) return;
 					if (!baseMove.avoid) baseMove.avoid = [];
@@ -1241,9 +1241,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					splitMove(fragment, { ability: 'Tough Claws', flags: 'contact', basePower: true, output: { basePowerMultiplier: 1.3 }}, refMove, defaultMove, abilitySplits);
 					splitMove(fragment, { ability: 'Triage', flags: 'heal', output: { priorityModifier: 3 }}, refMove, defaultMove, abilitySplits);
 					// other-based modifiers
-					splitMove(fragment, { ability: 'Merciless', notCategory: 'status', rejectOther: 'willcrit', output: { basePowerMultiplier: 1.5, requestedSupport: 'poison' }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: 'Reckless', notCategory: 'status', other: 'recoil', output: { basePowerMultiplier: 1.2 }}, refMove, defaultMove, abilitySplits);
+					splitMove(fragment, { ability: 'Merciless', basePower: true, rejectOther: 'willcrit', output: { basePowerMultiplier: 1.5, requestedSupport: 'poison' }}, refMove, defaultMove, abilitySplits);
+					splitMove(fragment, { ability: 'Reckless', basePower: true, other: 'recoil', output: { basePowerMultiplier: 1.2 }}, refMove, defaultMove, abilitySplits);
 					splitMove(fragment, { ability: 'Technician', basePower: true, maxBp: 60, output: { basePowerMultiplier: 1.5 }}, refMove, defaultMove, abilitySplits);
+					splitMove(fragment, { ability: 'Sheer Force', basePower: true, other: ['secondaries', 'hasSheerForce'], output: { basePowerMultiplier: 1.3, tags: 'Sheer Force' }}, refMove, defaultMove, abilitySplits);
 					// -ates
 					splitMove(fragment, { ability: 'Aerilate', type: 'Normal', basePower: true, notMoveid: noModifyType, output: { type: 'Flying', basePowerMultiplier: 1.2, tags: 'Aerilate' }, baseAvoid: 'Aerilate'} );
 					splitMove(fragment, { ability: 'Pixilate', type: 'Normal', basePower: true, notMoveid: noModifyType, output: { type: 'Fairy', basePowerMultiplier: 1.2, tags: 'Pixilate' }, baseAvoid: 'Pixilate'} );
