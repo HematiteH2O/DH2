@@ -1025,8 +1025,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// not having refMove should be okay for later
 				if (instructions.moveid || instructions.notMoveid) {
 					if (!baseMove.moveid) {
-						if (move && typeof move === 'string') baseMove.moveid = this.toID(move);
-						else if (baseMove.baseMove) baseMove.moveid = this.toID(baseMove.baseMove);
+						if (baseMove.baseMove) baseMove.moveid = this.toID(baseMove.baseMove);
 						else return false;
 					}
 					if (instructions.moveid) {
