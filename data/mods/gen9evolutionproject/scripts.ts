@@ -1298,7 +1298,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// the same set can't have the Aerilate version of one move and the Normal-type version of another,
 				// so we have to make them mutually exclusive!
 				if (defaultMove && (instructions.baseTag || instructions.baseAvoid)) {
-					destination = destination.filter((modFragment) => (modFragment === defaultMove));
 					if (instructions.baseTag) {
 						if (!defaultMove.tags) defaultMove.tags = [];
 						if (typeof instructions.baseTag === 'string') {
@@ -1315,7 +1314,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							for (const avoid of instructions.baseAvoid) defaultMove.avoid.push(avoid);
 						}
 					}
-					destination.push(defaultMove);
 				}
 			};
 			// const splitMoveBySupport
@@ -1324,7 +1322,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (!learnMove(moveid) || !this.dex.data.Moves[moveid]) return;
 				let refMove = this.dex.data.Moves[moveid];
 				let move = { baseMove: refMove.name }; // this is the basis of a splitMove fragment
-				let defaultMove = { baseMove: refMove.name }; // and this is a copy of it that we'll flag as needed as the base version of the move
+				let defaultMove = { baseMove: refMove.name , tags: [], avoid: []}; // and this is a copy of it that we'll flag as needed as the base version of the move
 				
 				// SPLIT MOVE BY INNATE EFFECTS OF THE MOVE
 				let effectSplits = [];
