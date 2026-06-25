@@ -1019,7 +1019,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				'hiddenpower', 'judgment', 'multiattack', 'naturalgift', 'revelationdance', 'struggle', 'technoblast', 'terrainpulse', 'weatherball',
 			];
 			const checkRelevance = (
-				baseMove: any, instructions: any, refMove: any
+				baseMove: anyObject, instructions: anyObject, refMove: anyObject
 			) = {
 				if (!baseMove || !instructions) return false;
 				// not having refMove should be okay for later
@@ -1117,7 +1117,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				return true;
 			};
 			const splitMove = (
-				baseMove: any, instructions: any, refMove: any, defaultMove: any, destination: any, override: boolean
+				baseMove: anyObject, instructions: anyObject, refMove: anyObject, defaultMove: anyObject, destination: anyObject, override: boolean
 			) => {
 				// basic sanity check + if you can actually have the Ability
 				if (!baseMove || !refMove || !instructions) return;
@@ -1323,7 +1323,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			
 			for (const moveid in learnset) if (learnMove(moveid)) fullySplitMove(moveid);
 
-			const makeFragment = (instructions: any) => {
+			const makeFragment = (instructions: anyObject) => {
 				if (instructions.format && format !== instructions.format) return;
 				
 				const fragment = instructions.fragment;
