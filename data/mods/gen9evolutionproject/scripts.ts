@@ -1022,7 +1022,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				baseMove: any, instructions: any, refMove: any
 			) => {
 				if (!baseMove || !instructions) return false;
-				// not having refMove should be okay for later
+
+				// fastest rejection cases are "wrong format" and "checking for a specific move"
+				if (instructions.format && format && instructions.format !== format) return false;
+				
 				if (instructions.moveid || instructions.notMoveid) {
 					if (!baseMove.moveid) {
 						if (baseMove.baseMove) baseMove.moveid = this.toID(baseMove.baseMove);
@@ -1043,6 +1046,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						}
 					}
 				}
+				
+				// for this section, it's still okay if refMove is empty, but let's cover the cases where it would actually be useful
+				if (baseMove.baseMove && !refMove) refMove = this.dex.data.Moves[this.toID(baseMove.baseMove)];
 				if (instructions.basePower) {
 					if (!baseMove.basePower) baseMove.basePower = refMove?.basePower;
 					if (!baseMove.basePower || baseMove.basePower === 0) return false;
@@ -1081,6 +1087,108 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						if (!instructions.notCategory.includes(baseMove.category)) return;
 					}
 				}*/
+				if (instructions.target) {
+					let accept = false;
+					if (!baseMove.target) baseMove.target = refMove?.target;
+					if (typeof instructions.target === 'string') {
+						if (instructions.target === baseMove.target) accept = true;
+					} else if (Array.isArray(instructions.target)) {
+						if (instructions.target.includes(baseMove.target)) accept = true;
+					}
+					// in some cases, like Expanding Force, a fragment will be tagged as a different target than it really is
+					if (baseMove.tags && baseMove.tags.includes(instructions.target)) accept = true;
+					if (!accept) return false;
+				}
+				if (instructions.selfBoosts) {
+					// there are so many things to check for this jsmdfgnh
+					// let's uh... find out if the move has any selfBoosts at all
+					if (!baseMove.selfBoosts) {
+						let boosts = [];
+	
+						if (baseMove.secondary && baseMove.secondary.self && baseMove.secondary.self.boosts) boosts.push(baseMove.secondary.self.boosts);
+						else if (refMove && refMove.secondary && refMove.secondary.self && refMove.secondary.self.boosts) boosts.push(refMove.secondary.self.boosts);
+						
+						if (baseMove.secondaries) for (const secondary of baseMove.secondaries) if (secondary.self && secondary.self.boosts) boosts.push(secondary.self.boosts);
+						else if (refMove && refMove.secondaries) for (const secondary of refMove.secondaries) if (secondary.self && secondary.self.boosts) boosts.push(secondary.self.boosts);
+
+						if (baseMove.self && baseMove.self.boosts) boosts.push(baseMove.self.boosts);
+						else if (refMove && refMove.self && refMove.self.boosts) boosts.push(refMove.self.boosts);
+
+						if (!baseMove.target && refMove) baseMove.target = refMove.target;
+						if (['self', 'allies', 'adjacentAllyOrSelf', 'all'].includes(baseMove.target)) {
+							if (baseMove.boosts) boosts.push(baseMove.boosts);
+							else if (refMove && refMove.boosts) boosts.push(refMove.boosts);
+						}
+						
+						baseMove.selfBoosts = boosts;
+					}
+					
+					// then, let's see if they follow the instructions
+					if (typeof instructions.selfBoosts === 'boolean') {
+						if (baseMove.selfBoosts.length !== instructions.selfBoosts) return false;
+					} else if (baseMove.selfBoosts.length) {
+						if (instructions.selfBoosts.any) {
+							let accept = false;
+							for (const boost of baseMove.selfBoosts) {
+								for (const stat in boost) {
+									if (instructions.selfBoosts.any < 0 && boost[stat] <= instructions.selfBoosts.any) accept = true;
+									if (instructions.selfBoosts.any > 0 && boost[stat] >= instructions.selfBoosts.any) accept = true;
+								}
+							}
+							if (!accept) return false;
+						} else {
+							for (const boost of baseMove.selfBoosts) for (const stat in instructions.selfBoosts) if (
+								!boost[stat] || (instructions.selfBoosts[stat] > 0 && boost[stat] < instructions.selfBoosts[stat]) || (instructions.selfBoosts[stat] < 0 && boost[stat] > instructions.selfBoosts[stat])
+							) return false;
+						}
+					}
+					// Okay...
+					// this should let us check later if selfBoosts exist at all, like selfBoosts: true
+					// or if they meet certain criteria, like selfBoosts: {atk: 1, def: 1}
+					// If we're checking for a negative number, like selfBoosts: {spa: -1}, we'll accept lower negative numbers like selfBoosts: {spa: -2},
+					// or if we're checking for a positive number, like selfBoosts: {spa: 2}, we'll accept greater numbers like selfBoosts: {spa: 3}
+					// We can also check for something like selfBoosts: {any: -1} to decide if we have any self-debuffs at all
+				}
+				if (instructions.targetBoosts) {
+					// same deal as above... these are in way too many places!
+					if (!baseMove.targetBoosts) {
+						let boosts = [];
+	
+						if (baseMove.secondary && baseMove.secondary.boosts) boosts.push(baseMove.secondary.boosts);
+						else if (refMove && refMove.secondary && refMove.secondary.boosts) boosts.push(refMove.secondary.boosts);
+						
+						if (baseMove.secondaries) for (const secondary of baseMove.secondaries) if (secondary.boosts) boosts.push(secondary.boosts);
+						else if (refMove && refMove.secondaries) for (const secondary of refMove.secondaries) if (secondary.boosts) boosts.push(secondary.boosts);
+
+						if (!baseMove.target && refMove) baseMove.target = refMove.target;
+						if (!['self', 'allies'].includes(baseMove.target)) {
+							if (baseMove.boosts) boosts.push(baseMove.boosts);
+							else if (refMove && refMove.boosts) boosts.push(refMove.boosts);
+						}
+						
+						baseMove.targetBoosts = boosts;
+					}
+					
+					// then, let's see if they follow the instructions
+					if (typeof instructions.targetBoosts === 'boolean') {
+						if (baseMove.targetBoosts.length !== instructions.targetBoosts) return false;
+					} else if (baseMove.targetBoosts.length) {
+						if (instructions.targetBoosts.any) {
+							let accept = false;
+							for (const boost of baseMove.targetBoosts) {
+								for (const stat in boost) {
+									if (instructions.targetBoosts.any < 0 && boost[stat] <= instructions.targetBoosts.any) accept = true;
+									if (instructions.targetBoosts.any > 0 && boost[stat] >= instructions.targetBoosts.any) accept = true;
+								}
+							}
+							if (!accept) return false;
+						} else {
+							for (const boost of baseMove.targetBoosts) for (const stat in instructions.targetBoosts) if (
+								!boost[stat] || (instructions.targetBoosts[stat] > 0 && boost[stat] < instructions.targetBoosts[stat]) || (instructions.targetBoosts[stat] < 0 && boost[stat] > instructions.targetBoosts[stat])
+							) return false;
+						}
+					}
+				}
 				if (instructions.terrain) {
 					if (activeData.types.includes('Flying')) return false;
 					if (!baseMove.avoid) baseMove.avoid = [];
@@ -1123,7 +1231,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (instructions.ability && (!activeData.abilities.includes(instructions.ability) || baseMove.ability)) return;
 
 				// checking compatibility
-				if (!checkRelevance(baseMove, instructions, refMove)) return;
+				if (!checkRelevance(baseMove, instructions, refMove)) return; // (checkRelevance wants them in this order because it might be used without a refMove elsewhere)
 				
 				// Seems like the move passed every check, so we can split it now!
 				let outputs = [];
@@ -1156,6 +1264,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							if (!modFragment.tags.includes(output.tags)) modFragment.tags.push(output.tags);
 						} else if (Array.isArray(output.tags)) {
 							for (const tag of output.tags) if (!modFragment.tags.includes(tag)) modFragment.tags.push(tag);
+						}
+					}
+					if (output.boostMultiplier) { // for Contrary and Simple
+						if (modFragment.selfBoosts) {
+							for (const boost of modFragment.selfBoosts) for (const stat in boost) boost[stat] *= output.boostMultiplier;
 						}
 					}
 					if (output.acceptedSupport) {
@@ -1251,7 +1364,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					splitMove(fragment, { ability: 'Merciless', basePower: true, rejectOther: 'willcrit', output: { basePowerMultiplier: 1.5, requestedSupport: 'poison' }}, refMove, defaultMove, abilitySplits);
 					splitMove(fragment, { ability: 'Reckless', basePower: true, other: 'recoil', output: { basePowerMultiplier: 1.2 }}, refMove, defaultMove, abilitySplits);
 					splitMove(fragment, { ability: 'Technician', basePower: true, maxBp: 60, output: { basePowerMultiplier: 1.5 }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: 'Sheer Force', basePower: true, other: ['secondaries', 'hasSheerForce'], output: { basePowerMultiplier: 1.3, tags: 'Sheer Force' }}, refMove, defaultMove, abilitySplits);
+					splitMove(fragment, { ability: 'Sheer Force', basePower: true, other: ['secondary', 'secondaries', 'hasSheerForce'], output: { basePowerMultiplier: 1.3, tags: 'Sheer Force' }}, refMove, defaultMove, abilitySplits);
+					// boost-based modifiers
+					splitMove(fragment, { ability: 'Contrary', selfBoosts: true, output: { boostMultiplier: -1, tags: 'Contrary' }, baseAvoid: 'Contrary'}, refMove, defaultMove, abilitySplits);
+					splitMove(fragment, { ability: 'Simple', selfBoosts: true, output: { boostMultiplier: 2 } }, refMove, defaultMove, abilitySplits);
 					// -ates
 					splitMove(fragment, { ability: 'Aerilate', type: 'Normal', basePower: true, notMoveid: noModifyType, output: { type: 'Flying', basePowerMultiplier: 1.2, tags: 'Aerilate' }, baseAvoid: 'Aerilate'} );
 					splitMove(fragment, { ability: 'Pixilate', type: 'Normal', basePower: true, notMoveid: noModifyType, output: { type: 'Fairy', basePowerMultiplier: 1.2, tags: 'Pixilate' }, baseAvoid: 'Pixilate'} );
@@ -1321,6 +1437,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			};
 			
 			for (const moveid in learnset) if (learnMove(moveid)) fullySplitMove(moveid);
+			if (activeData.name === 'Malamar') conssole.log(activeData.splitMoves);
 
 			const makeFragment = (instructions: any) => {
 				if (instructions.format && format !== instructions.format) return;
