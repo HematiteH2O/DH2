@@ -1457,8 +1457,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			const makeFragment = (fragment: any, instructions: any) => {
 				// NOT final
 				if (instructions.role) for (const role of instructions.role) {
-					if (!fragment.roles) fragment.roles = [];
-					fragment.roles.push(role);
+					if (!fragment.tags) fragment.tags = [];
+					fragment.tags.push(role);
 					if (!activeData.offeredSupport[role]) activeData.offeredSupport[role] = [];
 					activeData.offeredSupport[role].push(fragment);
 				}
