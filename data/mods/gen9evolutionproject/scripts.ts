@@ -1460,7 +1460,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (!fragment.roles) fragment.roles = [];
 					fragment.roles.push(role);
 					if (!activeData.offeredSupport[role]) activeData.offeredSupport[role] = [];
-					activeData.offeredSupport.push(fragment);
+					activeData.offeredSupport[role].push(fragment);
 				}
 			}
 			for (const fragment of activeData.splitMoves) {
@@ -1485,6 +1485,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (fragment.attackingStat && fragment.moveBasePower) fragment.moveBasePower *= calculateStat(
 					activeData.name, fragment.attackingStat, {evs: {[fragment.attackingStat]: 252}}, setLevel, 1
 				) / calculateStat('Mew', fragment.attackingStat, {evs: {[fragment.attackingStat]: 252}}, setLevel, 1);
+				fragment.basePower = fragment.moveBasePower;
 
 				if (checkRelevance(fragment, { moveid: ['fakeout', 'matblock'] })) makeFragment(fragment, { role: 'fakeout' });
 
