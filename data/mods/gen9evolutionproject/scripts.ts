@@ -1224,7 +1224,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				return true;
 			};
 			const splitMove = (
-				baseMove: any, instructions: any, refMove: any, defaultMove: any, destination: any, override: boolean
+				baseMove: any, instructions: any, refMove: any, defaultAvoid: any, destination: any, override: boolean
 			) => {
 				// basic sanity check + if you can actually have the Ability
 				if (!baseMove || !refMove || !instructions) return;
@@ -1297,22 +1297,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// This is used for purposes like Aerilate and Sheer Force;
 				// the same set can't have the Aerilate version of one move and the Normal-type version of another,
 				// so we have to make them mutually exclusive!
-				if (defaultMove && (instructions.baseTag || instructions.baseAvoid)) {
-					if (instructions.baseTag) {
-						if (!defaultMove.tags) defaultMove.tags = [];
-						if (typeof instructions.baseTag === 'string') {
-							if (!defaultMove.tags.includes(instructions.baseTag)) defaultMove.tags.push(instructions.baseTag);
-						} else if (Array.isArray(instructions.baseTag)) {
-							for (const tag of instructions.baseTag) defaultMove.tags.push(tag);
-						}
-					}
-					if (instructions.baseAvoid) {
-						if (!defaultMove.avoid) defaultMove.avoid = [];
-						if (typeof instructions.baseAvoid === 'string') {
-							if (!defaultMove.avoid.includes(instructions.baseAvoid)) defaultMove.avoid.push(instructions.baseAvoid);
-						} else if (Array.isArray(instructions.baseAvoid)) {
-							for (const avoid of instructions.baseAvoid) defaultMove.avoid.push(avoid);
-						}
+				if (defaultAvoid && instructions.baseAvoid) {
+					if (typeof instructions.baseAvoid === 'string') {
+						if (!defaultAvoid.avoid.includes(instructions.baseAvoid)) defaultAvoid.avoid.push(instructions.baseAvoid);
+					} else if (Array.isArray(instructions.baseAvoid)) {
+						for (const avoid of instructions.baseAvoid) defaultAvoid.avoid.push(avoid);
 					}
 				}
 			};
@@ -1322,7 +1311,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (!learnMove(moveid) || !this.dex.data.Moves[moveid]) return;
 				let refMove = this.dex.data.Moves[moveid];
 				let move = { baseMove: refMove.name }; // this is the basis of a splitMove fragment
-				let defaultMove = { baseMove: refMove.name , tags: [], avoid: []}; // and this is a copy of it that we'll flag as needed as the base version of the move
+				let defaultMove = { baseMove: refMove.name }; // this is the basis of a splitMove fragment
+				let defaultAvoid = [];
 				
 				// SPLIT MOVE BY INNATE EFFECTS OF THE MOVE
 				let effectSplits = [];
@@ -1331,14 +1321,14 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// TODO: list and override them here
 				// at a glance, ctrl + F basePowerCallback is a good way to do this
 				// placeholder examples
-				splitMove(move, { moveid: 'grassknot', output: { basePower: 60 }}, refMove, defaultMove, effectSplits, true);
-				splitMove(move, { moveid: 'naturepower', output: { basePower: 80, category: 'Special' }}, refMove, defaultMove, effectSplits, true);
+				splitMove(move, { moveid: 'grassknot', output: { basePower: 60 }}, refMove, defaultAvoid, effectSplits, true);
+				splitMove(move, { moveid: 'naturepower', output: { basePower: 80, category: 'Special' }}, refMove, defaultAvoid, effectSplits, true);
 				// I notice the Acrobatics fragment is gonna take some special attention, but one thing at a time
 
 				// SPLIT MOVE BY POSSIBLE SUPPORT
 				let supportSplits = Utils.deepClone(effectSplits);
 				for (const fragment of effectSplits) {
-					// splitMove(fragment, defaultMove, moveSplitsBySupport, { moveid: 'grassknot', output: { basePower: 60 }}, true );
+					// splitMove(fragment, defaultAvoid, moveSplitsBySupport, { moveid: 'grassknot', output: { basePower: 60 }}, true );
 				}
 				// MISSING
 				// https://github.com/HematiteH2O/DH2/blob/evo-upd-misc/data/mods/gen9evolutionproject/scripts.ts#L1717
@@ -1348,35 +1338,35 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				let abilitySplits = Utils.deepClone(supportSplits);
 				for (const fragment of supportSplits) {
 					// type-based modifiers
-					splitMove(fragment, { ability: 'Adaptability', type: activeData.types, basePower: true, notMoveid: ['terrainpulse', 'weatherball'], output: { basePowerMultiplier: 4/3 }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: `Dragon's Maw`, type: 'Dragon', basePower: true, output: { basePowerMultiplier: 1.5 }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: 'Gale Wings', type: 'Flying', output: { priorityModifier: 1 }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: 'Rocky Payload', type: 'Rock', basePower: true, output: { basePowerMultiplier: 1.5 }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: 'Steely Spirit', type: 'Steel', basePower: true, output: { basePowerMultiplier: 1.5 }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: 'Steelworker', type: 'Steel', basePower: true, output: { basePowerMultiplier: 1.5 }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: 'Transistor', type: 'Electric', basePower: true, output: { basePowerMultiplier: 1.3 }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: 'Water Bubble', type: 'Water', basePower: true, output: { basePowerMultiplier: 2 }}, refMove, defaultMove, abilitySplits);
+					splitMove(fragment, { ability: 'Adaptability', type: activeData.types, basePower: true, notMoveid: ['terrainpulse', 'weatherball'], output: { basePowerMultiplier: 4/3 }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: `Dragon's Maw`, type: 'Dragon', basePower: true, output: { basePowerMultiplier: 1.5 }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Gale Wings', type: 'Flying', output: { priorityModifier: 1 }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Rocky Payload', type: 'Rock', basePower: true, output: { basePowerMultiplier: 1.5 }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Steely Spirit', type: 'Steel', basePower: true, output: { basePowerMultiplier: 1.5 }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Steelworker', type: 'Steel', basePower: true, output: { basePowerMultiplier: 1.5 }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Transistor', type: 'Electric', basePower: true, output: { basePowerMultiplier: 1.3 }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Water Bubble', type: 'Water', basePower: true, output: { basePowerMultiplier: 2 }}, refMove, defaultAvoid, abilitySplits);
 					// category-based modifiers
-					splitMove(fragment, { ability: 'Huge Power', category: 'Physical', basePower: true, output: { basePowerMultiplier: 2 }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: 'Pure Power', category: 'Physical', basePower: true, output: { basePowerMultiplier: 2 }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: 'Hustle', category: 'Physical', basePower: true, output: { basePowerMultiplier: 1.5, accuracyMultiplier: 0.8 }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: 'Prankster', category: 'Status', output: { priorityModifier: 1 }}, refMove, defaultMove, abilitySplits);
+					splitMove(fragment, { ability: 'Huge Power', category: 'Physical', basePower: true, output: { basePowerMultiplier: 2 }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Pure Power', category: 'Physical', basePower: true, output: { basePowerMultiplier: 2 }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Hustle', category: 'Physical', basePower: true, output: { basePowerMultiplier: 1.5, accuracyMultiplier: 0.8 }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Prankster', category: 'Status', output: { priorityModifier: 1 }}, refMove, defaultAvoid, abilitySplits);
 					// flag-based modifiers
-					splitMove(fragment, { ability: 'Iron Fist', flags: 'punch', basePower: true, output: { basePowerMultiplier: 1.2 }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: 'Mega Launcher', flags: 'pulse', basePower: true, output: { basePowerMultiplier: 1.5 }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: 'Punk Rock', flags: 'sound', basePower: true, output: { basePowerMultiplier: 1.3 }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: 'Sharpness', flags: 'slicing', basePower: true, output: { basePowerMultiplier: 1.5 }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: 'Strong Jaw', flags: 'bite', basePower: true, output: { basePowerMultiplier: 1.5 }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: 'Tough Claws', flags: 'contact', basePower: true, output: { basePowerMultiplier: 1.3 }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: 'Triage', flags: 'heal', output: { priorityModifier: 3 }}, refMove, defaultMove, abilitySplits);
+					splitMove(fragment, { ability: 'Iron Fist', flags: 'punch', basePower: true, output: { basePowerMultiplier: 1.2 }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Mega Launcher', flags: 'pulse', basePower: true, output: { basePowerMultiplier: 1.5 }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Punk Rock', flags: 'sound', basePower: true, output: { basePowerMultiplier: 1.3 }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Sharpness', flags: 'slicing', basePower: true, output: { basePowerMultiplier: 1.5 }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Strong Jaw', flags: 'bite', basePower: true, output: { basePowerMultiplier: 1.5 }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Tough Claws', flags: 'contact', basePower: true, output: { basePowerMultiplier: 1.3 }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Triage', flags: 'heal', output: { priorityModifier: 3 }}, refMove, defaultAvoid, abilitySplits);
 					// other-based modifiers
-					splitMove(fragment, { ability: 'Merciless', basePower: true, rejectOther: 'willcrit', output: { basePowerMultiplier: 1.5, requestedSupport: 'poison' }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: 'Reckless', basePower: true, other: 'recoil', output: { basePowerMultiplier: 1.2 }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: 'Technician', basePower: true, maxBp: 60, output: { basePowerMultiplier: 1.5 }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: 'Sheer Force', basePower: true, other: ['secondary', 'secondaries', 'hasSheerForce'], output: { basePowerMultiplier: 1.3, tags: 'Sheer Force' }}, refMove, defaultMove, abilitySplits);
+					splitMove(fragment, { ability: 'Merciless', basePower: true, rejectOther: 'willcrit', output: { basePowerMultiplier: 1.5, requestedSupport: 'poison' }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Reckless', basePower: true, other: 'recoil', output: { basePowerMultiplier: 1.2 }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Technician', basePower: true, maxBp: 60, output: { basePowerMultiplier: 1.5 }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Sheer Force', basePower: true, other: ['secondary', 'secondaries', 'hasSheerForce'], output: { basePowerMultiplier: 1.3, tags: 'Sheer Force' }}, refMove, defaultAvoid, abilitySplits);
 					// boost-based modifiers
-					splitMove(fragment, { ability: 'Contrary', selfBoosts: true, output: { boostMultiplier: -1, tags: 'Contrary' }, baseAvoid: 'Contrary'}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: 'Simple', selfBoosts: true, output: { boostMultiplier: 2 } }, refMove, defaultMove, abilitySplits);
+					splitMove(fragment, { ability: 'Contrary', selfBoosts: true, output: { boostMultiplier: -1, tags: 'Contrary' }, baseAvoid: 'Contrary'}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Simple', selfBoosts: true, output: { boostMultiplier: 2 } }, refMove, defaultAvoid, abilitySplits);
 					// -ates
 					splitMove(fragment, { ability: 'Aerilate', type: 'Normal', basePower: true, notMoveid: noModifyType, output: { type: 'Flying', basePowerMultiplier: 1.2, tags: 'Aerilate' }, baseAvoid: 'Aerilate'} );
 					splitMove(fragment, { ability: 'Pixilate', type: 'Normal', basePower: true, notMoveid: noModifyType, output: { type: 'Fairy', basePowerMultiplier: 1.2, tags: 'Pixilate' }, baseAvoid: 'Pixilate'} );
@@ -1386,62 +1376,66 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					splitMove(fragment, { ability: 'Normalize', basePower: true, notMoveid: noModifyType, output: { type: 'Normal', basePowerMultiplier: 1.2, tags: 'Normalize' }, baseAvoid: 'Normalize'} );
 					// weather
 					for (const ability of ['Desolate Land', 'Drought', 'Mega Sol', 'Orichalcum Pulse']) {
-						splitMove(fragment, { ability: ability, type: 'Fire', basePower: true, notMoveid: 'weatherball', output: { basePowerMultiplier: ((ability === 'Orichalcum Pulse' && refMove.category === 'Physical') ? 2 : 1.5) }}, refMove, defaultMove, abilitySplits);
-						splitMove(fragment, { ability: ability, moveid: 'weatherball', output: { basePower: 150, type: 'Fire' }}, refMove, defaultMove, abilitySplits);
+						splitMove(fragment, { ability: ability, type: 'Fire', basePower: true, notMoveid: 'weatherball', output: { basePowerMultiplier: ((ability === 'Orichalcum Pulse' && refMove.category === 'Physical') ? 2 : 1.5) }}, refMove, defaultAvoid, abilitySplits);
+						splitMove(fragment, { ability: ability, moveid: 'weatherball', output: { basePower: 150, type: 'Fire' }}, refMove, defaultAvoid, abilitySplits);
 					}
-					splitMove(fragment, { ability: 'Orichalcum Pulse', notType: 'Fire', category: 'Physical', basePower: true, notMoveid: 'weatherball', output: { basePowerMultiplier: 4/3 }}, refMove, defaultMove, abilitySplits);
+					splitMove(fragment, { ability: 'Orichalcum Pulse', notType: 'Fire', category: 'Physical', basePower: true, notMoveid: 'weatherball', output: { basePowerMultiplier: 4/3 }}, refMove, defaultAvoid, abilitySplits);
 					for (const ability of ['Drizzle', 'Primordial Sea']) {
-						splitMove(fragment, { ability: ability, type: 'Water', basePower: true, notMoveid: 'weatherball', output: { basePowerMultiplier: 1.5 }}, refMove, defaultMove, abilitySplits);
-						splitMove(fragment, { ability: ability, moveid: 'weatherball', output: { basePower: 150, type: 'Water' }}, refMove, defaultMove, abilitySplits);
-						splitMove(fragment, { ability: ability, moveid: ['hurricane', 'thunder', 'bleakwindstorm', 'wildboltstorm', 'sandsearstorm'], output: { accuracy: 100 }}, refMove, defaultMove, abilitySplits);
+						splitMove(fragment, { ability: ability, type: 'Water', basePower: true, notMoveid: 'weatherball', output: { basePowerMultiplier: 1.5 }}, refMove, defaultAvoid, abilitySplits);
+						splitMove(fragment, { ability: ability, moveid: 'weatherball', output: { basePower: 150, type: 'Water' }}, refMove, defaultAvoid, abilitySplits);
+						splitMove(fragment, { ability: ability, moveid: ['hurricane', 'thunder', 'bleakwindstorm', 'wildboltstorm', 'sandsearstorm'], output: { accuracy: 100 }}, refMove, defaultAvoid, abilitySplits);
 					}
-					splitMove(fragment, { ability: 'Sand Stream', moveid: 'weatherball', output: { basePower: 100, type: 'Rock' }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: 'Sand Spit', moveid: 'weatherball', output: { basePower: 100, type: 'Rock' }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: 'Snow Warning', moveid: 'weatherball', output: { basePower: 100, type: 'Ice' }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: 'Snow Warning', moveid: 'blizzard', output: { accuracy: 100 }}, refMove, defaultMove, abilitySplits);
+					splitMove(fragment, { ability: 'Sand Stream', moveid: 'weatherball', output: { basePower: 100, type: 'Rock' }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Sand Spit', moveid: 'weatherball', output: { basePower: 100, type: 'Rock' }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Snow Warning', moveid: 'weatherball', output: { basePower: 100, type: 'Ice' }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Snow Warning', moveid: 'blizzard', output: { accuracy: 100 }}, refMove, defaultAvoid, abilitySplits);
 					// weather support-reliant
-					splitMove(fragment, { ability: 'Flower Gift', category: 'Physical', basePower: true, output: { basePowerMultiplier: 1.5, requestedSupport: 'sun' }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: 'Sand Force', type: ['Ground', 'Rock', 'Steel'], basePower: true, output: { basePowerMultiplier: 1.3, requestedSupport: 'sand' }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: 'Solar Power', category: 'Special', basePower: true, output: { basePowerMultiplier: 1.5, requestedSupport: 'sun' }}, refMove, defaultMove, abilitySplits);
+					splitMove(fragment, { ability: 'Flower Gift', category: 'Physical', basePower: true, output: { basePowerMultiplier: 1.5, requestedSupport: 'sun' }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Sand Force', type: ['Ground', 'Rock', 'Steel'], basePower: true, output: { basePowerMultiplier: 1.3, requestedSupport: 'sand' }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Solar Power', category: 'Special', basePower: true, output: { basePowerMultiplier: 1.5, requestedSupport: 'sun' }}, refMove, defaultAvoid, abilitySplits);
 					// terrain
 					for (const ability of ['Electric Surge', 'Hadron Engine']) {
 						let multiplier = 1.3;
 						if (ability === 'Hadron Engine' && refMove.category === 'Special') multiplier = 1.69;
-						splitMove(fragment, { ability: 'Electric Surge', type: 'Electric', basePower: true, notMoveid: ['terrainpulse', 'naturepower', 'risingvoltage'], terrain: true, output: { basePowerMultiplier: multiplier }}, refMove, defaultMove, abilitySplits);
-						splitMove(fragment, { ability: 'Electric Surge', moveid: 'terrainpulse', terrain: true, output: { basePower: multiplier * 100, type: 'Electric' }}, refMove, defaultMove, abilitySplits);
-						splitMove(fragment, { ability: 'Electric Surge', moveid: 'naturepower', terrain: true, output: { basePower: multiplier * 90, type: 'Electric' }}, refMove, defaultMove, abilitySplits);
-						splitMove(fragment, { ability: 'Electric Surge', moveid: 'risingvoltage', terrain: true, output: { basePower: multiplier * 140, type: 'Electric' }}, refMove, defaultMove, abilitySplits);
+						splitMove(fragment, { ability: 'Electric Surge', type: 'Electric', basePower: true, notMoveid: ['terrainpulse', 'naturepower', 'risingvoltage'], terrain: true, output: { basePowerMultiplier: multiplier }}, refMove, defaultAvoid, abilitySplits);
+						splitMove(fragment, { ability: 'Electric Surge', moveid: 'terrainpulse', terrain: true, output: { basePower: multiplier * 100, type: 'Electric' }}, refMove, defaultAvoid, abilitySplits);
+						splitMove(fragment, { ability: 'Electric Surge', moveid: 'naturepower', terrain: true, output: { basePower: multiplier * 90, type: 'Electric' }}, refMove, defaultAvoid, abilitySplits);
+						splitMove(fragment, { ability: 'Electric Surge', moveid: 'risingvoltage', terrain: true, output: { basePower: multiplier * 140, type: 'Electric' }}, refMove, defaultAvoid, abilitySplits);
 					}
-					splitMove(fragment, { ability: 'Hadron Engine', notType: 'Electric', category: 'Special', basePower: true, terrain: true, output: { basePowerMultiplier: 4/3 }}, refMove, defaultMove, abilitySplits);
+					splitMove(fragment, { ability: 'Hadron Engine', notType: 'Electric', category: 'Special', basePower: true, terrain: true, output: { basePowerMultiplier: 4/3 }}, refMove, defaultAvoid, abilitySplits);
 					for (const ability of ['Grassy Surge', 'Seed Sower']) {
-						splitMove(fragment, { ability: ability, type: 'Grass', basePower: true, notMoveid: ['terrainpulse', 'naturepower', 'grassyglide'], terrain: true, output: { basePowerMultiplier: 1.3 }}, refMove, defaultMove, abilitySplits);
-						splitMove(fragment, { ability: ability, moveid: 'terrainpulse', terrain: true, output: { basePower: 1.3 * 100, type: 'Grass' }}, refMove, defaultMove, abilitySplits);
-						splitMove(fragment, { ability: ability, moveid: 'naturepower', terrain: true, output: { basePower: 1.3 * 90, type: 'Grass' }}, refMove, defaultMove, abilitySplits);
-						splitMove(fragment, { ability: ability, moveid: 'grassyglide', terrain: true, output: { basePowerMultiplier: 1.3, priority: 1 }}, refMove, defaultMove, abilitySplits);
+						splitMove(fragment, { ability: ability, type: 'Grass', basePower: true, notMoveid: ['terrainpulse', 'naturepower', 'grassyglide'], terrain: true, output: { basePowerMultiplier: 1.3 }}, refMove, defaultAvoid, abilitySplits);
+						splitMove(fragment, { ability: ability, moveid: 'terrainpulse', terrain: true, output: { basePower: 1.3 * 100, type: 'Grass' }}, refMove, defaultAvoid, abilitySplits);
+						splitMove(fragment, { ability: ability, moveid: 'naturepower', terrain: true, output: { basePower: 1.3 * 90, type: 'Grass' }}, refMove, defaultAvoid, abilitySplits);
+						splitMove(fragment, { ability: ability, moveid: 'grassyglide', terrain: true, output: { basePowerMultiplier: 1.3, priority: 1 }}, refMove, defaultAvoid, abilitySplits);
 					}
-					splitMove(fragment, { ability: 'Misty Surge', moveid: 'terrainpulse', terrain: true, output: { basePower: 100, type: 'Fairy' }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: 'Misty Surge', moveid: 'naturepower', terrain: true, output: { basePower: 95, type: 'Fairy' }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: 'Misty Surge', moveid: 'mistyexplosion', terrain: true, output: { basePower: 150 }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: 'Psychic Surge', type: 'Psychic', basePower: true, notMoveid: ['terrainpulse', 'naturepower', 'expandingforce'], terrain: true, output: { basePowerMultiplier: 1.3 }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: 'Psychic Surge', moveid: 'terrainpulse', terrain: true, output: { basePower: 1.3 * 100, type: 'Psychic' }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: 'Psychic Surge', moveid: 'naturepower', terrain: true, output: { basePower: 1.3 * 90, type: 'Psychic' }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: 'Psychic Surge', moveid: 'expandingforce', terrain: true, output: { basePowerMultiplier: 1.5 * 1.3, tags: 'allAdjacentFoes' }}, refMove, defaultMove, abilitySplits);
+					splitMove(fragment, { ability: 'Misty Surge', moveid: 'terrainpulse', terrain: true, output: { basePower: 100, type: 'Fairy' }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Misty Surge', moveid: 'naturepower', terrain: true, output: { basePower: 95, type: 'Fairy' }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Misty Surge', moveid: 'mistyexplosion', terrain: true, output: { basePower: 150 }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Psychic Surge', type: 'Psychic', basePower: true, notMoveid: ['terrainpulse', 'naturepower', 'expandingforce'], terrain: true, output: { basePowerMultiplier: 1.3 }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Psychic Surge', moveid: 'terrainpulse', terrain: true, output: { basePower: 1.3 * 100, type: 'Psychic' }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Psychic Surge', moveid: 'naturepower', terrain: true, output: { basePower: 1.3 * 90, type: 'Psychic' }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Psychic Surge', moveid: 'expandingforce', terrain: true, output: { basePowerMultiplier: 1.5 * 1.3, tags: 'allAdjacentFoes' }}, refMove, defaultAvoid, abilitySplits);
 					
 					// Evo 2 customs
-					splitMove(fragment, { ability: 'Awakening', type: 'Fighting', basePower: true, output: { basePowerMultiplier: 1.5 }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: 'Calcify', type: 'Rock', basePower: true, output: { basePowerMultiplier: 1.3 }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: 'Canopy', type: 'Grass', basePower: true, output: { basePowerMultiplier: 1.3 }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: 'Frozen Focus', category: 'Special', basePower: true, output: { basePowerMultiplier: 1.5, requestedSupport: 'snow' }}, refMove, defaultMove, abilitySplits);
+					splitMove(fragment, { ability: 'Awakening', type: 'Fighting', basePower: true, output: { basePowerMultiplier: 1.5 }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Calcify', type: 'Rock', basePower: true, output: { basePowerMultiplier: 1.3 }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Canopy', type: 'Grass', basePower: true, output: { basePowerMultiplier: 1.3 }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Frozen Focus', category: 'Special', basePower: true, output: { basePowerMultiplier: 1.5, requestedSupport: 'snow' }}, refMove, defaultAvoid, abilitySplits);
 					splitMove(fragment, { ability: 'Permafrost', basePower: true, notMoveid: noModifyType, output: { type: 'Ice', basePowerMultiplier: 1.2, tags: 'Permafrost' }, baseAvoid: 'Permafrost'} );
-					splitMove(fragment, { ability: 'Storm Chaser', type: 'Water', basePower: true, notMoveid: 'weatherball', output: { basePowerMultiplier: 1.5 }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: 'Storm Chaser', moveid: 'weatherball', output: { basePower: 150, type: 'Water' }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: 'Storm Chaser', moveid: ['hurricane', 'thunder', 'bleakwindstorm', 'wildboltstorm', 'sandsearstorm'], output: { accuracy: 100 }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: `Mega-Neural`, type: 'Psychic', basePower: true, notMoveid: ['terrainpulse', 'naturepower', 'expandingforce'], terrain: true, output: { basePowerMultiplier: 1.3 }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: `Mega-Neural`, moveid: 'terrainpulse', terrain: true, output: { basePower: 1.3 * 100, type: 'Psychic' }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: `Mega-Neural`, moveid: 'naturepower', terrain: true, output: { basePower: 1.3 * 90, type: 'Psychic' }}, refMove, defaultMove, abilitySplits);
-					splitMove(fragment, { ability: `Mega-Neural`, moveid: 'expandingforce', terrain: true, output: { basePowerMultiplier: 1.5 * 1.3, tags: 'allAdjacentFoes' }}, refMove, defaultMove, abilitySplits);
+					splitMove(fragment, { ability: 'Storm Chaser', type: 'Water', basePower: true, notMoveid: 'weatherball', output: { basePowerMultiplier: 1.5 }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Storm Chaser', moveid: 'weatherball', output: { basePower: 150, type: 'Water' }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Storm Chaser', moveid: ['hurricane', 'thunder', 'bleakwindstorm', 'wildboltstorm', 'sandsearstorm'], output: { accuracy: 100 }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: `Mega-Neural`, type: 'Psychic', basePower: true, notMoveid: ['terrainpulse', 'naturepower', 'expandingforce'], terrain: true, output: { basePowerMultiplier: 1.3 }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: `Mega-Neural`, moveid: 'terrainpulse', terrain: true, output: { basePower: 1.3 * 100, type: 'Psychic' }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: `Mega-Neural`, moveid: 'naturepower', terrain: true, output: { basePower: 1.3 * 90, type: 'Psychic' }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: `Mega-Neural`, moveid: 'expandingforce', terrain: true, output: { basePowerMultiplier: 1.5 * 1.3, tags: 'allAdjacentFoes' }}, refMove, defaultAvoid, abilitySplits);
 				}
 
+				if (defaultAvoid.length) {
+					defaultMove.avoid = defaultAvoid;
+					abilitySplits[0] = defaultMove;
+				}
 				for (const moveVariant of abilitySplits) activeData.splitMoves.push(moveVariant);
 			};
 			
