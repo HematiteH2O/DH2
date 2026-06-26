@@ -714,16 +714,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			if (!level) level = 100;
 			if (typeof mon === 'string') mon = this.dex.data.Pokedex[this.toID(mon)];
 			if (mon && mon.baseStats && stat && mon.baseStats[stat]) {
-				let evs = 0;
-				let ivs = 31;
+				let evs = (set && set.evs) ? set.evs[stat] : 0;
+				let ivs = (set && set.ivs) ? set.ivs[stat] : 31;
 				if (!natureMod) natureMod = 1;
-				if (set && set.evs) evs = set.evs[stat];
-				if (set && set.ivs) ivs = set.ivs[stat];
-				if (stat === 'hp') {
-					return Math.floor(((2 * mon.baseStats[stat]) + Math.floor(evs / 4) + ivs) * level / 100 + level + 10);
-				} else {
-					return Math.floor(((2 * mon.baseStats[stat]) + Math.floor(evs / 4) + ivs) * level / 100 + 5) * natureMod;
-				}
+				
+				if (stat === 'hp') return Math.floor(((2 * mon.baseStats[stat]) + Math.floor(evs / 4) + ivs) * level / 100 + level + 10);
+				else return Math.floor(((2 * mon.baseStats[stat]) + Math.floor(evs / 4) + ivs) * level / 100 + 5) * natureMod;
 			} else return 0;
 		}
 		
