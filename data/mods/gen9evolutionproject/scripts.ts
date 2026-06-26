@@ -1460,7 +1460,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (!fragment.tags) fragment.tags = [];
 					if (typeof instructions.role === 'string') {
 						if (!fragment.tags.includes(instructions.role)) fragment.tags.push(instructions.role);
-						if (!defaultAvoid.includes(instructions.baseAvoid)) defaultAvoid.push(instructions.baseAvoid);
+						if (!activeData.offeredSupport[instructions.role]) activeData.offeredSupport[instructions.role] = [];
+						activeData.offeredSupport[instructions.role].push(fragment);
 					} else if (Array.isArray(instructions.role)) {
 						for (const role of instructions.role) {
 							if (!fragment.tags.includes(role)) fragment.tags.push(role);
