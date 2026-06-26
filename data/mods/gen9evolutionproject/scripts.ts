@@ -720,9 +720,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (set && set.evs) evs = set.evs[stat];
 				if (set && set.ivs) ivs = set.ivs[stat];
 				if (stat === 'hp') {
-					return Math.floor(((2 * mon.baseStat[stat]) + Math.floor(evs / 4) + ivs) * level / 100 + level + 10);
+					return Math.floor(((2 * mon.baseStats[stat]) + Math.floor(evs / 4) + ivs) * level / 100 + level + 10);
 				} else {
-					return Math.floor(((2 * mon.baseStat[stat]) + Math.floor(evs / 4) + ivs) * level / 100 + 5) * natureMod;
+					return Math.floor(((2 * mon.baseStats[stat]) + Math.floor(evs / 4) + ivs) * level / 100 + 5) * natureMod;
 				}
 			} else return 0;
 		}
