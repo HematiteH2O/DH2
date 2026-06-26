@@ -709,6 +709,23 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 		if (team && team.length) battleCheckRules.team;
 		if (this.teamsSoFar && this.teamsSoFar.length) for (const team of this.teamsSoFar) battleCheckRules(team);
+
+		const calculateStat = (mon, stat, set, level, natureMod) => {
+			if (!level) level = 100;
+			if (typeof mon === 'string') mon = this.dex.data.Pokedex[this.toID(mon)];
+			if (mon && mon.baseStats && stat && mon.baseStats[stat]) {
+				let evs = 0;
+				let ivs = 31;
+				if (!natureMod) natureMod = 1;
+				if (set && set.evs) evs = set.evs[stat];
+				if (set && set.ivs) ivs = set.ivs[stat];
+				if (stat === 'hp') {
+					return Math.floor(((2 * mon.baseStat[stat]) + Math.floor(evs / 4) + ivs) * level / 100 + level + 10);
+				} else {
+					return Math.floor(((2 * mon.baseStat[stat]) + Math.floor(evs / 4) + ivs) * level / 100 + 5) * natureMod;
+				}
+			} else return 0;
+		}
 		
 		
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1441,39 +1458,13 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			
 			for (const moveid in learnset) if (learnMove(moveid)) fullySplitMove(moveid);
 
-			const makeFragment = (instructions: any) => {
-				if (instructions.format && format !== instructions.format) return;
-				
-				const fragment = instructions.fragment;
-				const moveChecks = instructions.moveChecks;
-				const fragmentMods = instructions.fragmentMods;
-				const offeredSupport = instructions.offeredSupport;
-				// moveChecks are criteria to make sure the fragment is eligible
-				if (moveChecks) {
-					if (moveChecks.moves && Array.isArray(moveChecks.moves) && !moveChecks.moves.includes(fragment.baseMove)) return;
-					else if (moveChecks.moves && !Array.isArray(moveChecks.moves) && moveChecks.moves !== fragment.baseMove) return;
-					if (moveChecks.priority && fragment.movePriority < moveChecks.priority) return;
-				}
-				
-				// fragmentResults are changes to make to the fragment before we do that
-				let modFragments = [];
-				if (fragmentMods) {
-					// nothing yet
-				}
-				
-				// offeredSupport is where to put the fragment if we accept it
-				if (offeredSupport) {
-					if (modFragments.length) {
-						for (const modFragment of modFragments) for (const support of offeredSupport) {
-							if (!activeData.offeredSupport[support]) activeData.offeredSupport[support] = [];
-							activeData.offeredSupport[support].push(modFragment);
-						}
-					} else {
-						for (const support of offeredSupport) {
-							if (!activeData.offeredSupport[support]) activeData.offeredSupport[support] = [];
-							activeData.offeredSupport[support].push(fragment);
-						}
-					}
+			const makeFragment = (fragment: any, instructions: any) => {
+				// NOT final
+				if (instructions.roles) for (const role of instructions.roles) {
+					if (!fragment.roles) fragment.roles = [];
+					fragment.roles.push(role);
+					if (!activeData.offeredSupport[role]) activeData.offeredSupport[role] = [];
+					activeData.offeredSupport.push(fragment);
 				}
 			}
 			for (const fragment of activeData.splitMoves) {
@@ -1491,13 +1482,15 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (!fragment.requestedSupport) fragment.requestedSupport = [];
 				if (activeData.types.includes(fragment.type)) fragment.stab = true;
 				if (!fragment.stab && fragment.moveBasePower) fragment.moveBasePower /= 1.5;
-				
-				makeFragment({
-					format: 'vgc',
-					fragment: fragment,
-					moveChecks: {moves: ['Fake Out', 'Mat Block']},
-					offeredSupport: ['fakeout'],
-				});
+				// VERY temporary
+				if (fragment.moveCategory === 'Physical') fragment.attackingStat = 'atk';
+				if (fragment.moveCategory === 'Special') fragment.attackingStat = 'spa';
+				if (move.overrideOffensiveStat) fragment.attackingStat = move.overrideOffensiveStat;
+				if (fragment.attackingStat && fragment.moveBasePower) fragment.moveBasePower *= calculateStat(
+					activeData.name, fragment.attackingStat, {evs: {[fragment.attackingStat]: 252}}, setLevel, 1
+				) / calculateStat('Mew', fragment.attackingStat, {evs: {[fragment.attackingStat]: 252}}, setLevel, 1);
+
+				if (checkRelevance(fragment, { moveid: ['fakeout', 'matblock'] })) makeFragment(fragment, { role: 'fakeout' });
 
 			// general / STAB
 				// okay, the STAB categories are obviously way unfinished - I'm gonna come back to this
@@ -2416,7 +2409,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			// from there, the individual fragments' requestedSupports only need to be checked again during set construction, after the whole team is done
 			// and obviously ones with support available are favored, but ones with requestedSupport missing are completely ignored
 			
-			if (activeData.name === 'Regirock-Kanto') console.log(activeData.viableStabs);
 			for (const fragment of activeData.viableStabs) {
 				let modFragment = Utils.deepClone(fragment);
 				modFragment.mainstab = true;
