@@ -1299,9 +1299,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// so we have to make them mutually exclusive!
 				if (defaultAvoid && instructions.baseAvoid) {
 					if (typeof instructions.baseAvoid === 'string') {
-						if (!defaultAvoid.avoid.includes(instructions.baseAvoid)) defaultAvoid.avoid.push(instructions.baseAvoid);
+						if (!defaultAvoid.includes(instructions.baseAvoid)) defaultAvoid.push(instructions.baseAvoid);
 					} else if (Array.isArray(instructions.baseAvoid)) {
-						for (const avoid of instructions.baseAvoid) defaultAvoid.avoid.push(avoid);
+						for (const avoid of instructions.baseAvoid) defaultAvoid.push(avoid);
 					}
 				}
 			};
