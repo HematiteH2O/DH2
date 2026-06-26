@@ -1471,8 +1471,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					}
 				}
 			}
+			for (const moveSplit of activeData.splitMoves) {
+				if (checkRelevance(fragment, { moveid: ['fakeout', 'matblock'] })) makeFragment(moveSplit, { role: 'fakeout' });
+			}
 			for (const fragment of activeData.splitMoves) {
-				// temporary
+				// temporary; once this section is replaced with calls to makeFragment, this section won't be needed any more
 				const moveid = this.toID(fragment.baseMove);
 				const move = this.dex.moves.get(fragment.baseMove);
 				if (!move) continue;
@@ -1486,7 +1489,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (!fragment.requestedSupport) fragment.requestedSupport = [];
 				if (activeData.types.includes(fragment.type)) fragment.stab = true;
 				if (!fragment.stab && fragment.moveBasePower) fragment.moveBasePower /= 1.5;
-				// VERY temporary
+				
+				// VERY temporary; this is just recreating the previous functionality for STAB viability, but I want to handle it completely differently in the future
 				if (fragment.moveCategory === 'Physical') fragment.attackingStat = 'atk';
 				if (fragment.moveCategory === 'Special') fragment.attackingStat = 'spa';
 				if (move.overrideOffensiveStat) fragment.attackingStat = move.overrideOffensiveStat;
@@ -1494,8 +1498,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					activeData.name, fragment.attackingStat, {evs: {[fragment.attackingStat]: 252}}, setLevel, 1
 				) / calculateStat('Mew', fragment.attackingStat, {evs: {[fragment.attackingStat]: 252}}, setLevel, 1);
 				fragment.basePower = fragment.moveBasePower;
-
-				if (checkRelevance(fragment, { moveid: ['fakeout', 'matblock'] })) makeFragment(fragment, { role: 'fakeout' });
 
 			// general / STAB
 				// okay, the STAB categories are obviously way unfinished - I'm gonna come back to this
