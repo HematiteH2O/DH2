@@ -1456,11 +1456,18 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 			const makeFragment = (fragment: any, instructions: any) => {
 				// NOT final
-				if (instructions.role) for (const role of instructions.role) {
+				if (instructions.role) {
 					if (!fragment.tags) fragment.tags = [];
-					fragment.tags.push(role);
-					if (!activeData.offeredSupport[role]) activeData.offeredSupport[role] = [];
-					activeData.offeredSupport[role].push(fragment);
+					if (typeof instructions.role === 'string') {
+						if (!fragment.tags.includes(instructions.role)) fragment.tags.push(instructions.role);
+						if (!defaultAvoid.includes(instructions.baseAvoid)) defaultAvoid.push(instructions.baseAvoid);
+					} else if (Array.isArray(instructions.role)) {
+						for (const role of instructions.role) {
+							if (!fragment.tags.includes(role)) fragment.tags.push(role);
+							if (!activeData.offeredSupport[role]) activeData.offeredSupport[role] = [];
+							activeData.offeredSupport[role].push(fragment);
+						}
+					}
 				}
 			}
 			for (const fragment of activeData.splitMoves) {
