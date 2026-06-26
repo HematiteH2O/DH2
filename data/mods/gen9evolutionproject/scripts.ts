@@ -1440,7 +1440,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			};
 			
 			for (const moveid in learnset) if (learnMove(moveid)) fullySplitMove(moveid);
-			if (activeData.name === 'Malamar') console.log(activeData.splitMoves);
 
 			const makeFragment = (instructions: any) => {
 				if (instructions.format && format !== instructions.format) return;
@@ -2417,6 +2416,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			// from there, the individual fragments' requestedSupports only need to be checked again during set construction, after the whole team is done
 			// and obviously ones with support available are favored, but ones with requestedSupport missing are completely ignored
 			
+			if (activeData.name === 'Regirock-Kanto') console.log(activeData.viableStabs);
 			for (const fragment of activeData.viableStabs) {
 				let modFragment = Utils.deepClone(fragment);
 				modFragment.mainstab = true;
