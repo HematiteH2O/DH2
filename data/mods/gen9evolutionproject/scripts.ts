@@ -1472,7 +1472,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 			}
 			for (const moveSplit of activeData.splitMoves) {
-				if (checkRelevance(fragment, { moveid: ['fakeout', 'matblock'] })) makeFragment(moveSplit, { role: 'fakeout' });
+				if (checkRelevance(moveSplit, { moveid: ['fakeout', 'matblock'] })) makeFragment(moveSplit, { role: 'fakeout' });
 			}
 			for (const fragment of activeData.splitMoves) {
 				// temporary; once this section is replaced with calls to makeFragment, this section won't be needed any more
