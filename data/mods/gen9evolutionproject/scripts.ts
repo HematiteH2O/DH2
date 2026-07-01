@@ -1100,6 +1100,18 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						if (!instructions.notCategory.includes(baseMove.category)) return;
 					}
 				}*/
+				if (instructions.priority) {
+					if (!baseMove.priority) baseMove.priority = refMove?.priority;
+					if (!baseMove.priority || instructions.priority > baseMove.priority) return false;
+				}
+				if (instructions.accuracy) {
+					if (!baseMove.accuracy) baseMove.accuracy = refMove?.accuracy;
+					if (!baseMove.accuracy || (baseMove.accuracy > 1 && instructions.accuracy > baseMove.accuracy)) return false;
+				}
+				if (instructions.inaccurate) { // this makes sure the move is anything less than 100% accurate before we bother with Compound Eyes / No Guard
+					if (!baseMove.accuracy) baseMove.accuracy = refMove?.accuracy;
+					if (!baseMove.accuracy || baseMove.accuracy === 1 || baseMove.accuracy === 100) return false;
+				}
 				if (instructions.target) {
 					let accept = false;
 					if (!baseMove.target) baseMove.target = refMove?.target;
@@ -1118,11 +1130,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (!baseMove.selfBoosts) {
 						let boosts = [];
 	
-						if (baseMove.secondary && baseMove.secondary.self && baseMove.secondary.self.boosts) boosts.push(baseMove.secondary.self.boosts);
-						else if (refMove && refMove.secondary && refMove.secondary.self && refMove.secondary.self.boosts) boosts.push(refMove.secondary.self.boosts);
+						if (baseMove.secondary && baseMove.secondary.self && baseMove.secondary.self.boosts && (!baseMove.secondary.chance || baseMove.secondary.chance >= 70)) boosts.push(baseMove.secondary.self.boosts);
+						else if (refMove && refMove.secondary && refMove.secondary.self && refMove.secondary.self.boosts && (!refMove.secondary.chance || refMove.secondary.chance >= 70)) boosts.push(refMove.secondary.self.boosts);
 						
-						if (baseMove.secondaries) for (const secondary of baseMove.secondaries) if (secondary.self && secondary.self.boosts) boosts.push(secondary.self.boosts);
-						else if (refMove && refMove.secondaries) for (const secondary of refMove.secondaries) if (secondary.self && secondary.self.boosts) boosts.push(secondary.self.boosts);
+						if (baseMove.secondaries) for (const secondary of baseMove.secondaries) if (secondary.self && secondary.self.boosts && (!secondary.chance || secondary.chance >= 70)) boosts.push(secondary.self.boosts);
+						else if (refMove && refMove.secondaries) for (const secondary of refMove.secondaries) if (secondary.self && secondary.self.boosts && (!secondary.chance || secondary.chance >= 70)) boosts.push(secondary.self.boosts);
 
 						if (baseMove.self && baseMove.self.boosts) boosts.push(baseMove.self.boosts);
 						else if (refMove && refMove.self && refMove.self.boosts) boosts.push(refMove.self.boosts);
@@ -1359,6 +1371,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					splitMove(fragment, { ability: 'Steelworker', type: 'Steel', basePower: true, output: { basePowerMultiplier: 1.5 }}, refMove, defaultAvoid, abilitySplits);
 					splitMove(fragment, { ability: 'Transistor', type: 'Electric', basePower: true, output: { basePowerMultiplier: 1.3 }}, refMove, defaultAvoid, abilitySplits);
 					splitMove(fragment, { ability: 'Water Bubble', type: 'Water', basePower: true, output: { basePowerMultiplier: 2 }}, refMove, defaultAvoid, abilitySplits);
+					// universal modifiers
+					splitMove(fragment, { ability: 'Compound Eyes', inaccurate: true, output: { accuracyMultiplier: 1.3 }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'No Guard', inaccurate: true, output: { accuracy: 1 }}, refMove, defaultAvoid, abilitySplits);
 					// category-based modifiers
 					splitMove(fragment, { ability: 'Huge Power', category: 'Physical', basePower: true, output: { basePowerMultiplier: 2 }}, refMove, defaultAvoid, abilitySplits);
 					splitMove(fragment, { ability: 'Pure Power', category: 'Physical', basePower: true, output: { basePowerMultiplier: 2 }}, refMove, defaultAvoid, abilitySplits);
@@ -1396,12 +1411,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					for (const ability of ['Drizzle', 'Primordial Sea']) {
 						splitMove(fragment, { ability: ability, type: 'Water', basePower: true, notMoveid: 'weatherball', output: { basePowerMultiplier: 1.5 }}, refMove, defaultAvoid, abilitySplits);
 						splitMove(fragment, { ability: ability, moveid: 'weatherball', output: { basePower: 150, type: 'Water' }}, refMove, defaultAvoid, abilitySplits);
-						splitMove(fragment, { ability: ability, moveid: ['hurricane', 'thunder', 'bleakwindstorm', 'wildboltstorm', 'sandsearstorm'], output: { accuracy: 100 }}, refMove, defaultAvoid, abilitySplits);
+						splitMove(fragment, { ability: ability, moveid: ['hurricane', 'thunder', 'bleakwindstorm', 'wildboltstorm', 'sandsearstorm'], inaccurate: true, output: { accuracy: 1 }}, refMove, defaultAvoid, abilitySplits);
 					}
 					splitMove(fragment, { ability: 'Sand Stream', moveid: 'weatherball', output: { basePower: 100, type: 'Rock' }}, refMove, defaultAvoid, abilitySplits);
 					splitMove(fragment, { ability: 'Sand Spit', moveid: 'weatherball', output: { basePower: 100, type: 'Rock' }}, refMove, defaultAvoid, abilitySplits);
 					splitMove(fragment, { ability: 'Snow Warning', moveid: 'weatherball', output: { basePower: 100, type: 'Ice' }}, refMove, defaultAvoid, abilitySplits);
-					splitMove(fragment, { ability: 'Snow Warning', moveid: 'blizzard', output: { accuracy: 100 }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Snow Warning', moveid: 'blizzard', inaccurate: true, output: { accuracy: 1 }}, refMove, defaultAvoid, abilitySplits);
 					// weather support-reliant
 					splitMove(fragment, { ability: 'Flower Gift', category: 'Physical', basePower: true, output: { basePowerMultiplier: 1.5, requestedSupport: 'sun' }}, refMove, defaultAvoid, abilitySplits);
 					splitMove(fragment, { ability: 'Sand Force', type: ['Ground', 'Rock', 'Steel'], basePower: true, output: { basePowerMultiplier: 1.3, requestedSupport: 'sand' }}, refMove, defaultAvoid, abilitySplits);
@@ -1438,7 +1453,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					splitMove(fragment, { ability: 'Permafrost', basePower: true, notMoveid: noModifyType, output: { type: 'Ice', basePowerMultiplier: 1.2, tags: 'Permafrost' }, baseAvoid: 'Permafrost'} );
 					splitMove(fragment, { ability: 'Storm Chaser', type: 'Water', basePower: true, notMoveid: 'weatherball', output: { basePowerMultiplier: 1.5 }}, refMove, defaultAvoid, abilitySplits);
 					splitMove(fragment, { ability: 'Storm Chaser', moveid: 'weatherball', output: { basePower: 150, type: 'Water' }}, refMove, defaultAvoid, abilitySplits);
-					splitMove(fragment, { ability: 'Storm Chaser', moveid: ['hurricane', 'thunder', 'bleakwindstorm', 'wildboltstorm', 'sandsearstorm'], output: { accuracy: 100 }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Storm Chaser', moveid: ['hurricane', 'thunder', 'bleakwindstorm', 'wildboltstorm', 'sandsearstorm'], inaccurate: true, output: { accuracy: 1 }}, refMove, defaultAvoid, abilitySplits);
 					splitMove(fragment, { ability: `Mega-Neural`, type: 'Psychic', basePower: true, notMoveid: ['terrainpulse', 'naturepower', 'expandingforce'], terrain: true, output: { basePowerMultiplier: 1.3 }}, refMove, defaultAvoid, abilitySplits);
 					splitMove(fragment, { ability: `Mega-Neural`, moveid: 'terrainpulse', terrain: true, output: { basePower: 1.3 * 100, type: 'Psychic' }}, refMove, defaultAvoid, abilitySplits);
 					splitMove(fragment, { ability: `Mega-Neural`, moveid: 'naturepower', terrain: true, output: { basePower: 1.3 * 90, type: 'Psychic' }}, refMove, defaultAvoid, abilitySplits);
@@ -1455,7 +1470,13 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			for (const moveid in learnset) if (learnMove(moveid)) fullySplitMove(moveid);
 
 			const makeFragment = (fragment: any, instructions: any) => {
+				// todo: `avoidSameType` -> push `${fragment.type.toLowerCase}${avoidSameType}` to fragment.avoid (ex. `avoidSameType: 'priority'`)
+				// handle inaccurate moves accepting accuracy boosts
+				// handle moves rejecting setup (ex. Fake Out and First Impression)
+
+				// but also:
 				// NOT final
+				// the way offeredSupport and fragments are organized will change shortly
 				if (instructions.role) {
 					if (!fragment.tags) fragment.tags = [];
 					if (typeof instructions.role === 'string') {
