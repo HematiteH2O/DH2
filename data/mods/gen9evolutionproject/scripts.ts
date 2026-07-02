@@ -1124,17 +1124,38 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (baseMove.tags && baseMove.tags.includes(instructions.target)) accept = true;
 					if (!accept) return false;
 				}
+				if (instructions.status) {
+					let accept = false;
+					if (!baseMove.status) {
+						let statuses = [];
+						if (baseMove.status) statuses.push(baseMove.status);
+						else if (refMove && refMove.status) statuses.push(refMove.status);
+						
+						if (baseMove.secondary && baseMove.secondary.status && baseMove.secondary.status === instructions.status && (!baseMove.secondary.chance || baseMove.secondary.chance >= 60)) boosts.push(baseMove.secondary.self.boosts);
+						else if (refMove && refMove.secondary && refMove.secondary.status && refMove.secondary.status === instructions.status && (!refMove.secondary.chance || refMove.secondary.chance >= 60)) boosts.push(refMove.secondary.self.boosts);
+						
+						if (baseMove.secondaries) for (const secondary of baseMove.secondaries) if (secondary.status && secondary.status === instructions.status && (!secondary.chance || secondary.chance >= 60)) boosts.push(secondary.self.boosts);
+						else if (refMove && refMove.secondaries) for (const secondary of refMove.secondaries) if (secondary.status && secondary.status === instructions.status && (!secondary.chance || secondary.chance >= 60)) boosts.push(secondary.self.boosts);
+						
+						baseMove.status = statuses;
+					}
+					if (baseMove.status) {
+						if (typeof baseMove.status === 'string' && instructions.status === baseMove.status) accept = true;
+						else if (Array.isArray(baseMove.status) && baseMove.status.includes(instructions.status)) accept = true;
+					}
+					if (!accept) return false;
+				}
 				if (instructions.selfBoosts) {
 					// there are so many things to check for this jsmdfgnh
 					// let's uh... find out if the move has any selfBoosts at all
 					if (!baseMove.selfBoosts) {
 						let boosts = [];
 	
-						if (baseMove.secondary && baseMove.secondary.self && baseMove.secondary.self.boosts && (!baseMove.secondary.chance || baseMove.secondary.chance >= 70)) boosts.push(baseMove.secondary.self.boosts);
-						else if (refMove && refMove.secondary && refMove.secondary.self && refMove.secondary.self.boosts && (!refMove.secondary.chance || refMove.secondary.chance >= 70)) boosts.push(refMove.secondary.self.boosts);
+						if (baseMove.secondary && baseMove.secondary.self && baseMove.secondary.self.boosts && (!baseMove.secondary.chance || baseMove.secondary.chance >= 60)) boosts.push(baseMove.secondary.self.boosts);
+						else if (refMove && refMove.secondary && refMove.secondary.self && refMove.secondary.self.boosts && (!refMove.secondary.chance || refMove.secondary.chance >= 60)) boosts.push(refMove.secondary.self.boosts);
 						
-						if (baseMove.secondaries) for (const secondary of baseMove.secondaries) if (secondary.self && secondary.self.boosts && (!secondary.chance || secondary.chance >= 70)) boosts.push(secondary.self.boosts);
-						else if (refMove && refMove.secondaries) for (const secondary of refMove.secondaries) if (secondary.self && secondary.self.boosts && (!secondary.chance || secondary.chance >= 70)) boosts.push(secondary.self.boosts);
+						if (baseMove.secondaries) for (const secondary of baseMove.secondaries) if (secondary.self && secondary.self.boosts && (!secondary.chance || secondary.chance >= 60)) boosts.push(secondary.self.boosts);
+						else if (refMove && refMove.secondaries) for (const secondary of refMove.secondaries) if (secondary.self && secondary.self.boosts && (!secondary.chance || secondary.chance >= 60)) boosts.push(secondary.self.boosts);
 
 						if (baseMove.self && baseMove.self.boosts) boosts.push(baseMove.self.boosts);
 						else if (refMove && refMove.self && refMove.self.boosts) boosts.push(refMove.self.boosts);
@@ -1179,11 +1200,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (!baseMove.targetBoosts) {
 						let boosts = [];
 	
-						if (baseMove.secondary && baseMove.secondary.boosts) boosts.push(baseMove.secondary.boosts);
-						else if (refMove && refMove.secondary && refMove.secondary.boosts) boosts.push(refMove.secondary.boosts);
+						if (baseMove.secondary && baseMove.secondary.boosts && (!baseMove.secondary.chance || baseMove.secondary.chance >= 60)) boosts.push(baseMove.secondary.boosts);
+						else if (refMove && refMove.secondary && refMove.secondary.boosts && (!refMove.secondary.chance || refMove.secondary.chance >= 60)) boosts.push(refMove.secondary.boosts);
 						
-						if (baseMove.secondaries) for (const secondary of baseMove.secondaries) if (secondary.boosts) boosts.push(secondary.boosts);
-						else if (refMove && refMove.secondaries) for (const secondary of refMove.secondaries) if (secondary.boosts) boosts.push(secondary.boosts);
+						if (baseMove.secondaries) for (const secondary of baseMove.secondaries) if (secondary.boosts && (!secondary.chance || secondary.chance >= 60)) boosts.push(secondary.boosts);
+						else if (refMove && refMove.secondaries) for (const secondary of refMove.secondaries) if (secondary.boosts && (!secondary.chance || secondary.chance >= 60)) boosts.push(secondary.boosts);
 
 						if (!baseMove.target && refMove) baseMove.target = refMove.target;
 						if (!['self', 'allies'].includes(baseMove.target)) {
@@ -1469,14 +1490,59 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			
 			for (const moveid in learnset) if (learnMove(moveid)) fullySplitMove(moveid);
 
-			const makeFragment = (fragment: any, instructions: any) => {
-				// todo: `avoidSameType` -> push `${fragment.type.toLowerCase}${avoidSameType}` to fragment.avoid (ex. `avoidSameType: 'priority'`)
-				// handle inaccurate moves accepting accuracy boosts
-				// handle moves rejecting setup (ex. Fake Out and First Impression)
+			const makeFragment = (moveSplit: any, instructions: any) => {
+				// TODO:
+				// `offensive` -> 
+				// // tag the fragment as "physical" or "special" according to the damage category
+				// // label the fragment's relevant attacking stat and defense stat for later use
+				// // in VGC, additionally accept support that boosts the relevant attacking stat or lowers the relevant defense stat
+				
+				// `vgcSupport` -> in VGC, only make fragments using the established "picky VGC support" process
+				// // this should now check for priority, spread and pivoting as part of the move fragment as well as the Speed options and Trick Room
+				
+				// handle Tera Types as appropriate
+				// ^ that's currently if the move's power * 1.5 is acceptable but its base power isn't
+				
+				// it's better to handle minBp in makeFragment instead of checkRelevance because then we can use that information for EVs later
 
 				// but also:
 				// NOT final
-				// the way offeredSupport and fragments are organized will change shortly
+				// the way offeredSupport and fragments are organized will change shortly,
+				// and so will BP thresholds
+				let fragment = Utils.deepClone(moveSplit);
+				if (instructions.avoid) {
+					if (!fragment.avoid) fragment.avoid = [];
+					if (typeof instructions.avoid === 'string') fragment.avoid.push(instructions.avoid);
+					else if (Array.isArray(instructions.avoid)) for (const avoid of instructions.avoid) fragment.avoid.push(avoid);
+				}
+				// if a move is a single-target status move that inflicts a debuff, also tag it as such and avoid other single-target status debuff moves
+				if (checkRelevance(fragment, {target: 'normal', targetBoosts: {any: -1}, rejectOther: 'selfSwitch', category: 'Status'})) {
+					if (!fragment.avoid) fragment.avoid = [];
+					fragment.avoid.push('statusdebuffmove');
+					if (!fragment.tags) fragment.tags = [];
+					fragment.tags.push('statusdebuffmove');
+				}
+				if ((fragment.accuracy && fragment.accuracy < 80 && fragment.accuracy > 1) || checkRelevance(fragment, {other: 'multiaccuracy'})) {
+					if (!fragment.buddy) fragment.buddy = {};
+					if (!fragment.buddy.roles) fragment.buddy.roles = [];
+					fragment.buddy.roles.push('accuracyboost');
+					if (!fragment.tags) fragment.tags = [];
+					fragment.tags.push('inaccurate');
+				}
+				if (instructions.requestedSupport) {
+					if (!fragment.requestedSupport) fragment.requestedSupport = [];
+					if (typeof instructions.requestedSupport === 'string') fragment.requestedSupport.push(instructions.requestedSupport);
+					else if (Array.isArray(instructions.requestedSupport)) for (const requestedSupport of instructions.requestedSupport) fragment.requestedSupport.push(requestedSupport);
+				}
+				if (instructions.acceptedSupport) {
+					if (!fragment.acceptedSupport) fragment.acceptedSupport = [];
+					if (typeof instructions.acceptedSupport === 'string') fragment.acceptedSupport.push(instructions.acceptedSupport);
+					else if (Array.isArray(instructions.acceptedSupport)) for (const acceptedSupport of instructions.acceptedSupport) fragment.acceptedSupport.push(acceptedSupport);
+				}
+				if (instructions.score) fragment.score = instructions.score;
+				if (instructions.bypassScore) fragment.bypassScore = instructions.bypassScore;
+				if (instructions.weight) fragment.weight = instructions.weight;
+				
 				if (instructions.role) {
 					if (!fragment.tags) fragment.tags = [];
 					if (typeof instructions.role === 'string') {
@@ -1493,7 +1559,131 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 			}
 			for (const moveSplit of activeData.splitMoves) {
-				if (checkRelevance(moveSplit, { moveid: ['fakeout', 'matblock'] })) makeFragment(moveSplit, { role: 'fakeout' });
+				// failsafes to make sure we have necessary information
+				if (!moveSplit.baseMove) return;
+				const moveid = this.toID(moveSplit.baseMove);
+				const move = this.dex.moves.get(moveSplit.baseMove);
+				if (!move) return;
+				if (!moveSplit.type) moveSplit.type = move.type;
+				if (!moveSplit.basePower) moveSplit.basePower = move.basePower;
+				if (!moveSplit.accuracy) moveSplit.accuracy = move.accuracy;
+				
+				// // Fake Out support
+				if (checkRelevance(moveSplit, { format: 'vgc', moveid: ['fakeout', 'matblock']
+				})) makeFragment(moveSplit, { role: 'fakeout', vgcSupport: true });
+				
+				// // Priority moves
+				// Fake Out and First Impression are separate because they can't accept setup
+				// Note that this is about using Fake Out as offensive priority, which is held to a different standard than using it as disruptive support
+				if (checkRelevance(moveSplit, { priority: 1, moveid: ['fakeout', 'firstimpression'],
+				})) makeFragment(moveSplit, { role: 'priority', avoid: [`${moveSplit.type}priority`, 'physicalsetup', 'speedsetup'], minBp: 40, score: moveSplit.basePower, offensive: true });
+				// Next, we can cover damaging moves we want to use offensively...
+				if (checkRelevance(moveSplit, { priority: 1, notMoveid: ['upperhand', 'feint', 'fakeout', 'firstimpression'],
+				})) makeFragment(moveSplit, { role: 'priority', [`${moveSplit.type}priority`], minBp: 40, score: moveSplit.basePower, offensive: true });
+				// ... weak damaging moves we can use to side-target in VGC...
+				if (checkRelevance(moveSplit, { format: 'vgc', priority: 1, notMoveid: ['upperhand', 'feint', 'fakeout', 'firstimpression'],
+				})) makeFragment(moveSplit, { role: `side${moveSplit.type}`, vgcSupport: true });
+				// ... and moves that call other moves, if they happen to be priority (such as from Prankster)
+				if (checkRelevance(moveSplit, { priority: 1, moveid: ['assist', 'copycat', 'mefirst', 'metronome', 'mirrormove', 'naturepower']
+				})) makeFragment(moveSplit, { role: 'priority' });
+
+				// // Spread moves
+				// All of these only matter for VGC, but there are multiple kinds
+				// (TODO: the minBp threshold used to be 80, but I'm changing it to 60 because I intend to implement spread reduction)
+				// allAdjacentFoes moves, which can only be used offensively:
+				if (checkRelevance(moveSplit, { format: 'vgc', notMoveid: 'razorwind', accuracy: 90, target: 'allAdjacentFoes'
+				})) makeFragment(moveSplit, { role: 'spread', avoid: `${moveSplit.type}spread`, minBp: 60, score: moveSplit.basePower, offensive: true });
+				// allAdjacent moves we want to use offensively:
+				// These have a slight score penalty, just enough that they wouldn't be preferred over an equivalent allAdjacentFoes move
+				if (checkRelevance(moveSplit, { format: 'vgc', notMoveid: 'synchronoise', accuracy: 90, target: 'allAdjacent'
+				})) makeFragment(moveSplit, { role: 'spread', avoid: `${moveSplit.type}spread`, requestedSupport: `${moveSplit.type}immune`, minBp: 60, score: (moveSplit.basePower - 1), offensive: true });
+				// allAdjacent moves we want to use supportively:
+				if (checkRelevance(moveSplit, { format: 'vgc', notMoveid: 'synchronoise', accuracy: 90, target: 'allAdjacent'
+				})) makeFragment(moveSplit, { role: `side${moveSplit.type}`, vgcSupport: true });
+
+				// // Speed control
+				// dedicated Speed control moves
+				if (checkRelevance(moveSplit, { format: 'vgc', moveid: ['tailwind', 'stickyweb', 'silktrap', 'syrupbomb', 'quash']
+				})) makeFragment(moveSplit, { role: 'speedcontrol', avoid: 'speedcontrol', vgcSupport: true });
+				// moves that cause paralysis reliably
+				if (checkRelevance(moveSplit, { format: 'vgc', status: 'par'
+				})) makeFragment(moveSplit, { role: 'speedcontrol', avoid: 'speedcontrol', vgcSupport: true });
+				// Bulldoze requires special handling elsewhere
+				// moves that directly lower Speed and qualify as VGC support
+				if (checkRelevance(moveSplit, { format: 'vgc', notMoveid: 'bulldoze', targetBoosts: {spe: -1}
+				})) makeFragment(moveSplit, { role: 'speedcontrol', avoid: 'speedcontrol', vgcSupport: true });
+				// moves that directly lower Speed and do solid damage
+				if (checkRelevance(moveSplit, { format: 'vgc', notMoveid: 'bulldoze', targetBoosts: {spe: -1}
+				})) makeFragment(moveSplit, { role: 'speedcontrol', avoid: 'speedcontrol', minBp: 80 });
+				// TODO: mark Venom Drench as needing poison support, but that belongs in splitMove, not here
+
+				// // Trick Room
+				// TODO: this will probably end up working differently for singles later
+				if (checkRelevance(moveSplit, { moveid: 'trickroom'
+				})) makeFragment(moveSplit, { role: ['trickroom', 'backuptrickroom', 'minspeed'], acceptedSupport: 'backuptrickroom' });
+
+				// // Gravity
+				if (checkRelevance(moveSplit, { moveid: 'gravity'
+				})) makeFragment(moveSplit, { role: 'gravity', requestedSupport: 'gravsleep', vgcSupport: true });
+
+				// // poison support
+				if (checkRelevance(moveSplit, { format: 'singles', moveid: ['mortalspin', 'toxicspikes']
+				})) makeFragment(moveSplit, { role: 'poisonspam' });
+				if (checkRelevance(moveSplit, { format: 'vgc', moveid: ['mortalspin', 'poisongas']
+				})) makeFragment(moveSplit, { role: 'poisonspam', vgcSupport: true });
+
+				// // Round
+				if (checkRelevance(moveSplit, { format: 'vgc', moveid: 'round'
+				})) makeFragment(moveSplit, { role: 'round', acceptedSupport: 'round', requestedSupport: 'round', minBp: 80 });
+				if (checkRelevance(moveSplit, { format: 'vgc', moveid: 'round'
+				})) makeFragment(moveSplit, { role: 'round', minBp: 70, vgcSupport: true });
+
+				// // damage reduction
+				// moves that more generally interfere with damage:
+				// both sides
+				if (checkRelevance(moveSplit, { format: 'vgc', moveid: ['auroraveil', 'followme', 'ragepowder', 'yawn']
+				})) makeFragment(moveSplit, { role: ['physicalreduction', 'specialreduction'], vgcSupport: true });
+				// physical
+				if (checkRelevance(moveSplit, { format: 'vgc', moveid: ['baddybad', 'kingsshield', 'reflect', 'strengthsap']
+				})) makeFragment(moveSplit, { role: 'physicalreduction', vgcSupport: true });
+				// special
+				if (checkRelevance(moveSplit, { format: 'vgc', moveid: ['glitzyglow', 'lightscreen']
+				})) makeFragment(moveSplit, { role: 'specialreduction', vgcSupport: true });
+				// sleep moves
+				if (checkRelevance(moveSplit, { format: 'vgc', status: 'slp'
+				})) {
+					if (checkRelevance(moveSplit, { accuracy: 75
+					})) makeFragment(moveSplit, { role: ['physicalreduction', 'specialreduction', 'sleep', 'antitrickroom'], vgcSupport: true });
+					else makeFragment(moveSplit, { role: ['physicalreduction', 'specialreduction', 'sleep', 'antitrickroom', 'gravsleep'], requestedSupport: 'gravity', vgcSupport: true });
+				}
+				// moves that directly lower Attack or Sp. Atk
+				// we'll accept both VGC support quality and moves that do solid damage
+				if (checkRelevance(moveSplit, { format: 'vgc', targetBoosts: {atk: -1}
+				})) makeFragment(moveSplit, { role: 'physicalreduction', vgcSupport: true });
+				if (checkRelevance(moveSplit, { format: 'vgc', targetBoosts: {atk: -1}
+				})) makeFragment(moveSplit, { role: 'physicalreduction', minBp: 80 });
+				if (checkRelevance(moveSplit, { format: 'vgc', targetBoosts: {spa: -1}
+				})) makeFragment(moveSplit, { role: 'specialreduction', vgcSupport: true });
+				if (checkRelevance(moveSplit, { format: 'vgc', targetBoosts: {spa: -1}
+				})) makeFragment(moveSplit, { role: 'specialreduction', minBp: 80 });
+
+				// LEFT TO TRANSLATE:
+				// protection
+				// redirection
+				// anti-Trick Room
+				// other disruption
+				// Attack boosting
+				// Defense reduction
+				// Sp. Atk boosting
+				// Sp. Def reduction
+				// side healing
+				// momentum
+				// backup field effect setting
+				// Speed setup
+				// offensive setup
+				// Knock Off
+				// damaging entry hazards
+				// hazard control
 			}
 			for (const fragment of activeData.splitMoves) {
 				// temporary; once this section is replaced with calls to makeFragment, this section won't be needed any more
@@ -1629,314 +1819,6 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				}
 				
 			// VGC:
-				// Fake Out
-				// okay I'm trying something with this in the makeFragment function so let's see if that works
-				/*
-				if (fragment.moves.includes('Fake Out') || fragment.moves.includes('Mat Block')) {
-					if (!activeData.offeredSupport.fakeout) activeData.offeredSupport.fakeout = [];
-					activeData.offeredSupport.fakeout.push(fragment);
-				}
-				*/
-				// priority
-				if (fragment.movePriority > 0 && !['upperhand', 'feint'].includes(moveid)) {
-					// those two are cool and all, but they do *not* count as being a team's priority user jsdfngh
-					if (fragment.moveBasePower > 40 || ['assist', 'copycat', 'mefirst', 'metronome', 'mirrormove', 'naturepower'].includes(moveid)) {
-						if (!activeData.offeredSupport.priority) activeData.offeredSupport.priority = [];
-						// this was initially a sample to test the score feature, but I think it's a good idea to keep it this way:
-						// if you have multiple candidates for priority users, the strongest one is picked first
-						let modFragment = Utils.deepClone(fragment);
-						if (['firstimpression', 'fakeout'].includes(moveid)) {
-							if (!modFragment.avoid) modFragment.avoid = [];
-							modFragment.avoid.push('physicalsetup');
-							modFragment.avoid.push('speedsetup');
-						}
-						modFragment.score = fragment.moveBasePower;
-						
-						if (!modFragment.tags) modFragment.tags = [];
-						if (!move.overrideOffensiveStat && !modFragment.tags.includes(`${(move.category).toLowerCase()}`)) modFragment.tags.push(`${(move.category).toLowerCase()}`);
-						if (fragment.moveAccuracy < 80 || move.multiaccuracy) {
-							modFragment.tags.push('inaccurate');
-							if (!modFragment.buddy) modFragment.buddy = {};
-							if (!modFragment.buddy.roles) modFragment.buddy.roles = [];
-							modFragment.buddy.roles.push('accuracyboost');
-						}
-
-						if (format === 'vgc') {
-							if ((move.category === 'Physical' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'def')) {
-								if (!modFragment.acceptedSupport) modFragment.acceptedSupport = [];
-								if (!modFragment.acceptedSupport.includes('defensereduction')) modFragment.acceptedSupport.push('defensereduction');
-							}
-							if ((move.category === 'Special' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'spd')) {
-								if (!modFragment.acceptedSupport) modFragment.acceptedSupport = [];
-								if (!modFragment.acceptedSupport.includes('spdefreduction')) modFragment.acceptedSupport.push('spdefreduction');
-							}
-						}
-
-						// we don't want several of the same type on the same set
-						modFragment.tags.push(`${(modFragment.moveType).toLowerCase()}priority`);
-						if (!modFragment.avoid) modFragment.avoid = [];
-						modFragment.avoid.push(`${(modFragment.moveType).toLowerCase()}priority`);
-						
-						activeData.offeredSupport.priority.push(modFragment);
-					} else if (fragment.moveBasePower && (fragment.moveBasePower *1.5 > 40) && !fragment.stab && !fragment.teraType && fragment.moveType !== 'Normal') {
-						// push to "personal" for some last-pick set filler
-						if (!activeData.offeredSupport.personal) activeData.offeredSupport.personal = [];
-						let modFragment = Utils.deepClone(fragment);
-						if (['firstimpression', 'fakeout'].includes(moveid)) {
-							if (!modFragment.avoid) modFragment.avoid = [];
-							modFragment.avoid.push('physicalsetup');
-							modFragment.avoid.push('speedsetup');
-						}
-						if (!modFragment.tags) modFragment.tags = [];
-						if (!move.overrideOffensiveStat && !modFragment.tags.includes(`${(move.category).toLowerCase()}`)) modFragment.tags.push(`${(move.category).toLowerCase()}`);
-						if (fragment.moveAccuracy < 80 || move.multiaccuracy) {
-							modFragment.tags.push('inaccurate');
-							if (!modFragment.buddy) modFragment.buddy = {};
-							if (!modFragment.buddy.roles) modFragment.buddy.roles = [];
-							modFragment.buddy.roles.push('accuracyboost');
-						}
-
-						if (format === 'vgc') {
-							if ((move.category === 'Physical' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'def')) {
-								if (!modFragment.acceptedSupport) modFragment.acceptedSupport = [];
-								if (!modFragment.acceptedSupport.includes('defensereduction')) modFragment.acceptedSupport.push('defensereduction');
-							}
-							if ((move.category === 'Special' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'spd')) {
-								if (!modFragment.acceptedSupport) modFragment.acceptedSupport = [];
-								if (!modFragment.acceptedSupport.includes('spdefreduction')) modFragment.acceptedSupport.push('spdefreduction');
-							}
-						}
-						modFragment.teraType = fragment.moveType;
-
-						// we don't want several of the same type on the same set
-						modFragment.tags.push(`${(modFragment.moveType).toLowerCase()}priority`);
-						if (!modFragment.avoid) modFragment.avoid = [];
-						modFragment.avoid.push(`${(modFragment.moveType).toLowerCase()}priority`);
-						
-						activeData.offeredSupport.personal.push(modFragment);
-					}
-				}
-				// spread
-				if ((move.target === 'allAdjacentFoes' || moveid === 'expandingforce') && fragment.moveBasePower > 80 && fragment.moveAccuracy >= 90 && moveid !== 'razorwind') {
-					if (!activeData.offeredSupport.spread) activeData.offeredSupport.spread = [];
-					let modFragment = Utils.deepClone(fragment);
-					modFragment.score = fragment.moveBasePower;
-						
-					if (!modFragment.tags) modFragment.tags = [];
-					if (!move.overrideOffensiveStat && !modFragment.tags.includes(`${(move.category).toLowerCase()}`)) modFragment.tags.push(`${(move.category).toLowerCase()}`);
-					if (fragment.moveAccuracy < 80 || move.multiaccuracy) {
-						modFragment.tags.push('inaccurate');
-						if (!modFragment.buddy) modFragment.buddy = {};
-						if (!modFragment.buddy.roles) modFragment.buddy.roles = [];
-						modFragment.buddy.roles.push('accuracyboost');
-					}
-
-					if (format === 'vgc') {
-						if ((move.category === 'Physical' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'def')) {
-							if (!modFragment.acceptedSupport) modFragment.acceptedSupport = [];
-							if (!modFragment.acceptedSupport.includes('defensereduction')) modFragment.acceptedSupport.push('defensereduction');
-						}
-						if ((move.category === 'Special' && !move.overrideDefensiveStat) || (move.overrideDefensiveStat && move.overrideDefensiveStat === 'spd')) {
-							if (!modFragment.acceptedSupport) modFragment.acceptedSupport = [];
-							if (!modFragment.acceptedSupport.includes('spdefreduction')) modFragment.acceptedSupport.push('spdefreduction');
-						}
-					}
-
-					// we don't want several of the same type on the same set
-					modFragment.tags.push(`${(modFragment.moveType).toLowerCase()}spread`);
-					if (!modFragment.avoid) modFragment.avoid = [];
-					modFragment.avoid.push(`${(modFragment.moveType).toLowerCase()}spread`);
-					
-					activeData.offeredSupport.spread.push(modFragment);
-				}
-				if (move.target === 'allAdjacent' && !move.selfdestruct && moveid !== 'synchronoise') {
-					let modFragment = Utils.deepClone(fragment);
-					modFragment.score = fragment.moveBasePower;
-					
-					// seems like we're getting a *lot* of options for these on almost every team, so let's limit ourselves to one of these per Pokémon!
-					if (!modFragment.tags) modFragment.tags = [];
-					if (!modFragment.tags.includes('allyspread')) modFragment.tags.push('allyspread');
-					if (!modFragment.avoid) modFragment.avoid = [];
-					if (!modFragment.avoid.includes('allyspread')) modFragment.avoid.push('allyspread');
-					// in testing so far, some sets have been getting *too* excited about ally immunities and filling up with several spread moves like this,
-					// which is bad, because ally synergies are given the highest priority -
-					// if we let them take every possible option for these, they run out of room for important things quickly!
-
-					// we don't want several of the same type on the same set
-					modFragment.tags.push(`${(modFragment.moveType).toLowerCase()}spread`);
-					modFragment.avoid.push(`${(modFragment.moveType).toLowerCase()}spread`);
-					
-					// ones that we can use as a main spread should be strong!
-					if (fragment.moveBasePower > 80 && fragment.moveAccuracy >= 90) {
-						if (!modFragment.tags) modFragment.tags = [];
-						if (!move.overrideOffensiveStat && !modFragment.tags.includes(`${(move.category).toLowerCase()}`)) modFragment.tags.push(`${(move.category).toLowerCase()}`);
-						if (fragment.moveAccuracy < 80 || move.multiaccuracy) {
-							modFragment.tags.push('inaccurate');
-							if (!modFragment.buddy) modFragment.buddy = {};
-							if (!modFragment.buddy.roles) modFragment.buddy.roles = [];
-							modFragment.buddy.roles.push('accuracyboost');
-						}
-
-						modFragment.requestedSupport.push(`${(fragment.moveType).toLowerCase()}immune`); // ex. "electricimmune"
-						if (!activeData.offeredSupport.spread) activeData.offeredSupport.spread = [];
-						activeData.offeredSupport.spread.push(modFragment);
-					}
-					
-					// but we can drop the BP requirement if it's just to enable ally Abilities, like Lightning Rod
-					// these supports will be called, for example, "sideelectric" or "sideelectricnopara"
-					if (moveid === 'discharge') { // mostly for Cell Battery
-						if (!activeData.offeredSupport[`side${(fragment.moveType).toLowerCase()}nopara`]) activeData.offeredSupport[`side${(fragment.moveType).toLowerCase()}nopara`] = [];
-						activeData.offeredSupport[`side${(fragment.moveType).toLowerCase()}nopara`].push(modFragment);
-					} else {
-						if (!activeData.offeredSupport[`side${(fragment.moveType).toLowerCase()}`]) activeData.offeredSupport[`side${(fragment.moveType).toLowerCase()}`] = [];
-						activeData.offeredSupport[`side${(fragment.moveType).toLowerCase()}`].push(modFragment);
-					}
-				}
-				if ([
-					'tailwind', 'stickyweb', 'silktrap',
-					'cottonspore', 'stringshot', 'scaryface', 'venomdrench',
-					'electroweb', 'icywind', 'glaciate', // Bulldoze will receive special handling elsewhere because it doesn't work for every team
-					'thunderwave', 'nuzzle', 'glare', 'stunspore',
-					'syrupbomb', 'tarshot', 'quash',
-				].includes(moveid) ||
-					 ([
-						 'lowsweep', 'mudshot', 'drumbeating', 'pounce',
-					 ].includes(moveid) && fragment.moveBasePower > 80)
-				) {
-					let modFragment = Utils.deepClone(fragment);
-					if (!modFragment.avoid) modFragment.avoid = [];
-					modFragment.avoid.push('speedcontrol');
-					
-					// if (['cottonspore', 'stringshot', 'scaryface'].includes(moveid)) {
-					// actually, I want to be more charitable here - Cotton Spore and String Shot are really good moves and shouldn't be rejected like this
-					if (['scaryface'].includes(moveid)) {
-						if (!modFragment.tags) modFragment.tags = [];
-						modFragment.tags.push('statusdebuffmove');
-						modFragment.avoid.push('statusdebuffmove');
-					}
-					if (moveid === 'venomdrench') modFragment.requestedSupport.push('poison');
-					
-					if (modFragment.movePriority > 0) {
-							if (!activeData.offeredSupport.speedcontrol) activeData.offeredSupport.speedcontrol = [];
-							activeData.offeredSupport.speedcontrol.push(modFragment);
-					} else {
-						if (!pickyVgcSupport.speedcontrol) pickyVgcSupport.speedcontrol = [];
-						pickyVgcSupport.speedcontrol.push(modFragment);
-					}
-				}
-				if (moveid === 'trickroom') {
-					let modFragment = Utils.deepClone(fragment);
-					if (!modFragment.tags) modFragment.tags = [];
-					modFragment.tags.push('backuptrickroom');
-					modFragment.tags.push('minspeed');
-					modFragment.requestedSupport.push('backuptrickroom');
-					modFragment.acceptedSupport.push('backuptrickroom');
-					
-					if (!activeData.offeredSupport.trickroom) activeData.offeredSupport.trickroom = [];
-					activeData.offeredSupport.trickroom.push(modFragment);
-				}
-				if (moveid === 'gravity') {
-					// I think this is getting overused,
-					// so I might want it to request some kind of support that limits its scope to more specific abusers
-					if (!pickyVgcSupport.gravity) pickyVgcSupport.gravity = [];
-					pickyVgcSupport.gravity.push(fragment);
-				}
-				if (moveid === 'mortalspin' || (format === 'vgc' && moveid === 'poisongas') || (format === 'singles' && moveid === 'toxicspikes')) {
-					let modFragment = Utils.deepClone(fragment);
-
-					if (modFragment.movePriority > 0 || moveid === 'mortalspin') {
-						if (!activeData.offeredSupport.poison) activeData.offeredSupport.poison = [];
-						activeData.offeredSupport.poison.push(modFragment);
-					} else {
-						if (!pickyVgcSupport.poison) pickyVgcSupport.poison = [];
-						pickyVgcSupport.poison.push(modFragment);
-					}
-				}
-				if (moveid === 'round' && format === 'vgc') {
-					if (fragment.moveBasePower >= 80) {
-						let modFragment = Utils.deepClone(fragment);
-						modFragment.requestedSupport.push('round');
-						if (!activeData.offeredSupport.round) activeData.offeredSupport.round = [];
-						activeData.offeredSupport.round.push(modFragment);
-					}
-					if (fragment.moveBasePower >= 70) {
-						let modFragment = Utils.deepClone(fragment);
-						if (!pickyVgcSupport.round) pickyVgcSupport.round = [];
-						pickyVgcSupport.round.push(modFragment);
-					}
-				}
-
-				// some moves cover both physicalreduction and specialreduction at once
-				if (
-					(['auroraveil',
-					'followme', 'ragepowder',
-					'shadowbox', 'partingshot',
-					'nobleroar', 'venomdrench',
-					'grasswhistle', 'hypnosis', 'lovelykiss', 'sing', 'sleeppowder', 'spore', 'yawn'
-				].includes(moveid) && !(fragment.moveAccuracy && fragment.moveAccuracy < 70)) ||
-					(['nobleroar', 'tearfullook'].includes(moveid) && fragment.movePriority > 0)
-				) {
-					let modFragment = Utils.deepClone(fragment);
-					if (['nobleroar'].includes(moveid)) {
-						if (!modFragment.tags) modFragment.tags = [];
-						modFragment.tags.push('statusdebuffmove');
-						if (!modFragment.avoid) modFragment.avoid = [];
-						modFragment.avoid.push('statusdebuffmove');
-					}
-					if (moveid === 'venomdrench') modFragment.requestedSupport.push('poison');
-					if (modFragment.movePriority > 0) {
-						if (!activeData.offeredSupport.physicalreduction) activeData.offeredSupport.physicalreduction = [];
-						activeData.offeredSupport.physicalreduction.push(modFragment);
-						if (!activeData.offeredSupport.specialreduction) activeData.offeredSupport.specialreduction = [];
-						activeData.offeredSupport.specialreduction.push(modFragment);
-					} else {
-						if (!pickyVgcSupport.physicalreduction) pickyVgcSupport.physicalreduction = [];
-						pickyVgcSupport.physicalreduction.push(modFragment);
-						if (!pickyVgcSupport.specialreduction) pickyVgcSupport.specialreduction = [];
-						pickyVgcSupport.specialreduction.push(modFragment);
-					}
-				}
-				// others are specialized, so you need one of each
-				if (
-					['kingsshield', 'breakingswipe', 'strengthsap'].includes(moveid) ||
-					(['baddybad', 'bittermalice', 'chillingwater', 'lunge', 'tropkick'].includes(moveid) && fragment.moveBasePower > 80) ||
-					(['reflect', 'growl', 'charm', 'tickle', 'featherdance'].includes(moveid) && fragment.movePriority > 0)
-				) {
-					let modFragment = Utils.deepClone(fragment);
-					if (['growl', 'charm', 'tickle', 'featherdance'].includes(moveid)) {
-						if (!modFragment.tags) modFragment.tags = [];
-						modFragment.tags.push('statusdebuffmove');
-						if (!modFragment.avoid) modFragment.avoid = [];
-						modFragment.avoid.push('statusdebuffmove');
-					}
-					if (modFragment.movePriority > 0) {
-						if (!activeData.offeredSupport.physicalreduction) activeData.offeredSupport.physicalreduction = [];
-						activeData.offeredSupport.physicalreduction.push(modFragment);
-					} else {
-						if (!pickyVgcSupport.physicalreduction) pickyVgcSupport.physicalreduction = [];
-						pickyVgcSupport.physicalreduction.push(modFragment);
-					}
-				}
-				if (
-					['snarl', 'strugglebug'].includes(moveid) ||
-					(['glitzyglow', 'mysticalfire'].includes(moveid) && fragment.moveBasePower > 80) ||
-					(['lightscreen', 'eerieumpulse'].includes(moveid) && fragment.movePriority > 0)
-				) {
-					let modFragment = Utils.deepClone(fragment);
-					if (['eerieimpulse'].includes(moveid)) {
-						if (!modFragment.tags) modFragment.tags = [];
-						modFragment.tags.push('statusdebuffmove');
-						if (!modFragment.avoid) modFragment.avoid = [];
-						modFragment.avoid.push('statusdebuffmove');
-					}
-					if (modFragment.movePriority > 0) {
-						if (!activeData.offeredSupport.specialreduction) activeData.offeredSupport.specialreduction = [];
-						activeData.offeredSupport.specialreduction.push(modFragment);
-					} else {
-						if (!pickyVgcSupport.specialreduction) pickyVgcSupport.specialreduction = [];
-						pickyVgcSupport.specialreduction.push(modFragment);
-					}
-				}
 				
 				// somewhat rudimentary handling of protection for VGC
 				if ((move.stallingMove && moveid !== 'endure') || ['fakeout', 'substitute', 'quickguard', 'wideguard'].includes(moveid)) {
