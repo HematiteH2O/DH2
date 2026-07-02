@@ -1052,10 +1052,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						}
 					}
 					if (instructions.notMoveid) {
-						if (typeof instructions.moveid === 'string') {
-							if (instructions.moveid === baseMove.moveid) return false;
-						} else if (Array.isArray(instructions.moveid)) {
-							if (instructions.moveid.includes(baseMove.moveid)) return false;
+						if (typeof instructions.notMoveid === 'string') {
+							if (instructions.notMoveid === baseMove.moveid) return false;
+						} else if (Array.isArray(instructions.notMoveid)) {
+							if (instructions.notMoveid.includes(baseMove.moveid)) return false;
 						}
 					}
 				}
