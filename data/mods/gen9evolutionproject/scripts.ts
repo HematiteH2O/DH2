@@ -1131,11 +1131,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						if (baseMove.status) statuses.push(baseMove.status);
 						else if (refMove && refMove.status) statuses.push(refMove.status);
 						
-						if (baseMove.secondary && baseMove.secondary.status && baseMove.secondary.status === instructions.status && (!baseMove.secondary.chance || baseMove.secondary.chance >= 60)) boosts.push(baseMove.secondary.self.boosts);
-						else if (refMove && refMove.secondary && refMove.secondary.status && refMove.secondary.status === instructions.status && (!refMove.secondary.chance || refMove.secondary.chance >= 60)) boosts.push(refMove.secondary.self.boosts);
+						if (baseMove.secondary && baseMove.secondary.status && baseMove.secondary.status === instructions.status && (!baseMove.secondary.chance || baseMove.secondary.chance >= 60)) statuses.push(baseMove.secondary.status);
+						else if (refMove && refMove.secondary && refMove.secondary.status && refMove.secondary.status === instructions.status && (!refMove.secondary.chance || refMove.secondary.chance >= 60)) statuses.push(refMove.secondary.status);
 						
-						if (baseMove.secondaries) for (const secondary of baseMove.secondaries) if (secondary.status && secondary.status === instructions.status && (!secondary.chance || secondary.chance >= 60)) boosts.push(secondary.self.boosts);
-						else if (refMove && refMove.secondaries) for (const secondary of refMove.secondaries) if (secondary.status && secondary.status === instructions.status && (!secondary.chance || secondary.chance >= 60)) boosts.push(secondary.self.boosts);
+						if (baseMove.secondaries) for (const secondary of baseMove.secondaries) if (secondary.status && secondary.status === instructions.status && (!secondary.chance || secondary.chance >= 60)) statuses.push(secondary.status);
+						else if (refMove && refMove.secondaries) for (const secondary of refMove.secondaries) if (secondary.status && secondary.status === instructions.status && (!secondary.chance || secondary.chance >= 60)) statuses.push(secondary.status);
 						
 						baseMove.status = statuses;
 					}
