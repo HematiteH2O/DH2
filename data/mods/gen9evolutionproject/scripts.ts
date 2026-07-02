@@ -1491,6 +1491,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			for (const moveid in learnset) if (learnMove(moveid)) fullySplitMove(moveid);
 
 			const makeFragment = (moveSplit: any, instructions: any) => {
+				// VERY VERY VERY TEMPORARY
+				if (instructions.minBp && (!moveSplit.basePower || instructions.minBp > moveSplit.basePower)) return;
+				
 				// TODO:
 				// `offensive` -> 
 				// // tag the fragment as "physical" or "special" according to the damage category
@@ -1568,10 +1571,22 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (!moveSplit.type) moveSplit.type = move.type;
 				if (!moveSplit.basePower) moveSplit.basePower = move.basePower;
 				if (!moveSplit.accuracy) moveSplit.accuracy = move.accuracy;
+				if (!moveSplit.category) moveSplit.category = move.category;
 
 				if (!moveSplit.moves) moveSplit.moves = [move.name];
 				if (!moveSplit.requestedSupport) moveSplit.requestedSupport = [];
 				if (!moveSplit.acceptedSupport) moveSplit.acceptedSupport = [];
+
+				// VERY VERY VERY TEMPORARY
+				if (activeData.types.includes(moveSplit.type)) moveSplit.stab = true;
+				if (!moveSplit.stab && moveSplit.moveBasePower) moveSplit.moveBasePower /= 1.5;
+				// this is just recreating the previous functionality for STAB viability, but I want to handle it completely differently in the future
+				if (moveSplit.category === 'Physical') moveSplit.attackingStat = 'atk';
+				if (moveSplit.category === 'Special') moveSplit.attackingStat = 'spa';
+				if (move.overrideOffensiveStat) moveSplit.attackingStat = move.overrideOffensiveStat;
+				if (moveSplit.attackingStat && moveSplit.basePower) moveSplit.basePower *= calculateStat(
+					activeData.name, moveSplit.attackingStat, {evs: {[moveSplit.attackingStat]: 252}}, setLevel, 1
+				) / calculateStat('Mew', moveSplit.attackingStat, {evs: {[moveSplit.attackingStat]: 252}}, setLevel, 1);
 				
 				// // Fake Out support
 				if (checkRelevance(moveSplit, { format: 'vgc', moveid: ['fakeout', 'matblock']
