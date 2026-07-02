@@ -1187,7 +1187,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								!boost[stat] || (instructions.selfBoosts[stat] > 0 && boost[stat] < instructions.selfBoosts[stat]) || (instructions.selfBoosts[stat] < 0 && boost[stat] > instructions.selfBoosts[stat])
 							) return false;
 						}
-					}
+					} else return false;
 					// Okay...
 					// this should let us check later if selfBoosts exist at all, like selfBoosts: true
 					// or if they meet certain criteria, like selfBoosts: {atk: 1, def: 1}
@@ -1233,7 +1233,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 								!boost[stat] || (instructions.targetBoosts[stat] > 0 && boost[stat] < instructions.targetBoosts[stat]) || (instructions.targetBoosts[stat] < 0 && boost[stat] > instructions.targetBoosts[stat])
 							) return false;
 						}
-					}
+					} else return false;
 				}
 				if (instructions.terrain) {
 					if (activeData.types.includes('Flying')) return false;
