@@ -1510,6 +1510,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// the way offeredSupport and fragments are organized will change shortly,
 				// and so will BP thresholds
 				let fragment = Utils.deepClone(moveSplit);
+				if (!fragment.requestedSupport) fragment.requestedSupport = [];
+				if (!fragment.acceptedSupport) fragment.acceptedSupport = [];
+				
 				if (instructions.avoid) {
 					if (!fragment.avoid) fragment.avoid = [];
 					if (typeof instructions.avoid === 'string') fragment.avoid.push(instructions.avoid);
@@ -1530,12 +1533,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					fragment.tags.push('inaccurate');
 				}
 				if (instructions.requestedSupport) {
-					if (!fragment.requestedSupport) fragment.requestedSupport = [];
 					if (typeof instructions.requestedSupport === 'string') fragment.requestedSupport.push(instructions.requestedSupport);
 					else if (Array.isArray(instructions.requestedSupport)) for (const requestedSupport of instructions.requestedSupport) fragment.requestedSupport.push(requestedSupport);
 				}
 				if (instructions.acceptedSupport) {
-					if (!fragment.acceptedSupport) fragment.acceptedSupport = [];
 					if (typeof instructions.acceptedSupport === 'string') fragment.acceptedSupport.push(instructions.acceptedSupport);
 					else if (Array.isArray(instructions.acceptedSupport)) for (const acceptedSupport of instructions.acceptedSupport) fragment.acceptedSupport.push(acceptedSupport);
 				}
@@ -1567,6 +1568,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (!moveSplit.type) moveSplit.type = move.type;
 				if (!moveSplit.basePower) moveSplit.basePower = move.basePower;
 				if (!moveSplit.accuracy) moveSplit.accuracy = move.accuracy;
+				
+				if (!moveSplit.requestedSupport) moveSplit.requestedSupport = [];
+				if (!moveSplit.acceptedSupport) moveSplit.acceptedSupport = [];
 				
 				// // Fake Out support
 				if (checkRelevance(moveSplit, { format: 'vgc', moveid: ['fakeout', 'matblock']
