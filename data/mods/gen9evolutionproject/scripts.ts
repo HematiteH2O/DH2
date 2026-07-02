@@ -793,7 +793,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				fragments: [],
 				
 				offeredSupport: {},
-				requestedSupport: {},
+				requiredSupport: {},
 				acceptedSupport: {},
 			};
 			const activeData = activeMon[randbats];
@@ -903,7 +903,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						// push fragments
 						let fragment = {
 							ability: ability,
-							requestedSupport: [],
+							requiredSupport: [],
 							acceptedSupport: [],
 							fragmentPriority: 4,
 						};
@@ -920,7 +920,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						// push fragments
 						let fragment = {
 							ability: ability,
-							requestedSupport: [],
+							requiredSupport: [],
 							acceptedSupport: [],
 							fragmentPriority: 4,
 						};
@@ -942,7 +942,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			// we need to initialize this for certain kinds of Speed-reliant support in VGC
 			const vgcSupportSubfragments = [];
 			const makeSubfragment = (
-				spe: number | null, ability: string | null, item: string | null, requestedSupport: string[] | null, tags: string[] | null, avoid: string[] | null
+				spe: number | null, ability: string | null, item: string | null, requiredSupport: string[] | null, tags: string[] | null, avoid: string[] | null
 			) => {
 				if (
 					(ability && !activeData.abilities.includes(ability)) ||
@@ -951,9 +951,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				let subfragment = {};
 				if (ability) subfragment.ability = ability;
 				if (item) subfragment.item = item;
-				if (requestedSupport) {
-					subfragment.requestedSupport = [];
-					for (const support of requestedSupport) subfragment.requestedSupport.push(support);
+				if (requiredSupport) {
+					subfragment.requiredSupport = [];
+					for (const support of requiredSupport) subfragment.requiredSupport.push(support);
 				}
 				if (avoid) {
 					subfragment.avoid = [];
@@ -1325,12 +1325,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							for (const acceptedSupport of output.acceptedSupport) if (!modFragment.acceptedSupport.includes(acceptedSupport)) modFragment.tags.push(acceptedSupport);
 						}
 					}
-					if (output.requestedSupport) {
-						if (!modFragment.requestedSupport) modFragment.requestedSupport = [];
-						if (typeof output.requestedSupport === 'string') {
-							if (!modFragment.requestedSupport.includes(output.requestedSupport)) modFragment.requestedSupport.push(output.requestedSupport);
-						} else if (Array.isArray(output.requestedSupport)) {
-							for (const requestedSupport of output.requestedSupport) if (!modFragment.requestedSupport.includes(requestedSupport)) modFragment.tags.push(requestedSupport);
+					if (output.requiredSupport) {
+						if (!modFragment.requiredSupport) modFragment.requiredSupport = [];
+						if (typeof output.requiredSupport === 'string') {
+							if (!modFragment.requiredSupport.includes(output.requiredSupport)) modFragment.requiredSupport.push(output.requiredSupport);
+						} else if (Array.isArray(output.requiredSupport)) {
+							for (const requiredSupport of output.requiredSupport) if (!modFragment.requiredSupport.includes(requiredSupport)) modFragment.tags.push(requiredSupport);
 						}
 					}
 					if (override) {
@@ -1409,7 +1409,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					splitMove(fragment, { ability: 'Tough Claws', flags: 'contact', basePower: true, output: { basePowerMultiplier: 1.3 }}, refMove, defaultAvoid, abilitySplits);
 					splitMove(fragment, { ability: 'Triage', flags: 'heal', output: { priorityModifier: 3 }}, refMove, defaultAvoid, abilitySplits);
 					// other-based modifiers
-					splitMove(fragment, { ability: 'Merciless', basePower: true, rejectOther: 'willcrit', output: { basePowerMultiplier: 1.5, requestedSupport: 'poison' }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Merciless', basePower: true, rejectOther: 'willcrit', output: { basePowerMultiplier: 1.5, requiredSupport: 'poison' }}, refMove, defaultAvoid, abilitySplits);
 					splitMove(fragment, { ability: 'Reckless', basePower: true, other: 'recoil', output: { basePowerMultiplier: 1.2 }}, refMove, defaultAvoid, abilitySplits);
 					splitMove(fragment, { ability: 'Technician', basePower: true, maxBp: 60, output: { basePowerMultiplier: 1.5 }}, refMove, defaultAvoid, abilitySplits);
 					splitMove(fragment, { ability: 'Sheer Force', basePower: true, other: ['secondary', 'secondaries', 'hasSheerForce'], output: { basePowerMultiplier: 1.3, tags: 'Sheer Force' }}, refMove, defaultAvoid, abilitySplits);
@@ -1439,9 +1439,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					splitMove(fragment, { ability: 'Snow Warning', moveid: 'weatherball', output: { basePower: 100, type: 'Ice' }}, refMove, defaultAvoid, abilitySplits);
 					splitMove(fragment, { ability: 'Snow Warning', moveid: 'blizzard', inaccurate: true, output: { accuracy: 1 }}, refMove, defaultAvoid, abilitySplits);
 					// weather support-reliant
-					splitMove(fragment, { ability: 'Flower Gift', category: 'Physical', basePower: true, output: { basePowerMultiplier: 1.5, requestedSupport: 'sun' }}, refMove, defaultAvoid, abilitySplits);
-					splitMove(fragment, { ability: 'Sand Force', type: ['Ground', 'Rock', 'Steel'], basePower: true, output: { basePowerMultiplier: 1.3, requestedSupport: 'sand' }}, refMove, defaultAvoid, abilitySplits);
-					splitMove(fragment, { ability: 'Solar Power', category: 'Special', basePower: true, output: { basePowerMultiplier: 1.5, requestedSupport: 'sun' }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Flower Gift', category: 'Physical', basePower: true, output: { basePowerMultiplier: 1.5, requiredSupport: 'sun' }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Sand Force', type: ['Ground', 'Rock', 'Steel'], basePower: true, output: { basePowerMultiplier: 1.3, requiredSupport: 'sand' }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Solar Power', category: 'Special', basePower: true, output: { basePowerMultiplier: 1.5, requiredSupport: 'sun' }}, refMove, defaultAvoid, abilitySplits);
 					// terrain
 					for (const ability of ['Electric Surge', 'Hadron Engine']) {
 						let multiplier = 1.3;
@@ -1470,7 +1470,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					splitMove(fragment, { ability: 'Awakening', type: 'Fighting', basePower: true, output: { basePowerMultiplier: 1.5 }}, refMove, defaultAvoid, abilitySplits);
 					splitMove(fragment, { ability: 'Calcify', type: 'Rock', basePower: true, output: { basePowerMultiplier: 1.3 }}, refMove, defaultAvoid, abilitySplits);
 					splitMove(fragment, { ability: 'Canopy', type: 'Grass', basePower: true, output: { basePowerMultiplier: 1.3 }}, refMove, defaultAvoid, abilitySplits);
-					splitMove(fragment, { ability: 'Frozen Focus', category: 'Special', basePower: true, output: { basePowerMultiplier: 1.5, requestedSupport: 'snow' }}, refMove, defaultAvoid, abilitySplits);
+					splitMove(fragment, { ability: 'Frozen Focus', category: 'Special', basePower: true, output: { basePowerMultiplier: 1.5, requiredSupport: 'snow' }}, refMove, defaultAvoid, abilitySplits);
 					splitMove(fragment, { ability: 'Permafrost', basePower: true, notMoveid: noModifyType, output: { type: 'Ice', basePowerMultiplier: 1.2, tags: 'Permafrost' }, baseAvoid: 'Permafrost'} );
 					splitMove(fragment, { ability: 'Storm Chaser', type: 'Water', basePower: true, notMoveid: 'weatherball', output: { basePowerMultiplier: 1.5 }}, refMove, defaultAvoid, abilitySplits);
 					splitMove(fragment, { ability: 'Storm Chaser', moveid: 'weatherball', output: { basePower: 150, type: 'Water' }}, refMove, defaultAvoid, abilitySplits);
@@ -1513,7 +1513,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// the way offeredSupport and fragments are organized will change shortly,
 				// and so will BP thresholds
 				let fragment = Utils.deepClone(moveSplit);
-				if (!fragment.requestedSupport) fragment.requestedSupport = [];
+				if (!fragment.requiredSupport) fragment.requiredSupport = [];
 				if (!fragment.acceptedSupport) fragment.acceptedSupport = [];
 				
 				if (instructions.avoid) {
@@ -1535,9 +1535,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (!fragment.tags) fragment.tags = [];
 					fragment.tags.push('inaccurate');
 				}
-				if (instructions.requestedSupport) {
-					if (typeof instructions.requestedSupport === 'string') fragment.requestedSupport.push(instructions.requestedSupport);
-					else if (Array.isArray(instructions.requestedSupport)) for (const requestedSupport of instructions.requestedSupport) fragment.requestedSupport.push(requestedSupport);
+				if (instructions.requiredSupport) {
+					if (typeof instructions.requiredSupport === 'string') fragment.requiredSupport.push(instructions.requiredSupport);
+					else if (Array.isArray(instructions.requiredSupport)) for (const requiredSupport of instructions.requiredSupport) fragment.requiredSupport.push(requiredSupport);
 				}
 				if (instructions.acceptedSupport) {
 					if (typeof instructions.acceptedSupport === 'string') fragment.acceptedSupport.push(instructions.acceptedSupport);
@@ -1574,7 +1574,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (!moveSplit.category) moveSplit.category = move.category;
 
 				if (!moveSplit.moves) moveSplit.moves = [move.name];
-				if (!moveSplit.requestedSupport) moveSplit.requestedSupport = [];
+				if (!moveSplit.requiredSupport) moveSplit.requiredSupport = [];
 				if (!moveSplit.acceptedSupport) moveSplit.acceptedSupport = [];
 
 				// VERY VERY VERY TEMPORARY
@@ -1616,7 +1616,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// allAdjacent moves we want to use offensively:
 				// These have a slight score penalty, just enough that they wouldn't be preferred over an equivalent allAdjacentFoes move
 				if (checkRelevance(moveSplit, { format: 'vgc', notMoveid: 'synchronoise', accuracy: 90, target: 'allAdjacent'
-				})) makeFragment(moveSplit, { role: ['spread', `${moveSplit.type.toLowerCase()}spread`], avoid: `${moveSplit.type.toLowerCase()}spread`, requestedSupport: `${moveSplit.type.toLowerCase()}immune`, minBp: 60, score: (moveSplit.basePower - 1), offensive: true });
+				})) makeFragment(moveSplit, { role: ['spread', `${moveSplit.type.toLowerCase()}spread`], avoid: `${moveSplit.type.toLowerCase()}spread`, requiredSupport: `${moveSplit.type.toLowerCase()}immune`, minBp: 60, score: (moveSplit.basePower - 1), offensive: true });
 				// allAdjacent moves we want to use supportively:
 				if (checkRelevance(moveSplit, { format: 'vgc', notMoveid: 'synchronoise', accuracy: 90, target: 'allAdjacent'
 				})) makeFragment(moveSplit, { role: `side${moveSplit.type.toLowerCase()}`, vgcSupport: true });
@@ -1644,7 +1644,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 				// // Gravity
 				if (checkRelevance(moveSplit, { moveid: 'gravity'
-				})) makeFragment(moveSplit, { role: 'gravity', requestedSupport: 'gravsleep', vgcSupport: true });
+				})) makeFragment(moveSplit, { role: 'gravity', requiredSupport: 'gravsleep', vgcSupport: true });
 
 				// // poison support
 				if (checkRelevance(moveSplit, { format: 'singles', moveid: ['mortalspin', 'toxicspikes']
@@ -1653,10 +1653,13 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				})) makeFragment(moveSplit, { role: 'poisonspam', vgcSupport: true });
 
 				// // Round
+				// Every Round user has role: 'round' and requiredSupport: 'round', which means they'll only be used if they can be paired up
+				// but only an offensive user of Round has acceptedSupport: 'round', which is what actually encourages a Round team
+				// (The bar for a Round user is pretty strict either way, but the faster Round user can get away with hitting slightly less hard)
 				if (checkRelevance(moveSplit, { format: 'vgc', moveid: 'round'
-				})) makeFragment(moveSplit, { role: 'round', acceptedSupport: 'round', requestedSupport: 'round', minBp: 80 });
+				})) makeFragment(moveSplit, { role: 'round', acceptedSupport: 'round', requiredSupport: 'round', minBp: 80 });
 				if (checkRelevance(moveSplit, { format: 'vgc', moveid: 'round'
-				})) makeFragment(moveSplit, { role: 'round', minBp: 70, vgcSupport: true });
+				})) makeFragment(moveSplit, { role: 'round', requiredSupport: 'round', minBp: 70, vgcSupport: true });
 
 				// // damage reduction
 				// moves that more generally interfere with damage:
@@ -1674,7 +1677,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				})) {
 					if (checkRelevance(moveSplit, { accuracy: 75
 					})) makeFragment(moveSplit, { role: ['physicalreduction', 'specialreduction', 'sleep', 'antitrickroom'], vgcSupport: true });
-					else makeFragment(moveSplit, { role: ['physicalreduction', 'specialreduction', 'sleep', 'antitrickroom', 'gravsleep'], requestedSupport: 'gravity', vgcSupport: true });
+					else makeFragment(moveSplit, { role: ['physicalreduction', 'specialreduction', 'sleep', 'antitrickroom', 'gravsleep'], requiredSupport: 'gravity', vgcSupport: true });
 				}
 				// moves that directly lower Attack or Sp. Atk
 				// we'll accept both VGC support quality and moves that do solid damage
@@ -1717,7 +1720,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (!fragment.moveCategory) fragment.moveCategory = fragment.category || move.category;
 				if (!fragment.movePriority) fragment.movePriority = fragment.priority || move.priority;
 				if (!fragment.acceptedSupport) fragment.acceptedSupport = [];
-				if (!fragment.requestedSupport) fragment.requestedSupport = [];
+				if (!fragment.requiredSupport) fragment.requiredSupport = [];
 				if (activeData.types.includes(fragment.type)) fragment.stab = true;
 				if (!fragment.stab && fragment.moveBasePower) fragment.moveBasePower /= 1.5;
 				
@@ -2296,14 +2299,14 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 							for (const move of subfragment.moves) if (!modFragment.moves.includes(move)) modFragment.moves.push(move);
 							if (modFragment.moves.length > 4) accept = false;
 						}
-						if (subfragment.requestedSupport) {
-							if (!modFragment.requestedSupport) modFragment.requestedSupport = [];
-							for (const requestedSupport of subfragment.requestedSupport) {
-								if (offeredSupport === requestedSupport) accept = false;
-								if (offeredSupport === `backup${requestedSupport}`) accept = false;
+						if (subfragment.requiredSupport) {
+							if (!modFragment.requiredSupport) modFragment.requiredSupport = [];
+							for (const requiredSupport of subfragment.requiredSupport) {
+								if (offeredSupport === requiredSupport) accept = false;
+								if (offeredSupport === `backup${requiredSupport}`) accept = false;
 								// I don't want, for example, the fastest Swift Swim user on the team to be pressured to run Rain Dance simply to support its own Drizzle user
 								// backup rain setters should be things like Pranskter users, not rain abusers!
-								if (!modFragment.requestedSupport.includes(requestedSupport)) modFragment.requestedSupport.push(requestedSupport);
+								if (!modFragment.requiredSupport.includes(requiredSupport)) modFragment.requiredSupport.push(requiredSupport);
 							}
 						}
 						if (subfragment.evs) {
@@ -2331,20 +2334,20 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			// the Pokémon loses that offeredSupport category, and every fragment gets pushed into acceptedSupport instead
 			// (a common example might be Grass-types where Grassy Glide is the only priority they're offering)
 			
-			// but if we have an offeredSupport category where some options are always available while others have requestedSupport,
+			// but if we have an offeredSupport category where some options are always available while others have requiredSupport,
 			// then the category continues to exist,
 			// and all of the fragments requesting support additionally get pushed to the acceptedSupport for the species to make it more likely to come up
 			// but - obviously - if the support just never comes up during species selection, there are still contingencies in the category
 
-			// from there, the individual fragments' requestedSupports only need to be checked again during set construction, after the whole team is done
-			// and obviously ones with support available are favored, but ones with requestedSupport missing are completely ignored
+			// from there, the individual fragments' requiredSupports only need to be checked again during set construction, after the whole team is done
+			// and obviously ones with support available are favored, but ones with requiredSupport missing are completely ignored
 			
 			for (const fragment of activeData.viableStabs) {
 				let modFragment = Utils.deepClone(fragment);
 				modFragment.mainstab = true;
 				
-				if (fragment.requestedSupport.length) {
-					for (const request of fragment.requestedSupport) {
+				if (fragment.requiredSupport.length) {
+					for (const request of fragment.requiredSupport) {
 						if (!activeData.acceptedSupport[request]) activeData.acceptedSupport[request] = [];
 						activeData.acceptedSupport[request].push(modFragment);
 					}
@@ -2355,8 +2358,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				let accepted = false;
 				for (const fragment of activeData.offeredSupport[offeredSupport]) {
 					if (fragment.baseMove) { // if it was just an Ability, this is unnecessary
-						if (fragment.requestedSupport.length) {
-							for (const request of fragment.requestedSupport) {
+						if (fragment.requiredSupport.length) {
+							for (const request of fragment.requiredSupport) {
 								if (!activeData.acceptedSupport[request]) activeData.acceptedSupport[request] = [];
 								activeData.acceptedSupport[request].push(fragment);
 							}
@@ -2370,7 +2373,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			for (const ability of activeData.abilities) {
 				let fragment = {
 					ability: ability,
-					requestedSupport: [],
+					requiredSupport: [],
 					acceptedSupport: [],
 					fragmentPriority: 4,
 				};
@@ -2418,7 +2421,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						activeData.offeredSupport.intimidate.push(fragment);
 						break;
 					case 'Flower Gift':
-						fragment.requestedSupport.push('sun');
+						fragment.requiredSupport.push('sun');
 						if (!activeData.acceptedSupport.sun) activeData.acceptedSupport.sun = [];
 						activeData.acceptedSupport.sun.push(fragment);
 						if (!activeData.acceptedSupport.sun) activeData.acceptedSupport.sun = [];
@@ -2477,17 +2480,17 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						let fragmentElectric = Utils.deepClone(fragment);
 						fragmentElectric.acceptedSupport.push('rain');
 						fragmentElectric.acceptedSupport.push('backuprain');
-						fragmentElectric.requestedSupport.push('sideelectric');
+						fragmentElectric.requiredSupport.push('sideelectric');
 						
 						let fragmentFlying = Utils.deepClone(fragment);
 						fragmentFlying.acceptedSupport.push('rain');
 						fragmentFlying.acceptedSupport.push('backuprain');
-						fragmentFlying.requestedSupport.push('sideflying');
+						fragmentFlying.requiredSupport.push('sideflying');
 						
 						let fragmentWater = Utils.deepClone(fragment);
 						fragmentWater.acceptedSupport.push('rain');
 						fragmentWater.acceptedSupport.push('backuprain');
-						fragmentWater.requestedSupport.push('sidewater');
+						fragmentWater.requiredSupport.push('sidewater');
 						
 						if (!activeData.offeredSupport.rain) activeData.offeredSupport.rain = [];
 						if (!activeData.offeredSupport.backuprain) activeData.offeredSupport.backuprain = [];
@@ -2502,12 +2505,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					case 'Swift Swim':
 					case 'Dry Skin':
 					case 'Rain Dish':
-						fragment.requestedSupport.push('rain');
+						fragment.requiredSupport.push('rain');
 						if (!activeData.acceptedSupport.rain) activeData.acceptedSupport.rain = [];
 						activeData.acceptedSupport.rain.push(fragment);
 						break;
 					case 'Hydration':
-						fragment.requestedSupport.push('rain');
+						fragment.requiredSupport.push('rain');
 						if (learnset.rest && learnset.rest.length) {
 							fragment.baseMove = 'Rest';
 							fragment.moves = ['Rest'];
@@ -2519,25 +2522,25 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						break;
 					case 'Chlorophyll':
 					case 'Harvest':
-						fragment.requestedSupport.push('sun');
+						fragment.requiredSupport.push('sun');
 						if (!activeData.acceptedSupport.sun) activeData.acceptedSupport.sun = [];
 						activeData.acceptedSupport.sun.push(fragment);
 						break;
 					case 'Sand Rush':
 					case 'Sand Force':
-						fragment.requestedSupport.push('sand');
+						fragment.requiredSupport.push('sand');
 						if (!activeData.acceptedSupport.sand) activeData.acceptedSupport.sand = [];
 						activeData.acceptedSupport.sand.push(fragment);
 						break;
 					case 'Slush Rush':
 					case 'Ice Body':
 					case 'Ice Face':
-						fragment.requestedSupport.push('snow');
+						fragment.requiredSupport.push('snow');
 						if (!activeData.acceptedSupport.snow) activeData.acceptedSupport.snow = [];
 						activeData.acceptedSupport.snow.push(fragment);
 						break;
 					case 'Surge Surfer':
-						fragment.requestedSupport.push('electricterrain');
+						fragment.requiredSupport.push('electricterrain');
 						if (!activeData.acceptedSupport.electricterrain) activeData.acceptedSupport.electricterrain = [];
 						activeData.acceptedSupport.electricterrain.push(fragment);
 						break;
@@ -2689,14 +2692,14 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 		
 		// TODO: iterate over existing team members' actual sets and adjust accordingly
-		// I would like to evaluate the base team members in more detail for their requestedSupport, offeredSupport and acceptedSupport, but...
+		// I would like to evaluate the base team members in more detail for their requiredSupport, offeredSupport and acceptedSupport, but...
 		// I'm not ready to do that just yet, so I'll leave them as their species defaults for now.
 		// I'll come back to this after I've gone over the main support list!
 
 		if (team.length) {
 			for (const pokemon of team) {
 				pokemon.offeredSupport = randbatsData(pokemon.species).offeredSupport;
-				pokemon.requestedSupport = randbatsData(pokemon.species).requestedSupport;
+				pokemon.requiredSupport = randbatsData(pokemon.species).requiredSupport;
 				pokemon.acceptedSupport = randbatsData(pokemon.species).acceptedSupport;
 				pokemon.coveredStabs = [];
 				pokemon.attackingTypes = {};
@@ -2756,7 +2759,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				name: randbatsData(chosenRandomPokemon).name,
 				species: randbatsData(chosenRandomPokemon).name,
 				offeredSupport: randbatsData(chosenRandomPokemon).offeredSupport,
-				requestedSupport: randbatsData(chosenRandomPokemon).requestedSupport,
+				requiredSupport: randbatsData(chosenRandomPokemon).requiredSupport,
 				acceptedSupport: randbatsData(chosenRandomPokemon).acceptedSupport,
 				coveredStabs: [],
 				attackingTypes: {},
@@ -2794,7 +2797,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				name: randbatsData(chosenRandomPokemon).name,
 				species: randbatsData(chosenRandomPokemon).name,
 				offeredSupport: randbatsData(chosenRandomPokemon).offeredSupport,
-				requestedSupport: randbatsData(chosenRandomPokemon).requestedSupport,
+				requiredSupport: randbatsData(chosenRandomPokemon).requiredSupport,
 				acceptedSupport: randbatsData(chosenRandomPokemon).acceptedSupport,
 				coveredStabs: [],
 				attackingTypes: {},
@@ -2810,10 +2813,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 		// and we can access the entire pool of eligiblePokemon and their randbats data
 		// Next, we should start evaluating what we have so far and what we need for a team
 
-		let baseRequestedSupport = [];
+		let baserequiredSupport = [];
 		// These are a kind of default checklist for each format, but there will be more specific requests as team members are evaluated
-		if (format === "vgc") baseRequestedSupport = ['fakeout', 'priority', 'spread', 'speedcontrol', 'antitrickroom', 'physicalreduction', 'specialreduction'];
-		else baseRequestedSupport = ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff', 'contactpunish', 'electricimmune', 'groundimmune'];
+		if (format === "vgc") baserequiredSupport = ['fakeout', 'priority', 'spread', 'speedcontrol', 'antitrickroom', 'physicalreduction', 'specialreduction'];
+		else baserequiredSupport = ['choicebreaker', 'priority', 'entryhazard', 'hazardcontrol', 'knockoff', 'contactpunish', 'electricimmune', 'groundimmune'];
 
 		let teamPosition = 0;
 		for (const draftTeamMember of firstDraftTeam) {
@@ -2822,10 +2825,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			
 			let currentStep = [];
 			
-			let requestedSupportInGeneral = [];
+			let requiredSupportInGeneral = [];
 			let offeredSupportInGeneral = {}; // this one is not just a list, but how many of each
 			
-			let requestedSupportThisStep = [];
+			let requiredSupportThisStep = [];
 			let offeredSupportThisStep = [];
 			let acceptedSupportThisStep = [];
 			
@@ -2838,10 +2841,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			let restrictedThisStep = 0;
 			
 			if (firstDraftTeam.length) {
-				for (const request of baseRequestedSupport) if (!requestedSupportInGeneral.includes(request)) requestedSupportInGeneral.push(request);
+				for (const request of baserequiredSupport) if (!requiredSupportInGeneral.includes(request)) requiredSupportInGeneral.push(request);
 				for (const pokemon of firstDraftTeam) {
 					if (pokemon === draftTeamMember) continue; // we're evaluating them against every *other* Pokémon
-					for (const requestedSupport in pokemon.requestedSupport) if (!requestedSupportInGeneral.includes(requestedSupport)) requestedSupportInGeneral.push(requestedSupport);
+					for (const requiredSupport in pokemon.requiredSupport) if (!requiredSupportInGeneral.includes(requiredSupport)) requiredSupportInGeneral.push(requiredSupport);
 					for (const offeredSupport in pokemon.offeredSupport) {
 						if (!offeredSupportThisStep.includes(offeredSupport)) offeredSupportThisStep.push(offeredSupport);
 						if (!offeredSupportInGeneral[offeredSupport]) offeredSupportInGeneral[offeredSupport] = 0;
@@ -2902,27 +2905,27 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			}
 			
 			// Another thing: I need to filter which kinds of support are possible to ask for, now that I've established the pool of eligible Pokémon
-			for (const request of requestedSupportInGeneral) {
+			for (const request of requiredSupportInGeneral) {
 				let possible = false;
 				for (const id of eligiblePokemonThisStep) {
 					if (randbatsData(id).offeredSupport[request]) possible = true;
 				}
-				if (possible) requestedSupportThisStep.push(request);
+				if (possible) requiredSupportThisStep.push(request);
 			}
 			// This is because I noticed the team generator prioritizing impossible goals a couple of times on monotype
 			// It makes a pretty small difference in most cases, but it can come up if a type has multiple options for one goal and no options at all for another goal
 
 			// Now let's see which of those attainable goals we want for this step!
-			if (requestedSupportThisStep.filter(request => (!offeredSupportInGeneral[request])).length) { // If possible, we want a role that's requested and not already covered
-				requestedSupportThisStep = requestedSupportThisStep.filter(request => (!offeredSupportInGeneral[request]));
+			if (requiredSupportThisStep.filter(request => (!offeredSupportInGeneral[request])).length) { // If possible, we want a role that's requested and not already covered
+				requiredSupportThisStep = requiredSupportThisStep.filter(request => (!offeredSupportInGeneral[request]));
 			} else { // Failing that, we want a role that's requested and only 1 Pokémon can potentially cover it so far
-				requestedSupportThisStep = requestedSupportThisStep.filter(request => (offeredSupportInGeneral[request] === 1));
+				requiredSupportThisStep = requiredSupportThisStep.filter(request => (offeredSupportInGeneral[request] === 1));
 			}
 			// There's no next failsafe here, though - it's actually good if this still doesn't return anything!
 			// That means the team covered its bases as well as it could, so we'll get to skip the next step entirely
 
-			// If we have any requestedSupport at this point, we want to find offeredSupport that matches it
-			if (requestedSupportThisStep.length) {
+			// If we have any requiredSupport at this point, we want to find offeredSupport that matches it
+			if (requiredSupportThisStep.length) {
 				// Score them by how many roles they can fill, but no more than 3
 				let maxScore = 0;
 				for (const id of eligiblePokemonThisStep) {
@@ -2930,8 +2933,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (teamNumbersThisStep.includes(randbatsData(id).num)) continue;
 					
 					let score = 0;
-					for (const role of requestedSupportThisStep) if (randbatsData(id).offeredSupport[role]) score++;
-					if (score > (requestedSupportThisStep.length + (teamPosition - 6))) score = (requestedSupportThisStep.length + (teamPosition - 6));
+					for (const role of requiredSupportThisStep) if (randbatsData(id).offeredSupport[role]) score++;
+					if (score > (requiredSupportThisStep.length + (teamPosition - 6))) score = (requiredSupportThisStep.length + (teamPosition - 6));
 					if (score < 0) score = 0;
 					if (score > maxScore) { // reset
 						currentStep = [];
@@ -2966,10 +2969,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (desiredSupport.length) currentStep = desiredSupport;
 			}
 
-			// narrowing down: type synergy for requestedSupport
-			// // if we're doing requestedSupport for a specific Pokémon on the team (not a default), I'll want to prioritize defensive synergies with that Pokémon, not the whole team!
+			// narrowing down: type synergy for requiredSupport
+			// // if we're doing requiredSupport for a specific Pokémon on the team (not a default), I'll want to prioritize defensive synergies with that Pokémon, not the whole team!
 			// // probably total up the weaknesses, then use that as a multiplier
-			// // (ex. if 2 Pokémon that requestedSupport Intimidate are both weak to Water, and 0 are weak to Fire,
+			// // (ex. if 2 Pokémon that requiredSupport Intimidate are both weak to Water, and 0 are weak to Fire,
 			// // then the Intimidators are scored with 2 points for a Water resist and 0 for a Fire resist)
 			// // it should go both ways I think - it's cooler for the Intimidator to have a weakness if several of the teammates it supports resist it, isn't it?
 			if (firstDraftTeam.length) {
@@ -2978,7 +2981,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				for (const id of currentStep) {
 					let synergyResistScore = 0;
 					let membersRequestingSupport = [];
-					for (const offeredSupport in randbatsData(id).offeredSupport) for (const pokemon of firstDraftTeam) if (pokemon.requestedSupport[offeredSupport] || pokemon.acceptedSupport[offeredSupport]) membersRequestingSupport.push(pokemon);
+					for (const offeredSupport in randbatsData(id).offeredSupport) for (const pokemon of firstDraftTeam) if (pokemon.requiredSupport[offeredSupport] || pokemon.acceptedSupport[offeredSupport]) membersRequestingSupport.push(pokemon);
 					if (!membersRequestingSupport) continue;
 
 					if (membersRequestingSupport.length) {
@@ -3049,7 +3052,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				name: randbatsData(chosenRandomPokemon).name,
 				species: randbatsData(chosenRandomPokemon).name,
 				offeredSupport: randbatsData(chosenRandomPokemon).offeredSupport,
-				requestedSupport: randbatsData(chosenRandomPokemon).requestedSupport,
+				requiredSupport: randbatsData(chosenRandomPokemon).requiredSupport,
 				acceptedSupport: randbatsData(chosenRandomPokemon).acceptedSupport,
 				coveredStabs: [],
 				attackingTypes: {},
@@ -3079,10 +3082,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 		// outside the loop
 		let teamOfferedSupport = {};
-		let teamHighPrioRequestedSupport = {};
+		let teamHighPriorequiredSupport = {};
 		// this one will be reset during the loop,
 		// but I realized it was still useful to be able to reference the latest version of it after the loop was over
-		let teamRequestedSupport = {};
+		let teamrequiredSupport = {};
 		
 		let sets = [];
 		let teamItemsSoFar = []; // for item clause
@@ -3167,7 +3170,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (monotype && !randbatsData(set.species).types.includes(monotype) && !species.forceTeraType) set.teraType = monotype;
 			}
 			
-			// push everything in viableStabs, offeredSupport, requestedSupport and acceptedSupport
+			// push everything in viableStabs, offeredSupport, requiredSupport and acceptedSupport
 			// note that viableStabs is intentionally not sorted by type - for instance viableStabs.flying doesn't exist; all of the fragments are in viableStabs right now
 			for (const fragment of randbatsData(set.species).viableStabs) {
 				if (typeof fragment === 'string') continue;
@@ -3190,12 +3193,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					}
 				}
 			}
-			for (const requestedSupport in randbatsData(set.species).requestedSupport) {
+			for (const requiredSupport in randbatsData(set.species).requiredSupport) {
 				if (typeof fragment === 'string' && fragment === 'true') {
-					if (!teamHighPrioRequestedSupport[requestedSupport]) teamHighPrioRequestedSupport[requestedSupport] = [];
-					if (!teamHighPrioRequestedSupport[requestedSupport].includes(set)) teamHighPrioRequestedSupport[requestedSupport].push(set);
+					if (!teamHighPriorequiredSupport[requiredSupport]) teamHighPriorequiredSupport[requiredSupport] = [];
+					if (!teamHighPriorequiredSupport[requiredSupport].includes(set)) teamHighPriorequiredSupport[requiredSupport].push(set);
 				}
-				for (const fragment of randbatsData(set.species).requestedSupport[requestedSupport]) {
+				for (const fragment of randbatsData(set.species).requiredSupport[requiredSupport]) {
 					if (typeof fragment !== 'string') {
 						let modFragment = Utils.deepClone(fragment);
 						modFragment.pokemon = set;
@@ -3206,8 +3209,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			for (const acceptedSupport in randbatsData(set.species).acceptedSupport) {
 				for (const fragment of randbatsData(set.species).acceptedSupport[acceptedSupport]) {
 					if (typeof fragment === 'string' && fragment === 'true') {
-						if (!teamHighPrioRequestedSupport[acceptedSupport]) teamHighPrioRequestedSupport[acceptedSupport] = [];
-						if (!teamHighPrioRequestedSupport[acceptedSupport].includes(set)) teamHighPrioRequestedSupport[acceptedSupport].push(set);
+						if (!teamHighPriorequiredSupport[acceptedSupport]) teamHighPriorequiredSupport[acceptedSupport] = [];
+						if (!teamHighPriorequiredSupport[acceptedSupport].includes(set)) teamHighPriorequiredSupport[acceptedSupport].push(set);
 					}
 					if (typeof fragment !== 'string') {
 						let modFragment = Utils.deepClone(fragment);
@@ -3231,7 +3234,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					fragment.buddy = null;
 				}
 			}
-			// also, some fragments that came from requestedSupport or acceptedSupport still need to be identified as main STABs
+			// also, some fragments that came from requiredSupport or acceptedSupport still need to be identified as main STABs
 			if (!fragment.role && fragment.mainstab) fragment.role = 'mainstab';
 		}
 
@@ -3376,12 +3379,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						for (const avoid of fragment.avoid) if (!fragment.pokemon.avoid.includes(avoid)) fragment.pokemon.avoid.push(avoid);
 					}
 					if (fragment.acceptedSupport) for (const request of fragment.acceptedSupport) {
-						if (!teamHighPrioRequestedSupport[request]) teamHighPrioRequestedSupport[request] = [];
-						if (!teamHighPrioRequestedSupport[request].includes(fragment.pokemon)) teamHighPrioRequestedSupport[request].push(fragment.pokemon);
+						if (!teamHighPriorequiredSupport[request]) teamHighPriorequiredSupport[request] = [];
+						if (!teamHighPriorequiredSupport[request].includes(fragment.pokemon)) teamHighPriorequiredSupport[request].push(fragment.pokemon);
 					}
-					if (fragment.requestedSupport) for (const request of fragment.requestedSupport) {
-						if (!teamHighPrioRequestedSupport[request]) teamHighPrioRequestedSupport[request] = [];
-						if (!teamHighPrioRequestedSupport[request].includes(fragment.pokemon)) teamHighPrioRequestedSupport[request].push(fragment.pokemon);
+					if (fragment.requiredSupport) for (const request of fragment.requiredSupport) {
+						if (!teamHighPriorequiredSupport[request]) teamHighPriorequiredSupport[request] = [];
+						if (!teamHighPriorequiredSupport[request].includes(fragment.pokemon)) teamHighPriorequiredSupport[request].push(fragment.pokemon);
 					}
 					fragment.eligible = false;
 				}
@@ -3530,22 +3533,22 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			// // // IMPORTANT: delete any fragment that's "just" a main STAB if another main STAB of the *same type* is already in!
 			// // // if I don't, I risk letting two fragments in for "compressing" with conflicting STABs of the same type, and then you can't actually fit them both anyway
 
-			teamRequestedSupport = {}; // reset each step
-			for (const request of baseRequestedSupport) {
-				if (!teamRequestedSupport[request]) teamRequestedSupport[request] = [];
-				teamRequestedSupport[request].push("true");
+			teamrequiredSupport = {}; // reset each step
+			for (const request of baserequiredSupport) {
+				if (!teamrequiredSupport[request]) teamrequiredSupport[request] = [];
+				teamrequiredSupport[request].push("true");
 			}
-			for (const fragment of fragmentsList) if (fragment.requestedSupport) for (const request of fragment.requestedSupport) {
-				if (!teamRequestedSupport[request]) teamRequestedSupport[request] = [];
-				if (!teamRequestedSupport[request].includes(fragment.pokemon)) teamRequestedSupport[request].push(fragment.pokemon);
+			for (const fragment of fragmentsList) if (fragment.requiredSupport) for (const request of fragment.requiredSupport) {
+				if (!teamrequiredSupport[request]) teamrequiredSupport[request] = [];
+				if (!teamrequiredSupport[request].includes(fragment.pokemon)) teamrequiredSupport[request].push(fragment.pokemon);
 			}
 			for (const fragment of fragmentsList) if (fragment.acceptedSupport) for (const request of fragment.acceptedSupport) {
-				if (!teamRequestedSupport[request]) teamRequestedSupport[request] = [];
-				if (!teamRequestedSupport[request].includes(fragment.pokemon)) teamRequestedSupport[request].push(fragment.pokemon);
+				if (!teamrequiredSupport[request]) teamrequiredSupport[request] = [];
+				if (!teamrequiredSupport[request].includes(fragment.pokemon)) teamrequiredSupport[request].push(fragment.pokemon);
 			}
 			for (const type of types) {
-				if (!teamRequestedSupport[`${(type).toLowerCase()}resist`]) teamRequestedSupport[`${(type).toLowerCase()}resist`] = [];
-				teamRequestedSupport[`${(type).toLowerCase()}resist`].push("true");
+				if (!teamrequiredSupport[`${(type).toLowerCase()}resist`]) teamrequiredSupport[`${(type).toLowerCase()}resist`] = [];
+				teamrequiredSupport[`${(type).toLowerCase()}resist`].push("true");
 			}
 			
 			let possibleSupport = {};
@@ -3555,11 +3558,11 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			for (const fragment of fragmentsList) {
 				if (fragment.role) {
 					// prioritize roles that aren't covered
-					if (teamRequestedSupport[fragment.role] && !teamOfferedSupport[fragment.role]) {
+					if (teamrequiredSupport[fragment.role] && !teamOfferedSupport[fragment.role]) {
 						// major, team-specific synergies get 6
 						fragment.fragmentPriority = 6;
 						// default synergies get 5
-						if (baseRequestedSupport.includes(fragment.role)) fragment.fragmentPriority = 5;
+						if (baserequiredSupport.includes(fragment.role)) fragment.fragmentPriority = 5;
 						// minor synergies get 4
 						if (fragment.role.indexOf(`immune`) >= 0) fragment.fragmentPriority = 4;
 						if (fragment.role.indexOf(`resist`) >= 0) fragment.fragmentPriority = 4;
@@ -3572,9 +3575,9 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 						else if (fragment.pokemon.coveredStabs.length > 1 && fragment.fragmentPriority === 2) fragment.fragmentPriority = 0;
 					} else if (fragment.role !== 'protection') {
 						// if one half of a synergy exists, prioritize the other half
-						if ((teamHighPrioRequestedSupport[fragment.role] && teamHighPrioRequestedSupport[fragment.role].filter((requester) => (requester !== fragment.pokemon)).length) && !teamOfferedSupport[fragment.role]) fragment.highpriority = true;
+						if ((teamHighPriorequiredSupport[fragment.role] && teamHighPriorequiredSupport[fragment.role].filter((requester) => (requester !== fragment.pokemon)).length) && !teamOfferedSupport[fragment.role]) fragment.highpriority = true;
 						// if the team doesn't want the support, throw out the fragment
-						if ((!teamRequestedSupport[fragment.role] || !teamRequestedSupport[fragment.role].filter((requester) => (requester !== fragment.pokemon)).length) && (!teamHighPrioRequestedSupport[fragment.role] || !teamHighPrioRequestedSupport[fragment.role].filter((requester) => (requester !== fragment.pokemon)).length) && fragment.role !== 'personal') fragment.eligible = false;
+						if ((!teamrequiredSupport[fragment.role] || !teamrequiredSupport[fragment.role].filter((requester) => (requester !== fragment.pokemon)).length) && (!teamHighPriorequiredSupport[fragment.role] || !teamHighPriorequiredSupport[fragment.role].filter((requester) => (requester !== fragment.pokemon)).length) && fragment.role !== 'personal') fragment.eligible = false;
 						// otherwise, record that the support is still possible at this point
 						else {
 							if (!possibleSupport[fragment.role]) possibleSupport[fragment.role] = [];
@@ -3585,10 +3588,10 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			}
 			
 			for (const fragment of fragmentsList) {
-				if (fragment.requestedSupport) {
-					for (const request of fragment.requestedSupport) {
+				if (fragment.requiredSupport) {
+					for (const request of fragment.requiredSupport) {
 						// if one half of a synergy exists, prioritize getting at least one of the other half
-						if ((teamOfferedSupport[request] && teamOfferedSupport[request].filter((requester) => (requester !== fragment.pokemon)).length) && !teamHighPrioRequestedSupport[request]) fragment.highpriority = true;
+						if ((teamOfferedSupport[request] && teamOfferedSupport[request].filter((requester) => (requester !== fragment.pokemon)).length) && !teamHighPriorequiredSupport[request]) fragment.highpriority = true;
 						// but filter out impossible requests
 						if ((!possibleSupport[request] || !possibleSupport[request].filter((requester) => (requester !== fragment.pokemon)).length)) fragment.eligible = false;
 					}
@@ -3605,12 +3608,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 			// STEP 3: fragment matchmaking
 			
 			// list acceptedSupportThisStep based on remaining fragments
-			// list relevant roles (mix of requestedSupportThisStep and acceptedSupportThisStep, except roles that are already filled)
+			// list relevant roles (mix of requiredSupportThisStep and acceptedSupportThisStep, except roles that are already filled)
 
 			// for each fragment:
 			// // if it's an acceptedSupport, but the corresponding offeredSupport isn't offered by any Pokémon and isn't already on the team, delete the fragment
-			// // if it's an offeredSupport, but there is no corresponding requestedSupport or acceptedSupport, delete the fragment
-			// // // DO NOT delete the fragment if there *is* a requestedSupport or acceptedSupport but it's already covered - that will just lower its priority later!
+			// // if it's an offeredSupport, but there is no corresponding requiredSupport or acceptedSupport, delete the fragment
+			// // // DO NOT delete the fragment if there *is* a requiredSupport or acceptedSupport but it's already covered - that will just lower its priority later!
 			// // if it's an offeredSupport and it's still here, add it to a tally of how many Pokémon are offering that support (ones with fewer options will be prioritized later)
 
 
@@ -3773,12 +3776,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					}
 				}
 				if (chosenFragment.acceptedSupport) for (const request of chosenFragment.acceptedSupport) {
-					if (!teamHighPrioRequestedSupport[request]) teamHighPrioRequestedSupport[request] = [];
-					teamHighPrioRequestedSupport[request].push(chosenFragment.pokemon);
+					if (!teamHighPriorequiredSupport[request]) teamHighPriorequiredSupport[request] = [];
+					teamHighPriorequiredSupport[request].push(chosenFragment.pokemon);
 				}
-				if (chosenFragment.requestedSupport) for (const request of chosenFragment.requestedSupport) {
-					if (!teamHighPrioRequestedSupport[request]) teamHighPrioRequestedSupport[request] = [];
-					teamHighPrioRequestedSupport[request].push(chosenFragment.pokemon);
+				if (chosenFragment.requiredSupport) for (const request of chosenFragment.requiredSupport) {
+					if (!teamHighPriorequiredSupport[request]) teamHighPriorequiredSupport[request] = [];
+					teamHighPriorequiredSupport[request].push(chosenFragment.pokemon);
 				}
 				chosenFragment.eligible = false;
 			}
@@ -4592,7 +4595,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				} else if (set.species === 'Rotom-Fan') set.possibleItems.tier2.push('Air Balloon'); // ONLY SOMETIMES but it's funny
 				// Utility Umbrella I guess???
 				if (
-					teamOfferedSupport.rain && !(teamRequestedSupport.rain && !teamRequestedSupport.rain.includes(set)) && !set.roles.includes('rain') && !set.roles.includes('backuprain') && !(
+					teamOfferedSupport.rain && !(teamrequiredSupport.rain && !teamrequiredSupport.rain.includes(set)) && !set.roles.includes('rain') && !set.roles.includes('backuprain') && !(
 						randbatsData(set.species).resistances.Water && (
 							randbatsData(set.species).resistances.Water === 'true' ||
 							(randbatsData(set.species).resistances.Water.Ability && randbatsData(set.species).resistances.Water.Ability.includes(set.ability))
@@ -4602,7 +4605,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 					if (set.moves.includes('Synthesis') || set.moves.includes('Morning Sun') || set.moves.includes('Moonlight')) set.possibleItems.tier0.push('Utility Umbrella');
 					else set.possibleItems.tier2.push('Utility Umbrella');
 				} else if (
-					teamOfferedSupport.sun && !(teamRequestedSupport.sun && teamRequestedSupport.sun.includes(set)) && !set.roles.includes('sun') && !set.roles.includes('backupsun') && !(
+					teamOfferedSupport.sun && !(teamrequiredSupport.sun && teamrequiredSupport.sun.includes(set)) && !set.roles.includes('sun') && !set.roles.includes('backupsun') && !(
 						randbatsData(set.species).resistances.Fire && (
 							randbatsData(set.species).resistances.Fire === 'true' ||
 							(randbatsData(set.species).resistances.Fire.Ability && randbatsData(set.species).resistances.Fire.Ability.includes(set.ability))
