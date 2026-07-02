@@ -1568,7 +1568,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (!moveSplit.type) moveSplit.type = move.type;
 				if (!moveSplit.basePower) moveSplit.basePower = move.basePower;
 				if (!moveSplit.accuracy) moveSplit.accuracy = move.accuracy;
-				
+
+				if (!moveSplit.moves) moveSplit.moves = [move.name];
 				if (!moveSplit.requestedSupport) moveSplit.requestedSupport = [];
 				if (!moveSplit.acceptedSupport) moveSplit.acceptedSupport = [];
 				
@@ -1579,14 +1580,14 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// // Priority moves
 				// Fake Out and First Impression are separate because they can't accept setup
 				// Note that this is about using Fake Out as offensive priority, which is held to a different standard than using it as disruptive support
-				if (checkRelevance(moveSplit, { priority: 1, moveid: ['fakeout', 'firstimpression'],
-				})) makeFragment(moveSplit, { role: ['priority', `${moveSplit.type}priority`], avoid: [`${moveSplit.type}priority`, 'physicalsetup', 'speedsetup'], minBp: 40, score: moveSplit.basePower, offensive: true });
+				if (checkRelevance(moveSplit, { priority: 1, basePower: true, moveid: ['fakeout', 'firstimpression'],
+				})) makeFragment(moveSplit, { role: ['priority', `${moveSplit.type.toLowerCase()}priority`], avoid: [`${moveSplit.type.toLowerCase()}priority`, 'physicalsetup', 'speedsetup'], minBp: 40, score: moveSplit.basePower, offensive: true });
 				// Next, we can cover damaging moves we want to use offensively...
-				if (checkRelevance(moveSplit, { priority: 1, notMoveid: ['upperhand', 'feint', 'fakeout', 'firstimpression'],
-				})) makeFragment(moveSplit, { role: ['priority', `${moveSplit.type}priority`], avoid: `${moveSplit.type}priority`, minBp: 40, score: moveSplit.basePower, offensive: true });
+				if (checkRelevance(moveSplit, { priority: 1, basePower: true, notMoveid: ['upperhand', 'feint', 'fakeout', 'firstimpression'],
+				})) makeFragment(moveSplit, { role: ['priority', `${moveSplit.type.toLowerCase()}priority`], avoid: `${moveSplit.type.toLowerCase()}priority`, minBp: 40, score: moveSplit.basePower, offensive: true });
 				// ... weak damaging moves we can use to side-target in VGC...
-				if (checkRelevance(moveSplit, { format: 'vgc', priority: 1, notMoveid: ['upperhand', 'feint', 'fakeout', 'firstimpression'],
-				})) makeFragment(moveSplit, { role: `side${moveSplit.type}`, vgcSupport: true });
+				if (checkRelevance(moveSplit, { format: 'vgc', basePower: true, priority: 1, notMoveid: ['upperhand', 'feint', 'fakeout', 'firstimpression'],
+				})) makeFragment(moveSplit, { role: `side${moveSplit.type.toLowerCase()}`, vgcSupport: true });
 				// ... and moves that call other moves, if they happen to be priority (such as from Prankster)
 				if (checkRelevance(moveSplit, { priority: 1, moveid: ['assist', 'copycat', 'mefirst', 'metronome', 'mirrormove', 'naturepower']
 				})) makeFragment(moveSplit, { role: 'priority' });
@@ -1596,14 +1597,14 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// (TODO: the minBp threshold used to be 80, but I'm changing it to 60 because I intend to implement spread reduction)
 				// allAdjacentFoes moves, which can only be used offensively:
 				if (checkRelevance(moveSplit, { format: 'vgc', notMoveid: 'razorwind', accuracy: 90, target: 'allAdjacentFoes'
-				})) makeFragment(moveSplit, { role: ['spread', `${moveSplit.type}spread`], avoid: `${moveSplit.type}spread`, minBp: 60, score: moveSplit.basePower, offensive: true });
+				})) makeFragment(moveSplit, { role: ['spread', `${moveSplit.type.toLowerCase()}spread`], avoid: `${moveSplit.type.toLowerCase()}spread`, minBp: 60, score: moveSplit.basePower, offensive: true });
 				// allAdjacent moves we want to use offensively:
 				// These have a slight score penalty, just enough that they wouldn't be preferred over an equivalent allAdjacentFoes move
 				if (checkRelevance(moveSplit, { format: 'vgc', notMoveid: 'synchronoise', accuracy: 90, target: 'allAdjacent'
-				})) makeFragment(moveSplit, { role: ['spread', `${moveSplit.type}spread`], avoid: `${moveSplit.type}spread`, requestedSupport: `${moveSplit.type}immune`, minBp: 60, score: (moveSplit.basePower - 1), offensive: true });
+				})) makeFragment(moveSplit, { role: ['spread', `${moveSplit.type.toLowerCase()}spread`], avoid: `${moveSplit.type.toLowerCase()}spread`, requestedSupport: `${moveSplit.type.toLowerCase()}immune`, minBp: 60, score: (moveSplit.basePower - 1), offensive: true });
 				// allAdjacent moves we want to use supportively:
 				if (checkRelevance(moveSplit, { format: 'vgc', notMoveid: 'synchronoise', accuracy: 90, target: 'allAdjacent'
-				})) makeFragment(moveSplit, { role: `side${moveSplit.type}`, vgcSupport: true });
+				})) makeFragment(moveSplit, { role: `side${moveSplit.type.toLowerCase()}`, vgcSupport: true });
 
 				// // Speed control
 				// dedicated Speed control moves
