@@ -100,6 +100,7 @@ export const Moves: {[k: string]: ModdedMoveData} = {
 	// Adjusted Moves
 	rockslide: {
 		inherit: true,
+		modded: true, // this makes its description display in Data Mod
 		shortDesc: "20% chance to make the foe(s) flinch.",
 		desc: "20% chance to make the foe(s) flinch.",
 		secondary: {
@@ -108,6 +109,10 @@ export const Moves: {[k: string]: ModdedMoveData} = {
 		},
 	},
 	// Snatch got buffed, but in reality the changes are applied to the moves it now affects
+	snatch: {
+		inherit: true,
+		isNonstandard: null,
+	},
 	revivalblessing: {
 		inherit: true,
 		flags: {heal: 1, nosketch: 1, snatch: 1},
