@@ -24,7 +24,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 					if (species.movepoolAdditions || species.movepoolDeletions) modded = true;
 
 					// Since Umbremons changes some in-battle forms (like Mega Evolutions), we also need to know if any of those are modded
-					const formDisplay = ``;
+					let formDisplay = ``;
 					if (species.otherFormes) for (const form of species.otherFormes) {
 						let umbremonsForm = this.dex.species.get(form);
 						const vanillaForm = Dex.species.get(form);
