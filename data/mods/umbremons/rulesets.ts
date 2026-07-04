@@ -118,7 +118,7 @@
 						
 						// custom moves
 						if (species.movepoolAdditions) {
-							for (const moveid of species.movepoolAdditions) {
+							for (const moveid of species.movepoolAdditions.sort()) {
 								let move = this.dex.moves.get(moveid);
 								if (move && (!move.num || move.num < 0 || move.modded)) { // report custom moves only
 									let power = move.basePower;
