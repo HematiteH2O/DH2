@@ -1,3 +1,4 @@
+export const Rulesets: {[k: string]: ModdedFormatData} = {
 	datamod: {
 		effectType: 'Rule',
 		name: 'Data Mod',
