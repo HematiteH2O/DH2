@@ -69,7 +69,7 @@ export const Scripts: ModdedBattleScriptsData = {
 
 			for (const move of moves) {
 				for (const mon of pokemon) {
-					this.modData('learnsets', mon).learnset[move] = ['9M'];
+					this.modData('Learnsets', mon).learnset[move] = ['9M'];
 					if (this.dataCache.Pokedex[mon] && this.dataCache.Moves[move]) {
 						if (!this.dataCache.Pokedex[mon].movepoolAdditions) this.dataCache.Pokedex[mon].movepoolAdditions = [];
 						this.dataCache.Pokedex[mon].movepoolAdditions.push(this.dataCache.Moves[move].name);
