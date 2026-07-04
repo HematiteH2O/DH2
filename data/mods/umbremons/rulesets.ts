@@ -13,20 +13,44 @@
 				let hideBox = `raw|<div class="infobox" open><details class ="details"><summary>Modded Pokémon on ${side.name}'s team</summary>`;
 				for (const pokemon of side.pokemon) {
 					let species = this.dex.species.get(pokemon.species.name);
-					
+
+					// Let's check if the Pokémon is modded first
 					let modded = false;
 					const baseSpecies = Dex.species.get(pokemon.species.name);
 					for (const type in [0, 1]) if (species.types[type] !== baseSpecies.types[type]) modded = true;
 					for (const ability in [0, 1, 'H', 'S']) if (species.abilities[ability] !== baseSpecies.abilities[ability]) modded = true;
-					// we don't need a base stat check since Umbremons doesn't allow changes to those!
+					// We don't need a base stat check since Umbremons doesn't allow changes to those!
 					if (species.movepoolAdditions || species.movepoolDeletions) modded = true;
+
+					// Since Umbremons changes some in-battle forms (like Mega Evolutions), we also need to know if any of those are modded
+					const formDisplay = ``;
+					if (species.otherFormes) for (const form of species.otherFormes) {
+						let umbremonsForm = this.dex.species.get(form);
+						const vanillaForm = Dex.species.get(form);
+						let listForm = false;
+						
+						for (const type in [0, 1]) if (umbremonsForm.types[type] !== vanillaForm.types[type]) listForm = true;
+						for (const ability in [0, 1, 'H', 'S']) if (umbremonsForm.abilities[ability] !== vanillaForm.abilities[ability]) listForm = true;
+
+						if (listForm) {
+							modded = true;
+							let abilities = umbremonsForm.abilities[0];
+							if (umbremonsForm.abilities[1]) abilities += ` / ${umbremonsForm.abilities[1]}`;
+							if (umbremonsForm.abilities['H']) abilities += ` // ${umbremonsForm.abilities['H']}`;
+							if (umbremonsForm.abilities['S']) abilities += ` // <i>(${umbremonsForm.abilities['S']})</i>`;
+							const baseStats = umbremonsForm.baseStats;
+							
+							formDisplay += `<div class="message"><ul class="utilichart"><li class="result"><span class="col pokemonnamecol" style="white-space: nowrap">` + umbremonsForm.name + `</span> <span class="col typecol"><img src="http://play.pokemonshowdown.com/sprites/types/${umbremonsForm.types[0]}.png" alt="${umbremonsForm.types[0]}" height="14" width="32">`;
+							if (umbremonsForm.types[1]) formDisplay += `<img src="http://play.pokemonshowdown.com/sprites/types/${umbremonsForm.types[1]}.png" alt="${umbremonsForm.types[1]}" height="14" width="32">`;
+							formDisplay += `</span></li><br><li class="result"><span style="float: left ; min-height: 26px"><span class="col abilitycol">` + abilities + `</span><span class="col abilitycol"></span></span></li><br><li class="result"><span style="float: left ; min-height: 26px"><span class="col statcol"><em>HP</em><br>` + baseStats.hp + `</span> <span class="col statcol"><em>Atk</em><br>` + baseStats.atk + `</span> <span class="col statcol"><em>Def</em><br>` + baseStats.def + `</span> <span class="col statcol"><em>SpA</em><br>` + baseStats.spa + `</span> <span class="col statcol"><em>SpD</em><br>` + baseStats.spd + `</span> <span class="col statcol"><em>Spe</em><br>` + baseStats.spe + `</span> </span></li><li style="clear: both"></li></ul></div><br>`;
+						}
+					}
 					
-					// add one more line between each modded Pokémon
 					if (species && modded) {
-						showFakemon = true; // this lets us know that at least one modded Pokémon exists on the team; if not, we won't want to print anything!
+						showFakemon = true; // This lets us know that at least one modded Pokémon exists on the team; if not, we won't want to print anything!
 						
 						if (extraLineBreak) hideBox += `<br>`;
-						else extraLineBreak = true; // this gives us an extra linebreak before every Pokémon except the first
+						else extraLineBreak = true; // This gives us an extra linebreak before every Pokémon except the first
 						
 						let abilities = species.abilities[0];
 						if (species.abilities[1]) abilities += ` / ${species.abilities[1]}`;
@@ -39,37 +63,15 @@
 						
 						let customGuide = `<br><div class="infobox" open><details class ="details"><summary>More details on ${species.name}</summary>`;
 
-						// these two sections are relevant to Evo 2, but probably not to Umbremons, so I'm commenting them out for now; feel free to add them back if you want!
-						/*
-						if (species.creator) {
-							customGuide += `<div class="hint"><br>${species.name} was modified by ${species.creator}!</div>`;
-						}
-
-						if (species.evos && species.evos.length) {
-							customGuide += `<br><div class="hint">It <strong>can use Eviolite</strong> because it evolves into`;
-							let order = 0;
-							for (const evoname of species.evos) {
-								order++;
-								if (order < species.evos.length) {
-									customGuide += ` ${evoname}`;
-									if (order + 1 < species.evos.length) customGuide += `,`;
-								}
-								else {
-									if (species.evos.length !== 1) customGuide += ` and`;
-									customGuide += ` ${evoname}`;
-								}
-							}
-							customGuide += `!</div>`;
-						}
-						*/
+						if (formDisplay) customGuide += formDisplay;
 						
 						// Movepool changes
 						// This section is slightly reworded from the Evo 2 version, since the modded Pokémon in Umbremons aren't Fakemon
 						if (species.movepoolAdditions) {
-							customGuide += `<br><div class="hint">${species.name} <strong>gained</strong> the move`;
+							customGuide += `<div class="hint">${species.name} <strong>gained</strong> the move`;
 							if (species.movepoolAdditions.length > 1) customGuide += `s`;
 							let order = 0;
-							for (const moveid of species.movepoolAdditions) {
+							for (const moveid of species.movepoolAdditions.sort()) {
 								order++;
 								let move = this.dex.moves.get(moveid);
 								if (order < species.movepoolAdditions.length) {
@@ -84,11 +86,11 @@
 						}
 						if (species.movepoolDeletions) {
 							if (species.movepoolAdditions) customGuide += `,<br>but it <strong>lost</strong> the move`;
-							else customGuide += `<br><div class="hint">${species.name} <strong>lost</strong> the move`;
+							else customGuide += `<div class="hint">${species.name} <strong>lost</strong> the move`;
 							
 							if (species.movepoolDeletions.length > 1) customGuide += `s`;
 							let order = 0;
-							for (const moveid of species.movepoolDeletions) {
+							for (const moveid of species.movepoolDeletions.sort()) {
 								order++;
 								let move = this.dex.moves.get(moveid);
 								if (order < species.movepoolDeletions.length) {
