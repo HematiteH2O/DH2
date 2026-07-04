@@ -32,6 +32,8 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 					let formDisplay = ``;
 					let formList = [];
 					if (species.otherFormes) for (const form of species.otherFormes) {
+						formList.push(form); // even if the form isn't modded, we'll want to check later if their Abilities are modded
+						
 						let umbremonsForm = this.dex.species.get(form);
 						const vanillaForm = Dex.species.get(form);
 						let listForm = false;
@@ -46,7 +48,6 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 
 						if (listForm) {
 							modded = true;
-							formList.push(form); // so we can check their Abilities later
 							let abilities = umbremonsForm.abilities[0];
 							if (umbremonsForm.abilities[1]) abilities += ` / ${umbremonsForm.abilities[1]}`;
 							if (umbremonsForm.abilities['H']) abilities += ` // ${umbremonsForm.abilities['H']}`;
@@ -123,26 +124,29 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 							}
 						}
 						if (species.movepoolAdditions || species.movepoolDeletions) customGuide += `.</div>`;
-						
+
+						let abilitiesCovered = [];
 						// custom Abilities
 						for (const num in [0, 1, 'H', 'S']) if (species.abilities[num]) {
 							let ability = this.dex.abilities.get(species.abilities[num]);
-							if (ability && (!ability.num || ability.num < 0 || ability.modded)) { // report custom Abilities only
+							if (ability && !abilitiesCovered.includes(ability) && (!ability.num || ability.num < 0 || ability.modded)) { // report custom Abilities only
 								customGuide += `<br><div class="message"><li class="result"><span class="col namecol"><strong>${ability.name}</strong></span>`;
 								if (ability.desc) customGuide += `<br><font color="#686868">${ability.desc}</font>`;
 								else if (ability.shortDesc) customGuide += `<br><font color="#686868">${ability.shortDesc}</font>`;
 								customGuide += `</li></div>`;
 							}
+							abilitiesCovered.push(ability);
 						}
 						if (formList.length) for (const form of formList) for (const num in [0, 1, 'H', 'S']) if (this.dex.species.get(form).abilities[num]) {
 							let ability = this.dex.abilities.get(this.dex.species.get(form).abilities[num]);
-							if (ability && (!ability.num || ability.num < 0 || ability.modded)) { // report custom Abilities only
+							if (ability && !abilitiesCovered.includes(ability) && (!ability.num || ability.num < 0 || ability.modded)) { // report custom Abilities only
 								customGuide += `<br><div class="hint">${form}'s Ability, ${ability.name}, is modded:</div>`
 								customGuide += `<br><div class="message"><li class="result"><span class="col namecol"><strong>${ability.name}</strong></span>`;
 								if (ability.desc) customGuide += `<br><font color="#686868">${ability.desc}</font>`;
 								else if (ability.shortDesc) customGuide += `<br><font color="#686868">${ability.shortDesc}</font>`;
 								customGuide += `</li></div>`;
 							}
+							abilitiesCovered.push(ability);
 						}
 						
 						// custom moves
