@@ -110,7 +110,7 @@
 							let ability = this.dex.abilities.get(species.abilities[num]);
 							if (ability && (!ability.num || ability.num < 0 || ability.modded)) { // report custom Abilities only
 								customGuide += `<br><div class="message"><li class="result"><span class="col namecol"><strong>${ability.name}</strong></span>`;
-								if (ability.longDesc) customGuide += `<br><font color="#686868">${ability.longDesc}</font>`;
+								if (ability.desc) customGuide += `<br><font color="#686868">${ability.desc}</font>`;
 								else if (ability.shortDesc) customGuide += `<br><font color="#686868">${ability.shortDesc}</font>`;
 								customGuide += `</li></div>`;
 							}
@@ -126,7 +126,7 @@
 									let acc = move.accuracy;
 									if (acc === true) acc = "—";
 									customGuide += `<br><div class="message"><ul class="utilichart"><li class="result"><span class="col movenamecol"><strong>${move.name}</strong></span><span class="col typecol"><img src="https://play.pokemonshowdown.com/sprites/types/${move.type}.png" alt="${move.type} width="32" height="14"><img src="https://play.pokemonshowdown.com/sprites/categories/${move.category}.png" alt="${move.category}" width="32" height="14"></span><span class="col labelcol"><em>Power</em><br>${power}</span><span class="col widelabelcol"><em>Accuracy</em><br>${acc}</span><span class="col pplabelcol"><em>PP</em><br>${Math.floor(move.pp * 8 / 5)}</span></li></ul></div>`;
-									if (move.longDesc) customGuide += `<br><font color="#686868">${move.longDesc}</font>`;
+									if (move.desc) customGuide += `<br><font color="#686868">${move.desc}</font>`;
 									else if (move.shortDesc) customGuide += `<br><font color="#686868">${move.shortDesc}</font>`;
 								}
 							}
