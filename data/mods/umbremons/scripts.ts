@@ -86,7 +86,7 @@ export const Scripts: ModdedBattleScriptsData = {
 		addMove('fakeout', 'gallade');
 		addMove(['fakeout', 'suckerpunch', 'partingshot'], 'krookodile');
 		addMove(['mysticalfire', 'psychicnoise', 'tickle'], 'musharna');
-		addMove(['bulkup', 'coil', 'bodypress'', 'powertrip', 'stringshot'], 'scolipede');
+		addMove(['bulkup', 'coil', 'bodypress', 'powertrip', 'stringshot'], 'scolipede');
 		
 		// move adjustments
 		addMove('rapidfire', [
