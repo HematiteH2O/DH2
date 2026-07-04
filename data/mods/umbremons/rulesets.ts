@@ -141,26 +141,8 @@
 				if (showFakemon) this.add(`${hideBox}`);
 			}
 		},
-		onSwitchIn(pokemon) {
+		onUpdate(pokemon) {
 			this.add('-start', pokemon, 'typechange', (pokemon.illusion ? pokemon.illusion.getTypes(true) : pokemon.getTypes(true)).join('/'), '[silent]');
-		},
-		onDamagingHit(damage, target, source, move) {
-			if (target.hasAbility('illusion')) { // making sure the correct information is given when an Illusion breaks
-				// displaying type changes
-				let species = this.dex.species.get(target.species.name);
-				const baseSpecies = Dex.species.get(target.species.name);
-				
-				let modded = false;
-				for (const type in [0, 1]) if (species.types[type] !== baseSpecies.types[type]) modded = true;
-				
-				if (modded) this.add('-start', target, 'typechange', target.getTypes(true).join('/'), '[silent]');
-				else {
-					const types = target.baseSpecies.types;
-					if (target.getTypes().join() === types.join()) {
-						this.add('-end', target, 'typechange', '[silent]');
-					}
-				}
-			}
 		},
 	},
 };
