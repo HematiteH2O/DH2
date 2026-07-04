@@ -108,7 +108,7 @@
 						// custom Abilities
 						for (const num in [0, 1, 'H', 'S']) if (species.abilities[num]) {
 							let ability = this.dex.abilities.get(species.abilities[num]);
-							if (ability && ability.modded) { // report custom Abilities only
+							if (ability && (!ability.num || ability.num < 0 || ability.modded)) { // report custom Abilities only
 								customGuide += `<br><div class="message"><li class="result"><span class="col namecol"><strong>${ability.name}</strong></span>`;
 								if (ability.longDesc) customGuide += `<br><font color="#686868">${ability.longDesc}</font>`;
 								else if (ability.shortDesc) customGuide += `<br><font color="#686868">${ability.shortDesc}</font>`;
@@ -120,7 +120,7 @@
 						if (species.movepoolAdditions) {
 							for (const moveid of species.movepoolAdditions) {
 								let move = this.dex.moves.get(moveid);
-								if (move && move.modded) { // report custom moves only
+								if (move && (!move.num || move.num < 0 || move.modded)) { // report custom moves only
 									let power = move.basePower;
 									if (power < 2) power = "—";
 									let acc = move.accuracy;
