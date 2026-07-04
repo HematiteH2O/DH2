@@ -19,10 +19,10 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 					let modded = false;
 					const baseSpecies = Dex.species.get(pokemon.species.name);
 					for (const type in [0, 1]) if (species.types[type] !== baseSpecies.types[type]) modded = true;
-					for (const ability in [0, 1, 'H', 'S']) {
-						if (species.abilities[ability] !== baseSpecies.abilities[ability]) modded = true;
-						// Even if the Ability list is vanilla, see if any of the Abilities are modded:
-						let ability = this.dex.abilities.get(species.abilities[num]);
+					for (const ability in [0, 1, 'H', 'S']) if (species.abilities[ability] !== baseSpecies.abilities[ability]) modded = true;
+					// Even if the Ability list is vanilla, see if any of the Abilities are modded:
+					for (const eachAbility in species.abilities) {
+						let ability = this.dex.abilities.get(species.abilities[eachAbility]);
 						if (ability && (!ability.num || ability.num < 0 || ability.modded)) modded = true;
 					}
 					// We don't need a base stat check since Umbremons doesn't allow changes to those!
@@ -37,10 +37,10 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						let listForm = false;
 						
 						for (const type in [0, 1]) if (umbremonsForm.types[type] !== vanillaForm.types[type]) listForm = true;
-						for (const ability in [0, 1, 'H', 'S']) {
-							if (umbremonsForm.abilities[ability] !== vanillaForm.abilities[ability]) listForm = true;
+						for (const ability in [0, 1, 'H', 'S']) if (umbremonsForm.abilities[ability] !== vanillaForm.abilities[ability]) listForm = true;
+						for (const eachAbility in umbremonsForm.abilities) {
 							// Even if the Ability list is vanilla, see if any of the Abilities are modded:
-							let ability = this.dex.abilities.get(umbremonsForm.abilities[num]);
+							let ability = this.dex.abilities.get(umbremonsForm.abilities[eachAbility]);
 							if (ability && (!ability.num || ability.num < 0 || ability.modded)) modded = true;
 						}
 
