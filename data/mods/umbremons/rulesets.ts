@@ -72,7 +72,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 							customGuide += `<div class="hint">${species.name} <strong>gained</strong> the move`;
 							if (species.movepoolAdditions.length > 1) customGuide += `s`;
 							let order = 0;
-							for (const moveid of species.movepoolAdditions.sort()) {
+							for (const moveid of species.movepoolAdditions) {
 								order++;
 								let move = this.dex.moves.get(moveid);
 								if (order < species.movepoolAdditions.length) {
@@ -91,7 +91,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 							
 							if (species.movepoolDeletions.length > 1) customGuide += `s`;
 							let order = 0;
-							for (const moveid of species.movepoolDeletions.sort()) {
+							for (const moveid of species.movepoolDeletions) {
 								order++;
 								let move = this.dex.moves.get(moveid);
 								if (order < species.movepoolDeletions.length) {
@@ -119,7 +119,7 @@ export const Rulesets: {[k: string]: ModdedFormatData} = {
 						
 						// custom moves
 						if (species.movepoolAdditions) {
-							for (const moveid of species.movepoolAdditions.sort()) {
+							for (const moveid of species.movepoolAdditions) {
 								let move = this.dex.moves.get(moveid);
 								if (move && (!move.num || move.num < 0 || move.modded)) { // report custom moves only
 									let power = move.basePower;
