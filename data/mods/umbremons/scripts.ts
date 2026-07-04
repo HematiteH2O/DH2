@@ -82,7 +82,7 @@ export const Scripts: ModdedBattleScriptsData = {
 		
 		// species adjustments
 		addMove(['taunt', 'toxicspikes', 'disable', 'encore'], 'meowstic');
-		addMove(['earthpower', 'moonblast'], 'meowstic');
+		addMove(['earthpower', 'moonblast'], 'meowsticf');
 		addMove('fakeout', 'gallade');
 		addMove(['fakeout', 'suckerpunch', 'partingshot'], 'krookodile');
 		addMove(['mysticalfire', 'psychicnoise', 'tickle'], 'musharna');
