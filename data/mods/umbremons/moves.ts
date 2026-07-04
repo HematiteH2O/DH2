@@ -51,7 +51,7 @@ export const Moves: {[k: string]: ModdedMoveData} = {
 		category: "Physical",
 		name: "Sunken Lunge",
 		shortDesc: "Hits first. First turn out only. Target's Speed -1.",
-		pp: 15,
+		pp: 16,
 		priority: 2,
 		flags: {contact: 1, protect: 1, mirror: 1, metronome: 1, bite: 1},
 		onPrepareHit(target, source, move) {
@@ -81,7 +81,7 @@ export const Moves: {[k: string]: ModdedMoveData} = {
 		category: "Physical",
 		name: "Starburst",
 		shortDesc: "Applies spotlight on target. Usually goes first.",
-		pp: 15,
+		pp: 16,
 		priority: 1,
 		flags: {contact: 1, protect: 1, mirror: 1, metronome: 1},
 		onPrepareHit(target, source, move) {
