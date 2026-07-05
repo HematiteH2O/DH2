@@ -1544,6 +1544,12 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (instructions.score) fragment.score = instructions.score;
 				if (instructions.bypassScore) fragment.bypassScore = instructions.bypassScore;
 				if (instructions.weight) fragment.weight = instructions.weight;
+
+				// TODO:
+				// - "buddy" - split into prerequisites and boosts
+				// - "teamAvoid"
+				// basically, I *know* I'm going to want "require," "encourage" and "avoid" on both a set level and a team level
+				// and I should make that as intuitive to work with as I can
 				
 				if (instructions.role) {
 					if (typeof instructions.role === 'string') {
@@ -1638,6 +1644,8 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 				// // Trick Room
 				// TODO: this will probably end up working differently for singles later
+				// TODO: I have absolutely zero sense for *when you want Trick Room* and that's *ridiculous*
+				// I should at least have slow spread attackers request it I guess??
 				if (checkRelevance(moveSplit, { moveid: 'trickroom'
 				})) makeFragment(moveSplit, { role: ['trickroom', 'backuptrickroom', 'minspeed'], acceptedSupport: 'backuptrickroom' });
 
@@ -1686,28 +1694,206 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				if (checkRelevance(moveSplit, { format: 'vgc', targetBoosts: {atk: -1}
 				})) makeFragment(moveSplit, { role: 'physicalreduction', minBp: 80 });
 				// Sp. Atk
-				if (checkRelevance(moveSplit, { format: 'vgc', notMoveid: 'captivate', targetBoosts: {spa: -1}
+				if (checkRelevance(moveSplit, { format: 'vgc', notMoveid: ['captivate', 'confide'], targetBoosts: {spa: -1}
 				})) makeFragment(moveSplit, { role: 'specialreduction', vgcSupport: true });
 				if (checkRelevance(moveSplit, { format: 'vgc', targetBoosts: {spa: -1}
 				})) makeFragment(moveSplit, { role: 'specialreduction', minBp: 80 });
 
-				// LEFT TO TRANSLATE:
-				// protection
+				// protection moves
+				// I think I need a new tag like "bypassSaveRoomForProtect" for Fake Out, Wide Guard and Substitute -
+				// I *don't* like that my previous draft made those avoid Protect 100% of the time
+				// (I also absolutely need a teamAvoid at this point)
+				// I think it's actually simpler to guarantee protection on everything by default
+				// and be ready to define edge cases where they *don't* need it
+				// That said, the Protect fragments are easy: Detect > Protect, and anything with a bonus effect > Detect
+
+				// Wide Guard - NOT the same category as protection
+				// *can be* instead of Protect if those criteria are met, but *doesn't* strictly avoid it if you have room for all four
+				// likely an encouraged "acceptedSupport" but... more so in defensive roles? like "team members have weaknesses to strong spread move users"
+				// so I don't think I even make it a fragment here - save it for the threatlist step
+
+				// Substitute - NOT the same category as protection
+				// setup + spread move + Sucker Punch weakness (potentially include Thunderclap, Blazar Jet)
+				// *can be* instead of Protect if those criteria are met, but *doesn't* strictly avoid it if you have room for all four
+				// new tag: "bypassSaveRoomForProtect" ????
+				// (example: Substitute Spirited Away's setup and its spread are the same move, Struggle Bug;
+				// Calyrex-Shadow only needs one attacking move, so it can sometimes run Astral Barrage, Plot, Substitute and Protect)
+				// separately:
+				// if you have setup + a spread move, you should also encourage (acceptedSupport, not requiredSupport) redirection, among other things
+				// "among other things" = Fake Out, anti-priority, ally healing, etc. - these are often "protect the queen" teams
+				// but this is independent of Substitute; they're useful under the same circumstances, but you don't need one for the other to be useful
+				// Incidentally, Substitute is often like a backup plan -
+				// it's less "use redirection to get Sub up" and more "use Sub when your redirector isn't available" -
+				// so it might be a *slightly elevated in importance* if you don't have a redirector on the team?
+
+				// Upper Hand and Quick Guard - NOT the same category as protection
+				// - SCORING: Abilities are best; Upper Hand is second-best; Quick Guard is third-best
+				// // correction: Quick Guard vs Upper Hand scoring depends how much anti-priority there is
+				// - TEAMAVOID: only have one anti-priority measure on the team
+				// - Quick Guard is probably only ever "accepted," not "requested"
+				// - absolutely no relation to Protect. you still want Protect. do NOT bypassSaveRoomForProtect.
+				// anti-priority should be fully required by Eruption/Water Spout
+				// probably also encouraged on Trick Room in general
+				
 				// redirection
+				// - arguably a bit threatlist-dependent? it has a lot to do with how many attackers are single-target and how many are spread
+				// - there *are* specific teammates that might demand either redirection or Wide Guard support in general, though
+				// SETUP USERS and ERUPTION/WATER SPOUT-STYLE MOVES invite this!
+				// (that said, Eruption/Water Spout are a *bit* less dependent on redirection and a bit more so on Speed control and anti-priority)
+				// actually, I think I can set this up in a way that teams with 2+ of those require redirection, while teams with only 1 just encourage it
+				// it's a bit hacky, but I can make two versions of each setup-or-Eruption-style move:
+				// one with no requiredSupport that's tagged as "unprotectedSetup" with teamAvoid: "unprotectedSetup"
+				// and a second with requiredSupport that's not tagged as unprotectedSetup,
+				// so it doesn't get rejected by a second setup move but does get rejected if there's no redirection
+				
 				// anti-Trick Room
-				// other disruption
-				// Attack boosting
-				// Defense reduction
-				// Sp. Atk boosting
-				// Sp. Def reduction
+				// // the score and viability here are threatlist-dependent, but I'll have to handle that elsewhere
+				
+				// other disruption (?)
+				
+				// ALLY-TARGETING:
+				// Attack and Sp. Atk boosting, accounting for mixed (Helping Hand/Decorate)
+				// Defense and Sp. Def reduction
+				
 				// side healing
+				// // can be encouraged by setup users as usual, especially ones with Multiscale-like Abilities and
+				// // more importantly: should be encouraged by any offensive Pokémon that happen to be very bulky,
+				// // which has a lot of overlap with something else I need to define properly - Trick Room teams
+				// Revival Blessing is usually dedicated to restricted Legendaries and, uh, Dondozo...
+				// // for now, I'll treat it the same as other side healing in general,
+				// // *except* that it's not useful for HP-dependent effects like Multiscale and Eruption
+				// // One day it will get some special treatment for VGC restricted maybe jdfgm
+
 				// momentum
+				// // distinguish fast pivoting and slow pivoting:
+				// // frail attackers might request slow pivots;
+				// // fast attackers might be more concerned with their own set rhan teammates and use it "selfishly"
+				// // especially good on choiced attackers, AV users, on-entry Abilities
+				// // slow pivoting is especially good with Wish
+				// // absolutely reject status setup moves
+				// // every singles team wants pivoting, ideally more than one
+				
 				// backup field effect setting
-				// Speed setup
-				// offensive setup
+				// // set these up to be accepted (encouraged) by the field effect abusers, esp. weatherspeed, not by other setters
+				// // on the other hand: main field effect setters should heavily push weatherspeed if possible
+				
+				// SELF-TARGETING Speed setup
+				// // Speed tiers (including EVs) should definitely somehow be a factor and they aren't yet
+				// // generally encourage on committed offensive sets, but it's not as important as offensive setup if that's an option
+				// // can pair well with passive setup like Weakness Policy or offensive setup like Meteor Beam
+				// // avoid setup on choiced sets, even offensive setup for the most part
+				// // in general: being able to set up offense and Speed is excellent if you can do it *without* two status moves,
+				// // but double dance is much harder to pull off and should basically be rejected
+				// // attacking moves that raise Speed should match the set's amage category (ex. Trailblaze = physical), except Rapid Spin
+				// // **basically singles-only for now?** Speed-boosting in VGC is only good if it also raises an attacking stat
+				// // definitely consider "avoid: status setup move," "buddy (but not require): offensive setup"
+				
+				// SELF-TARGETING offensive setup
+				// // in VGC, it's best to match this to spread (ideally) or exceptionally good priority (like, almost main STAB-level?)
+				// // outside of spread access, very bulky attackers are better than very fast ones at setup, except support moves like Howl
+				// // again, sets that can raise both an offense and Speed without multiple status moves are also good;
+				// // these can get a pass even in VGC
+				// // definitely consider "avoid: status setup move," "buddy (but not require): Speed setup"
+				// // for simplicity, probably require an attacker role but what other roles give attacker roles varies depending on the format
+
+				// especially for singles: denoting sweepers vs breakers in a setup context
+
+				// Perish Song?
+				// // well. for *now*, this is effectively "last-slot filler if there's somehow room"
+				// // this will start to matter more if there's trapping, but I'll wait to figure it out until that actually comes up
+				
 				// Knock Off
-				// damaging entry hazards
+				// // uuuhhh this is gonna be very threatlist-heavy on the scoring
+				// // in singles:
+				// // defensive users like hitting choice items? offensive users like when Rock-weak targets switch in on them?
+				// // in VGC I think it's basically just a flex utility option, especially if you're AV and don't want Protect?
+				// // can be good into Amulet and Cloak though - something with Fake Out or Intimidate might be fond of it
+				
 				// hazard control
+				// // push for Rapid Spin-style if you're running Spikes or Toxic Spikes (stackable hazards);
+				// // Tidy Up and Defog are fine if you're running Stealth Rock
+				// // do not run in VGC
+				
+				// damaging entry hazards
+				// // if you have them, you can use them (but better matchups into hazard control are ideal)
+				// // do not run manually in VGC
+				
+				// Toxic Spikes
+				// // teammates with Hex, Venoshock, Merciless, etc. can request Toxic Spikes in singles
+				// // do not run manually in VGC
+				
+				// Sticky Web
+				// // push for anti-Defog (Defiant, Competitive, etc.)
+				// // want teammates that can capitalize on exact Speed tiers at -1
+
+				// Beat Up / other multihits
+				// // just flag multihit moves with 'multi' and '${type}multi' here, and let Abilities like Justified and Stamina request them
+
+				// Snatch
+
+				// Topsy-Turvy
+
+				// Fling
+
+				// Trick/Switcheroo
+
+				// Healing Wish
+
+				// Memento
+				// // arguably the closest self-KO move to a pivoting move in function
+
+				// Explosion, Self-Destruct, Misty Explosion
+
+				// Sky Drop
+
+				// Petal Blizzard / Wind Rider
+
+				// Pledge moves
+
+				// Fusion moves
+
+				// Skill Swap, Entrainment
+
+				// Simple Beam
+
+				// Soak
+
+				// Acupressure
+
+				// Rototiller, Flower Shield
+
+				// Magnetic Flux, Gear Up
+
+				// Forest's Curse
+
+				// Trick-or-Treat
+
+				// Pickup
+
+				// protect-the-queen but it's Focus Punch
+
+				// Foul Play, Swagger and stuff
+				// // careful not to make Swagger too common;
+				// // probably have several requirements before it starts getting added to sets,
+				// // and maybe still mark it "unique"
+
+				// Assurance?
+
+				// Eruption-like moves
+
+				// AFTER YOU
+
+				// recoil moves? (Wish / healing support)
+
+				// Brine <-> Super Fang, Nature's Madness, etc.
+
+				// Bulldoze needs special attention
+
+				// Scarfers, esp. in singles (primary: Speed tiers + move power, buddies: pivoting, momentum, hazards/control, Knock, Trick)
+
+				// (VGC: identifying AV/Choice item candidates *early enough* to assign them before Protect / avoid saving room for Protect)
+
+				// stallbreaking tools, cleric moves, recovery moves are more threatlist-based
 			}
 			for (const fragment of activeData.splitMoves) {
 				// temporary; once this section is replaced with calls to makeFragment, this section won't be needed any more
