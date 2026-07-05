@@ -1738,6 +1738,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// redirection
 				// - arguably a bit threatlist-dependent? it has a lot to do with how many attackers are single-target and how many are spread
 				// - there *are* specific teammates that might demand either redirection or Wide Guard support in general, though
+				// score based on bulk + access to contact-punishing effects
 				// SETUP USERS and ERUPTION/WATER SPOUT-STYLE MOVES invite this!
 				// (that said, Eruption/Water Spout are a *bit* less dependent on redirection and a bit more so on Speed control and anti-priority)
 				// actually, I think I can set this up in a way that teams with 2+ of those require redirection, while teams with only 1 just encourage it
@@ -1776,6 +1777,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// backup field effect setting
 				// // set these up to be accepted (encouraged) by the field effect abusers, esp. weatherspeed, not by other setters
 				// // on the other hand: main field effect setters should heavily push weatherspeed if possible
+				// // *specifically, weatherspeed is absolutely required for extender items to be necessary*
 				
 				// SELF-TARGETING Speed setup
 				// // Speed tiers (including EVs) should definitely somehow be a factor and they aren't yet
@@ -1795,6 +1797,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// // these can get a pass even in VGC
 				// // definitely consider "avoid: status setup move," "buddy (but not require): Speed setup"
 				// // for simplicity, probably require an attacker role but what other roles give attacker roles varies depending on the format
+				// // (doing this systematically by attacking stat makes stuff like Iron Defense Body Press automatic, too)
 
 				// especially for singles: denoting sweepers vs breakers in a setup context
 
@@ -1846,7 +1849,7 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 
 				// Sky Drop
 
-				// Petal Blizzard / Wind Rider
+				// generalizing for Petal Blizzard / Wind Rider, Boomburst / Soundproof, etc.
 
 				// Pledge moves
 
@@ -1884,16 +1887,30 @@ export const Scripts: {[k: string]: ModdedBattleScriptsData} = {
 				// AFTER YOU
 
 				// recoil moves? (Wish / healing support)
+				// // Steel Beam-like moves?
 
 				// Brine <-> Super Fang, Nature's Madness, etc.
 
 				// Bulldoze needs special attention
 
+				// ION DELUGE (and Electrify)
+				// // on that note: single-target Electric moves avoid Lightning Rod teammates / Water, Storm Drain / Ground, Centrifuge (etc.)
+
+				// Double Shock-like moves require Tera Types (STAB or Stellar)
+
+				// draining moves are a broad category I should figure out how to score
+
 				// Scarfers, esp. in singles (primary: Speed tiers + move power, buddies: pivoting, momentum, hazards/control, Knock, Trick)
 
 				// (VGC: identifying AV/Choice item candidates *early enough* to assign them before Protect / avoid saving room for Protect)
 
-				// stallbreaking tools, cleric moves, recovery moves are more threatlist-based
+				// stallbreaking tools (including move-binding, trapping, etc. + Reflect Type), cleric moves, recovery moves are more threatlist-based
+
+				// anti-setup tools are more threatlist-based
+
+				// at least somewhat threatlist-based: anti-sleep, anti-Trick Room, anti-spread, anti-priority
+
+				// TODO: which of the above belong in makeFragment and which belong in splitMove?
 			}
 			for (const fragment of activeData.splitMoves) {
 				// temporary; once this section is replaced with calls to makeFragment, this section won't be needed any more
