@@ -161,13 +161,13 @@ export const Abilities: { [abilityid: string]: ModdedAbilityData; } = {
 		onStart(pokemon) {
 			pokemon.abilityState.ending = false; // clear the ending flag
 			if (!this.field.isTerrain('')) {
-				this.add('-ability', this.effectState.target, 'Down-to-Earth');
+				this.add('-ability', pokemon, 'Down-to-Earth');
 				this.add('-message', `${pokemon.name} suppresses the effects of the terrain!`);
 				this.eachEvent('TerrainChange', this.effect);
 			}
 		},
 		onAnyTerrainStart(target, source, terrain) {
-			this.add('-ability', this.effectState.target, 'Down-to-Earth');
+			this.add('-ability', pokemon, 'Down-to-Earth');
 			this.add('-message', `${pokemon.name} suppresses the effects of the terrain!`);
 		},
 		onEnd(pokemon) {
@@ -378,7 +378,6 @@ export const Abilities: { [abilityid: string]: ModdedAbilityData; } = {
 		desc: "This Pokemon's Speed is raised 1 stage if hit by a Bug-, Dark-, or Ghost-type attack, or when a stat is lowered by a foe.",
 	},
 	mimicry: {
-		inherit: true,
 		modded: true,
 		onTerrainChange(pokemon) {
 			let terrainType;
@@ -398,7 +397,7 @@ export const Abilities: { [abilityid: string]: ModdedAbilityData; } = {
 			default:
 				terrainType = null;
 			}
-			if (this.field.terrain && this.field.isTerrain(this.field.terrain)) {
+			if (this.field.terrain && !this.field.suppressingTerrain()) {
 				// there is a terrain *and* Down-to-Earth isn't suppressing it
 				if (terrainType && !pokemon.hasType('terrainType') && pokemon.addType('terrainType')) {
 					this.add('-activate', pokemon, 'ability: Mimicry');
@@ -416,5 +415,11 @@ export const Abilities: { [abilityid: string]: ModdedAbilityData; } = {
 		},
 		shortDesc: "Adds a type to the Pokémon based on the terrain.",
 		desc: "Adds an additional type to the Pokémon based on the terrain.",
+		
+		// Testing without "inherit: true,"
+		flags: {},
+		name: "Mimicry",
+		rating: 0,
+		num: 250,
 	},
 };
