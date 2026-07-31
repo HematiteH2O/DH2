@@ -402,7 +402,7 @@ export const Abilities: { [abilityid: string]: ModdedAbilityData; } = {
 			}
 			if (this.field.terrain && !this.field.suppressingTerrain()) {
 				// there is a terrain *and* Down-to-Earth isn't suppressing it
-				if (terrainType && !pokemon.hasType('terrainType') && pokemon.addType('terrainType')) {
+				if (terrainType && !pokemon.hasType(terrainType) && pokemon.addType(terrainType)) {
 					this.add('-activate', pokemon, 'ability: Mimicry');
 					this.add('-start', pokemon, 'typeadd', terrainType, '[from] ability: Mimicry');
 				}
