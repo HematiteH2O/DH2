@@ -13,7 +13,7 @@ export const Pokedex: { [k: string]: ModdedSpeciesData; } = {
 	},
 	gallade: {
 		inherit: true,
-		abilities: {0: "Inner Focus", 1: "Sharpness", H: "Justified"},
+		abilities: {0: "Down-to-Earth"},
 	},
 	gallademega: {
 		inherit: true,
