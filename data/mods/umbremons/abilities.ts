@@ -378,10 +378,8 @@ export const Abilities: { [abilityid: string]: ModdedAbilityData; } = {
 		desc: "This Pokemon's Speed is raised 1 stage if hit by a Bug-, Dark-, or Ghost-type attack, or when a stat is lowered by a foe.",
 	},
 	mimicry: {
+		inherit: true,
 		modded: true,
-		onStart(pokemon) {
-			this.singleEvent('TerrainChange', this.effect, this.effectState, pokemon);
-		},
 		onTerrainChange(pokemon) {
 			let terrainType;
 			switch (this.field.terrain) {
@@ -402,27 +400,22 @@ export const Abilities: { [abilityid: string]: ModdedAbilityData; } = {
 			}
 			if (this.field.terrain && !this.field.suppressingTerrain()) {
 				// there is a terrain *and* Down-to-Earth isn't suppressing it
-				if (terrainType && !pokemon.hasType(terrainType) && pokemon.addType(terrainType)) {
-					this.add('-activate', pokemon, 'ability: Mimicry');
-					this.add('-start', pokemon, 'typeadd', terrainType, '[from] ability: Mimicry');
+				if (terrainType && !pokemon.hasType(terrainType)) {
+					if (pokemon.setType(pokemon.baseSpecies.types)) {
+						this.add('-start', pokemon, 'typechange',  pokemon.getTypes().join('/'), '[silent]');
+						if (pokemon.transformed) this.hint("Transform Mimicry changes you to your original un-transformed types.");
+					}
+					if (pokemon.addType(terrainType)) this.add('-start', pokemon, 'typeadd', terrainType, '[from] ability: Mimicry');
 				}
-			} else if (!this.field.terrain) {
-				// there is no terrain at all
+			} else {
+				// there is no terrain at all, or Down-to-Earth is suppressing it
 				if (pokemon.types !== pokemon.baseSpecies.types && pokemon.setType(pokemon.baseSpecies.types)) {
-					this.add('-activate', pokemon, 'ability: Mimicry');
-					this.add('-start', pokemon, 'typechange', pokemon.baseSpecies.types, '[from] ability: Mimicry');
 					if (pokemon.transformed) this.hint("Transform Mimicry changes you to your original un-transformed types.");
+					this.add('-start', pokemon, 'typechange',  pokemon.getTypes().join('/'), '[from] ability: Mimicry';
 				}
 			}
-			// If the terrain changes, but Down-to-Earth is suppressing it, Mimicry shouldn't reactivate (rather than resetting the user's type in this situation)
 		},
 		shortDesc: "Adds a type to the Pokémon based on the terrain.",
 		desc: "Adds an additional type to the Pokémon based on the terrain.",
-		
-		// Testing without "inherit: true,"
-		flags: {},
-		name: "Mimicry",
-		rating: 2,
-		num: 250,
 	},
 };
