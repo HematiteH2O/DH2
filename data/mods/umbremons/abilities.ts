@@ -379,6 +379,9 @@ export const Abilities: { [abilityid: string]: ModdedAbilityData; } = {
 	},
 	mimicry: {
 		modded: true,
+		onStart(pokemon) {
+			this.singleEvent('TerrainChange', this.effect, this.effectState, pokemon);
+		},
 		onTerrainChange(pokemon) {
 			let terrainType;
 			switch (this.field.terrain) {
