@@ -129,6 +129,27 @@ export const Scripts: ModdedBattleScriptsData = {
 			return this.getRandomTarget(pokemon, move);
 		}
 	},
+	field: {
+		suppressingTerrain() { // new function for Down-to-Earth
+			for (const side of this.battle.sides) {
+				for (const pokemon of side.active) {
+					if (pokemon && !pokemon.fainted && !pokemon.ignoringAbility() &&
+						pokemon.hasAbility('downtoearth') && !pokemon.abilityState.ending) {
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+		isTerrain(terrain: string | string[], target?: Pokemon | Side | Battle) {
+			if (this.suppressingTerrain()) return false; // modded for Down-to-Earth
+			const ourTerrain = this.effectiveTerrain(target);
+			if (!Array.isArray(terrain)) {
+				return ourTerrain === toID(terrain);
+			}
+			return terrain.map(toID).includes(ourTerrain);
+		}
+	},
 	init() {
 		// Hematite note: I added a new function for this so it would be easier to list movepool additions in Data Mod!
 		// You can add multiple moves to the same Pokémon and/or add the same move to multiple Pokémon in one line;
