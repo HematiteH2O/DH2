@@ -411,7 +411,7 @@ export const Abilities: { [abilityid: string]: ModdedAbilityData; } = {
 				// there is no terrain at all, or Down-to-Earth is suppressing it
 				if (pokemon.types !== pokemon.baseSpecies.types && pokemon.setType(pokemon.baseSpecies.types)) {
 					if (pokemon.transformed) this.hint("Transform Mimicry changes you to your original un-transformed types.");
-					this.add('-start', pokemon, 'typechange',  pokemon.getTypes().join('/'), '[from] ability: Mimicry';
+					this.add('-start', pokemon, 'typechange',  pokemon.getTypes().join('/'), '[from] ability: Mimicry');
 				}
 			}
 		},
