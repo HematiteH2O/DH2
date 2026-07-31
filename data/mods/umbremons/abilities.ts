@@ -419,7 +419,7 @@ export const Abilities: { [abilityid: string]: ModdedAbilityData; } = {
 		// Testing without "inherit: true,"
 		flags: {},
 		name: "Mimicry",
-		rating: 0,
+		rating: 2,
 		num: 250,
 	},
 };
