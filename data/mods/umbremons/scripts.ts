@@ -140,7 +140,7 @@ export const Scripts: ModdedBattleScriptsData = {
 				}
 			}
 			return false;
-		}
+		},
 		isTerrain(terrain: string | string[], target?: Pokemon | Side | Battle) {
 			if (this.suppressingTerrain()) return false; // modded for Down-to-Earth
 			const ourTerrain = this.effectiveTerrain(target);
@@ -148,7 +148,7 @@ export const Scripts: ModdedBattleScriptsData = {
 				return ourTerrain === toID(terrain);
 			}
 			return terrain.map(toID).includes(ourTerrain);
-		}
+		},
 	},
 	init() {
 		// Hematite note: I added a new function for this so it would be easier to list movepool additions in Data Mod!
