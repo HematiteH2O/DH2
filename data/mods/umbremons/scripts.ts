@@ -1,4 +1,4 @@
-import {toID} from './dex'; // needed for field: {},
+import {toID} from 'from '../../../sim/dex'; // needed for field: {},
 
 export const Scripts: ModdedBattleScriptsData = {
 	inherit: 'champions',
