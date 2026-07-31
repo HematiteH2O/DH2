@@ -1,3 +1,5 @@
+import {toID} from './dex'; // needed for field: {},
+
 export const Scripts: ModdedBattleScriptsData = {
 	inherit: 'champions',
 	teambuilderConfig: {
